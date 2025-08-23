@@ -35,6 +35,61 @@
             overflow-x: hidden;
         }
 
+        /* Futuristic transition styles */
+        .transition-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            background: linear-gradient(135deg, rgba(46, 125, 50, 0.1) 0%, rgba(67, 160, 71, 0.1) 100%);
+        }
+
+        .transition-layer.active {
+            opacity: 1;
+        }
+
+        .section-transition {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        .section-transition.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .parallax-element {
+            transition: transform 0.1s ease;
+        }
+
+        .glow-border {
+            position: relative;
+        }
+
+        .glow-border::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: inherit;
+            box-shadow: 0 0 15px rgba(67, 160, 71, 0.3);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: -1;
+        }
+
+        .glow-border.visible::after {
+            opacity: 1;
+        }
+
         .container {
             width: 100%;
             max-width: 1200px;
@@ -886,10 +941,11 @@
             justify-content: space-between;
             margin-bottom: 10px;
             font-size: 0.9rem;
+            font-weight: 600;
         }
 
         .blog-comment-author {
-            font-weight: 6;
+            font-weight: 600;
         }
 
         .blog-comment-date {
@@ -1070,6 +1126,7 @@
             align-items: center;
             cursor: pointer;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
         }
 
         .chatbot-title {
@@ -1230,6 +1287,8 @@
             display: flex;
             gap: 15px;
             margin-top: 20px;
+            z-index: 2;
+            position: relative;
         }
 
         .social-links a {
@@ -1405,6 +1464,9 @@
     </style>
 </head>
 <body>
+    <!-- Transition Layer -->
+    <div class="transition-layer" id="transition-layer"></div>
+
     <!-- Floating Background Elements -->
     <div class="floating-element floating-1"></div>
     <div class="floating-element floating-2"></div>
@@ -1470,7 +1532,7 @@
     </div>
 
     <!-- Hero Section -->
-    <section class="hero" id="home">
+    <section class="hero section-transition" id="home">
         <div class="container">
             <div class="hero-content">
                 <h2>Shaping Future Leaders Through Quality Education</h2>
@@ -1487,28 +1549,28 @@
     </section>
 
     <!-- Features Section -->
-    <section class="features" id="about">
+    <section class="features section-transition" id="about">
         <div class="container">
             <div class="section-title">
                 <h2>Why Choose Hweakwae JHS</h2>
                 <p>Discover what makes our institution stand out in providing quality junior high school education</p>
             </div>
             <div class="features-grid">
-                <div class="feature-card">
+                <div class="feature-card glow-border">
                     <div class="feature-icon">
                         <i class="fas fa-graduation-cap"></i>
                     </div>
                     <h3>Qualified Teachers</h3>
                     <p>Our dedicated and experienced teachers are committed to bringing out the best in every student through personalized attention.</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card glow-border">
                     <div class="feature-icon">
                         <i class="fas fa-flask"></i>
                     </div>
                     <h3>Modern Facilities</h3>
                     <p>State-of-the-art laboratories, library, and classrooms equipped with modern learning technologies.</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card glow-border">
                     <div class="feature-icon">
                         <i class="fas fa-medal"></i>
                     </div>
@@ -1520,7 +1582,7 @@
     </section>
 
     <!-- Blog Section -->
-    <section class="blog-section" id="blog">
+    <section class="blog-section section-transition" id="blog">
         <div class="container">
             <div class="section-title">
                 <h2>School Blog</h2>
@@ -1529,7 +1591,7 @@
             <div class="blog-container" id="blog-container">
                 <!-- Blog posts will be loaded dynamically from Firebase -->
             </div>
-            <div class="blog-form" id="blog-form">
+            <div class="blog-form glow-border" id="blog-form">
                 <h3 class="blog-form-title">Create a New Blog Post</h3>
                 <div class="blog-form-group">
                     <label for="blog-post-title" class="blog-form-label">Title</label>
@@ -1545,7 +1607,7 @@
     </section>
 
     <!-- Gallery Section -->
-    <section class="gallery" id="gallery">
+    <section class="gallery section-transition" id="gallery">
         <div class="container">
             <div class="section-title">
                 <h2>Our School Gallery</h2>
@@ -1568,7 +1630,7 @@
     </section>
 
     <!-- Video Section -->
-    <section class="video-section" id="videos">
+    <section class="video-section section-transition" id="videos">
         <div class="container">
             <div class="section-title">
                 <h2>School Videos</h2>
@@ -1589,7 +1651,7 @@
     </section>
 
     <!-- Call to Action -->
-    <section class="cta" id="apply">
+    <section class="cta section-transition" id="apply">
         <div class="container">
             <div class="cta-container">
                 <div class="cta-image">
@@ -1735,9 +1797,21 @@
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
+                
+                // Show transition effect
+                const transitionLayer = document.getElementById('transition-layer');
+                transitionLayer.classList.add('active');
+                
+                setTimeout(() => {
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    
+                    // Hide transition effect
+                    setTimeout(() => {
+                        transitionLayer.classList.remove('active');
+                    }, 500);
+                }, 300);
             });
         });
 
@@ -2424,6 +2498,78 @@
                 sendChatbotMessage();
             }
         });
+
+        // Futuristic scroll transitions
+        function initScrollTransitions() {
+            const sections = document.querySelectorAll('.section-transition');
+            const transitionLayer = document.getElementById('transition-layer');
+            
+            // Initial check to show elements already in view
+            checkScroll();
+            
+            // Add scroll event listener
+            let isScrolling = false;
+            window.addEventListener('scroll', () => {
+                if (!isScrolling) {
+                    // Show transition effect
+                    transitionLayer.classList.add('active');
+                    
+                    setTimeout(() => {
+                        checkScroll();
+                        
+                        // Hide transition effect
+                        setTimeout(() => {
+                            transitionLayer.classList.remove('active');
+                            isScrolling = false;
+                        }, 300);
+                    }, 300);
+                    
+                    isScrolling = true;
+                }
+                
+                // Stop all videos when scrolling
+                stopAllVideos();
+            });
+            
+            function checkScroll() {
+                const triggerBottom = window.innerHeight * 0.8;
+                
+                sections.forEach(section => {
+                    const sectionTop = section.getBoundingClientRect().top;
+                    
+                    if (sectionTop < triggerBottom) {
+                        section.classList.add('visible');
+                        
+                        // Add glow effect to cards in the section
+                        if (section.classList.contains('features')) {
+                            setTimeout(() => {
+                                const cards = section.querySelectorAll('.glow-border');
+                                cards.forEach((card, index) => {
+                                    setTimeout(() => {
+                                        card.classList.add('visible');
+                                    }, index * 200);
+                                });
+                            }, 300);
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Parallax effect for floating elements
+        function initParallaxEffect() {
+            const floatingElements = document.querySelectorAll('.floating-element');
+            
+            window.addEventListener('scroll', () => {
+                const scrollPosition = window.pageYOffset;
+                
+                floatingElements.forEach(element => {
+                    const speed = 0.5;
+                    const yPos = -(scrollPosition * speed);
+                    element.style.transform = `translateY(${yPos}px)`;
+                });
+            });
+        }
         
         // Load all content when page loads
         window.addEventListener('load', () => {
@@ -2431,6 +2577,8 @@
             loadMediaFromFirebase();
             loadBlogPosts();
             setupBlogRealtimeUpdates();
+            initScrollTransitions();
+            initParallaxEffect();
             
             // Show nickname modal if needed when trying to interact with blog
             document.querySelectorAll('.blog-post-likes, .blog-post-comments, #blog-post-submit').forEach(element => {
