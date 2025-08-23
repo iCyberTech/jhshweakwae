@@ -753,6 +753,18 @@
             font-size: 2.5rem;
             color: var(--secondary-color);
             margin-bottom: 20px;
+            position: relative;
+        }
+
+        .cta-content h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: var(--accent-color);
+            border-radius: 2px;
         }
 
         .cta-content p {
@@ -877,7 +889,7 @@
         }
 
         .blog-comment-author {
-            font-weight: 600;
+            font-weight: 6;
         }
 
         .blog-comment-date {
@@ -1465,7 +1477,7 @@
                 <p>At Hweakwae JHS, we provide a nurturing environment that fosters academic excellence, character development, and holistic growth for every student.</p>
                 <div class="hero-btns">
                     <a href="admmission.html" class="btn btn-primary">Apply Now</a>
-                    <a href="signin.html" class="btn btn-secondary">Student Portal</a>
+                    <a href="signin.html" class="btn btn-secondary">CramNerd</a>
                 </div>
             </div>
             <div class="hero-image">
@@ -1697,6 +1709,9 @@
         const database = firebase.database();
         const storage = firebase.storage();
 
+        // Track currently playing video
+        let currentlyPlayingVideo = null;
+
         // Mobile Menu Toggle
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const navMenu = document.getElementById('nav-menu');
@@ -1910,6 +1925,26 @@
             });
         });
 
+        // Function to stop all videos
+        function stopAllVideos() {
+            if (currentlyPlayingVideo) {
+                // Create a new iframe to reset the video
+                const iframe = currentlyPlayingVideo;
+                const src = iframe.src;
+                iframe.src = src;
+                currentlyPlayingVideo = null;
+            }
+        }
+
+        // Function to handle video play
+        function handleVideoPlay(event) {
+            // Stop any currently playing video
+            stopAllVideos();
+            
+            // Set the currently playing video to this one
+            currentlyPlayingVideo = event.target;
+        }
+
         // Load media from Firebase
         function loadMediaFromFirebase() {
             // Load hero image
@@ -1964,9 +1999,24 @@
                     Object.values(videoItems).forEach(item => {
                         const videoCard = document.createElement('div');
                         videoCard.className = 'video-card';
+                        
+                        // Modify YouTube URL to prevent autoplay and add modest branding
+                        let videoUrl = item.url;
+                        if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+                            // Remove any existing autoplay parameter
+                            videoUrl = videoUrl.replace('autoplay=1', 'autoplay=0');
+                            
+                            // Add parameters to prevent autoplay and enable modest branding
+                            if (videoUrl.includes('?')) {
+                                videoUrl += '&autoplay=0&modestbranding=1';
+                            } else {
+                                videoUrl += '?autoplay=0&modestbranding=1';
+                            }
+                        }
+                        
                         videoCard.innerHTML = `
                             <div class="video-player">
-                                <iframe src="${item.url}" title="${item.title || 'School Video'}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                <iframe src="${videoUrl}" title="${item.title || 'School Video'}" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                             </div>
                             <div class="video-card-content">
                                 <h3>${item.title || 'School Video'}</h3>
@@ -1975,6 +2025,18 @@
                         `;
                         videoContainer.appendChild(videoCard);
                     });
+                    
+                    // Add event listeners to iframes to handle video playback
+                    setTimeout(() => {
+                        const iframes = document.querySelectorAll('.video-player iframe');
+                        iframes.forEach(iframe => {
+                            iframe.addEventListener('load', function() {
+                                // Add a click event to the iframe container to handle play
+                                const container = iframe.closest('.video-player');
+                                container.addEventListener('click', handleVideoPlay);
+                            });
+                        });
+                    }, 1000);
                 }
             });
         }
@@ -2374,6 +2436,17 @@
             document.querySelectorAll('.blog-post-likes, .blog-post-comments, #blog-post-submit').forEach(element => {
                 element.addEventListener('click', showNicknameModal);
             });
+        });
+
+        // Stop all videos when user scrolls away from video section
+        window.addEventListener('scroll', () => {
+            const videoSection = document.getElementById('videos');
+            const rect = videoSection.getBoundingClientRect();
+            
+            // If video section is not in view, stop all videos
+            if (rect.bottom < 0 || rect.top > window.innerHeight) {
+                stopAllVideos();
+            }
         });
     </script>
 </body>
