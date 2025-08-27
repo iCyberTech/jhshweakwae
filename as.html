@@ -3,21 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Homework & Grading</title>
+    <title>Teacher Assessment Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         :root {
-            --primary-color: #6c5ce7;
-            --secondary-color: #a29bfe;
-            --text-color: #2d3436;
-            --light-text: #636e72;
-            --glass-bg: rgba(255, 255, 255, 0.25);
-            --glass-border: rgba(255, 255, 255, 0.18);
-            --success-color: #00b894;
-            --danger-color: #d63031;
-            --warning-color: #fdcb6e;
-            --info-color: #0984e3;
+            --primary-color: rgba(108, 92, 231, 0.9);
+            --secondary-color: rgba(162, 155, 254, 0.9);
+            --text-color: rgba(45, 52, 54, 0.9);
+            --light-text: rgba(99, 110, 114, 0.8);
+            --glass-bg: rgba(255, 255, 255, 0.2);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --glass-blur: 16px;
+            --success-color: rgba(0, 184, 148, 0.9);
+            --danger-color: rgba(214, 48, 49, 0.9);
+            --warning-color: rgba(253, 203, 110, 0.9);
+            --info-color: rgba(9, 132, 227, 0.9);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --transition-speed: 0.3s;
         }
 
         * {
@@ -31,220 +34,370 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: var(--text-color);
             min-height: 100vh;
+            padding: 20px;
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
         }
 
         .container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .main-content {
-            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
             padding: 20px;
-            transition: all 0.3s;
         }
 
-        .header {
+        header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 16px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
         }
 
-        .header h1 {
+        .header-title {
             font-size: 1.8rem;
             color: var(--primary-color);
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .user-profile {
+        .teacher-info {
             display: flex;
             align-items: center;
+            gap: 15px;
+            padding: 8px 15px;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
-        .user-profile img {
-            width: 40px;
-            height: 40px;
+        .teacher-avatar {
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
-            margin-right: 10px;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .user-profile span {
-            font-weight: 500;
+        .teacher-name {
+            font-weight: 600;
+            color: var(--text-color);
         }
 
-        .card {
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            overflow-x: auto;
+            padding: 10px 5px;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            padding: 12px 24px;
             background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all var(--transition-speed) ease;
             border: 1px solid var(--glass-border);
-            margin-bottom: 20px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            color: var(--text-color);
         }
 
-        .card-header {
+        .tab.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            box-shadow: 0 6px 12px rgba(108, 92, 231, 0.3);
+        }
+
+        .tab:hover:not(.active) {
+            background: rgba(108, 92, 231, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .subjects-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .subject-card {
+            background: var(--glass-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            transition: all var(--transition-speed) ease;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+        }
+
+        .subject-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .subject-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        .card-title {
+        .subject-name {
             font-size: 1.3rem;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--primary-color);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
-        .btn {
-            padding: 8px 15px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s;
-            display: inline-flex;
+        .subject-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
             align-items: center;
-        }
-
-        .btn i {
-            margin-right: 5px;
-        }
-
-        .btn-primary {
-            background: var(--primary-color);
+            justify-content: center;
             color: white;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            box-shadow: 0 4px 8px rgba(108, 92, 231, 0.3);
         }
 
-        .btn-primary:hover {
-            background: #5a4bc9;
+        .class-info {
+            margin-top: 15px;
         }
 
-        .btn-success {
-            background: var(--success-color);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #00a884;
-        }
-
-        .btn-danger {
-            background: var(--danger-color);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c0392b;
-        }
-
-        .btn-warning {
-            background: var(--warning-color);
+        .class-name {
+            font-weight: 600;
+            margin-bottom: 8px;
             color: var(--text-color);
         }
 
-        .btn-warning:hover {
-            background: #fdbb4a;
+        .schedule {
+            font-size: 0.9rem;
+            color: var(--light-text);
+            margin-bottom: 12px;
+        }
+
+        .days {
+            display: flex;
+            gap: 8px;
+            margin: 8px 0;
+            flex-wrap: wrap;
+        }
+
+        .day {
+            background: rgba(108, 92, 231, 0.15);
+            color: var(--primary-color);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(108, 92, 231, 0.2);
+        }
+
+        .time {
+            font-weight: 600;
+            color: var(--success-color);
+            font-size: 0.9rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all var(--transition-speed) ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            box-shadow: 0 4px 8px rgba(108, 92, 231, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, rgba(90, 75, 209, 0.9) 0%, rgba(142, 134, 222, 0.9) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(108, 92, 231, 0.4);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-outline:hover {
+            background: rgba(108, 92, 231, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(108, 92, 231, 0.2);
+        }
+
+        .students-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            background: var(--glass-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+        }
+
+        .students-table th, 
+        .students-table td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .students-table th {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .students-table tr:hover {
+            background: rgba(108, 92, 231, 0.08);
+        }
+
+        .students-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .student-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+            vertical-align: middle;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-grade {
+            width: 80px;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            font-weight: 500;
+            transition: all var(--transition-speed) ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .input-grade:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
+        }
+
+        .grade-form {
+            background: var(--glass-bg);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            margin-top: 25px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
-        .form-label {
+        .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
         }
 
         .form-control {
             width: 100%;
-            padding: 10px 15px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            background: rgba(255, 255, 255, 0.7);
-            transition: all 0.3s;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all var(--transition-speed) ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.3);
             box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
         }
 
-        textarea.form-control {
-            min-height: 100px;
-            resize: vertical;
+        .form-row {
+            display: flex;
+            gap: 20px;
         }
 
-        .select2-container .select2-selection--single {
-            height: 40px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            background: rgba(255, 255, 255, 0.7);
-        }
-
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 40px;
-        }
-
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 38px;
-        }
-
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        .table th, .table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .table th {
-            background: rgba(108, 92, 231, 0.1);
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        .table tr:hover {
-            background: rgba(108, 92, 231, 0.05);
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .badge-primary {
-            background: rgba(108, 92, 231, 0.1);
-            color: var(--primary-color);
-        }
-
-        .badge-success {
-            background: rgba(0, 184, 148, 0.1);
-            color: var(--success-color);
-        }
-
-        .badge-warning {
-            background: rgba(253, 203, 110, 0.1);
-            color: #e17055;
-        }
-
-        .badge-danger {
-            background: rgba(214, 48, 49, 0.1);
-            color: var(--danger-color);
+        .form-row .form-group {
+            flex: 1;
         }
 
         .loading-screen {
@@ -253,27 +406,31 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 2000;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--primary-color);
+            width: 60px;
+            height: 60px;
+            border: 6px solid rgba(108, 92, 231, 0.1);
+            border-top: 6px solid var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
         .loading-text {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             color: var(--text-color);
+            font-weight: 500;
         }
 
         @keyframes spin {
@@ -281,70 +438,204 @@
             100% { transform: rotate(360deg); }
         }
 
-        .tab-container {
-            margin-bottom: 20px;
+        .no-data {
+            text-align: center;
+            padding: 50px;
+            background: var(--glass-bg);
+            border-radius: 16px;
+            margin-top: 25px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
         }
 
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        .no-data i {
+            font-size: 2.5rem;
+            color: var(--light-text);
             margin-bottom: 20px;
+            opacity: 0.7;
         }
 
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            position: relative;
-            font-weight: 500;
+        .no-data h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .no-data p {
+            font-size: 1rem;
             color: var(--light-text);
         }
 
-        .tab.active {
+        .back-btn {
+            margin-bottom: 25px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-3px);
+        }
+
+        .grade-summary {
+            background: var(--glass-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+        }
+
+        .grade-summary h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-size: 1.4rem;
+        }
+
+        .grade-summary p {
+            margin-bottom: 8px;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .grade-summary strong {
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .grade-weight {
+            font-size: 0.9rem;
+            color: var(--light-text);
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .total-grade {
+            font-weight: 700;
             color: var(--primary-color);
         }
 
-        .tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: var(--primary-color);
+        .letter-grade {
+            font-weight: 700;
+            text-transform: uppercase;
         }
 
-        .tab-content {
-            display: none;
+        /* Notification styles */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 350px;
+            max-width: 90%;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        .tab-content.active {
-            display: block;
-        }
-
-        .homework-item {
-            background: white;
+        .notification {
+            position: relative;
+            padding: 16px 20px;
             border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            transform: translateX(120%);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            opacity: 0;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification.hide {
+            transform: translateX(120%);
+            opacity: 0;
+        }
+
+        .notification.success {
+            background-color: var(--success-color);
+        }
+
+        .notification.error {
+            background-color: var(--danger-color);
+        }
+
+        .notification.warning {
+            background-color: var(--warning-color);
+            color: var(--text-color);
+        }
+
+        .notification.info {
+            background-color: var(--info-color);
+        }
+
+        .notification-icon {
+            margin-right: 12px;
+            font-size: 20px;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            margin-left: 15px;
+            font-size: 18px;
+            opacity: 0.8;
+        }
+
+        /* Homework specific styles */
+        .homework-item {
+            background: var(--glass-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
         }
 
         .homework-title {
-            font-weight: 600;
-            margin-bottom: 5px;
+            font-weight: 700;
             color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.2rem;
         }
 
         .homework-meta {
             display: flex;
             justify-content: space-between;
-            font-size: 0.85rem;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
             color: var(--light-text);
-            margin-bottom: 10px;
         }
 
         .homework-description {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            line-height: 1.5;
         }
 
         .homework-actions {
@@ -352,83 +643,19 @@
             gap: 10px;
         }
 
-        .grade-input {
-            width: 70px;
-            padding: 5px 10px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-
-        .grade-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 3000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 20px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .modal-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--light-text);
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 0.85rem;
         }
 
         .file-upload-container {
             margin-top: 15px;
-            border: 2px dashed #ddd;
-            border-radius: 8px;
+            border: 2px dashed var(--glass-border);
+            border-radius: 12px;
             padding: 20px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all var(--transition-speed) ease;
         }
 
         .file-upload-container:hover {
@@ -459,8 +686,9 @@
             display: flex;
             align-items: center;
             padding: 10px;
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 8px;
+            border: 1px solid var(--glass-border);
         }
 
         .file-preview i {
@@ -489,11 +717,11 @@
         }
 
         .submission-item {
-            background: white;
-            border-radius: 10px;
+            background: var(--glass-bg);
+            border-radius: 12px;
             padding: 15px;
             margin-bottom: 15px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--glass-border);
         }
 
         .submission-header {
@@ -525,6 +753,7 @@
             text-decoration: none;
             margin-right: 10px;
             margin-bottom: 10px;
+            border: 1px solid rgba(108, 92, 231, 0.2);
         }
 
         .submission-file i {
@@ -534,7 +763,7 @@
         .submission-grade {
             margin-top: 10px;
             padding-top: 10px;
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .grade-form {
@@ -549,20 +778,86 @@
             color: var(--success-color);
         }
 
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--light-text);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Real-time notification */
         .real-time-notification {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: white;
-            border-radius: 8px;
+            background: var(--glass-bg);
+            border-radius: 12px;
             padding: 15px;
-            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--card-shadow);
             display: flex;
             align-items: center;
             z-index: 1000;
             transform: translateY(100px);
             opacity: 0;
             transition: all 0.3s;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
         }
 
         .real-time-notification.show {
@@ -578,33 +873,169 @@
             color: var(--danger-color);
         }
 
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .subjects-container {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 992px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .teacher-info {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.4rem;
+            .header-title {
+                font-size: 1.5rem;
+            }
+            
+            .subjects-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .students-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .grade-form {
+                padding: 20px;
+            }
+            
+            .students-table th, 
+            .students-table td {
+                padding: 12px 15px;
             }
 
-            .user-profile span {
-                display: none;
+            .modal-content {
+                width: 95%;
+                padding: 20px;
             }
         }
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+        @media (max-width: 576px) {
+            :root {
+                --glass-blur: 10px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .header-title {
+                font-size: 1.3rem;
+            }
+            
+            .teacher-info {
+                padding: 6px 12px;
+            }
+            
+            .teacher-avatar {
+                width: 38px;
+                height: 38px;
+            }
+            
+            .teacher-name {
+                font-size: 0.9rem;
+            }
+            
+            .tabs {
+                gap: 8px;
+            }
+            
+            .tab {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+            
+            .subject-card {
+                padding: 15px;
+            }
+            
+            .subject-name {
+                font-size: 1.1rem;
+            }
+            
+            .btn {
+                padding: 8px 14px;
+                font-size: 0.9rem;
+            }
+            
+            .no-data {
+                padding: 30px 20px;
+            }
+            
+            .no-data i {
+                font-size: 2rem;
+            }
+            
+            .no-data h3 {
+                font-size: 1.3rem;
+            }
+
+            .modal-content {
+                padding: 15px;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+            }
+
+            .modal-footer .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
         }
 
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(108, 92, 231, 0.5);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(108, 92, 231, 0.7);
+        @media (max-width: 400px) {
+            .header-title {
+                font-size: 1.2rem;
+            }
+            
+            .teacher-info {
+                padding: 5px 10px;
+            }
+            
+            .teacher-avatar {
+                width: 35px;
+                height: 35px;
+            }
+            
+            .tab {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .subject-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 0.9rem;
+            }
+            
+            .input-grade {
+                width: 70px;
+                padding: 6px 8px;
+            }
         }
     </style>
 </head>
@@ -612,8 +1043,11 @@
     <!-- Loading Screen -->
     <div class="loading-screen" id="loading-screen">
         <div class="loading-spinner"></div>
-        <div class="loading-text">Loading Teacher Dashboard...</div>
+        <div class="loading-text">Loading Teacher Portal...</div>
     </div>
+
+    <!-- Notification Container -->
+    <div class="notification-container" id="notification-container"></div>
 
     <!-- Real-time Notification -->
     <div class="real-time-notification" id="real-time-notification">
@@ -622,150 +1056,184 @@
     </div>
 
     <!-- Main Content -->
-    <div class="container">
-        <div class="main-content" id="main-content">
-            <div class="header">
-                <h1 id="page-title">Homework Management</h1>
-                <div class="user-profile">
-                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Teacher" id="header-teacher-avatar">
-                    <span id="header-teacher-name">Loading...</span>
+    <div class="container" id="main-content" style="display: none;">
+        <!-- Header -->
+        <header>
+            <h1 class="header-title">Teacher Assessment Portal</h1>
+            <div class="teacher-info">
+                <img id="teacher-avatar" src="" alt="Teacher" class="teacher-avatar">
+                <span class="teacher-name" id="teacher-name">Loading...</span>
+            </div>
+        </header>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-tab="subjects">My Subjects</div>
+            <div class="tab" data-tab="grades">Enter Grades</div>
+            <div class="tab" data-tab="published">Published Grades</div>
+            <div class="tab" data-tab="homework">Homework</div>
+        </div>
+
+        <!-- Subjects Tab -->
+        <div class="content-section active" id="subjects-tab">
+            <div class="subjects-container" id="subjects-container">
+                <!-- Subjects will be dynamically inserted here -->
+            </div>
+
+            <div id="no-subjects" class="no-data" style="display: none;">
+                <i class="fas fa-book-open"></i>
+                <h3>No Subjects Assigned</h3>
+                <p>You currently don't have any subjects assigned to you.</p>
+            </div>
+        </div>
+
+        <!-- Grades Tab -->
+        <div class="content-section" id="grades-tab">
+            <div id="grade-selection">
+                <div class="form-group">
+                    <label for="subject-select">Select Subject</label>
+                    <select id="subject-select" class="form-control">
+                        <option value="">-- Select Subject --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="class-select">Select Class</label>
+                    <select id="class-select" class="form-control">
+                        <option value="">-- Select Class --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="term-select">Select Term</label>
+                    <select id="term-select" class="form-control">
+                        <option value="Term 1">Term 1</option>
+                        <option value="Term 2">Term 2</option>
+                        <option value="Term 3">Term 3</option>
+                    </select>
+                </div>
+                
+                <button id="load-students-btn" class="btn btn-primary">
+                    <i class="fas fa-users"></i> Load Students
+                </button>
+            </div>
+            
+            <div id="grade-form-container" style="display: none;">
+                <button id="back-to-selection" class="btn btn-outline back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Selection
+                </button>
+                
+                <div class="grade-summary">
+                    <h3 id="grade-summary-title">Grade Summary</h3>
+                    <p><strong>Subject:</strong> <span id="current-subject"></span></p>
+                    <p><strong>Class:</strong> <span id="current-class"></span></p>
+                    <p><strong>Term:</strong> <span id="current-term"></span></p>
+                    <p class="grade-weight"><strong>Grading Weights:</strong> 
+                        <span id="grade-weights">Loading weights...</span>
+                    </p>
+                </div>
+                
+                <div class="grade-form">
+                    <h3>Enter Student Grades</h3>
+                    <table class="students-table" id="students-grade-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Assignments</th>
+                                <th>Projects</th>
+                                <th>Class Score</th>
+                                <th>Final Exam</th>
+                                <th>Total</th>
+                                <th>Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Student rows will be inserted here -->
+                        </tbody>
+                    </table>
+                    
+                    <div style="margin-top: 20px; text-align: right;">
+                        <button id="save-grades-btn" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Grades
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="no-grade-data" class="no-data" style="display: none;">
+                <i class="fas fa-graduation-cap"></i>
+                <h3>No Students Found</h3>
+                <p>Please select a subject and class to view students.</p>
+            </div>
+        </div>
+
+        <!-- Published Grades Tab -->
+        <div class="content-section" id="published-tab">
+            <div id="published-grades-container">
+                <!-- Published grades will be inserted here -->
+            </div>
+            
+            <div id="no-published-grades" class="no-data" style="display: none;">
+                <i class="fas fa-chart-bar"></i>
+                <h3>No Published Grades</h3>
+                <p>You haven't published any grades yet.</p>
+            </div>
+        </div>
+
+        <!-- Homework Tab -->
+        <div class="content-section" id="homework-tab">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Create New Homework</div>
+                </div>
+                <div class="card-body">
+                    <form id="homework-form">
+                        <div class="form-group">
+                            <label for="homework-subject" class="form-label">Subject</label>
+                            <select id="homework-subject" class="form-control" required>
+                                <option value="">Select Subject</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="homework-class" class="form-label">Class</label>
+                            <select id="homework-class" class="form-control" required>
+                                <option value="">Select Class</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="homework-title" class="form-label">Title</label>
+                            <input type="text" id="homework-title" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="homework-description" class="form-label">Description</label>
+                            <textarea id="homework-description" class="form-control" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="homework-due-date" class="form-label">Due Date</label>
+                            <input type="date" id="homework-due-date" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Attachments (Optional)</label>
+                            <div class="file-upload-container" id="file-upload-container">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Click to upload files</p>
+                                <small>PDF, DOCX, PPTX, JPG, PNG (Max 10MB)</small>
+                                <input type="file" id="file-input" multiple>
+                            </div>
+                            <div id="file-preview-container"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Create Homework</button>
+                    </form>
                 </div>
             </div>
 
-            <!-- Tab Container -->
-            <div class="tab-container">
-                <div class="tabs">
-                    <div class="tab active" data-tab="homework">Homework</div>
-                    <div class="tab" data-tab="grading">Grading</div>
-                    <div class="tab" data-tab="classes">My Classes</div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Assigned Homework</div>
                 </div>
-
-                <!-- Homework Tab Content -->
-                <div class="tab-content active" id="homework-tab">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Create New Homework</div>
-                        </div>
-                        <div class="card-body">
-                            <form id="homework-form">
-                                <div class="form-group">
-                                    <label for="homework-subject" class="form-label">Subject</label>
-                                    <select id="homework-subject" class="form-control" required>
-                                        <option value="">Select Subject</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="homework-class" class="form-label">Class</label>
-                                    <select id="homework-class" class="form-control" required>
-                                        <option value="">Select Class</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="homework-title" class="form-label">Title</label>
-                                    <input type="text" id="homework-title" class="form-control" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="homework-description" class="form-label">Description</label>
-                                    <textarea id="homework-description" class="form-control" required></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label for="homework-due-date" class="form-label">Due Date</label>
-                                    <input type="date" id="homework-due-date" class="form-control" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Attachments (Optional)</label>
-                                    <div class="file-upload-container" id="file-upload-container">
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                        <p>Click to upload files</p>
-                                        <small>PDF, DOCX, PPTX, JPG, PNG (Max 10MB)</small>
-                                        <input type="file" id="file-input" multiple>
-                                    </div>
-                                    <div id="file-preview-container"></div>
-                                </div>
-                                <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Create Homework</button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Assigned Homework</div>
-                        </div>
-                        <div class="card-body">
-                            <div id="homework-list">
-                                <!-- Homework items will be loaded here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Grading Tab Content -->
-                <div class="tab-content" id="grading-tab">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Grade Students</div>
-                        </div>
-                        <div class="card-body">
-                            <form id="grade-filter-form">
-                                <div class="form-group">
-                                    <label for="grade-subject" class="form-label">Subject</label>
-                                    <select id="grade-subject" class="form-control" required>
-                                        <option value="">Select Subject</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="grade-class" class="form-label">Class</label>
-                                    <select id="grade-class" class="form-control" required>
-                                        <option value="">Select Class</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="grade-term" class="form-label">Term</label>
-                                    <select id="grade-term" class="form-control" required>
-                                        <option value="Term 1">Term 1</option>
-                                        <option value="Term 2">Term 2</option>
-                                        <option value="Term 3">Term 3</option>
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filter Students</button>
-                            </form>
-
-                            <div id="students-to-grade" style="margin-top: 20px; display: none;">
-                                <h3>Students in <span id="selected-class-name"></span> - <span id="selected-subject-name"></span></h3>
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Student</th>
-                                            <th>Assignments</th>
-                                            <th>Projects</th>
-                                            <th>Class Score</th>
-                                            <th>Final Exam</th>
-                                            <th>Total</th>
-                                            <th>Grade</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="grade-students-table">
-                                        <!-- Students will be loaded here -->
-                                    </tbody>
-                                </table>
-                                <button id="save-grades-btn" class="btn btn-success" style="margin-top: 15px;"><i class="fas fa-save"></i> Save All Grades</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Classes Tab Content -->
-                <div class="tab-content" id="classes-tab">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">My Classes & Subjects</div>
-                        </div>
-                        <div class="card-body">
-                            <div id="teacher-classes-list">
-                                <!-- Classes and subjects will be loaded here -->
-                            </div>
-                        </div>
+                <div class="card-body">
+                    <div id="homework-list">
+                        <!-- Homework items will be loaded here -->
                     </div>
                 </div>
             </div>
@@ -895,13 +1363,34 @@
         // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
         const mainContent = document.getElementById('main-content');
-        const headerTeacherName = document.getElementById('header-teacher-name');
-        const headerTeacherAvatar = document.getElementById('header-teacher-avatar');
-        const pageTitle = document.getElementById('page-title');
+        const teacherName = document.getElementById('teacher-name');
+        const teacherAvatar = document.getElementById('teacher-avatar');
         const tabs = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const notification = document.getElementById('real-time-notification');
-        const notificationMessage = document.getElementById('notification-message');
+        const contentSections = document.querySelectorAll('.content-section');
+        const notificationContainer = document.getElementById('notification-container');
+        
+        // Subjects elements
+        const subjectsContainer = document.getElementById('subjects-container');
+        const noSubjects = document.getElementById('no-subjects');
+        
+        // Grades elements
+        const subjectSelect = document.getElementById('subject-select');
+        const classSelect = document.getElementById('class-select');
+        const termSelect = document.getElementById('term-select');
+        const loadStudentsBtn = document.getElementById('load-students-btn');
+        const gradeFormContainer = document.getElementById('grade-form-container');
+        const backToSelection = document.getElementById('back-to-selection');
+        const currentSubject = document.getElementById('current-subject');
+        const currentClass = document.getElementById('current-class');
+        const currentTerm = document.getElementById('current-term');
+        const gradeWeights = document.getElementById('grade-weights');
+        const studentsGradeTable = document.getElementById('students-grade-table');
+        const saveGradesBtn = document.getElementById('save-grades-btn');
+        const noGradeData = document.getElementById('no-grade-data');
+        
+        // Published grades elements
+        const publishedGradesContainer = document.getElementById('published-grades-container');
+        const noPublishedGrades = document.getElementById('no-published-grades');
         
         // Homework elements
         const homeworkForm = document.getElementById('homework-form');
@@ -914,20 +1403,6 @@
         const fileUploadContainer = document.getElementById('file-upload-container');
         const fileInput = document.getElementById('file-input');
         const filePreviewContainer = document.getElementById('file-preview-container');
-        
-        // Grading elements
-        const gradeFilterForm = document.getElementById('grade-filter-form');
-        const gradeSubjectSelect = document.getElementById('grade-subject');
-        const gradeClassSelect = document.getElementById('grade-class');
-        const gradeTermSelect = document.getElementById('grade-term');
-        const studentsToGradeSection = document.getElementById('students-to-grade');
-        const gradeStudentsTable = document.getElementById('grade-students-table');
-        const saveGradesBtn = document.getElementById('save-grades-btn');
-        const selectedClassName = document.getElementById('selected-class-name');
-        const selectedSubjectName = document.getElementById('selected-subject-name');
-        
-        // Classes elements
-        const teacherClassesList = document.getElementById('teacher-classes-list');
         
         // Modal elements
         const homeworkDetailModal = document.getElementById('homework-detail-modal');
@@ -987,9 +1462,11 @@
             tab.addEventListener('click', () => switchTab(tab.dataset.tab));
         });
         
-        homeworkForm.addEventListener('submit', createHomework);
-        gradeFilterForm.addEventListener('submit', filterStudentsForGrading);
+        loadStudentsBtn.addEventListener('click', loadStudentsForGrading);
+        backToSelection.addEventListener('click', backToGradeSelection);
         saveGradesBtn.addEventListener('click', saveAllGrades);
+        
+        homeworkForm.addEventListener('submit', createHomework);
         
         // File upload events
         fileUploadContainer.addEventListener('click', () => fileInput.click());
@@ -1023,17 +1500,68 @@
         });
 
         // Functions
-        function showNotification(message, isSuccess = true) {
-            notificationMessage.textContent = message;
-            notification.className = 'real-time-notification';
-            notification.classList.add(isSuccess ? 'success' : 'error');
-            notification.querySelector('i').className = isSuccess ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+        function showNotification(message, type = 'info', duration = 5000) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
             
-            notification.classList.add('show');
+            let icon = 'fa-info-circle';
+            let title = 'Information';
+            
+            switch(type) {
+                case 'success':
+                    icon = 'fa-check-circle';
+                    title = 'Success';
+                    break;
+                case 'error':
+                    icon = 'fa-exclamation-circle';
+                    title = 'Error';
+                    break;
+                case 'warning':
+                    icon = 'fa-exclamation-triangle';
+                    title = 'Warning';
+                    break;
+            }
+            
+            notification.innerHTML = `
+                <i class="fas ${icon} notification-icon"></i>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+                <button class="notification-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            notificationContainer.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // Close button event
+            notification.querySelector('.notification-close').addEventListener('click', () => {
+                closeNotification(notification);
+            });
+            
+            // Auto close after duration
+            if (duration > 0) {
+                setTimeout(() => {
+                    closeNotification(notification);
+                }, duration);
+            }
+            
+            return notification;
+        }
+        
+        function closeNotification(notification) {
+            notification.classList.remove('show');
+            notification.classList.add('hide');
             
             setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
+                notification.remove();
+            }, 300);
         }
 
         function switchTab(tabId) {
@@ -1047,27 +1575,19 @@
             });
             
             // Update active content
-            tabContents.forEach(content => {
-                if (content.id === `${tabId}-tab`) {
-                    content.classList.add('active');
+            contentSections.forEach(section => {
+                if (section.id === `${tabId}-tab`) {
+                    section.classList.add('active');
                 } else {
-                    content.classList.remove('active');
+                    section.classList.remove('active');
                 }
             });
             
-            // Update page title
-            switch(tabId) {
-                case 'homework':
-                    pageTitle.textContent = 'Homework Management';
-                    break;
-                case 'grading':
-                    pageTitle.textContent = 'Student Grading';
-                    break;
-                case 'classes':
-                    pageTitle.textContent = 'My Classes & Subjects';
-                    break;
-                default:
-                    pageTitle.textContent = 'Teacher Dashboard';
+            // Load data for the tab if needed
+            if (tabId === 'published') {
+                loadPublishedGrades();
+            } else if (tabId === 'homework') {
+                loadHomework();
             }
         }
 
@@ -1132,7 +1652,7 @@
                 throw new Error('No matching teacher found');
             } catch (error) {
                 console.error('Error identifying teacher:', error);
-                showNotification('Failed to identify teacher: ' + error.message, false);
+                showNotification('Failed to identify teacher: ' + error.message, 'error');
                 return null;
             }
         }
@@ -1147,10 +1667,6 @@
                             loadTeacherSubjects();
                             loadClasses();
                             loadStudents();
-                            loadHomework();
-                            
-                            // Set up real-time listener for homework submissions
-                            setupHomeworkSubmissionsListener();
                             
                             // Hide loading screen and show main content
                             loadingScreen.style.display = 'none';
@@ -1175,10 +1691,12 @@
             
             if (currentTeacherData) {
                 // Update UI with teacher data
-                headerTeacherName.textContent = currentTeacherData.name;
+                teacherName.textContent = currentTeacherData.name;
                 
                 if (currentTeacherData.profileImage) {
-                    headerTeacherAvatar.src = currentTeacherData.profileImage;
+                    teacherAvatar.src = currentTeacherData.profileImage;
+                } else {
+                    teacherAvatar.src = "https://randomuser.me/api/portraits/women/44.jpg";
                 }
             }
         }
@@ -1200,6 +1718,9 @@
                     }
                 }
                 
+                // Display subjects
+                displayTeacherSubjects();
+                
                 // Populate subject dropdowns
                 populateSubjectDropdowns();
                 
@@ -1208,27 +1729,119 @@
             });
         }
 
+        function displayTeacherSubjects() {
+            subjectsContainer.innerHTML = '';
+            
+            if (teacherSubjects.length === 0) {
+                noSubjects.style.display = 'block';
+                return;
+            }
+            
+            noSubjects.style.display = 'none';
+            
+            // Group subjects by class
+            const classesMap = {};
+            
+            teacherSubjects.forEach(subject => {
+                if (!subject.class) return;
+                
+                if (!classesMap[subject.class]) {
+                    classesMap[subject.class] = {
+                        classId: subject.class,
+                        className: allClasses[subject.class]?.name || `Class ${subject.class}`,
+                        subjects: []
+                    };
+                }
+                
+                classesMap[subject.class].subjects.push({
+                    id: subject.id,
+                    name: subject.name,
+                    schedule: subject.schedule
+                });
+            });
+            
+            // Create cards for each subject
+            for (const classId in classesMap) {
+                const classInfo = classesMap[classId];
+                
+                classInfo.subjects.forEach(subject => {
+                    const subjectCard = document.createElement('div');
+                    subjectCard.className = 'subject-card';
+                    
+                    const subjectIcon = document.createElement('div');
+                    subjectIcon.className = 'subject-icon';
+                    subjectIcon.innerHTML = '<i class="fas fa-book"></i>';
+                    
+                    const subjectHeader = document.createElement('div');
+                    subjectHeader.className = 'subject-header';
+                    subjectHeader.innerHTML = `
+                        <h3 class="subject-name">${subject.name}</h3>
+                    `;
+                    subjectHeader.appendChild(subjectIcon);
+                    
+                    const classInfoDiv = document.createElement('div');
+                    classInfoDiv.className = 'class-info';
+                    classInfoDiv.innerHTML = `
+                        <div class="class-name">${classInfo.className}</div>
+                    `;
+                    
+                    if (subject.schedule) {
+                        const scheduleDiv = document.createElement('div');
+                        scheduleDiv.className = 'schedule';
+                        
+                        if (subject.schedule.days) {
+                            const daysDiv = document.createElement('div');
+                            daysDiv.className = 'days';
+                            
+                            subject.schedule.days.forEach(day => {
+                                const daySpan = document.createElement('span');
+                                daySpan.className = 'day';
+                                daySpan.textContent = day;
+                                daysDiv.appendChild(daySpan);
+                            });
+                            
+                            scheduleDiv.appendChild(daysDiv);
+                        }
+                        
+                        if (subject.schedule.time) {
+                            const timeDiv = document.createElement('div');
+                            timeDiv.className = 'time';
+                            timeDiv.innerHTML = `<i class="fas fa-clock"></i> ${subject.schedule.time.from} - ${subject.schedule.time.to}`;
+                            scheduleDiv.appendChild(timeDiv);
+                        }
+                        
+                        classInfoDiv.appendChild(scheduleDiv);
+                    }
+                    
+                    subjectCard.appendChild(subjectHeader);
+                    subjectCard.appendChild(classInfoDiv);
+                    
+                    subjectsContainer.appendChild(subjectCard);
+                });
+            }
+        }
+
         function populateSubjectDropdowns() {
             // Clear existing options
+            subjectSelect.innerHTML = '<option value="">-- Select Subject --</option>';
             homeworkSubjectSelect.innerHTML = '<option value="">Select Subject</option>';
-            gradeSubjectSelect.innerHTML = '<option value="">Select Subject</option>';
             
             // Add subjects
             teacherSubjects.forEach(subject => {
                 const option1 = document.createElement('option');
                 option1.value = subject.id;
                 option1.textContent = subject.name;
-                homeworkSubjectSelect.appendChild(option1);
+                subjectSelect.appendChild(option1);
                 
                 const option2 = document.createElement('option');
                 option2.value = subject.id;
                 option2.textContent = subject.name;
-                gradeSubjectSelect.appendChild(option2);
+                homeworkSubjectSelect.appendChild(option2);
             });
             
             // Refresh Select2
+            $(subjectSelect).trigger('change');
             $(homeworkSubjectSelect).trigger('change');
-            $(gradeSubjectSelect).trigger('change');
         }
 
         function loadTeacherClasses() {
@@ -1246,8 +1859,29 @@
             });
             
             // Populate class dropdowns based on selected subject
+            subjectSelect.addEventListener('change', updateClassDropdown);
             homeworkSubjectSelect.addEventListener('change', updateHomeworkClassDropdown);
-            gradeSubjectSelect.addEventListener('change', updateGradeClassDropdown);
+        }
+
+        function updateClassDropdown() {
+            const subjectId = subjectSelect.value;
+            classSelect.innerHTML = '<option value="">-- Select Class --</option>';
+            
+            if (!subjectId) return;
+            
+            const subject = teacherSubjects.find(s => s.id === subjectId);
+            if (subject && subject.class) {
+                const option = document.createElement('option');
+                option.value = subject.class;
+                
+                // Find class name from allClasses
+                const className = allClasses[subject.class]?.name || `Class ${subject.class}`;
+                option.textContent = className;
+                
+                classSelect.appendChild(option);
+            }
+            
+            $(classSelect).trigger('change');
         }
 
         function updateHomeworkClassDropdown() {
@@ -1271,27 +1905,6 @@
             $(homeworkClassSelect).trigger('change');
         }
 
-        function updateGradeClassDropdown() {
-            const subjectId = gradeSubjectSelect.value;
-            gradeClassSelect.innerHTML = '<option value="">Select Class</option>';
-            
-            if (!subjectId) return;
-            
-            const subject = teacherSubjects.find(s => s.id === subjectId);
-            if (subject && subject.class) {
-                const option = document.createElement('option');
-                option.value = subject.class;
-                
-                // Find class name from allClasses
-                const className = allClasses[subject.class]?.name || `Class ${subject.class}`;
-                option.textContent = className;
-                
-                gradeClassSelect.appendChild(option);
-            }
-            
-            $(gradeClassSelect).trigger('change');
-        }
-
         function loadClasses() {
             const classesRef = database.ref('classes');
             
@@ -1305,15 +1918,12 @@
                     allClasses = { ...allClasses, ...graduatedClasses };
                     
                     // Update class dropdowns if needed
+                    if (subjectSelect.value) {
+                        updateClassDropdown();
+                    }
                     if (homeworkSubjectSelect.value) {
                         updateHomeworkClassDropdown();
                     }
-                    if (gradeSubjectSelect.value) {
-                        updateGradeClassDropdown();
-                    }
-                    
-                    // Load teacher's classes for display
-                    displayTeacherClasses();
                 });
             });
         }
@@ -1338,81 +1948,370 @@
             });
         }
 
-        function displayTeacherClasses() {
-            teacherClassesList.innerHTML = '';
+        function loadStudentsForGrading() {
+            const subjectId = subjectSelect.value;
+            const classId = classSelect.value;
+            const term = termSelect.value;
             
-            if (teacherSubjects.length === 0) {
-                teacherClassesList.innerHTML = '<p>No classes assigned to you.</p>';
+            if (!subjectId || !classId || !term) {
+                showNotification('Please select a subject, class, and term', 'error');
                 return;
             }
             
-            // Group subjects by class
-            const classesMap = {};
+            // Save current grading context
+            currentGradingContext = {
+                subjectId,
+                classId,
+                term
+            };
             
-            teacherSubjects.forEach(subject => {
-                if (!subject.class) return;
+            // Find subject name
+            const subject = teacherSubjects.find(s => s.id === subjectId);
+            const subjectName = subject ? subject.name : 'Unknown Subject';
+            
+            // Find class name
+            const className = allClasses[classId]?.name || `Class ${classId}`;
+            
+            // Update UI
+            currentSubject.textContent = subjectName;
+            currentClass.textContent = className;
+            currentTerm.textContent = term;
+            
+            // Get grading weights
+            const weightsRef = database.ref('gradingWeights');
+            weightsRef.once('value').then(snapshot => {
+                const weights = snapshot.val() || {
+                    assignments: 20,
+                    projects: 20,
+                    classScore: 30,
+                    finalExam: 30
+                };
                 
-                if (!classesMap[subject.class]) {
-                    classesMap[subject.class] = {
-                        classId: subject.class,
-                        className: allClasses[subject.class]?.name || `Class ${subject.class}`,
-                        subjects: []
-                    };
-                }
-                
-                classesMap[subject.class].subjects.push({
-                    id: subject.id,
-                    name: subject.name,
-                    schedule: subject.schedule ? formatSchedule(subject.schedule) : 'No schedule set'
-                });
+                gradeWeights.textContent = `Assignments: ${weights.assignments}%, Projects: ${weights.projects}%, Class Score: ${weights.classScore}%, Final Exam: ${weights.finalExam}%`;
             });
             
-            // Create cards for each class
-            for (const classId in classesMap) {
-                const classInfo = classesMap[classId];
+            // First, find all students in this class
+            const classInfo = allClasses[classId];
+            if (!classInfo || !classInfo.students || classInfo.students.length === 0) {
+                studentsGradeTable.querySelector('tbody').innerHTML = '<tr><td colspan="7">No students found in this class.</td></tr>';
+                gradeFormContainer.style.display = 'block';
+                noGradeData.style.display = 'none';
+                return;
+            }
+            
+            // Get existing grades for this subject, class, and term
+            const gradesRef = database.ref('grades');
+            
+            gradesRef.orderByChild('class').equalTo(className).once('value').then(snapshot => {
+                const allGrades = snapshot.val() || {};
+                currentGrades = {};
                 
-                const classCard = document.createElement('div');
-                classCard.className = 'card';
-                classCard.style.marginBottom = '20px';
+                // Filter grades for this subject and term
+                for (const gradeId in allGrades) {
+                    const grade = allGrades[gradeId];
+                    if (grade.subject === subjectId && grade.term === term) {
+                        currentGrades[grade.studentId] = {
+                            gradeId,
+                            ...grade
+                        };
+                    }
+                }
                 
-                const cardHeader = document.createElement('div');
-                cardHeader.className = 'card-header';
-                cardHeader.innerHTML = `<div class="card-title">${classInfo.className}</div>`;
+                // Display students with their grades
+                displayStudentsForGrading(classInfo.students, subjectId, term);
                 
-                const cardBody = document.createElement('div');
-                cardBody.className = 'card-body';
+                // Show the grade form
+                gradeFormContainer.style.display = 'block';
+                noGradeData.style.display = 'none';
+            });
+        }
+
+        function displayStudentsForGrading(studentIds, subjectId, term) {
+            const tbody = studentsGradeTable.querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            if (studentIds.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7">No students found in this class.</td></tr>';
+                return;
+            }
+            
+            // Find subject name
+            const subject = teacherSubjects.find(s => s.id === subjectId);
+            const subjectName = subject ? subject.name : 'Unknown Subject';
+            
+            studentIds.forEach(studentId => {
+                const student = allStudents[studentId];
+                if (!student) return;
                 
-                const subjectsList = document.createElement('div');
-                subjectsList.style.marginTop = '15px';
+                // Get existing grade if it exists
+                const existingGrade = currentGrades[studentId] || {
+                    assignments: '',
+                    projects: '',
+                    classScore: '',
+                    finalExam: '',
+                    totalScore: '',
+                    letterGrade: ''
+                };
                 
-                classInfo.subjects.forEach(subject => {
-                    const subjectItem = document.createElement('div');
-                    subjectItem.style.marginBottom = '15px';
-                    subjectItem.style.paddingBottom = '15px';
-                    subjectItem.style.borderBottom = '1px solid rgba(0,0,0,0.1)';
-                    
-                    subjectItem.innerHTML = `
-                        <h4 style="margin-bottom: 5px;">${subject.name}</h4>
-                        <p style="color: var(--light-text); font-size: 0.9rem;">${subject.schedule}</p>
-                    `;
-                    
-                    subjectsList.appendChild(subjectItem);
-                });
+                const row = document.createElement('tr');
+                row.dataset.studentId = studentId;
                 
-                cardBody.appendChild(subjectsList);
-                classCard.appendChild(cardHeader);
-                classCard.appendChild(cardBody);
-                teacherClassesList.appendChild(classCard);
+                row.innerHTML = `
+                    <td>
+                        <img src="${student.profileImage || 'https://randomuser.me/api/portraits/lego/1.jpg'}" alt="${student.name}" class="student-avatar">
+                        ${student.name}
+                    </td>
+                    <td><input type="number" class="input-grade" id="assignments-${studentId}" 
+                        value="${existingGrade.assignments || ''}" min="0" max="100" step="0.1"></td>
+                    <td><input type="number" class="input-grade" id="projects-${studentId}" 
+                        value="${existingGrade.projects || ''}" min="0" max="100" step="0.1"></td>
+                    <td><input type="number" class="input-grade" id="classScore-${studentId}" 
+                        value="${existingGrade.classScore || ''}" min="0" max="100" step="0.1"></td>
+                    <td><input type="number" class="input-grade" id="finalExam-${studentId}" 
+                        value="${existingGrade.finalExam || ''}" min="0" max="100" step="0.1"></td>
+                    <td id="totalScore-${studentId}">${existingGrade.totalScore || ''}</td>
+                    <td id="letterGrade-${studentId}">${existingGrade.letterGrade || ''}</td>
+                `;
+                
+                tbody.appendChild(row);
+                
+                // Add event listeners to grade inputs for auto-calculation
+                document.getElementById(`assignments-${studentId}`).addEventListener('input', () => calculateTotalGrade(studentId));
+                document.getElementById(`projects-${studentId}`).addEventListener('input', () => calculateTotalGrade(studentId));
+                document.getElementById(`classScore-${studentId}`).addEventListener('input', () => calculateTotalGrade(studentId));
+                document.getElementById(`finalExam-${studentId}`).addEventListener('input', () => calculateTotalGrade(studentId));
+            });
+        }
+
+        function calculateTotalGrade(studentId) {
+            const assignments = parseFloat(document.getElementById(`assignments-${studentId}`).value) || 0;
+            const projects = parseFloat(document.getElementById(`projects-${studentId}`).value) || 0;
+            const classScore = parseFloat(document.getElementById(`classScore-${studentId}`).value) || 0;
+            const finalExam = parseFloat(document.getElementById(`finalExam-${studentId}`).value) || 0;
+            
+            // Get grading weights from settings (default values if not set)
+            const weightsRef = database.ref('gradingWeights');
+            weightsRef.once('value').then(snapshot => {
+                const weights = snapshot.val() || {
+                    assignments: 20,
+                    projects: 20,
+                    classScore: 30,
+                    finalExam: 30
+                };
+                
+                // Calculate total score
+                const totalScore = (assignments * weights.assignments/100) + 
+                                  (projects * weights.projects/100) + 
+                                  (classScore * weights.classScore/100) + 
+                                  (finalExam * weights.finalExam/100);
+                
+                // Round to 1 decimal place
+                const roundedScore = Math.round(totalScore * 10) / 10;
+                
+                // Calculate letter grade
+                const letterGrade = calculateLetterGrade(roundedScore);
+                
+                // Update display
+                document.getElementById(`totalScore-${studentId}`).textContent = roundedScore;
+                document.getElementById(`letterGrade-${studentId}`).textContent = letterGrade;
+            });
+        }
+
+        function calculateLetterGrade(score) {
+            if (score >= 90) return 'A';
+            if (score >= 80) return 'B';
+            if (score >= 70) return 'C';
+            if (score >= 60) return 'D';
+            return 'F';
+        }
+
+        function saveAllGrades() {
+            if (!currentGradingContext.classId || !currentGradingContext.subjectId || !currentGradingContext.term) {
+                showNotification('Please filter students first', 'error');
+                return;
+            }
+            
+            // Get all student rows
+            const studentRows = studentsGradeTable.querySelectorAll('tbody tr');
+            
+            if (studentRows.length === 0) {
+                showNotification('No students to save', 'error');
+                return;
+            }
+            
+            // Find subject name
+            const subject = teacherSubjects.find(s => s.id === currentGradingContext.subjectId);
+            const subjectName = subject ? subject.name : 'Unknown Subject';
+            
+            // Find class name
+            const className = allClasses[currentGradingContext.classId]?.name || `Class ${currentGradingContext.classId}`;
+            
+            // Save each student's grade
+            let saveCount = 0;
+            const totalStudents = studentRows.length;
+            
+            studentRows.forEach(row => {
+                const studentId = row.dataset.studentId;
+                const student = allStudents[studentId];
+                
+                if (!student) return;
+                
+                const assignments = parseFloat(document.getElementById(`assignments-${studentId}`).value) || 0;
+                const projects = parseFloat(document.getElementById(`projects-${studentId}`).value) || 0;
+                const classScore = parseFloat(document.getElementById(`classScore-${studentId}`).value) || 0;
+                const finalExam = parseFloat(document.getElementById(`finalExam-${studentId}`).value) || 0;
+                const totalScore = parseFloat(document.getElementById(`totalScore-${studentId}`).textContent) || 0;
+                const letterGrade = document.getElementById(`letterGrade-${studentId}`).textContent;
+                
+                // Prepare grade object
+                const grade = {
+                    studentId,
+                    studentName: student.name,
+                    class: className,
+                    subject: currentGradingContext.subjectId,
+                    subjectName,
+                    term: currentGradingContext.term,
+                    assignments,
+                    projects,
+                    classScore,
+                    finalExam,
+                    totalScore,
+                    letterGrade,
+                    status: 'draft',
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                // Check if this student already has a grade record
+                const existingGrade = currentGrades[studentId];
+                
+                let savePromise;
+                
+                if (existingGrade && existingGrade.gradeId) {
+                    // Update existing grade
+                    const gradeRef = database.ref(`grades/${existingGrade.gradeId}`);
+                    savePromise = gradeRef.update(grade);
+                } else {
+                    // Create new grade
+                    const gradeRef = database.ref('grades').push();
+                    savePromise = gradeRef.set(grade);
+                }
+                
+                savePromise
+                    .then(() => {
+                        saveCount++;
+                        
+                        if (saveCount === totalStudents) {
+                            showNotification(`All ${saveCount} grades saved successfully!`, 'success');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error saving grade:', error);
+                        showNotification(`Failed to save grade for ${student.name}. Please try again.`, 'error');
+                    });
+            });
+            
+            if (saveCount > 0) {
+                showNotification(`Saving grades for ${saveCount} students...`, 'info');
             }
         }
 
-        function formatSchedule(schedule) {
-            if (!schedule || !schedule.days || !schedule.time) return 'No schedule set';
+        function backToGradeSelection() {
+            gradeFormContainer.style.display = 'none';
+        }
+
+        function loadPublishedGrades() {
+            publishedGradesContainer.innerHTML = '';
             
-            const days = schedule.days.join(', ');
-            const time = `${schedule.time.from} - ${schedule.time.to}`;
+            if (teacherSubjects.length === 0) {
+                noPublishedGrades.style.display = 'block';
+                return;
+            }
             
-            return `${days} at ${time}`;
+            // Get published grades for this teacher's subjects
+            const gradesRef = database.ref('grades');
+            
+            gradesRef.once('value').then(snapshot => {
+                const allGrades = snapshot.val() || {};
+                const publishedGrades = [];
+                
+                // Filter grades for this teacher's subjects and published status
+                for (const gradeId in allGrades) {
+                    const grade = allGrades[gradeId];
+                    
+                    // Check if this grade is for one of the teacher's subjects
+                    const isTeacherSubject = teacherSubjects.some(subject => subject.id === grade.subject);
+                    
+                    if (isTeacherSubject && grade.status === 'published') {
+                        publishedGrades.push({
+                            gradeId,
+                            ...grade
+                        });
+                    }
+                }
+                
+                if (publishedGrades.length === 0) {
+                    noPublishedGrades.style.display = 'block';
+                    return;
+                }
+                
+                noPublishedGrades.style.display = 'none';
+                
+                // Group grades by class and term
+                const gradesByClassTerm = {};
+                
+                publishedGrades.forEach(grade => {
+                    const key = `${grade.class}-${grade.term}`;
+                    
+                    if (!gradesByClassTerm[key]) {
+                        gradesByClassTerm[key] = {
+                            class: grade.class,
+                            term: grade.term,
+                            grades: []
+                        };
+                    }
+                    
+                    gradesByClassTerm[key].grades.push(grade);
+                });
+                
+                // Display published grades
+                for (const key in gradesByClassTerm) {
+                    const classTerm = gradesByClassTerm[key];
+                    
+                    const gradeCard = document.createElement('div');
+                    gradeCard.className = 'subject-card';
+                    
+                    gradeCard.innerHTML = `
+                        <div class="subject-header">
+                            <h3 class="subject-name">${classTerm.class} - ${classTerm.term}</h3>
+                            <div class="subject-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                        </div>
+                        <div class="class-info">
+                            <table class="students-table">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Total Score</th>
+                                        <th>Grade</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${classTerm.grades.map(grade => `
+                                        <tr>
+                                            <td>${grade.studentName}</td>
+                                            <td>${grade.totalScore}</td>
+                                            <td>${grade.letterGrade}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                    
+                    publishedGradesContainer.appendChild(gradeCard);
+                }
+            });
         }
 
         function handleFileSelect(e) {
@@ -1427,7 +2326,7 @@
                 
                 // Check file size (max 10MB)
                 if (file.size > 10 * 1024 * 1024) {
-                    showNotification(`File ${file.name} is too large (max 10MB)`, false);
+                    showNotification(`File ${file.name} is too large (max 10MB)`, 'error');
                     continue;
                 }
                 
@@ -1439,7 +2338,7 @@
                                    'image/jpeg', 'image/png'];
                 
                 if (!validTypes.includes(file.type)) {
-                    showNotification(`File type not supported for ${file.name}`, false);
+                    showNotification(`File type not supported for ${file.name}`, 'error');
                     continue;
                 }
                 
@@ -1491,7 +2390,7 @@
                 
                 // Check file size (max 10MB)
                 if (file.size > 10 * 1024 * 1024) {
-                    showNotification(`File ${file.name} is too large (max 10MB)`, false);
+                    showNotification(`File ${file.name} is too large (max 10MB)`, 'error');
                     continue;
                 }
                 
@@ -1503,7 +2402,7 @@
                                    'image/jpeg', 'image/png'];
                 
                 if (!validTypes.includes(file.type)) {
-                    showNotification(`File type not supported for ${file.name}`, false);
+                    showNotification(`File type not supported for ${file.name}`, 'error');
                     continue;
                 }
                 
@@ -1681,7 +2580,7 @@
             const dueDate = homeworkDueDateInput.value;
             
             if (!subjectId || !classId || !title || !description || !dueDate) {
-                showNotification('Please fill in all fields', false);
+                showNotification('Please fill in all fields', 'error');
                 return;
             }
             
@@ -1725,7 +2624,7 @@
                     await homeworkRef.set(homework);
                 }
                 
-                showNotification('Homework created successfully!');
+                showNotification('Homework created successfully!', 'success');
                 homeworkForm.reset();
                 $(homeworkSubjectSelect).val('').trigger('change');
                 $(homeworkClassSelect).val('').trigger('change');
@@ -1735,7 +2634,7 @@
                 loadHomework();
             } catch (error) {
                 console.error('Error creating homework:', error);
-                showNotification('Failed to create homework. Please try again.', false);
+                showNotification('Failed to create homework. Please try again.', 'error');
             }
         }
 
@@ -1802,7 +2701,7 @@
                 const homework = snapshot.val();
                 
                 if (!homework) {
-                    showNotification('Homework not found', false);
+                    showNotification('Homework not found', 'error');
                     return;
                 }
                 
@@ -1912,7 +2811,7 @@
             const feedback = feedbackInput.value.trim();
             
             if (isNaN(score)) {
-                showNotification('Please enter a valid score', false);
+                showNotification('Please enter a valid score', 'error');
                 return;
             }
             
@@ -1931,28 +2830,13 @@
             
             database.ref().update(update)
                 .then(() => {
-                    showNotification('Grade saved successfully');
+                    showNotification('Grade saved successfully', 'success');
                     viewHomeworkDetails(homeworkId); // Refresh the view
                 })
                 .catch(error => {
                     console.error('Error saving grade:', error);
-                    showNotification('Failed to save grade', false);
+                    showNotification('Failed to save grade', 'error');
                 });
-        }
-
-        function setupHomeworkSubmissionsListener() {
-            const homeworkRef = database.ref('homework');
-            
-            homeworkRef.orderByChild('assignedBy').equalTo(currentTeacherId).on('child_changed', snapshot => {
-                const homework = snapshot.val();
-                const notificationMessage = `New submission for ${homework.title} from ${homework.className}`;
-                showNotification(notificationMessage);
-                
-                // Update the homework list if we're on that tab
-                if (document.getElementById('homework-tab').classList.contains('active')) {
-                    loadHomework();
-                }
-            });
         }
 
         function deleteHomework() {
@@ -1967,13 +2851,13 @@
                         return homeworkRef.remove();
                     })
                     .then(() => {
-                        showNotification('Homework deleted successfully!');
+                        showNotification('Homework deleted successfully!', 'success');
                         homeworkDetailModal.style.display = 'none';
                         loadHomework();
                     })
                     .catch(error => {
                         console.error('Error deleting homework:', error);
-                        showNotification('Failed to delete homework. Please try again.', false);
+                        showNotification('Failed to delete homework. Please try again.', 'error');
                     });
             }
         }
@@ -2006,7 +2890,7 @@
                 const homework = snapshot.val();
                 
                 if (!homework) {
-                    showNotification('Homework not found', false);
+                    showNotification('Homework not found', 'error');
                     return;
                 }
                 
@@ -2083,11 +2967,11 @@
                 const updatedFiles = files.filter(f => f.path !== file.path);
                 await homeworkRef.set(updatedFiles);
                 
-                showNotification('File removed successfully');
+                showNotification('File removed successfully', 'success');
                 openEditHomeworkModal(); // Refresh the edit modal
             } catch (error) {
                 console.error('Error removing file:', error);
-                showNotification('Failed to remove file', false);
+                showNotification('Failed to remove file', 'error');
             }
         }
 
@@ -2098,7 +2982,7 @@
             const dueDate = editHomeworkDueDate.value;
             
             if (!homeworkId || !title || !description || !dueDate) {
-                showNotification('Please fill in all fields', false);
+                showNotification('Please fill in all fields', 'error');
                 return;
             }
             
@@ -2128,270 +3012,13 @@
                 // Save updates
                 await database.ref(`homework/${homeworkId}`).update(updates);
                 
-                showNotification('Homework updated successfully!');
+                showNotification('Homework updated successfully!', 'success');
                 editHomeworkModal.style.display = 'none';
                 loadHomework();
             } catch (error) {
                 console.error('Error updating homework:', error);
-                showNotification('Failed to update homework. Please try again.', false);
+                showNotification('Failed to update homework. Please try again.', 'error');
             }
-        }
-
-        function filterStudentsForGrading(e) {
-            e.preventDefault();
-            
-            const subjectId = gradeSubjectSelect.value;
-            const classId = gradeClassSelect.value;
-            const term = gradeTermSelect.value;
-            
-            if (!subjectId || !classId || !term) {
-                showNotification('Please select a subject, class, and term', false);
-                return;
-            }
-            
-            // Save current grading context
-            currentGradingContext = {
-                subjectId,
-                classId,
-                term
-            };
-            
-            // Find subject name
-            const subject = teacherSubjects.find(s => s.id === subjectId);
-            const subjectName = subject ? subject.name : 'Unknown Subject';
-            
-            // Find class name
-            const className = allClasses[classId]?.name || `Class ${classId}`;
-            
-            // Update UI
-            selectedClassName.textContent = className;
-            selectedSubjectName.textContent = subjectName;
-            
-            // Load students for this class
-            loadStudentsForGrading(classId, subjectId, term);
-        }
-
-        function loadStudentsForGrading(classId, subjectId, term) {
-            // First, find all students in this class
-            const classInfo = allClasses[classId];
-            if (!classInfo || !classInfo.students || classInfo.students.length === 0) {
-                gradeStudentsTable.innerHTML = '<tr><td colspan="8">No students found in this class.</td></tr>';
-                studentsToGradeSection.style.display = 'block';
-                return;
-            }
-            
-            // Get existing grades for this subject, class, and term
-            const gradesRef = database.ref('grades');
-            
-            gradesRef.orderByChild('class').equalTo(classInfo.name).once('value').then(snapshot => {
-                const allGrades = snapshot.val() || {};
-                currentGrades = {};
-                
-                // Filter grades for this subject and term
-                for (const gradeId in allGrades) {
-                    const grade = allGrades[gradeId];
-                    if (grade.subject === subjectId && grade.term === term) {
-                        currentGrades[grade.studentId] = {
-                            gradeId,
-                            ...grade
-                        };
-                    }
-                }
-                
-                // Display students with their grades
-                displayStudentsForGrading(classInfo.students, subjectId, term);
-            });
-        }
-
-        function displayStudentsForGrading(studentIds, subjectId, term) {
-            gradeStudentsTable.innerHTML = '';
-            
-            if (studentIds.length === 0) {
-                gradeStudentsTable.innerHTML = '<tr><td colspan="8">No students found in this class.</td></tr>';
-                studentsToGradeSection.style.display = 'block';
-                return;
-            }
-            
-            // Find subject name
-            const subject = teacherSubjects.find(s => s.id === subjectId);
-            const subjectName = subject ? subject.name : 'Unknown Subject';
-            
-            studentIds.forEach(studentId => {
-                const student = allStudents[studentId];
-                if (!student) return;
-                
-                // Get existing grade if it exists
-                const existingGrade = currentGrades[studentId] || {
-                    assignments: '',
-                    projects: '',
-                    classScore: '',
-                    finalExam: '',
-                    totalScore: '',
-                    letterGrade: ''
-                };
-                
-                const row = document.createElement('tr');
-                row.dataset.studentId = studentId;
-                
-                row.innerHTML = `
-                    <td>${student.name}</td>
-                    <td><input type="number" class="grade-input" id="assignments-${studentId}" 
-                        value="${existingGrade.assignments || ''}" min="0" max="100"></td>
-                    <td><input type="number" class="grade-input" id="projects-${studentId}" 
-                        value="${existingGrade.projects || ''}" min="0" max="100"></td>
-                    <td><input type="number" class="grade-input" id="classScore-${studentId}" 
-                        value="${existingGrade.classScore || ''}" min="0" max="100"></td>
-                    <td><input type="number" class="grade-input" id="finalExam-${studentId}" 
-                        value="${existingGrade.finalExam || ''}" min="0" max="100"></td>
-                    <td id="totalScore-${studentId}">${existingGrade.totalScore || ''}</td>
-                    <td id="letterGrade-${studentId}">${existingGrade.letterGrade || ''}</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm save-grade-btn" data-student-id="${studentId}">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                    </td>
-                `;
-                
-                gradeStudentsTable.appendChild(row);
-                
-                // Add event listeners to grade inputs for auto-calculation
-                document.getElementById(`assignments-${studentId}`).addEventListener('input', () => calculateTotalGrade(studentId));
-                document.getElementById(`projects-${studentId}`).addEventListener('input', () => calculateTotalGrade(studentId));
-                document.getElementById(`classScore-${studentId}`).addEventListener('input', () => calculateTotalGrade(studentId));
-                document.getElementById(`finalExam-${studentId}`).addEventListener('input', () => calculateTotalGrade(studentId));
-                
-                // Add event listener to save button
-                document.querySelector(`.save-grade-btn[data-student-id="${studentId}"]`).addEventListener('click', () => saveStudentGrade(studentId));
-            });
-            
-            studentsToGradeSection.style.display = 'block';
-        }
-
-        function calculateTotalGrade(studentId) {
-            const assignments = parseFloat(document.getElementById(`assignments-${studentId}`).value) || 0;
-            const projects = parseFloat(document.getElementById(`projects-${studentId}`).value) || 0;
-            const classScore = parseFloat(document.getElementById(`classScore-${studentId}`).value) || 0;
-            const finalExam = parseFloat(document.getElementById(`finalExam-${studentId}`).value) || 0;
-            
-            // Get grading weights from settings (default values if not set)
-            const assignmentsWeight = 0.2; // 20%
-            const projectsWeight = 0.2;    // 20%
-            const classScoreWeight = 0.3; // 30%
-            const finalExamWeight = 0.3;   // 30%
-            
-            // Calculate total score
-            const totalScore = (assignments * assignmentsWeight) + 
-                              (projects * projectsWeight) + 
-                              (classScore * classScoreWeight) + 
-                              (finalExam * finalExamWeight);
-            
-            // Round to 1 decimal place
-            const roundedScore = Math.round(totalScore * 10) / 10;
-            
-            // Calculate letter grade
-            const letterGrade = calculateLetterGrade(roundedScore);
-            
-            // Update display
-            document.getElementById(`totalScore-${studentId}`).textContent = roundedScore;
-            document.getElementById(`letterGrade-${studentId}`).textContent = letterGrade;
-        }
-
-        function calculateLetterGrade(score) {
-            if (score >= 90) return 'A';
-            if (score >= 80) return 'B';
-            if (score >= 70) return 'C';
-            if (score >= 60) return 'D';
-            return 'F';
-        }
-
-        function saveStudentGrade(studentId) {
-            const student = allStudents[studentId];
-            if (!student) return;
-            
-            const assignments = parseFloat(document.getElementById(`assignments-${studentId}`).value) || 0;
-            const projects = parseFloat(document.getElementById(`projects-${studentId}`).value) || 0;
-            const classScore = parseFloat(document.getElementById(`classScore-${studentId}`).value) || 0;
-            const finalExam = parseFloat(document.getElementById(`finalExam-${studentId}`).value) || 0;
-            const totalScore = parseFloat(document.getElementById(`totalScore-${studentId}`).textContent) || 0;
-            const letterGrade = document.getElementById(`letterGrade-${studentId}`).textContent;
-            
-            // Find subject name
-            const subject = teacherSubjects.find(s => s.id === currentGradingContext.subjectId);
-            const subjectName = subject ? subject.name : 'Unknown Subject';
-            
-            // Find class name
-            const className = allClasses[currentGradingContext.classId]?.name || `Class ${currentGradingContext.classId}`;
-            
-            // Prepare grade object
-            const grade = {
-                studentId,
-                studentName: student.name,
-                class: className,
-                subject: currentGradingContext.subjectId,
-                subjectName,
-                term: currentGradingContext.term,
-                assignments,
-                projects,
-                classScore,
-                finalExam,
-                totalScore,
-                letterGrade,
-                status: 'draft',
-                lastUpdated: new Date().toISOString()
-            };
-            
-            // Check if this student already has a grade record
-            const existingGrade = currentGrades[studentId];
-            
-            let savePromise;
-            
-            if (existingGrade && existingGrade.gradeId) {
-                // Update existing grade
-                const gradeRef = database.ref(`grades/${existingGrade.gradeId}`);
-                savePromise = gradeRef.update(grade);
-            } else {
-                // Create new grade
-                const gradeRef = database.ref('grades').push();
-                savePromise = gradeRef.set(grade);
-            }
-            
-            savePromise
-                .then(() => {
-                    showNotification(`Grade saved for ${student.name}`);
-                    // Reload grades to update currentGrades
-                    loadStudentsForGrading(currentGradingContext.classId, currentGradingContext.subjectId, currentGradingContext.term);
-                })
-                .catch(error => {
-                    console.error('Error saving grade:', error);
-                    showNotification(`Failed to save grade for ${student.name}. Please try again.`, false);
-                });
-        }
-
-        function saveAllGrades() {
-            if (!currentGradingContext.classId || !currentGradingContext.subjectId || !currentGradingContext.term) {
-                showNotification('Please filter students first', false);
-                return;
-            }
-            
-            // Get all student rows
-            const studentRows = gradeStudentsTable.querySelectorAll('tr[data-student-id]');
-            
-            if (studentRows.length === 0) {
-                showNotification('No students to save', false);
-                return;
-            }
-            
-            // Save each student's grade
-            let saveCount = 0;
-            const totalStudents = studentRows.length;
-            
-            studentRows.forEach(row => {
-                const studentId = row.dataset.studentId;
-                saveStudentGrade(studentId);
-                saveCount++;
-            });
-            
-            showNotification(`Grades for ${saveCount} students are being saved.`);
         }
 
         // Initialize the app
