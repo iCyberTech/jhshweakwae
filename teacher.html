@@ -6,38 +6,6 @@
     <title>Teacher Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* New Top Bar Styles */
-        .status-topbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 30px;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--glass-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: none;
-        }
-
-        .status-topbar.clocked-in {
-            color: var(--success-color);
-        }
-
-        .status-topbar.clocked-out {
-            color: var(--info-color);
-        }
-
-        .status-topbar.not-clocked {
-            color: var(--danger-color);
-        }
-
         /* Enhanced Notification Styles */
         .notification {
             padding: 18px 20px;
@@ -149,10 +117,6 @@
             
             .notification-message {
                 font-size: 0.85rem;
-            }
-
-            .status-topbar {
-                font-size: 0.75rem;
             }
         }
         :root {
@@ -630,11 +594,6 @@
     </style>
 </head>
 <body>
-    <!-- Status Top Bar -->
-    <div class="status-topbar" id="status-topbar">
-        <span id="status-text">Attendance Status</span>
-    </div>
-
     <!-- Loading Screen -->
     <div class="loading-screen" id="loading-screen">
         <div class="loading-spinner"></div>
@@ -815,8 +774,6 @@
         const greetingTitle = document.getElementById('greeting-title');
         const greetingSubtitle = document.getElementById('greeting-subtitle');
         const notificationContainer = document.getElementById('notification-container');
-        const statusTopbar = document.getElementById('status-topbar');
-        const statusText = document.getElementById('status-text');
         
         // Attendance elements
         const attendanceStatus = document.getElementById('attendance-status');
@@ -850,7 +807,6 @@
         let today = getCurrentDate(); // Get current date in YYYY-MM-DD format
         let isInRange = false;
         let isClassTeacher = false;
-        let currentAttendanceStatus = "Not Clocked In";
         
         // Get current date in YYYY-MM-DD format based on local time
         function getCurrentDate() {
@@ -859,34 +815,6 @@
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
-        }
-        
-        // Update the status top bar
-        function updateStatusTopbar(status, page) {
-            // Don't show on Dashboard and Academics pages
-            if (page === 'dashboard' || page === 'academics') {
-                statusTopbar.style.display = 'none';
-                return;
-            }
-            
-            // Show on other pages
-            statusTopbar.style.display = 'flex';
-            
-            // Update status text and styling
-            statusText.textContent = `Attendance Status: ${status}`;
-            
-            // Set appropriate styling based on status
-            statusTopbar.classList.remove('clocked-in', 'clocked-out', 'not-clocked');
-            
-            if (status.includes('Clocked In')) {
-                statusTopbar.classList.add('clocked-in');
-            } else if (status.includes('Clocked Out')) {
-                statusTopbar.classList.add('clocked-out');
-            } else {
-                statusTopbar.classList.add('not-clocked');
-            }
-            
-            currentAttendanceStatus = status;
         }
         
         // Show notification function
@@ -1235,9 +1163,6 @@
                         const clockInTime = new Date(attendanceData.clockIn);
                         attendanceTime.textContent = `Clocked in at ${formatTime(clockInTime)}`;
                         
-                        // Update status for top bar
-                        updateStatusTopbar("Clocked In", getCurrentPage());
-                        
                         // Check if clock in was out of range
                         if (attendanceData.isOutOfRange) {
                             rangeWarning.style.display = 'block';
@@ -1255,9 +1180,6 @@
                         const clockOutTime = new Date(attendanceData.clockOut);
                         attendanceTime.textContent = `Clocked in at ${formatTime(clockInTime)}, out at ${formatTime(clockOutTime)}`;
                         
-                        // Update status for top bar
-                        updateStatusTopbar("Clocked Out", getCurrentPage());
-                        
                         // Check if clock in/out was out of range
                         if (attendanceData.isOutOfRange) {
                             rangeWarning.style.display = 'block';
@@ -1271,25 +1193,8 @@
                     clockInBtn.style.display = 'block';
                     clockOutBtn.style.display = 'none';
                     attendanceTime.textContent = "";
-                    
-                    // Update status for top bar
-                    updateStatusTopbar("Not Clocked In", getCurrentPage());
                 }
             });
-        }
-        
-        // Get current page from navigation
-        function getCurrentPage() {
-            const activeNav = document.querySelector('.nav-item.active');
-            if (!activeNav) return 'dashboard';
-            
-            const navId = activeNav.id;
-            if (navId === 'dashboard-nav') return 'dashboard';
-            if (navId === 'academics-nav') return 'academics';
-            if (navId === 'finance-nav') return 'finance';
-            if (navId === 'connect-nav') return 'connect';
-            if (navId === 'admin-nav') return 'admin';
-            return 'dashboard';
         }
         
         // Format time for display
@@ -1459,9 +1364,6 @@
                     // Update greeting
                     updateGreeting();
                     greetingSubtitle.textContent = 'Let\'s make today productive';
-                    
-                    // Update status bar (hide it for dashboard)
-                    updateStatusTopbar(currentAttendanceStatus, 'dashboard');
                 } else {
                     // Show the corresponding frame
                     const frameId = navId.replace('-nav', '-frame');
@@ -1478,9 +1380,6 @@
                     const pageTitle = this.querySelector('span').textContent;
                     greetingTitle.textContent = `Welcome to ${pageTitle}`;
                     greetingSubtitle.textContent = `Viewing your ${pageTitle.toLowerCase()} information`;
-                    
-                    // Update status bar
-                    updateStatusTopbar(currentAttendanceStatus, navId.replace('-nav', ''));
                 }
             });
         });
