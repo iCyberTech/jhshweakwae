@@ -3,7 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hweakwae JHS - CramNerd</title>
+    <meta name="description" content="Hweakwae JHS - Quality junior high school education in Ghana. Shaping future leaders through academic excellence and character development.">
+    <meta name="keywords" content="Hweakwae JHS, Ghana school, junior high school, quality education, CramNerd, New Abirem">
+    <meta name="author" content="Hweakwae JHS">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://www.hweakwaejhs.edu.gh">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.hweakwaejhs.edu.gh">
+    <meta property="og:title" content="Hweakwae JHS - Quality Education in Ghana">
+    <meta property="og:description" content="Shaping future leaders through academic excellence and character development at Hweakwae Junior High School.">
+    <meta property="og:image" content="https://www.hweakwaejhs.edu.gh/og-image.jpg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://www.hweakwaejhs.edu.gh">
+    <meta property="twitter:title" content="Hweakwae JHS - Quality Education in Ghana">
+    <meta property="twitter:description" content="Shaping future leaders through academic excellence and character development at Hweakwae Junior High School.">
+    <meta property="twitter:image" content="https://www.hweakwaejhs.edu.gh/twitter-image.jpg">
+    
+    <title>Hweakwae JHS - Quality Junior High School Education in Ghana | CramNerd</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -33,6 +53,7 @@
             line-height: 1.6;
             min-height: 100vh;
             overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* Futuristic transition styles */
@@ -770,6 +791,28 @@
             right: -25px;
         }
 
+        /* Swipe indicator for videos */
+        .swipe-indicator {
+            display: none;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            z-index: 5;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
         /* Call to Action */
         .cta {
             padding: 80px 0;
@@ -962,7 +1005,7 @@
 
         .blog-comment-input {
             padding: 12px;
-            border-radius: 8px;
+            borderRadius: 8px;
             border: 1px solid #ddd;
             resize: vertical;
             min-height: 100px;
@@ -1132,6 +1175,7 @@
         .chatbot-title {
             font-weight: 600;
             font-size: 1.1rem;
+            pointer-events: none;
         }
 
         .chatbot-toggle {
@@ -1281,6 +1325,7 @@
         .footer-col ul li a:hover {
             opacity: 1;
             padding-left: 5px;
+            color: var(--accent-color);
         }
 
         .social-links {
@@ -1316,6 +1361,11 @@
             font-size: 0.9rem;
         }
 
+        /* Mobile-specific improvements */
+        .mobile-only {
+            display: none;
+        }
+
         /* Responsive Styles */
         @media (max-width: 992px) {
             .hero-content h2 {
@@ -1342,6 +1392,11 @@
 
             .video-next {
                 right: -15px;
+            }
+            
+            /* Show swipe indicator on mobile */
+            .swipe-indicator {
+                display: block;
             }
         }
 
@@ -1424,6 +1479,25 @@
                 right: 20px;
                 bottom: 20px;
             }
+            
+            /* Mobile-only elements */
+            .mobile-only {
+                display: block;
+            }
+            
+            .desktop-only {
+                display: none;
+            }
+            
+            /* Improve touch targets */
+            nav ul li a {
+                padding: 10px 0;
+                display: block;
+            }
+            
+            .btn {
+                padding: 15px 30px;
+            }
         }
 
         @media (max-width: 576px) {
@@ -1460,6 +1534,46 @@
                 right: 10px;
                 bottom: 10px;
             }
+            
+            .blog-form {
+                padding: 20px;
+            }
+            
+            .blog-form-title {
+                font-size: 1.5rem;
+            }
+            
+            .footer-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
+
+        /* Improved mobile menu animation */
+        @media (max-width: 768px) {
+            nav ul {
+                transition: right 0.3s ease-in-out;
+            }
+            
+            nav ul.active {
+                right: 0;
+            }
+        }
+
+        /* Prevent horizontal scrolling on mobile */
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        /* Improved touch feedback for buttons */
+        .btn, .chatbot-send, .gallery-nav-btn, .video-nav, .announcement-nav {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Better scrolling experience on iOS */
+        .chatbot-messages, .modal-content {
+            -webkit-overflow-scrolling: touch;
         }
     </style>
 </head>
@@ -1476,7 +1590,7 @@
         <div class="container">
             <div class="header-container">
                 <div class="logo">
-                    <img src="logo.jpg" alt="Hweakwae JHS Logo">
+                    <img src="logo.jpg" alt="Hweakwae JHS Logo - Quality Education in Ghana" width="50" height="50">
                     <div class="logo-text">
                         <h1>Hweakwae JHS</h1>
                         <p>« In Deo Credere »</p>
@@ -1491,7 +1605,7 @@
                         <li><a href="#videos">Videos</a></li>
                         <li><a href="#contact">Contact</a></li>
                     </ul>
-                    <button class="mobile-menu-btn" id="mobile-menu-btn">
+                    <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle navigation menu">
                         <i class="fas fa-bars"></i>
                     </button>
                 </nav>
@@ -1519,7 +1633,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title" id="modal-title">Announcement Title</h3>
-                <button class="modal-close" id="modal-close">&times;</button>
+                <button class="modal-close" id="modal-close" aria-label="Close announcement">&times;</button>
             </div>
             <div class="modal-body" id="modal-body">
                 <!-- Announcement content will be loaded here -->
@@ -1543,7 +1657,7 @@
                 </div>
             </div>
             <div class="hero-image">
-                <img id="hero-image" src="" alt="Students Learning">
+                <img id="hero-image" src="" alt="Students Learning at Hweakwae JHS" width="600" height="400">
             </div>
         </div>
     </section>
@@ -1618,10 +1732,10 @@
                     <!-- Gallery items will be loaded dynamically from Firebase -->
                 </div>
                 <div class="gallery-nav">
-                    <button class="gallery-nav-btn" id="gallery-prev" disabled>
+                    <button class="gallery-nav-btn" id="gallery-prev" disabled aria-label="Previous gallery page">
                         <i class="fas fa-chevron-left"></i>
                     </button>
-                    <button class="gallery-nav-btn" id="gallery-next">
+                    <button class="gallery-nav-btn" id="gallery-next" aria-label="Next gallery page">
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
@@ -1637,15 +1751,18 @@
                 <p>Watch our school in action through these videos</p>
             </div>
             <div class="video-section-container">
-                <button class="video-nav video-prev" id="video-prev">
+                <button class="video-nav video-prev" id="video-prev" aria-label="Previous videos">
                     <i class="fas fa-chevron-left"></i>
                 </button>
                 <div class="video-container" id="video-container">
                     <!-- Video items will be loaded dynamically from Firebase -->
                 </div>
-                <button class="video-nav video-next" id="video-next">
+                <button class="video-nav video-next" id="video-next" aria-label="Next videos">
                     <i class="fas fa-chevron-right"></i>
                 </button>
+                <div class="swipe-indicator mobile-only">
+                    <i class="fas fa-hand-point-right"></i> Swipe for more
+                </div>
             </div>
         </div>
     </section>
@@ -1655,7 +1772,7 @@
         <div class="container">
             <div class="cta-container">
                 <div class="cta-image">
-                    <img id="cta-image" src="" alt="Apply Now">
+                    <img id="cta-image" src="" alt="Apply to Hweakwae JHS - Quality Education" width="500" height="400">
                 </div>
                 <div class="cta-content">
                     <h2>Ready to Join Our Community?</h2>
@@ -1674,10 +1791,10 @@
                     <h3>About Us</h3>
                     <p>Hweakwae JHS has been a pillar of academic excellence for over 57 years, shaping young minds to become responsible global citizens.</p>
                     <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-tiktok"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#" aria-label="Visit our Facebook page"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Visit our TikTok page"><i class="fab fa-tiktok"></i></a>
+                        <a href="#" aria-label="Visit our Instagram page"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Visit our YouTube channel"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
                 <div class="footer-col">
@@ -1730,7 +1847,7 @@
     <div class="chatbot-container" id="chatbot-container">
         <div class="chatbot-header" id="chatbot-header">
             <div class="chatbot-title">School Assistant</div>
-            <button class="chatbot-toggle" id="chatbot-toggle">
+            <button class="chatbot-toggle" id="chatbot-toggle" aria-label="Toggle chatbot">
                 <i class="fas fa-comment-dots"></i>
             </button>
         </div>
@@ -1742,7 +1859,7 @@
             </div>
             <div class="chatbot-input-container">
                 <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Type your question...">
-                <button class="chatbot-send" id="chatbot-send">
+                <button class="chatbot-send" id="chatbot-send" aria-label="Send message">
                     <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
@@ -1955,7 +2072,7 @@
                 const galleryItem = document.createElement('div');
                 galleryItem.className = 'gallery-item';
                 galleryItem.innerHTML = `
-                    <img src="${item.url}" alt="${item.caption || 'School Image'}">
+                    <img src="${item.url}" alt="${item.caption || 'School Image'}" loading="lazy">
                     <div class="gallery-item-caption">${item.caption || 'School Image'}</div>
                 `;
                 galleryGrid.appendChild(galleryItem);
@@ -1998,6 +2115,39 @@
                 behavior: 'smooth'
             });
         });
+
+        // Add touch swipe functionality for videos on mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        videoContainer.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+
+        videoContainer.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, false);
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            
+            if (touchEndX < touchStartX - swipeThreshold) {
+                // Swipe left - go to next
+                videoContainer.scrollBy({
+                    left: videoContainer.offsetWidth,
+                    behavior: 'smooth'
+                });
+            }
+            
+            if (touchEndX > touchStartX + swipeThreshold) {
+                // Swipe right - go to previous
+                videoContainer.scrollBy({
+                    left: -videoContainer.offsetWidth,
+                    behavior: 'smooth'
+                });
+            }
+        }
 
         // Function to stop all videos
         function stopAllVideos() {
@@ -2090,7 +2240,7 @@
                         
                         videoCard.innerHTML = `
                             <div class="video-player">
-                                <iframe src="${videoUrl}" title="${item.title || 'School Video'}" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                <iframe src="${videoUrl}" title="${item.title || 'School Video'}" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
                             </div>
                             <div class="video-card-content">
                                 <h3>${item.title || 'School Video'}</h3>
@@ -2398,6 +2548,13 @@
         // Toggle chatbot visibility
         chatbotToggle.addEventListener('click', () => {
             chatbotBody.classList.toggle('open');
+            if (chatbotBody.classList.contains('open') && window.innerWidth <= 768) {
+                // On mobile, scroll to bottom when opening
+                setTimeout(() => {
+                    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+                }, 100);
+            }
+            
             if (chatbotBody.classList.contains('open')) {
                 chatbotToggle.innerHTML = '<i class="fas fa-times"></i>';
             } else {
@@ -2584,6 +2741,9 @@
             document.querySelectorAll('.blog-post-likes, .blog-post-comments, #blog-post-submit').forEach(element => {
                 element.addEventListener('click', showNicknameModal);
             });
+            
+            // Add structured data for SEO
+            addStructuredData();
         });
 
         // Stop all videos when user scrolls away from video section
@@ -2596,6 +2756,29 @@
                 stopAllVideos();
             }
         });
+        
+        // Add structured data for better SEO
+        function addStructuredData() {
+            const structuredData = {
+                "@context": "https://schema.org",
+                "@type": "EducationalOrganization",
+                "name": "Hweakwae JHS",
+                "description": "Hweakwae Junior High School provides quality education in Ghana, shaping future leaders through academic excellence and character development.",
+                "url": "https://www.hweakwaejhs.com",
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": "New Abirem",
+                    "addressRegion": "Eastern Region",
+                    "addressCountry": "GH"
+                },
+                "telephone": "+233"
+            };
+            
+            const script = document.createElement('script');
+            script.type = 'application/ld+json';
+            script.text = JSON.stringify(structuredData);
+            document.head.appendChild(script);
+        }
     </script>
 </body>
 </html>
