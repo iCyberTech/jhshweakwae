@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Attendance</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --text-color: #2d3436;
+            --light-text: #636e72;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --success-color: #00b894;
+            --danger-color: #d63031;
+            --warning-color: #fdcb6e;
+            --info-color: #0984e3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .greeting h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .greeting p {
+            font-size: 0.9rem;
+            color: var(--light-text);
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            color: var(--text-color);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .class-info {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+        }
+
+        .class-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .class-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 10px 15px;
+            border-radius: 10px;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: var(--light-text);
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-weight: 600;
+        }
+
+        .attendance-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+        }
+
+        .attendance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .attendance-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .date-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 8px 15px;
+            border-radius: 50px;
+        }
+
+        .date-selector input {
+            border: none;
+            background: transparent;
+            font-size: 0.9rem;
+            padding: 5px;
+            border-radius: 5px;
+            max-width: 150px;
+        }
+
+        .attendance-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            gap: 5px;
+        }
+
+        .action-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .action-btn.secondary {
+            background: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        .action-btn.secondary:hover {
+            background: rgba(108, 92, 231, 0.1);
+        }
+
+        .action-btn.success {
+            background: var(--success-color);
+        }
+
+        .action-btn.success:hover {
+            background: #00a884;
+        }
+
+        .action-btn.danger {
+            background: var(--danger-color);
+        }
+
+        .action-btn.danger:hover {
+            background: #c0392b;
+        }
+
+        .action-btn.info {
+            background: var(--info-color);
+        }
+
+        .action-btn.info:hover {
+            background: #0870c0;
+        }
+
+        .students-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .student-card {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .student-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .student-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+
+        .student-info {
+            flex: 1;
+        }
+
+        .student-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .student-id {
+            font-size: 0.8rem;
+            color: var(--light-text);
+        }
+
+        .attendance-status {
+            display: flex;
+            gap: 8px;
+        }
+
+        .status-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.7);
+            color: var(--light-text);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+        }
+
+        .status-btn.active {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .status-btn.absent {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .status-btn.late {
+            background: var(--warning-color);
+            color: var(--text-color);
+        }
+
+        .notes-input {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 8px;
+            font-size: 0.9rem;
+            resize: none;
+            min-height: 40px;
+        }
+
+        .no-students {
+            text-align: center;
+            padding: 30px;
+            color: var(--light-text);
+            grid-column: 1 / -1;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .status-present {
+            background-color: var(--success-color);
+        }
+
+        .status-absent {
+            background-color: var(--danger-color);
+        }
+
+        .status-late {
+            background-color: var(--warning-color);
+        }
+
+        .summary-card {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .summary-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 3px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--light-text);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--light-text);
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .class-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .attendance-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .date-selector {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .date-selector input {
+                max-width: none;
+                flex: 1;
+            }
+
+            .action-btn {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+
+            .student-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .student-info {
+                width: 100%;
+            }
+
+            .attendance-status {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .status-btn {
+                width: 28%;
+                height: 40px;
+                border-radius: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Class Information...</div>
+    </div>
+
+    <!-- Main Content (initially hidden) -->
+    <div id="main-content" style="display: none;">
+        <header>
+            <div class="profile">
+                <img id="profile-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="profile-img">
+                <div class="greeting">
+                    <h1 id="greeting-title">Class Attendance</h1>
+                    <p id="greeting-subtitle">Taking attendance for your class</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Class Information -->
+        <div class="class-info" id="class-info">
+            <h2 class="class-title" id="class-name">Loading class...</h2>
+            <div class="class-details">
+                <div class="detail-item">
+                    <div class="detail-label">Class ID</div>
+                    <div class="detail-value" id="class-id">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Room</div>
+                    <div class="detail-value" id="class-room">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Schedule</div>
+                    <div class="detail-value" id="class-schedule">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Daily Amount</div>
+                    <div class="detail-value" id="class-daily-amount">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Summary -->
+        <div class="summary-card" id="attendance-summary" style="display: none;">
+            <div class="summary-title">Today's Attendance Summary</div>
+            <div class="summary-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="total-students">0</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="present-count">0</div>
+                    <div class="stat-label">Present</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="absent-count">0</div>
+                    <div class="stat-label">Absent</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="late-count">0</div>
+                    <div class="stat-label">Late</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Container -->
+        <div class="attendance-container">
+            <div class="attendance-header">
+                <h3 class="attendance-title">Student Attendance</h3>
+                <div class="date-selector">
+                    <i class="fas fa-calendar-alt"></i>
+                    <input type="date" id="attendance-date" value="">
+                </div>
+                <div class="attendance-actions">
+                    <button class="action-btn info" id="mark-all-present-btn">
+                        <i class="fas fa-check-circle"></i> Mark All Present
+                    </button>
+                    <button class="action-btn success" id="save-btn">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                    <button class="action-btn secondary" id="reset-btn">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+            <div class="students-list" id="students-list">
+                <div class="no-students">
+                    <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                    <p>No students found in this class</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmation-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirm Attendance</h3>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmation-message">Are you sure you want to save the attendance for today?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" id="cancel-btn">Cancel</button>
+                <button class="action-btn success" id="confirm-save-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, get, onValue, set, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
+            authDomain: "sms-single.firebaseapp.com",
+            projectId: "sms-single",
+            storageBucket: "sms-single.appspot.com",
+            messagingSenderId: "140188895278",
+            appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
+            measurementId: "G-7ER348P6VZ"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        
+        // DOM Elements
+        const loadingScreen = document.getElementById('loading-screen');
+        const mainContent = document.getElementById('main-content');
+        const profileImg = document.getElementById('profile-img');
+        const greetingTitle = document.getElementById('greeting-title');
+        const greetingSubtitle = document.getElementById('greeting-subtitle');
+        
+        // Class info elements
+        const classNameElement = document.getElementById('class-name');
+        const classIdElement = document.getElementById('class-id');
+        const classRoomElement = document.getElementById('class-room');
+        const classScheduleElement = document.getElementById('class-schedule');
+        const classDailyAmountElement = document.getElementById('class-daily-amount');
+        
+        // Attendance elements
+        const attendanceDate = document.getElementById('attendance-date');
+        const saveBtn = document.getElementById('save-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const markAllPresentBtn = document.getElementById('mark-all-present-btn');
+        const studentsListElement = document.getElementById('students-list');
+        const attendanceSummary = document.getElementById('attendance-summary');
+        const totalStudentsElement = document.getElementById('total-students');
+        const presentCountElement = document.getElementById('present-count');
+        const absentCountElement = document.getElementById('absent-count');
+        const lateCountElement = document.getElementById('late-count');
+        
+        // Modal elements
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const confirmSaveBtn = document.getElementById('confirm-save-btn');
+        const confirmationMessage = document.getElementById('confirmation-message');
+        
+        // Firebase references
+        const authUsersRef = ref(db, 'authUsers');
+        const teachersRef = ref(db, 'teachers');
+        const classesRef = ref(db, 'classes');
+        const credentialsRef = ref(db, 'credentials');
+        const attendanceRef = ref(db, 'attendance');
+        
+        // Global variables
+        let currentTeacherId = null;
+        let currentTeacherData = null;
+        let currentClass = null;
+        let classStudents = [];
+        let attendanceData = {};
+        let currentDate = new Date().toISOString().split('T')[0];
+        
+        // Set today's date as default
+        attendanceDate.value = currentDate;
+        
+        // Identify the current teacher based on device info
+        async function identifyCurrentTeacher() {
+            try {
+                // Get all auth users
+                const authUsersSnapshot = await get(authUsersRef);
+                if (!authUsersSnapshot.exists()) {
+                    throw new Error('No auth users found');
+                }
+                
+                const authUsers = authUsersSnapshot.val();
+                const credentialsSnapshot = await get(credentialsRef);
+                const credentials = credentialsSnapshot.exists() ? credentialsSnapshot.val() : {};
+                
+                // Get current device info from browser
+                const userAgent = navigator.userAgent;
+                const screenResolution = `${window.screen.width}x${window.screen.height}`;
+                const language = navigator.language;
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                
+                // Find matching teacher based on device info
+                for (const [authId, authUser] of Object.entries(authUsers)) {
+                    if (authUser.userType === 'teacher') {
+                        const teacherCredential = credentials[authUser.userId];
+                        if (teacherCredential && teacherCredential.deviceInfo) {
+                            const deviceInfo = teacherCredential.deviceInfo;
+                            
+                            // Check for matching device characteristics
+                            if (deviceInfo.userAgent === userAgent && 
+                                deviceInfo.screenResolution === screenResolution &&
+                                deviceInfo.language === language && 
+                                deviceInfo.timezone === timezone) {
+                                
+                                // This is likely the current teacher
+                                currentTeacherId = authUser.userId;
+                                
+                                // Get teacher details from teachers collection
+                                const teacherRef = ref(db, `teachers/${currentTeacherId}`);
+                                const teacherSnapshot = await get(teacherRef);
+                                
+                                if (teacherSnapshot.exists()) {
+                                    currentTeacherData = teacherSnapshot.val();
+                                    return currentTeacherData;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // If no match found, try to get from activeSessions as fallback
+                const activeSessionSnapshot = await get(ref(db, 'activeSessions/teacher'));
+                if (activeSessionSnapshot.exists()) {
+                    currentTeacherId = activeSessionSnapshot.val();
+                    const teacherRef = ref(db, `teachers/${currentTeacherId}`);
+                    const teacherSnapshot = await get(teacherRef);
+                    
+                    if (teacherSnapshot.exists()) {
+                        currentTeacherData = teacherSnapshot.val();
+                        return currentTeacherData;
+                    }
+                }
+                
+                throw new Error('No matching teacher found');
+            } catch (error) {
+                console.error('Error identifying teacher:', error);
+                return null;
+            }
+        }
+        
+        // Find the class assigned to this teacher
+        async function findAssignedClass(teacherName) {
+            try {
+                const classesSnapshot = await get(classesRef);
+                if (!classesSnapshot.exists()) {
+                    return null;
+                }
+                
+                const classes = classesSnapshot.val();
+                let assignedClass = null;
+                
+                // Find the first class where teacher name matches
+                for (const classId in classes) {
+                    if (classes[classId].teacher === teacherName) {
+                        assignedClass = {
+                            id: classId,
+                            ...classes[classId]
+                        };
+                        break;
+                    }
+                }
+                
+                return assignedClass;
+            } catch (error) {
+                console.error('Error finding assigned class:', error);
+                return null;
+            }
+        }
+        
+        // Load students for the assigned class (from the students subcollection under the class)
+        async function loadClassStudents(classId) {
+            try {
+                // Get the students array from the class document
+                const classRef = ref(db, `classes/${classId}`);
+                const classSnapshot = await get(classRef);
+                
+                if (!classSnapshot.exists()) {
+                    return [];
+                }
+                
+                const classData = classSnapshot.val();
+                const studentIds = classData.students || [];
+                
+                if (studentIds.length === 0) {
+                    return [];
+                }
+                
+                // Get all students from the students collection
+                const allStudentsSnapshot = await get(ref(db, 'students'));
+                if (!allStudentsSnapshot.exists()) {
+                    return [];
+                }
+                
+                const allStudents = allStudentsSnapshot.val();
+                const classStudents = [];
+                
+                // Match student IDs with their data
+                for (const studentId of studentIds) {
+                    if (allStudents[studentId]) {
+                        classStudents.push({
+                            id: studentId,
+                            ...allStudents[studentId]
+                        });
+                    }
+                }
+                
+                return classStudents;
+            } catch (error) {
+                console.error('Error loading class students:', error);
+                return [];
+            }
+        }
+        
+        // Load attendance data for the selected date
+        async function loadAttendanceData(classId, date) {
+            try {
+                const attendanceSnapshot = await get(ref(db, `attendance/${classId}/${date}`));
+                
+                if (attendanceSnapshot.exists()) {
+                    return attendanceSnapshot.val();
+                }
+                
+                return {};
+            } catch (error) {
+                console.error('Error loading attendance data:', error);
+                return {};
+            }
+        }
+        
+        // Render class information
+        function renderClassInfo(classData) {
+            classNameElement.textContent = classData.name || 'Unnamed Class';
+            classIdElement.textContent = classData.id || '-';
+            classRoomElement.textContent = classData.room || 'Not assigned';
+            classScheduleElement.textContent = classData.schedule || 'Not scheduled';
+            classDailyAmountElement.textContent = classData.dailyAmount ? `$${classData.dailyAmount}` : '$0';
+        }
+        
+        // Render students list with attendance options
+        function renderStudentsList(students, attendanceData, selectedDate) {
+            studentsListElement.innerHTML = '';
+            
+            if (students.length === 0) {
+                studentsListElement.innerHTML = `
+                    <div class="no-students">
+                        <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>No students found in this class</p>
+                    </div>
+                `;
+                attendanceSummary.style.display = 'none';
+                return;
+            }
+            
+            // Show attendance summary
+            attendanceSummary.style.display = 'block';
+            totalStudentsElement.textContent = students.length;
+            
+            let presentCount = 0;
+            let absentCount = 0;
+            let lateCount = 0;
+            
+            students.forEach(student => {
+                const studentId = student.id;
+                const studentAttendance = attendanceData[studentId] || {};
+                const currentStatus = studentAttendance.status || '';
+                const notes = studentAttendance.notes || '';
+                
+                // Count statuses
+                if (currentStatus === 'present') presentCount++;
+                else if (currentStatus === 'absent') absentCount++;
+                else if (currentStatus === 'late') lateCount++;
+                
+                const studentCard = document.createElement('div');
+                studentCard.className = 'student-card';
+                studentCard.dataset.studentId = studentId;
+                
+                studentCard.innerHTML = `
+                    <img src="${student.profileImage || student.avatar || 'https://randomuser.me/api/portraits/lego/1.jpg'}" 
+                         alt="${student.name}" 
+                         class="student-avatar">
+                    <div class="student-info">
+                        <div class="student-name">${student.name || 'Unknown Student'}</div>
+                        <div class="student-id">ID: ${student.id || 'N/A'}</div>
+                    </div>
+                    <div class="attendance-status">
+                        <button class="status-btn ${currentStatus === 'present' ? 'active' : ''}" 
+                                data-status="present" 
+                                title="Present">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="status-btn ${currentStatus === 'absent' ? 'absent' : ''}" 
+                                data-status="absent" 
+                                title="Absent">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button class="status-btn ${currentStatus === 'late' ? 'late' : ''}" 
+                                data-status="late" 
+                                title="Late">
+                            <i class="fas fa-clock"></i>
+                        </button>
+                    </div>
+                    <textarea class="notes-input" placeholder="Notes (optional)">${notes}</textarea>
+                `;
+                
+                studentsListElement.appendChild(studentCard);
+            });
+            
+            // Update summary counts
+            presentCountElement.textContent = presentCount;
+            absentCountElement.textContent = absentCount;
+            lateCountElement.textContent = lateCount;
+            
+            // Add event listeners to status buttons
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const status = this.dataset.status;
+                    const card = this.closest('.student-card');
+                    const studentId = card.dataset.studentId;
+                    
+                    // Update UI
+                    const statusBtns = card.querySelectorAll('.status-btn');
+                    statusBtns.forEach(btn => btn.classList.remove('active', 'absent', 'late'));
+                    this.classList.add(status);
+                    
+                    // Update attendance data
+                    if (!attendanceData[studentId]) {
+                        attendanceData[studentId] = {};
+                    }
+                    
+                    attendanceData[studentId].status = status;
+                    attendanceData[studentId].timestamp = new Date().toISOString();
+                    
+                    // Update summary counts
+                    updateSummaryCounts();
+                });
+            });
+        }
+        
+        // Update summary counts based on current attendance data
+        function updateSummaryCounts() {
+            let presentCount = 0;
+            let absentCount = 0;
+            let lateCount = 0;
+            
+            classStudents.forEach(student => {
+                const studentId = student.id;
+                const status = attendanceData[studentId]?.status || '';
+                
+                if (status === 'present') presentCount++;
+                else if (status === 'absent') absentCount++;
+                else if (status === 'late') lateCount++;
+            });
+            
+            presentCountElement.textContent = presentCount;
+            absentCountElement.textContent = absentCount;
+            lateCountElement.textContent = lateCount;
+        }
+        
+        // Mark all students as present
+        function markAllStudentsPresent() {
+            if (confirm('Are you sure you want to mark all students as present?')) {
+                classStudents.forEach(student => {
+                    const studentId = student.id;
+                    
+                    if (!attendanceData[studentId]) {
+                        attendanceData[studentId] = {};
+                    }
+                    
+                    attendanceData[studentId].status = 'present';
+                    attendanceData[studentId].timestamp = new Date().toISOString();
+                });
+                
+                // Re-render the list to show all students as present
+                renderStudentsList(classStudents, attendanceData, currentDate);
+            }
+        }
+        
+        // Save attendance data to Firebase
+        async function saveAttendanceData(classId, date) {
+            try {
+                // Get all notes from the UI
+                document.querySelectorAll('.student-card').forEach(card => {
+                    const studentId = card.dataset.studentId;
+                    const notesInput = card.querySelector('.notes-input');
+                    
+                    if (attendanceData[studentId] && notesInput) {
+                        attendanceData[studentId].notes = notesInput.value.trim();
+                    }
+                });
+                
+                // Prepare the data to be saved
+                const updates = {};
+                
+                for (const studentId in attendanceData) {
+                    updates[`attendance/${classId}/${date}/${studentId}`] = attendanceData[studentId];
+                }
+                
+                // Show confirmation modal
+                confirmationMessage.textContent = `Are you sure you want to save attendance for ${date}?`;
+                confirmationModal.classList.add('active');
+                
+                // Wait for user confirmation
+                return new Promise((resolve) => {
+                    confirmSaveBtn.onclick = async () => {
+                        try {
+                            // Save to Firebase
+                            await update(ref(db), updates);
+                            confirmationModal.classList.remove('active');
+                            resolve(true);
+                            
+                            // Show success message
+                            alert('Attendance saved successfully!');
+                        } catch (error) {
+                            console.error('Error saving attendance:', error);
+                            confirmationModal.classList.remove('active');
+                            alert('Failed to save attendance. Please try again.');
+                            resolve(false);
+                        }
+                    };
+                    
+                    cancelBtn.onclick = () => {
+                        confirmationModal.classList.remove('active');
+                        resolve(false);
+                    };
+                });
+            } catch (error) {
+                console.error('Error preparing attendance data:', error);
+                return false;
+            }
+        }
+        
+        // Reset attendance data for the current date
+        function resetAttendanceData() {
+            if (confirm('Are you sure you want to reset all attendance for today?')) {
+                attendanceData = {};
+                renderStudentsList(classStudents, attendanceData, currentDate);
+            }
+        }
+        
+        // Handle date change
+        async function handleDateChange(newDate) {
+            currentDate = newDate;
+            attendanceData = await loadAttendanceData(currentClass.id, currentDate);
+            renderStudentsList(classStudents, attendanceData, currentDate);
+        }
+        
+        // Initialize the page
+        async function initializePage() {
+            loadingScreen.style.display = 'flex';
+            mainContent.style.display = 'none';
+            
+            try {
+                // Identify the current teacher
+                const teacher = await identifyCurrentTeacher();
+                
+                if (!teacher) {
+                    throw new Error('Teacher not identified');
+                }
+                
+                // Update teacher profile
+                profileImg.src = teacher.profileImage || 'https://randomuser.me/api/portraits/women/44.jpg';
+                greetingTitle.textContent = `Class Attendance`;
+                greetingSubtitle.textContent = `Taking attendance for ${teacher.name}'s class`;
+                
+                // Find the class assigned to this teacher
+                currentClass = await findAssignedClass(teacher.name);
+                
+                if (!currentClass) {
+                    throw new Error('No class assigned to this teacher');
+                }
+                
+                // Render class information
+                renderClassInfo(currentClass);
+                
+                // Load students for the class
+                classStudents = await loadClassStudents(currentClass.id);
+                
+                // Load attendance data for today
+                attendanceData = await loadAttendanceData(currentClass.id, currentDate);
+                
+                // Render students with attendance options
+                renderStudentsList(classStudents, attendanceData, currentDate);
+                
+                // Hide loading screen and show main content
+                loadingScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Initialization error:', error);
+                loadingScreen.querySelector('.loading-text').textContent = 'Error loading class information';
+                
+                // Redirect to dashboard after a delay
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+            }
+        }
+        
+        // Event listeners
+        saveBtn.addEventListener('click', async () => {
+            await saveAttendanceData(currentClass.id, currentDate);
+        });
+        
+        resetBtn.addEventListener('click', resetAttendanceData);
+        
+        markAllPresentBtn.addEventListener('click', markAllStudentsPresent);
+        
+        attendanceDate.addEventListener('change', (e) => {
+            handleDateChange(e.target.value);
+        });
+        
+        closeModalBtn.addEventListener('click', () => {
+            confirmationModal.classList.remove('active');
+        });
+        
+        // Close modal when clicking outside
+        confirmationModal.addEventListener('click', (e) => {
+            if (e.target === confirmationModal) {
+                confirmationModal.classList.remove('active');
+            }
+        });
+        
+        // Start the application
+        initializePage();
+    </script>
+</body>
+</html>

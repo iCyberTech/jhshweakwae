@@ -1,0 +1,3360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Communication Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #128C7E;
+            --primary-dark: #075E54;
+            --primary-light: #25D366;
+            --secondary-color: #34B7F1;
+            --text-color: #333333;
+            --light-text: #667781;
+            --chat-bg: #e5ddd5;
+            --chat-in: #ffffff;
+            --chat-out: #DCF8C6;
+            --sidebar-bg: #f0f2f5;
+            --header-bg: #f0f2f5;
+            --border-color: #e9edef;
+            --online-status: #00b20d;
+            --offline-status: #a5a5a5;
+            --unread-badge: #25D366;
+            --notification-bg: #f8f9fa;
+            --danger-color: #ff3b30;
+            --warning-color: #ff9500;
+            --success-color: #4cd964;
+            --student-color: #3498db;
+            --teacher-color: #e74c3c;
+            --alumni-color: #9b59b6;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--sidebar-bg);
+            color: var(--text-color);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            max-width: 1600px;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 380px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .user-badge {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-student {
+            background-color: var(--student-color);
+            color: white;
+        }
+
+        .badge-teacher {
+            background-color: var(--teacher-color);
+            color: white;
+        }
+
+        .badge-alumni {
+            background-color: var(--alumni-color);
+            color: white;
+        }
+
+        .sidebar-actions {
+            display: flex;
+            gap: 20px;
+            color: var(--light-text);
+        }
+
+        .sidebar-actions i {
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .search-bar {
+            padding: 8px 16px;
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-container {
+            background-color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+        }
+
+        .search-container i {
+            color: var(--light-text);
+            margin-right: 8px;
+            font-size: 0.9rem;
+        }
+
+        .search-container input {
+            border: none;
+            outline: none;
+            background: transparent;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+
+        .tab-bar {
+            display: flex;
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            cursor: pointer;
+            position: relative;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--light-text);
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            background-color: white;
+        }
+
+        .chat-item {
+            display: flex;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color var(--transition-speed) ease;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .chat-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .chat-item.active {
+            background-color: #ebebeb;
+        }
+
+        .chat-item-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+            position: relative;
+        }
+
+        .online-status {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .online-status.online {
+            background-color: var(--online-status);
+        }
+
+        .online-status.offline {
+            background-color: var(--offline-status);
+        }
+
+        .chat-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .chat-item-name {
+            font-weight: 600;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-item-time {
+            font-size: 0.75rem;
+            color: var(--light-text);
+            white-space: nowrap;
+            margin-left: 8px;
+        }
+
+        .chat-item-preview {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-item-message {
+            font-size: 0.9rem;
+            color: var(--light-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+        }
+
+        .unread-badge {
+            background-color: var(--unread-badge);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 4px;
+        }
+
+        /* Chat Area Styles */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--chat-bg);
+            background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.1'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10zm10 8c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm40 40c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            position: relative;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 10;
+        }
+
+        .chat-header-back {
+            margin-right: 12px;
+            font-size: 1.2rem;
+            color: var(--light-text);
+            cursor: pointer;
+            display: none;
+        }
+
+        .chat-header-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+            position: relative;
+        }
+
+        .chat-header-info {
+            flex: 1;
+        }
+
+        .chat-header-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 2px;
+        }
+
+        .chat-header-status {
+            font-size: 0.8rem;
+            color: var(--light-text);
+        }
+
+        .chat-header-actions {
+            display: flex;
+            gap: 20px;
+            color: var(--light-text);
+        }
+
+        .chat-header-actions i {
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 8px;
+            max-width: 70%;
+        }
+
+        .message.sent {
+            align-self: flex-end;
+        }
+
+        .message.received {
+            align-self: flex-start;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 8px;
+            align-self: flex-end;
+        }
+
+        .message.sent .message-avatar {
+            display: none;
+        }
+
+        .message-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-bubble {
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            position: relative;
+            word-wrap: break-word;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .message.received .message-bubble {
+            background-color: var(--chat-in);
+            border-top-left-radius: 0;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+        }
+
+        .message.sent .message-bubble {
+            background-color: var(--chat-out);
+            border-top-right-radius: 0;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+        }
+
+        .message-info {
+            display: flex;
+            align-items: center;
+            font-size: 0.7rem;
+            color: var(--light-text);
+            padding: 0 4px;
+        }
+
+        .message-time {
+            margin-left: 6px;
+        }
+
+        .message-status {
+            margin-left: 4px;
+            font-size: 0.6rem;
+        }
+
+        .chat-input-container {
+            padding: 10px 16px;
+            background-color: var(--header-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-input-actions {
+            display: flex;
+            gap: 12px;
+            color: var(--light-text);
+        }
+
+        .chat-input-actions i {
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            background-color: white;
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-input textarea {
+            border: none;
+            outline: none;
+            background: transparent;
+            width: 100%;
+            resize: none;
+            font-size: 0.95rem;
+            max-height: 100px;
+            line-height: 1.4;
+            font-family: inherit;
+        }
+
+        .chat-input-send {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .chat-input-send:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .chat-input-send i {
+            font-size: 1.2rem;
+        }
+
+        /* Group Info Panel */
+        .info-panel {
+            width: 350px;
+            background-color: white;
+            border-left: 1px solid var(--border-color);
+            height: 100%;
+            overflow-y: auto;
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .info-panel.hidden {
+            transform: translateX(100%);
+        }
+
+        .info-header {
+            padding: 16px;
+            background-color: var(--primary-dark);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .info-header-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .info-header-close {
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .info-section {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .info-section-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--primary-dark);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .group-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 16px;
+            display: block;
+        }
+
+        .group-name {
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .group-description {
+            text-align: center;
+            color: var(--light-text);
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        .group-created {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--light-text);
+            margin-bottom: 16px;
+        }
+
+        .group-action {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            cursor: pointer;
+            transition: background-color var(--transition-speed) ease;
+            border-radius: 4px;
+        }
+
+        .group-action:hover {
+            background-color: #f5f5f5;
+        }
+
+        .group-action i {
+            width: 40px;
+            text-align: center;
+            color: var(--light-text);
+            font-size: 1.2rem;
+        }
+
+        .group-action-text {
+            flex: 1;
+        }
+
+        .group-action-title {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .group-action-desc {
+            font-size: 0.8rem;
+            color: var(--light-text);
+        }
+
+        .member-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            cursor: pointer;
+        }
+
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-name {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .member-role {
+            font-size: 0.8rem;
+            color: var(--light-text);
+        }
+
+        .member-status {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        .status-online {
+            background-color: rgba(0, 178, 13, 0.1);
+            color: var(--online-status);
+        }
+
+        .status-offline {
+            background-color: rgba(165, 165, 165, 0.1);
+            color: var(--offline-status);
+        }
+
+        /* Notification Styles */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 350px;
+            max-width: 90%;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification {
+            position: relative;
+            padding: 16px;
+            border-radius: 8px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            transform: translateX(120%);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            opacity: 0;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification.hide {
+            transform: translateX(120%);
+            opacity: 0;
+        }
+
+        .notification.success {
+            background-color: var(--success-color);
+        }
+
+        .notification.error {
+            background-color: var(--danger-color);
+        }
+
+        .notification.warning {
+            background-color: var(--warning-color);
+            color: var(--text-color);
+        }
+
+        .notification.info {
+            background-color: var(--secondary-color);
+        }
+
+        .notification-icon {
+            margin-right: 12px;
+            font-size: 20px;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            margin-left: 15px;
+            font-size: 18px;
+            opacity: 0.8;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--primary-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-dark);
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 20px;
+            color: var(--light-text);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        .empty-state p {
+            font-size: 0.95rem;
+            max-width: 300px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state .btn {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .empty-state .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--light-text);
+        }
+
+        .modal-body {
+            padding: 16px;
+        }
+
+        .modal-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .modal-btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .modal-btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .modal-btn-secondary {
+            background-color: var(--sidebar-bg);
+            color: var(--text-color);
+            border: none;
+        }
+
+        .modal-btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Emoji Picker Styles */
+        .emoji-picker {
+            position: absolute;
+            bottom: 70px;
+            right: 20px;
+            width: 300px;
+            height: 300px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            display: none;
+            z-index: 100;
+        }
+
+        .emoji-picker.show {
+            display: block;
+        }
+
+        .emoji-picker-header {
+            padding: 8px;
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .emoji-picker-search {
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .emoji-picker-search input {
+            width: 100%;
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .emoji-picker-body {
+            height: calc(100% - 90px);
+            overflow-y: auto;
+            padding: 8px;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
+        }
+
+        .emoji-item {
+            font-size: 1.2rem;
+            padding: 4px;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .emoji-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .emoji-picker-footer {
+            padding: 8px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--light-text);
+        }
+
+        /* File Attachment Modal */
+        .attachment-modal {
+            position: absolute;
+            bottom: 70px;
+            left: 20px;
+            width: 250px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            display: none;
+            z-index: 100;
+        }
+
+        .attachment-modal.show {
+            display: block;
+        }
+
+        .attachment-option {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .attachment-option:hover {
+            background-color: #f5f5f5;
+        }
+
+        .attachment-option i {
+            font-size: 1.2rem;
+            color: var(--light-text);
+        }
+
+        .attachment-option-text {
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 350px;
+            }
+            
+            .info-panel {
+                width: 320px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 300px;
+            }
+            
+            .info-panel {
+                position: fixed;
+                top: 0;
+                right: 0;
+                height: 100%;
+                z-index: 100;
+                box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 10;
+                height: 100%;
+                transform: translateX(0);
+                transition: transform var(--transition-speed) ease;
+            }
+            
+            .sidebar.hidden {
+                transform: translateX(-100%);
+            }
+            
+            .chat-area {
+                display: none;
+            }
+            
+            .chat-area.active {
+                display: flex;
+            }
+            
+            .chat-header-back {
+                display: block;
+            }
+            
+            .info-panel {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .chat-item {
+                padding: 10px 12px;
+            }
+            
+            .chat-item-avatar {
+                width: 45px;
+                height: 45px;
+                margin-right: 10px;
+            }
+            
+            .chat-header {
+                padding: 10px 12px;
+            }
+            
+            .chat-input-container {
+                padding: 8px 12px;
+            }
+            
+            .message {
+                max-width: 80%;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .sidebar-header, .chat-header {
+                padding: 8px 10px;
+            }
+            
+            .user-avatar, .chat-header-avatar {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .user-name, .chat-header-name {
+                font-size: 0.95rem;
+            }
+            
+            .chat-messages {
+                padding: 15px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-logo">SC</div>
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading School Connect</div>
+    </div>
+
+    <!-- Notification Container -->
+    <div class="notification-container" id="notification-container"></div>
+
+    <!-- Main Container -->
+    <div class="container" id="main-container" style="display: none;">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="user-info">
+                    <img id="user-avatar" src="" alt="User" class="user-avatar">
+                    <div>
+                        <div class="user-name" id="user-name">Loading...</div>
+                        <div class="user-badge" id="user-badge">...</div>
+                    </div>
+                </div>
+                <div class="sidebar-actions">
+                    <i class="fas fa-users" id="new-group-btn" title="New Group"></i>
+                    <i class="fas fa-ellipsis-v" id="menu-btn" title="Menu"></i>
+                </div>
+            </div>
+            
+            <div class="search-bar">
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search or start new chat" id="search-input">
+                </div>
+            </div>
+            
+            <div class="tab-bar">
+                <div class="tab active" data-tab="chats">Chats</div>
+                <div class="tab" data-tab="groups">Groups</div>
+                <div class="tab" data-tab="contacts">Contacts</div>
+            </div>
+            
+            <div class="chat-list" id="chat-list">
+                <!-- Chats will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Chat Area -->
+        <div class="chat-area" id="chat-area">
+            <div class="chat-header">
+                <div class="chat-header-back" id="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </div>
+                <img id="chat-header-avatar" src="" alt="Chat" class="chat-header-avatar">
+                <div class="chat-header-info">
+                    <div class="chat-header-name" id="chat-header-name">Select a chat</div>
+                    <div class="chat-header-status" id="chat-header-status">Online</div>
+                </div>
+                <div class="chat-header-actions">
+                    <i class="fas fa-search"></i>
+                    <i class="fas fa-info-circle" id="info-btn"></i>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <!-- Messages will be loaded here -->
+            </div>
+            
+            <div class="chat-input-container">
+                <div class="chat-input-actions">
+                    <i class="far fa-smile" id="emoji-btn"></i>
+                    <i class="fas fa-paperclip" id="attach-btn"></i>
+                </div>
+                <div class="chat-input">
+                    <textarea id="message-input" placeholder="Type a message" rows="1"></textarea>
+                </div>
+                <div class="chat-input-send" id="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Group Info Panel -->
+        <div class="info-panel hidden" id="info-panel">
+            <div class="info-header">
+                <div class="info-header-title">Group Info</div>
+                <div class="info-header-close" id="close-info-btn">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <img id="group-info-avatar" src="" alt="Group" class="group-avatar">
+                <div class="group-name" id="group-info-name">Group Name</div>
+                <div class="group-description" id="group-info-desc">Group description goes here</div>
+                <div class="group-created" id="group-info-created">Created on Jan 1, 2023</div>
+            </div>
+            
+            <div class="info-section">
+                <div class="info-section-title">Actions</div>
+                <div class="group-action" id="media-btn">
+                    <i class="fas fa-photo-video"></i>
+                    <div class="group-action-text">
+                        <div class="group-action-title">Media, links, and docs</div>
+                        <div class="group-action-desc">25 photos, 10 videos, 5 docs</div>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="group-action" id="notifications-btn">
+                    <i class="fas fa-bell"></i>
+                    <div class="group-action-text">
+                        <div class="group-action-title">Notifications</div>
+                        <div class="group-action-desc">Mute or customize notifications</div>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <div class="info-section-title">Participants</div>
+                <div class="member-list" id="member-list">
+                    <!-- Members will be loaded here -->
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <div class="group-action danger" id="exit-group-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <div class="group-action-text">
+                        <div class="group-action-title">Exit Group</div>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <i class="fas fa-comment-alt"></i>
+            <h3>No Chat Selected</h3>
+            <p>Select a chat from the sidebar or start a new conversation</p>
+            <button class="btn" id="new-chat-btn">New Chat</button>
+        </div>
+    </div>
+
+    <!-- New Group Modal -->
+    <div class="modal" id="new-group-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Create New Group</div>
+                <button class="modal-close" id="close-group-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="group-name">Group Name</label>
+                    <input type="text" id="group-name" class="form-control" placeholder="Enter group name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="group-description">Description</label>
+                    <textarea id="group-description" class="form-control" placeholder="Enter group description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Add Members</label>
+                    <div id="group-members-list" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 4px; padding: 8px;">
+                        <!-- Members will be listed here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" id="cancel-group-btn">Cancel</button>
+                <button class="modal-btn modal-btn-primary" id="create-group-btn">Create Group</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emoji Picker -->
+    <div class="emoji-picker" id="emoji-picker">
+        <div class="emoji-picker-header">
+            <span>Emoji</span>
+            <span id="close-emoji-picker"><i class="fas fa-times"></i></span>
+        </div>
+        <div class="emoji-picker-search">
+            <input type="text" placeholder="Search emoji..." id="emoji-search">
+        </div>
+        <div class="emoji-picker-body" id="emoji-container">
+            <!-- Emojis will be loaded here -->
+        </div>
+        <div class="emoji-picker-footer">
+            Click an emoji to insert
+        </div>
+    </div>
+
+    <!-- Attachment Modal -->
+    <div class="attachment-modal" id="attachment-modal">
+        <div class="attachment-option" id="attach-photo">
+            <i class="fas fa-camera"></i>
+            <span class="attachment-option-text">Photo or Video</span>
+        </div>
+        <div class="attachment-option" id="attach-document">
+            <i class="fas fa-file"></i>
+            <span class="attachment-option-text">Document</span>
+        </div>
+        <div class="attachment-option" id="attach-location">
+            <i class="fas fa-map-marker-alt"></i>
+            <span class="attachment-option-text">Location</span>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, get, onValue, set, push, onChildAdded, onChildChanged, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
+            authDomain: "sms-single.firebaseapp.com",
+            projectId: "sms-single",
+            storageBucket: "sms-single.appspot.com",
+            messagingSenderId: "140188895278",
+            appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
+            measurementId: "G-7ER348P6VZ"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        
+        // DOM Elements
+        const loadingScreen = document.getElementById('loading-screen');
+        const mainContainer = document.getElementById('main-container');
+        const notificationContainer = document.getElementById('notification-container');
+        const sidebar = document.getElementById('sidebar');
+        const chatArea = document.getElementById('chat-area');
+        const emptyState = document.getElementById('empty-state');
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        const userBadge = document.getElementById('user-badge');
+        const searchInput = document.getElementById('search-input');
+        const tabs = document.querySelectorAll('.tab');
+        const chatList = document.getElementById('chat-list');
+        const backBtn = document.getElementById('back-btn');
+        const chatHeaderAvatar = document.getElementById('chat-header-avatar');
+        const chatHeaderName = document.getElementById('chat-header-name');
+        const chatHeaderStatus = document.getElementById('chat-header-status');
+        const infoBtn = document.getElementById('info-btn');
+        const chatMessages = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const infoPanel = document.getElementById('info-panel');
+        const closeInfoBtn = document.getElementById('close-info-btn');
+        const groupInfoAvatar = document.getElementById('group-info-avatar');
+        const groupInfoName = document.getElementById('group-info-name');
+        const groupInfoDesc = document.getElementById('group-info-desc');
+        const groupInfoCreated = document.getElementById('group-info-created');
+        const memberList = document.getElementById('member-list');
+        const newChatBtn = document.getElementById('new-chat-btn');
+        const newGroupBtn = document.getElementById('new-group-btn');
+        const emojiBtn = document.getElementById('emoji-btn');
+        const emojiPicker = document.getElementById('emoji-picker');
+        const emojiContainer = document.getElementById('emoji-container');
+        const closeEmojiPicker = document.getElementById('close-emoji-picker');
+        const emojiSearch = document.getElementById('emoji-search');
+        const attachBtn = document.getElementById('attach-btn');
+        const attachmentModal = document.getElementById('attachment-modal');
+        
+        // Modal elements
+        const newGroupModal = document.getElementById('new-group-modal');
+        const closeGroupModal = document.getElementById('close-group-modal');
+        const cancelGroupBtn = document.getElementById('cancel-group-btn');
+        const createGroupBtn = document.getElementById('create-group-btn');
+        const groupNameInput = document.getElementById('group-name');
+        const groupDescriptionInput = document.getElementById('group-description');
+        const groupMembersList = document.getElementById('group-members-list');
+        
+        // Firebase references
+        const authUsersRef = ref(db, 'authUsers');
+        const teachersRef = ref(db, 'teachers');
+        const studentsRef = ref(db, 'students');
+        const alumniRef = ref(db, 'alumni');
+        const credentialsRef = ref(db, 'credentials');
+        const classesRef = ref(db, 'classes');
+        const subjectsRef = ref(db, 'subjects');
+        const privateMessagesRef = ref(db, 'privateMessages');
+        const groupChatsRef = ref(db, 'groupChats');
+        const groupMessagesRef = ref(db, 'groupMessages');
+        const activeSessionsRef = ref(db, 'activeSessions');
+        const onlineStatusRef = ref(db, 'onlineStatus');
+        
+        // Global variables
+        let currentUserId = null;
+        let currentUserData = null;
+        let userType = null; // 'student', 'teacher', or 'alumni'
+        let allTeachers = {};
+        let allStudents = {};
+        let allAlumni = {};
+        let allClasses = {};
+        let allSubjects = {};
+        let currentChat = null; // { type: 'private'|'group', id: string }
+        let currentChatData = null;
+        let currentChatMembers = [];
+        let userClasses = [];
+        let userSubjects = [];
+        let onlineUsers = {};
+        let userStatusInterval = null;
+        let existingConversations = {}; // Track existing conversations
+        
+        // Show notification function
+        function showNotification({ title, message, type = 'info', duration = 5000 }) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            const iconMap = {
+                success: 'check-circle',
+                error: 'exclamation-circle',
+                warning: 'exclamation-triangle',
+                info: 'info-circle'
+            };
+            
+            notification.innerHTML = `
+                <i class="fas fa-${iconMap[type]} notification-icon"></i>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+                <button class="notification-close">&times;</button>
+            `;
+            
+            notificationContainer.appendChild(notification);
+            
+            // Trigger reflow to enable animation
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // Auto-dismiss after duration
+            let timeoutId;
+            if (duration > 0) {
+                timeoutId = setTimeout(() => {
+                    notification.classList.remove('show');
+                    notification.classList.add('hide');
+                    
+                    // Remove after animation completes
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, duration);
+            }
+            
+            // Close button handler
+            const closeBtn = notification.querySelector('.notification-close');
+            closeBtn.addEventListener('click', () => {
+                clearTimeout(timeoutId);
+                notification.classList.remove('show');
+                notification.classList.add('hide');
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            });
+            
+            return notification;
+        }
+        
+        // Identify the current user based on device info
+        async function identifyCurrentUser() {
+            try {
+                // Get all auth users
+                const authUsersSnapshot = await get(authUsersRef);
+                if (!authUsersSnapshot.exists()) {
+                    throw new Error('No auth users found');
+                }
+                
+                const authUsers = authUsersSnapshot.val();
+                const credentialsSnapshot = await get(credentialsRef);
+                const credentials = credentialsSnapshot.exists() ? credentialsSnapshot.val() : {};
+                
+                // Get current device info from browser
+                const userAgent = navigator.userAgent;
+                const screenResolution = `${window.screen.width}x${window.screen.height}`;
+                const language = navigator.language;
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                
+                // Find matching user based on device info
+                for (const [authId, authUser] of Object.entries(authUsers)) {
+                    const userCredential = credentials[authUser.userId];
+                    if (userCredential && userCredential.deviceInfo) {
+                        const deviceInfo = userCredential.deviceInfo;
+                        
+                        // Check for matching device characteristics
+                        if (deviceInfo.userAgent === userAgent && 
+                            deviceInfo.screenResolution === screenResolution &&
+                            deviceInfo.language === language && 
+                            deviceInfo.timezone === timezone) {
+                            
+                            // This is likely the current user
+                            currentUserId = authUser.userId;
+                            userType = authUser.userType; // 'student', 'teacher', or 'alumni'
+                            
+                            // Get user details from appropriate collection
+                            let userRef;
+                            if (userType === 'teacher') {
+                                userRef = ref(db, `teachers/${currentUserId}`);
+                            } else if (userType === 'student') {
+                                userRef = ref(db, `students/${currentUserId}`);
+                            } else if (userType === 'alumni') {
+                                userRef = ref(db, `alumni/${currentUserId}`);
+                            } else {
+                                throw new Error('Unknown user type');
+                            }
+                            
+                            const userSnapshot = await get(userRef);
+                            
+                            if (userSnapshot.exists()) {
+                                currentUserData = userSnapshot.val();
+                                return currentUserData;
+                            }
+                        }
+                    }
+                }
+                
+                // If no match found, try to get from activeSessions as fallback
+                const activeSessionSnapshot = await get(activeSessionsRef);
+                if (activeSessionSnapshot.exists()) {
+                    const activeSessions = activeSessionSnapshot.val();
+                    
+                    if (activeSessions.student) {
+                        currentUserId = activeSessions.student;
+                        userType = 'student';
+                    } else if (activeSessions.teacher) {
+                        currentUserId = activeSessions.teacher;
+                        userType = 'teacher';
+                    } else if (activeSessions.alumni) {
+                        currentUserId = activeSessions.alumni;
+                        userType = 'alumni';
+                    }
+                    
+                    if (currentUserId) {
+                        let userRef;
+                        if (userType === 'teacher') {
+                            userRef = ref(db, `teachers/${currentUserId}`);
+                        } else if (userType === 'student') {
+                            userRef = ref(db, `students/${currentUserId}`);
+                        } else if (userType === 'alumni') {
+                            userRef = ref(db, `alumni/${currentUserId}`);
+                        }
+                        
+                        const userSnapshot = await get(userRef);
+                        
+                        if (userSnapshot.exists()) {
+                            currentUserData = userSnapshot.val();
+                            return currentUserData;
+                        }
+                    }
+                }
+                
+                throw new Error('No matching user found');
+            } catch (error) {
+                console.error('Error identifying user:', error);
+                showNotification({
+                    title: 'Error',
+                    message: 'Failed to identify user: ' + error.message,
+                    type: 'error'
+                });
+                return null;
+            }
+        }
+        
+        // Initialize the app
+        async function initApp() {
+            try {
+                // First try to identify the user based on device info
+                const user = await identifyCurrentUser();
+                
+                if (user) {
+                    // Update UI with user info
+                    userName.textContent = user.name || 'User';
+                    
+                    // Set user badge
+                    if (userType === 'student') {
+                        userBadge.textContent = 'Student';
+                        userBadge.className = 'user-badge badge-student';
+                    } else if (userType === 'teacher') {
+                        userBadge.textContent = 'Teacher';
+                        userBadge.className = 'user-badge badge-teacher';
+                    } else if (userType === 'alumni') {
+                        userBadge.textContent = 'Alumni';
+                        userBadge.className = 'user-badge badge-alumni';
+                    }
+                    
+                    // Set avatar - use profileImage if available, otherwise use dicebear
+                    const avatarUrl = user.profileImage || user.avatar || 
+                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUserId}`;
+                    userAvatar.src = avatarUrl;
+                    
+                    // Load all teachers, students, and alumni
+                    await loadAllUsers();
+                    
+                    // Load all classes and subjects
+                    await loadAllClasses();
+                    await loadAllSubjects();
+                    
+                    // Determine user's classes and subjects
+                    await determineUserClassesAndSubjects();
+                    
+                    // Create subject groups for the user
+                    await createSubjectGroups();
+                    
+                    // Create class groups for the user
+                    await createClassGroups();
+                    
+                    // Set up online status tracking
+                    setupOnlineStatus();
+                    
+                    // Set up event listeners
+                    setupEventListeners();
+                    
+                    // Load chats
+                    await loadChats();
+                    
+                    // Set up real-time listeners
+                    setupRealTimeListeners();
+                    
+                    // Load emojis
+                    loadEmojis();
+                    
+                    // Hide loading screen and show main content
+                    loadingScreen.style.display = 'none';
+                    mainContainer.style.display = 'flex';
+                    
+                    showNotification({
+                        title: 'Welcome Back',
+                        message: `You're logged in as ${user.name || 'User'}`,
+                        type: 'success',
+                        duration: 3000
+                    });
+                    
+                    return;
+                }
+                
+                // If no user identified
+                showNotification({
+                    title: 'Session Expired',
+                    message: 'Please sign in again',
+                    type: 'error',
+                    duration: 0
+                });
+                
+                // Redirect to login page after a delay
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                showNotification({
+                    title: 'Error',
+                    message: 'Failed to load user information',
+                    type: 'error'
+                });
+                
+                // Redirect to login page after a delay
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            }
+        }
+        
+        // Load all users (teachers, students, alumni)
+        async function loadAllUsers() {
+            // Load teachers
+            const teachersSnapshot = await get(teachersRef);
+            allTeachers = teachersSnapshot.exists() ? teachersSnapshot.val() : {};
+            
+            // Load students
+            const studentsSnapshot = await get(studentsRef);
+            allStudents = studentsSnapshot.exists() ? studentsSnapshot.val() : {};
+            
+            // Load alumni
+            const alumniSnapshot = await get(alumniRef);
+            allAlumni = alumniSnapshot.exists() ? alumniSnapshot.val() : {};
+        }
+        
+        // Load all classes
+        async function loadAllClasses() {
+            const snapshot = await get(classesRef);
+            allClasses = snapshot.exists() ? snapshot.val() : {};
+        }
+        
+        // Load all subjects
+        async function loadAllSubjects() {
+            const snapshot = await get(subjectsRef);
+            allSubjects = snapshot.exists() ? snapshot.val() : {};
+        }
+        
+        // Determine which classes and subjects the user is associated with
+        async function determineUserClassesAndSubjects() {
+            userClasses = [];
+            userSubjects = [];
+            
+            if (userType === 'student') {
+                // For students, get their class from student data
+                if (currentUserData.class) {
+                    userClasses.push(currentUserData.class);
+                    
+                    // Find subjects taught in this class
+                    for (const subjectId in allSubjects) {
+                        const subject = allSubjects[subjectId];
+                        if (subject.class === currentUserData.class) {
+                            userSubjects.push({
+                                id: subjectId,
+                                ...subject
+                            });
+                        }
+                    }
+                }
+            } else if (userType === 'teacher') {
+                // For teachers, get classes and subjects they teach
+                for (const subjectId in allSubjects) {
+                    const subject = allSubjects[subjectId];
+                    if (subject.teacher === currentUserId) {
+                        userSubjects.push({
+                            id: subjectId,
+                            ...subject
+                        });
+                        
+                        if (subject.class && !userClasses.includes(subject.class)) {
+                            userClasses.push(subject.class);
+                        }
+                    }
+                }
+            } else if (userType === 'alumni') {
+                // For alumni, we might want to show forums from their previous classes
+                if (currentUserData.previousClass) {
+                    userClasses.push(currentUserData.previousClass);
+                    
+                    // Find subjects from their previous class
+                    for (const subjectId in allSubjects) {
+                        const subject = allSubjects[subjectId];
+                        if (subject.class === currentUserData.previousClass) {
+                            userSubjects.push({
+                                id: subjectId,
+                                ...subject
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Create subject groups for the user
+        async function createSubjectGroups() {
+            if (userType === 'student' || userType === 'teacher') {
+                for (const subject of userSubjects) {
+                    const subjectId = subject.id;
+                    const classId = subject.class;
+                    const teacherId = subject.teacher;
+                    
+                    // Generate a unique group ID based on subject and class
+                    const groupId = `subject_${subjectId}_class_${classId}`;
+                    
+                    // Check if group already exists
+                    const groupRef = ref(db, `groupChats/${groupId}`);
+                    const groupSnapshot = await get(groupRef);
+                    
+                    if (!groupSnapshot.exists()) {
+                        // Get all students in this class
+                        const classStudents = [];
+                        const classData = allClasses[classId];
+                        
+                        if (classData && classData.students) {
+                            for (const studentId of classData.students) {
+                                const student = allStudents[studentId];
+                                if (student) {
+                                    classStudents.push(studentId);
+                                }
+                            }
+                        }
+                        
+                        // Combine teacher and students as group members
+                        const members = [teacherId, ...classStudents];
+                        
+                        // Create the group
+                        const groupData = {
+                            id: groupId,
+                            name: `${subject.name} - ${classData?.name || 'Class'}`,
+                            description: `Group for ${subject.name} subject in ${classData?.name || 'Class'}`,
+                            members: members,
+                            createdAt: new Date().toISOString(),
+                            isSubjectGroup: true,
+                            subjectId: subjectId,
+                            classId: classId
+                        };
+                        
+                        await set(groupRef, groupData);
+                        
+                        console.log(`Created group for ${subject.name} in ${classData?.name}`);
+                    }
+                }
+            }
+        }
+        
+        // Create class groups for the user
+        async function createClassGroups() {
+            if (userType === 'student' || userType === 'teacher') {
+                for (const classId of userClasses) {
+                    const classData = allClasses[classId];
+                    if (!classData) continue;
+                    
+                    // Generate a unique group ID based on class
+                    const groupId = `class_${classId}`;
+                    
+                    // Check if group already exists
+                    const groupRef = ref(db, `groupChats/${groupId}`);
+                    const groupSnapshot = await get(groupRef);
+                    
+                    if (!groupSnapshot.exists()) {
+                        // Get all students in this class
+                        const classStudents = [];
+                        if (classData.students) {
+                            for (const studentId of classData.students) {
+                                const student = allStudents[studentId];
+                                if (student) {
+                                    classStudents.push(studentId);
+                                }
+                            }
+                        }
+                        
+                        // Get the class teacher (if specified)
+                        let classTeacher = null;
+                        if (classData.teacher) {
+                            // If teacher is specified by name, find the teacher ID
+                            if (typeof classData.teacher === 'string') {
+                                for (const teacherId in allTeachers) {
+                                    if (allTeachers[teacherId].name === classData.teacher) {
+                                        classTeacher = teacherId;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                classTeacher = classData.teacher;
+                            }
+                        }
+                        
+                        // Combine teacher and students as group members
+                        const members = classTeacher ? [classTeacher, ...classStudents] : [...classStudents];
+                        
+                        // Create the group
+                        const groupData = {
+                            id: groupId,
+                            name: `${classData.name} Class Group`,
+                            description: `Group for ${classData.name} class`,
+                            members: members,
+                            createdAt: new Date().toISOString(),
+                            isClassGroup: true,
+                            classId: classId,
+                            teacher: classTeacher || null
+                        };
+                        
+                        await set(groupRef, groupData);
+                        
+                        console.log(`Created group for ${classData.name} class`);
+                    }
+                }
+            }
+        }
+        
+        // Set up online status tracking
+        function setupOnlineStatus() {
+            // Set user as online
+            set(ref(db, `onlineStatus/${currentUserId}`), true);
+            
+            // Update every 30 seconds to keep status active
+            userStatusInterval = setInterval(() => {
+                set(ref(db, `onlineStatus/${currentUserId}`), true);
+            }, 30000);
+            
+            // Listen for online status changes
+            onValue(ref(db, 'onlineStatus'), (snapshot) => {
+                onlineUsers = snapshot.exists() ? snapshot.val() : {};
+                
+                // Update status indicators in chat list
+                updateOnlineStatusIndicators();
+            });
+        }
+        
+        // Update online status indicators in chat list
+        function updateOnlineStatusIndicators() {
+            document.querySelectorAll('.chat-item').forEach(item => {
+                const userId = item.getAttribute('data-user-id');
+                if (userId && onlineUsers[userId]) {
+                    const statusIndicator = item.querySelector('.online-status');
+                    if (statusIndicator) {
+                        statusIndicator.classList.add('online');
+                        statusIndicator.classList.remove('offline');
+                    }
+                } else if (userId) {
+                    const statusIndicator = item.querySelector('.online-status');
+                    if (statusIndicator) {
+                        statusIndicator.classList.add('offline');
+                        statusIndicator.classList.remove('online');
+                    }
+                }
+                
+                // For group chats, we don't show online status in the list
+            });
+            
+            // Update current chat status if it's a private chat
+            if (currentChat && currentChat.type === 'private') {
+                const isOnline = onlineUsers[currentChat.id];
+                chatHeaderStatus.textContent = isOnline ? 'Online' : 'Offline';
+                chatHeaderStatus.style.color = isOnline ? 'var(--online-status)' : 'var(--offline-status)';
+            }
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+                    
+                    // Reload chat list based on selected tab
+                    loadChats();
+                });
+            });
+            
+            // Back button (for mobile)
+            backBtn.addEventListener('click', () => {
+                sidebar.classList.remove('hidden');
+                chatArea.classList.remove('active');
+                emptyState.style.display = 'none';
+                currentChat = null;
+                currentChatData = null;
+            });
+            
+            // Info button
+            infoBtn.addEventListener('click', () => {
+                if (currentChat) {
+                    loadChatInfo();
+                    infoPanel.classList.remove('hidden');
+                }
+            });
+            
+            // Close info panel
+            closeInfoBtn.addEventListener('click', () => {
+                infoPanel.classList.add('hidden');
+            });
+            
+            // Send message
+            sendBtn.addEventListener('click', sendMessage);
+            
+            // Also send message when Enter is pressed (but not Shift+Enter)
+            messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // New chat button
+            newChatBtn.addEventListener('click', () => {
+                showNewChatModal();
+            });
+            
+            // New group button
+            newGroupBtn.addEventListener('click', () => {
+                showNewGroupModal();
+            });
+            
+            // Search input
+            searchInput.addEventListener('input', (e) => {
+                filterChats(e.target.value);
+            });
+            
+            // Window resize handler
+            window.addEventListener('resize', handleResize);
+            
+            // Modal event listeners
+            closeGroupModal.addEventListener('click', () => {
+                newGroupModal.style.display = 'none';
+            });
+            
+            cancelGroupBtn.addEventListener('click', () => {
+                newGroupModal.style.display = 'none';
+            });
+            
+            createGroupBtn.addEventListener('click', createNewGroup);
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === newGroupModal) {
+                    newGroupModal.style.display = 'none';
+                }
+                if (e.target === emojiPicker) {
+                    emojiPicker.classList.remove('show');
+                }
+                if (e.target === attachmentModal) {
+                    attachmentModal.classList.remove('show');
+                }
+            });
+            
+            // Emoji picker
+            emojiBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                attachmentModal.classList.remove('show');
+                emojiPicker.classList.toggle('show');
+            });
+            
+            closeEmojiPicker.addEventListener('click', () => {
+                emojiPicker.classList.remove('show');
+            });
+            
+            // Attachment button
+            attachBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                emojiPicker.classList.remove('show');
+                attachmentModal.classList.toggle('show');
+            });
+            
+            // Close emoji picker when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!emojiPicker.contains(e.target) && e.target !== emojiBtn) {
+                    emojiPicker.classList.remove('show');
+                }
+                if (!attachmentModal.contains(e.target) && e.target !== attachBtn) {
+                    attachmentModal.classList.remove('show');
+                }
+            });
+            
+            // Attachment options
+            document.getElementById('attach-photo').addEventListener('click', () => {
+                attachmentModal.classList.remove('show');
+                showNotification({
+                    title: 'Feature Coming Soon',
+                    message: 'Photo attachment functionality will be added in a future update',
+                    type: 'info',
+                    duration: 3000
+                });
+            });
+            
+            document.getElementById('attach-document').addEventListener('click', () => {
+                attachmentModal.classList.remove('show');
+                showNotification({
+                    title: 'Feature Coming Soon',
+                    message: 'Document attachment functionality will be added in a future update',
+                    type: 'info',
+                    duration: 3000
+                });
+            });
+            
+            document.getElementById('attach-location').addEventListener('click', () => {
+                attachmentModal.classList.remove('show');
+                showNotification({
+                    title: 'Feature Coming Soon',
+                    message: 'Location sharing functionality will be added in a future update',
+                    type: 'info',
+                    duration: 3000
+                });
+            });
+        }
+        
+        // Load emojis into the picker
+        function loadEmojis() {
+            const emojis = [
+                '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇',
+                '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚',
+                '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🥸',
+                '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️',
+                '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡',
+                '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓',
+                '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄',
+                '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵',
+                '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑', '🤠',
+                '😈', '👿', '👹', '👺', '🤡', '💩', '👻', '💀', '☠️', '👽',
+                '👾', '🤖', '🎃', '😺', '😸', '😹', '😻', '😼', '😽', '🙀',
+                '😿', '😾', '🙈', '🙉', '🙊', '💋', '💌', '💘', '💝', '💖',
+                '💗', '💓', '💞', '💕', '💟', '❣️', '💔', '❤️', '🧡', '💛',
+                '💚', '💙', '💜', '🤎', '🖤', '🤍', '💯', '💢', '💥', '💫',
+                '💦', '💨', '🕳️', '💣', '💬', '👁️‍🗨️', '🗨️', '🗯️', '💭', '💤'
+            ];
+            
+            emojiContainer.innerHTML = '';
+            
+            emojis.forEach(emoji => {
+                const emojiElement = document.createElement('div');
+                emojiElement.className = 'emoji-item';
+                emojiElement.textContent = emoji;
+                emojiElement.addEventListener('click', () => {
+                    messageInput.value += emoji;
+                    messageInput.focus();
+                });
+                emojiContainer.appendChild(emojiElement);
+            });
+            
+            // Emoji search
+            emojiSearch.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const emojiItems = emojiContainer.querySelectorAll('.emoji-item');
+                
+                emojiItems.forEach(item => {
+                    const emoji = item.textContent;
+                    if (emoji.includes(searchTerm)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        }
+        
+        // Handle window resize
+        function handleResize() {
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove('hidden');
+                chatArea.classList.add('active');
+                
+                if (currentChat) {
+                    emptyState.style.display = 'none';
+                } else {
+                    emptyState.style.display = 'flex';
+                }
+            }
+        }
+        
+        // Load chats based on selected tab
+        async function loadChats() {
+            chatList.innerHTML = '';
+            existingConversations = {}; // Reset existing conversations
+            
+            const selectedTab = document.querySelector('.tab.active').getAttribute('data-tab');
+            
+            if (selectedTab === 'chats') {
+                await loadPrivateChats();
+            } else if (selectedTab === 'groups') {
+                await loadGroupChats();
+            } else if (selectedTab === 'contacts') {
+                await loadContacts();
+            }
+        }
+        
+        // Load private chats
+        async function loadPrivateChats() {
+            // Get all private messages involving this user
+            const messagesSnapshot = await get(privateMessagesRef);
+            const allMessages = messagesSnapshot.exists() ? messagesSnapshot.val() : {};
+            
+            // Find unique conversations
+            const conversations = {};
+            
+            for (const messageId in allMessages) {
+                const message = allMessages[messageId];
+                
+                if (message.senderId === currentUserId || message.recipientId === currentUserId) {
+                    // Determine the other participant in the conversation
+                    const otherUserId = message.senderId === currentUserId ? message.recipientId : message.senderId;
+                    
+                    if (!conversations[otherUserId]) {
+                        conversations[otherUserId] = {
+                            lastMessage: message,
+                            unread: message.recipientId === currentUserId && !message.read
+                        };
+                    } else {
+                        // Keep the most recent message
+                        if (new Date(message.timestamp) > new Date(conversations[otherUserId].lastMessage.timestamp)) {
+                            conversations[otherUserId].lastMessage = message;
+                            conversations[otherUserId].unread = message.recipientId === currentUserId && !message.read;
+                        }
+                    }
+                }
+            }
+            
+            // Track existing conversations to avoid duplicates
+            for (const otherUserId in conversations) {
+                existingConversations[otherUserId] = true;
+            }
+            
+            // Create chat list items for existing conversations
+            for (const otherUserId in conversations) {
+                const conversation = conversations[otherUserId];
+                const otherUser = getUserInfo(otherUserId);
+                
+                if (!otherUser) continue;
+                
+                const chatItem = createPrivateChatItem(otherUser, conversation.lastMessage, conversation.unread);
+                chatList.appendChild(chatItem);
+            }
+            
+            // Add potential new chats based on user type
+            if (userType === 'student' && userSubjects.length > 0) {
+                // Get unique teachers from subjects
+                const subjectTeachers = {};
+                
+                userSubjects.forEach(subject => {
+                    if (subject.teacher && !subjectTeachers[subject.teacher] && subject.teacher !== currentUserId) {
+                        subjectTeachers[subject.teacher] = true;
+                    }
+                });
+                
+                // Add "New Chat" items for each teacher that doesn't have an existing conversation
+                for (const teacherId in subjectTeachers) {
+                    if (!existingConversations[teacherId]) {
+                        const teacher = allTeachers[teacherId];
+                        if (!teacher) continue;
+                        
+                        const chatItem = createNewPrivateChatItem(teacher);
+                        chatList.appendChild(chatItem);
+                    }
+                }
+            }
+            
+            if (userType === 'teacher' && userClasses.length > 0) {
+                // Get students in teacher's classes
+                const classStudents = {};
+                
+                for (const classId of userClasses) {
+                    const classData = allClasses[classId];
+                    if (classData && classData.students) {
+                        classData.students.forEach(studentId => {
+                            if (studentId !== currentUserId && !classStudents[studentId]) {
+                                classStudents[studentId] = true;
+                            }
+                        });
+                    }
+                }
+                
+                // Add "New Chat" items for each student that doesn't have an existing conversation
+                for (const studentId in classStudents) {
+                    if (!existingConversations[studentId]) {
+                        const student = allStudents[studentId];
+                        if (!student) continue;
+                        
+                        const chatItem = createNewPrivateChatItem(student);
+                        chatList.appendChild(chatItem);
+                    }
+                }
+            }
+            
+            // Update online status indicators
+            updateOnlineStatusIndicators();
+            
+            // Show empty state if no chats
+            if (chatList.children.length === 0) {
+                const emptyItem = document.createElement('div');
+                emptyItem.className = 'empty-state';
+                emptyItem.innerHTML = `
+                    <i class="fas fa-comment-slash"></i>
+                    <h3>No Conversations</h3>
+                    <p>You don't have any conversations yet.</p>
+                `;
+                chatList.appendChild(emptyItem);
+            }
+        }
+        
+        // Load contacts (teachers and students)
+        async function loadContacts() {
+            chatList.innerHTML = '';
+            
+            // Add teachers section
+            const teachersHeader = document.createElement('div');
+            teachersHeader.className = 'info-section-title';
+            teachersHeader.textContent = 'Teachers';
+            chatList.appendChild(teachersHeader);
+            
+            // Add teachers
+            for (const teacherId in allTeachers) {
+                const teacher = allTeachers[teacherId];
+                if (teacherId === currentUserId) continue;
+                
+                const contactItem = createContactItem(teacher, 'teacher');
+                chatList.appendChild(contactItem);
+            }
+            
+            // Add students section
+            const studentsHeader = document.createElement('div');
+            studentsHeader.className = 'info-section-title';
+            studentsHeader.textContent = 'Students';
+            chatList.appendChild(studentsHeader);
+            
+            // Add students
+            for (const studentId in allStudents) {
+                const student = allStudents[studentId];
+                if (studentId === currentUserId) continue;
+                
+                const contactItem = createContactItem(student, 'student');
+                chatList.appendChild(contactItem);
+            }
+            
+            // Add alumni section if any
+            if (Object.keys(allAlumni).length > 0) {
+                const alumniHeader = document.createElement('div');
+                alumniHeader.className = 'info-section-title';
+                alumniHeader.textContent = 'Alumni';
+                chatList.appendChild(alumniHeader);
+                
+                for (const alumniId in allAlumni) {
+                    const alumni = allAlumni[alumniId];
+                    if (alumniId === currentUserId) continue;
+                    
+                    const contactItem = createContactItem(alumni, 'alumni');
+                    chatList.appendChild(contactItem);
+                }
+            }
+            
+            // Update online status indicators
+            updateOnlineStatusIndicators();
+        }
+        
+        // Create a contact item
+        function createContactItem(user, type) {
+            const contactItem = document.createElement('div');
+            contactItem.className = 'chat-item contact-item';
+            contactItem.setAttribute('data-user-id', user.id);
+            
+            // Use profileImage if available, otherwise fall back to avatar or generate one
+            const avatarUrl = user.profileImage || user.avatar || 
+                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`;
+            
+            const isOnline = onlineUsers[user.id];
+            
+            contactItem.innerHTML = `
+                <img src="${avatarUrl}" alt="${user.name}" class="chat-item-avatar">
+                <div class="online-status ${isOnline ? 'online' : 'offline'}"></div>
+                <div class="chat-item-info">
+                    <div class="chat-item-header">
+                        <div class="chat-item-name">${user.name}</div>
+                        <div class="chat-item-time">
+                            <span class="user-badge ${type === 'teacher' ? 'badge-teacher' : type === 'student' ? 'badge-student' : 'badge-alumni'}">
+                                ${type === 'teacher' ? 'Teacher' : type === 'student' ? 'Student' : 'Alumni'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="chat-item-preview">
+                        <div class="chat-item-message">
+                            ${type === 'teacher' ? user.subject || 'Teacher' : 
+                              type === 'student' ? `Class: ${user.class || 'N/A'}` : 
+                              'Alumni'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add click handler to open chat
+            contactItem.addEventListener('click', () => openPrivateChat({
+                id: user.id,
+                name: user.name,
+                profileImage: user.profileImage,
+                avatar: user.avatar
+            }));
+            
+            return contactItem;
+        }
+        
+        // Create a private chat list item
+        function createPrivateChatItem(user, lastMessage, unread = false) {
+            const chatItem = document.createElement('div');
+            chatItem.className = `chat-item ${unread ? 'unread' : ''}`;
+            chatItem.setAttribute('data-user-id', user.id);
+            
+            const avatarUrl = user.profileImage || user.avatar || 
+                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`;
+            
+            const isOnline = onlineUsers[user.id];
+            
+            chatItem.innerHTML = `
+                <img src="${avatarUrl}" alt="${user.name}" class="chat-item-avatar">
+                <div class="online-status ${isOnline ? 'online' : 'offline'}"></div>
+                <div class="chat-item-info">
+                    <div class="chat-item-header">
+                        <div class="chat-item-name">${user.name}</div>
+                        <div class="chat-item-time">${formatTime(lastMessage.timestamp)}</div>
+                    </div>
+                    <div class="chat-item-preview">
+                        <div class="chat-item-message">${lastMessage.content}</div>
+                        ${unread ? '<div class="unread-badge">1</div>' : ''}
+                    </div>
+                </div>
+            `;
+            
+            // Add click handler to open chat
+            chatItem.addEventListener('click', () => openPrivateChat(user));
+            
+            return chatItem;
+        }
+        
+        // Create a new private chat list item
+        function createNewPrivateChatItem(user) {
+            const chatItem = document.createElement('div');
+            chatItem.className = 'chat-item new-chat';
+            chatItem.setAttribute('data-user-id', user.id);
+            
+            const avatarUrl = user.profileImage || user.avatar || 
+                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`;
+            
+            const isOnline = onlineUsers[user.id];
+            
+            chatItem.innerHTML = `
+                <img src="${avatarUrl}" alt="${user.name}" class="chat-item-avatar">
+                <div class="online-status ${isOnline ? 'online' : 'offline'}"></div>
+                <div class="chat-item-info">
+                    <div class="chat-item-header">
+                        <div class="chat-item-name">${user.name}</div>
+                        <div class="chat-item-time"><i class="fas fa-plus"></i></div>
+                    </div>
+                    <div class="chat-item-preview">
+                        <div class="chat-item-message">Start new conversation</div>
+                    </div>
+                </div>
+            `;
+            
+            // Add click handler to open chat
+            chatItem.addEventListener('click', () => openPrivateChat(user));
+            
+            return chatItem;
+        }
+        
+        // Load group chats
+        async function loadGroupChats() {
+            // Get all group chats
+            const groupsSnapshot = await get(groupChatsRef);
+            const allGroups = groupsSnapshot.exists() ? groupsSnapshot.val() : {};
+            
+            // Filter groups relevant to this user
+            const userGroups = [];
+            
+            for (const groupId in allGroups) {
+                const group = allGroups[groupId];
+                
+                // Check if user is a member of this group
+                if (group.members && group.members.includes(currentUserId)) {
+                    userGroups.push({
+                        id: groupId,
+                        ...group
+                    });
+                }
+            }
+            
+            // Sort groups - class groups first, then subject groups, then others
+            userGroups.sort((a, b) => {
+                if (a.isClassGroup && !b.isClassGroup) return -1;
+                if (!a.isClassGroup && b.isClassGroup) return 1;
+                if (a.isSubjectGroup && !b.isSubjectGroup) return -1;
+                if (!a.isSubjectGroup && b.isSubjectGroup) return 1;
+                return 0;
+            });
+            
+            // Create group chat items
+            for (const group of userGroups) {
+                const chatItem = createGroupChatItem(group);
+                chatList.appendChild(chatItem);
+            }
+            
+            // Show empty state if no groups
+            if (chatList.children.length === 0) {
+                const emptyItem = document.createElement('div');
+                emptyItem.className = 'empty-state';
+                emptyItem.innerHTML = `
+                    <i class="fas fa-users-slash"></i>
+                    <h3>No Group Chats</h3>
+                    <p>You're not a member of any group chats yet.</p>
+                `;
+                chatList.appendChild(emptyItem);
+            }
+        }
+        
+        // Create a group chat list item
+        function createGroupChatItem(group) {
+            const chatItem = document.createElement('div');
+            chatItem.className = 'chat-item';
+            chatItem.setAttribute('data-group-id', group.id);
+            
+            // Get last message for this group
+            const lastMessage = group.lastMessage || {
+                content: 'No messages yet',
+                timestamp: group.createdAt || new Date().toISOString(),
+                senderName: ''
+            };
+            
+            // Count unread messages
+            const unreadCount = group.unreadCounts && group.unreadCounts[currentUserId] || 0;
+            
+            // Use group avatar if available, otherwise create a default one
+            const avatarUrl = group.avatar || 
+                `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(group.name)}`;
+            
+            chatItem.innerHTML = `
+                <img src="${avatarUrl}" alt="${group.name}" class="chat-item-avatar">
+                <div class="chat-item-info">
+                    <div class="chat-item-header">
+                        <div class="chat-item-name">${group.name}</div>
+                        <div class="chat-item-time">${formatTime(lastMessage.timestamp)}</div>
+                    </div>
+                    <div class="chat-item-preview">
+                        <div class="chat-item-message">
+                            ${lastMessage.senderName ? `${lastMessage.senderName}: ` : ''}
+                            ${lastMessage.content}
+                        </div>
+                        ${unreadCount > 0 ? `<div class="unread-badge">${unreadCount}</div>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            // Add click handler to open group chat
+            chatItem.addEventListener('click', () => openGroupChat(group));
+            
+            return chatItem;
+        }
+        
+        // Filter chats based on search input
+        function filterChats(searchTerm) {
+            const term = searchTerm.toLowerCase();
+            const items = chatList.querySelectorAll('.chat-item');
+            
+            items.forEach(item => {
+                const name = item.querySelector('.chat-item-name').textContent.toLowerCase();
+                const message = item.querySelector('.chat-item-message').textContent.toLowerCase();
+                
+                if (name.includes(term) || message.includes(term)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+        
+        // Open a private chat
+        async function openPrivateChat(user) {
+            currentChat = {
+                type: 'private',
+                id: user.id
+            };
+            currentChatData = user;
+            currentChatMembers = [currentUserId, user.id];
+            
+            // Update UI
+            updateChatHeader();
+            
+            // Load messages
+            await loadPrivateMessages();
+            
+            // Mark messages as read
+            markMessagesAsRead(user.id);
+            
+            // For mobile, hide sidebar and show chat area
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('hidden');
+                chatArea.classList.add('active');
+            }
+            
+            // Hide empty state
+            emptyState.style.display = 'none';
+            
+            // Highlight active chat in list
+            highlightActiveChat();
+        }
+        
+        // Open a group chat
+        async function openGroupChat(group) {
+            currentChat = {
+                type: 'group',
+                id: group.id
+            };
+            currentChatData = group;
+            currentChatMembers = group.members || [];
+            
+            // Update UI
+            updateChatHeader();
+            
+            // Load messages
+            await loadGroupMessages();
+            
+            // Mark messages as read
+            markGroupMessagesAsRead(group.id);
+            
+            // For mobile, hide sidebar and show chat area
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('hidden');
+                chatArea.classList.add('active');
+            }
+            
+            // Hide empty state
+            emptyState.style.display = 'none';
+            
+            // Highlight active chat in list
+            highlightActiveChat();
+        }
+        
+        // Update chat header based on current chat
+        function updateChatHeader() {
+            if (!currentChat || !currentChatData) return;
+            
+            if (currentChat.type === 'private') {
+                // Private chat header
+                const avatarUrl = currentChatData.profileImage || currentChatData.avatar || 
+                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentChatData.id}`;
+                
+                chatHeaderAvatar.src = avatarUrl;
+                chatHeaderName.textContent = currentChatData.name;
+                
+                // Set status based on online status
+                const isOnline = onlineUsers[currentChatData.id];
+                chatHeaderStatus.textContent = isOnline ? 'Online' : 'Offline';
+                chatHeaderStatus.style.color = isOnline ? 'var(--online-status)' : 'var(--offline-status)';
+            } else if (currentChat.type === 'group') {
+                // Group chat header
+                const avatarUrl = currentChatData.avatar || 
+                    `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentChatData.name)}`;
+                
+                chatHeaderAvatar.src = avatarUrl;
+                chatHeaderName.textContent = currentChatData.name;
+                chatHeaderStatus.textContent = `${currentChatMembers.length} members`;
+                chatHeaderStatus.style.color = 'var(--light-text)';
+            }
+        }
+        
+        // Load private messages
+        async function loadPrivateMessages() {
+            chatMessages.innerHTML = '';
+            
+            // Get all private messages between current user and chat participant
+            const messagesSnapshot = await get(privateMessagesRef);
+            const allMessages = messagesSnapshot.exists() ? messagesSnapshot.val() : {};
+            
+            const messagesArray = [];
+            
+            for (const messageId in allMessages) {
+                const message = allMessages[messageId];
+                
+                if ((message.senderId === currentUserId && message.recipientId === currentChat.id) || 
+                    (message.senderId === currentChat.id && message.recipientId === currentUserId)) {
+                    messagesArray.push(message);
+                }
+            }
+            
+            // Sort messages by timestamp
+            messagesArray.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            
+            // Display messages
+            messagesArray.forEach(message => {
+                addMessageToChat(message);
+            });
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Load group messages
+        async function loadGroupMessages() {
+            chatMessages.innerHTML = '';
+            
+            // Get all messages for this group
+            const messagesSnapshot = await get(ref(db, `groupMessages/${currentChat.id}`));
+            const allMessages = messagesSnapshot.exists() ? messagesSnapshot.val() : {};
+            
+            const messagesArray = [];
+            
+            for (const messageId in allMessages) {
+                messagesArray.push({
+                    id: messageId,
+                    ...allMessages[messageId]
+                });
+            }
+            
+            // Sort messages by timestamp
+            messagesArray.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            
+            // Display messages
+            messagesArray.forEach(message => {
+                addMessageToChat(message);
+            });
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Add a message to the chat UI
+        function addMessageToChat(message) {
+            const isSent = message.senderId === currentUserId;
+            const sender = getUserInfo(message.senderId);
+            
+            if (!sender && message.senderId !== currentUserId) return;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+            
+            if (!isSent) {
+                const avatarUrl = sender.profileImage || sender.avatar || 
+                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${message.senderId}`;
+                
+                messageDiv.innerHTML = `
+                    <img src="${avatarUrl}" alt="${sender.name}" class="message-avatar">
+                    <div class="message-content">
+                        ${currentChat.type === 'group' && !isSent ? 
+                            `<div class="message-sender">${sender.name}</div>` : ''}
+                        <div class="message-bubble">${message.content}</div>
+                        <div class="message-info">
+                            <span class="message-time">${formatTime(message.timestamp)}</span>
+                            ${isSent ? `<span class="message-status">
+                                ${message.read ? '<i class="fas fa-check-double"></i>' : '<i class="fas fa-check"></i>'}
+                            </span>` : ''}
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        <div class="message-bubble">${message.content}</div>
+                        <div class="message-info">
+                            <span class="message-time">${formatTime(message.timestamp)}</span>
+                            <span class="message-status">
+                                ${message.read ? '<i class="fas fa-check-double"></i>' : '<i class="fas fa-check"></i>'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+        }
+        
+        // Send a message
+        async function sendMessage() {
+            const content = messageInput.value.trim();
+            
+            if (!content || !currentChat) return;
+            
+            // Create message object with temporary ID
+            const tempMessageId = `temp-${Date.now()}`;
+            const message = {
+                id: tempMessageId,
+                senderId: currentUserId,
+                senderName: currentUserData.name,
+                content: content,
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+            
+            // Add message to UI immediately
+            addMessageToChat(message);
+            
+            // Clear input
+            messageInput.value = '';
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            if (currentChat.type === 'private') {
+                // Add recipientId for private messages
+                message.recipientId = currentChat.id;
+                
+                // Add to database
+                const newMessageRef = push(privateMessagesRef);
+                await set(newMessageRef, message);
+                
+                // Update last message in chat list
+                updatePrivateChatListItem(message);
+                
+            } else if (currentChat.type === 'group') {
+                // Add to database
+                const newMessageRef = push(ref(db, `groupMessages/${currentChat.id}`));
+                await set(newMessageRef, message);
+                
+                // Update last message in group chat
+                await update(ref(db, `groupChats/${currentChat.id}`), {
+                    lastMessage: {
+                        content: content,
+                        timestamp: message.timestamp,
+                        senderName: currentUserData.name
+                    },
+                    [`unreadCounts/${currentUserId}`]: 0
+                });
+                
+                // Increment unread count for other members
+                currentChatMembers.forEach(memberId => {
+                    if (memberId !== currentUserId) {
+                        update(ref(db, `groupChats/${currentChat.id}/unreadCounts/${memberId}`), 
+                            (count) => (count || 0) + 1);
+                    }
+                });
+                
+                // Update group chat list item
+                updateGroupChatListItem();
+            }
+        }
+        
+        // Update private chat list item with new message
+        function updatePrivateChatListItem(message) {
+            const chatItem = document.querySelector(`.chat-item[data-user-id="${currentChat.id}"]`);
+            
+            if (chatItem) {
+                // Update last message preview
+                chatItem.querySelector('.chat-item-message').textContent = message.content;
+                chatItem.querySelector('.chat-item-time').textContent = 'Now';
+                
+                // Remove unread badge if present
+                const unreadBadge = chatItem.querySelector('.unread-badge');
+                if (unreadBadge) {
+                    unreadBadge.remove();
+                    chatItem.classList.remove('unread');
+                }
+                
+                // Move to top of list
+                chatList.prepend(chatItem);
+            } else {
+                // Create new chat item if it doesn't exist
+                const user = getUserInfo(currentChat.id);
+                if (user) {
+                    const chatItem = createPrivateChatItem(user, message);
+                    chatList.prepend(chatItem);
+                }
+            }
+        }
+        
+        // Update group chat list item with new message
+        function updateGroupChatListItem() {
+            const chatItem = document.querySelector(`.chat-item[data-group-id="${currentChat.id}"]`);
+            
+            if (chatItem) {
+                // Update last message preview
+                chatItem.querySelector('.chat-item-message').textContent = 
+                    `${currentUserData.name}: ${messageInput.value.trim()}`;
+                chatItem.querySelector('.chat-item-time').textContent = 'Now';
+                
+                // Remove unread badge for current user
+                const unreadBadge = chatItem.querySelector('.unread-badge');
+                if (unreadBadge && unreadBadge.textContent === '1') {
+                    unreadBadge.remove();
+                }
+                
+                // Move to top of list
+                chatList.prepend(chatItem);
+            }
+        }
+        
+        // Mark private messages as read
+        async function markMessagesAsRead(senderId) {
+            const messagesSnapshot = await get(privateMessagesRef);
+            const allMessages = messagesSnapshot.exists() ? messagesSnapshot.val() : {};
+            
+            const updates = {};
+            
+            for (const messageId in allMessages) {
+                const message = allMessages[messageId];
+                
+                if (message.senderId === senderId && 
+                    message.recipientId === currentUserId && 
+                    !message.read) {
+                    
+                    updates[`${messageId}/read`] = true;
+                }
+            }
+            
+            if (Object.keys(updates).length > 0) {
+                await update(privateMessagesRef, updates);
+                
+                // Update chat list item
+                const chatItem = document.querySelector(`.chat-item[data-user-id="${senderId}"]`);
+                if (chatItem) {
+                    chatItem.classList.remove('unread');
+                    const unreadBadge = chatItem.querySelector('.unread-badge');
+                    if (unreadBadge) {
+                        unreadBadge.remove();
+                    }
+                }
+            }
+        }
+        
+        // Mark group messages as read
+        async function markGroupMessagesAsRead(groupId) {
+            // Reset unread count for current user
+            await set(ref(db, `groupChats/${groupId}/unreadCounts/${currentUserId}`), 0);
+            
+            // Update chat list item
+            const chatItem = document.querySelector(`.chat-item[data-group-id="${groupId}"]`);
+            if (chatItem) {
+                const unreadBadge = chatItem.querySelector('.unread-badge');
+                if (unreadBadge) {
+                    unreadBadge.remove();
+                }
+            }
+        }
+        
+        // Highlight active chat in list
+        function highlightActiveChat() {
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.classList.remove('active');
+                
+                if (currentChat.type === 'private' && item.getAttribute('data-user-id') === currentChat.id) {
+                    item.classList.add('active');
+                } else if (currentChat.type === 'group' && item.getAttribute('data-group-id') === currentChat.id) {
+                    item.classList.add('active');
+                }
+            });
+        }
+        
+        // Load chat info for info panel
+        function loadChatInfo() {
+            if (!currentChat || !currentChatData) return;
+            
+            if (currentChat.type === 'private') {
+                // Private chat info
+                const avatarUrl = currentChatData.profileImage || currentChatData.avatar || 
+                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentChatData.id}`;
+                
+                groupInfoAvatar.src = avatarUrl;
+                groupInfoName.textContent = currentChatData.name;
+                groupInfoDesc.textContent = 'Private conversation';
+                groupInfoCreated.textContent = '';
+                
+                // Load member list (just the two participants)
+                memberList.innerHTML = '';
+                
+                // Add current user
+                addMemberToInfoPanel(currentUserData, 'You');
+                
+                // Add other participant
+                addMemberToInfoPanel(currentChatData);
+                
+            } else if (currentChat.type === 'group') {
+                // Group chat info
+                const avatarUrl = currentChatData.avatar || 
+                    `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentChatData.name)}`;
+                
+                groupInfoAvatar.src = avatarUrl;
+                groupInfoName.textContent = currentChatData.name;
+                groupInfoDesc.textContent = currentChatData.description || 'Group conversation';
+                groupInfoCreated.textContent = `Created on ${formatDate(currentChatData.createdAt)}`;
+                
+                // Load member list
+                memberList.innerHTML = '';
+                
+                currentChatMembers.forEach(memberId => {
+                    const member = getUserInfo(memberId);
+                    if (member) {
+                        addMemberToInfoPanel(member, memberId === currentUserId ? 'You' : '');
+                    }
+                });
+            }
+        }
+        
+        // Add member to info panel
+        function addMemberToInfoPanel(user, role = '') {
+            const memberItem = document.createElement('div');
+            memberItem.className = 'member-item';
+            
+            const avatarUrl = user.profileImage || user.avatar || 
+                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`;
+            
+            const isOnline = onlineUsers[user.id];
+            
+            memberItem.innerHTML = `
+                <img src="${avatarUrl}" alt="${user.name}" class="member-avatar">
+                <div class="member-info">
+                    <div class="member-name">${user.name} ${role ? `(${role})` : ''}</div>
+                    <div class="member-role">${getUserType(user.id)}</div>
+                </div>
+                <div class="member-status ${isOnline ? 'status-online' : 'status-offline'}">
+                    ${isOnline ? 'Online' : 'Offline'}
+                </div>
+            `;
+            
+            // Add click handler to start private chat
+            if (user.id !== currentUserId) {
+                memberItem.style.cursor = 'pointer';
+                memberItem.addEventListener('click', () => {
+                    openPrivateChat(user);
+                    infoPanel.classList.add('hidden');
+                });
+            }
+            
+            memberList.appendChild(memberItem);
+        }
+        
+        // Get user type
+        function getUserType(userId) {
+            if (allTeachers[userId]) return 'Teacher';
+            if (allStudents[userId]) return 'Student';
+            if (allAlumni[userId]) return 'Alumni';
+            return 'User';
+        }
+        
+        // Show new chat modal
+        function showNewChatModal() {
+            // In a real app, this would show a modal to select a user to chat with
+            // For this demo, we'll just show a notification
+            showNotification({
+                title: 'New Chat',
+                message: 'In a complete implementation, this would open a modal to select a user to chat with.',
+                type: 'info',
+                duration: 3000
+            });
+        }
+        
+        // Show new group modal
+        function showNewGroupModal() {
+            newGroupModal.style.display = 'flex';
+            
+            // Clear previous inputs
+            groupNameInput.value = '';
+            groupDescriptionInput.value = '';
+            groupMembersList.innerHTML = '';
+            
+            // Add current user as first member
+            addMemberToGroupList(currentUserData, true);
+            
+            // Add potential members based on user type
+            if (userType === 'teacher') {
+                // For teachers, show students in their classes
+                const classStudents = {};
+                
+                for (const classId of userClasses) {
+                    const classData = allClasses[classId];
+                    if (classData && classData.students) {
+                        classData.students.forEach(studentId => {
+                            if (studentId !== currentUserId && !classStudents[studentId]) {
+                                classStudents[studentId] = true;
+                            }
+                        });
+                    }
+                }
+                
+                // Add students to member list
+                for (const studentId in classStudents) {
+                    const student = allStudents[studentId];
+                    if (student) {
+                        addMemberToGroupList(student);
+                    }
+                }
+            } else if (userType === 'student') {
+                // For students, show teachers of their subjects
+                const subjectTeachers = {};
+                
+                userSubjects.forEach(subject => {
+                    if (subject.teacher && !subjectTeachers[subject.teacher] && subject.teacher !== currentUserId) {
+                        subjectTeachers[subject.teacher] = true;
+                    }
+                });
+                
+                // Add teachers to member list
+                for (const teacherId in subjectTeachers) {
+                    const teacher = allTeachers[teacherId];
+                    if (teacher) {
+                        addMemberToGroupList(teacher);
+                    }
+                }
+                
+                // Also add classmates
+                if (currentUserData.class) {
+                    const classData = allClasses[currentUserData.class];
+                    if (classData && classData.students) {
+                        classData.students.forEach(studentId => {
+                            if (studentId !== currentUserId && !subjectTeachers[studentId]) {
+                                const student = allStudents[studentId];
+                                if (student) {
+                                    addMemberToGroupList(student);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        
+        // Add member to group creation list
+        function addMemberToGroupList(user, isCurrentUser = false) {
+            const memberItem = document.createElement('div');
+            memberItem.className = 'member-item';
+            
+            const avatarUrl = user.profileImage || user.avatar || 
+                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`;
+            
+            memberItem.innerHTML = `
+                <img src="${avatarUrl}" alt="${user.name}" class="member-avatar">
+                <div class="member-info">
+                    <div class="member-name">${user.name} ${isCurrentUser ? '(You)' : ''}</div>
+                    <div class="member-role">${getUserType(user.id)}</div>
+                </div>
+                <div class="member-status">
+                    <input type="checkbox" ${isCurrentUser ? 'checked disabled' : 'checked'} 
+                        data-user-id="${user.id}" class="member-checkbox">
+                </div>
+            `;
+            
+            groupMembersList.appendChild(memberItem);
+        }
+        
+        // Create new group
+        async function createNewGroup() {
+            const name = groupNameInput.value.trim();
+            const description = groupDescriptionInput.value.trim();
+            
+            if (!name) {
+                showNotification({
+                    title: 'Error',
+                    message: 'Please enter a group name',
+                    type: 'error',
+                    duration: 3000
+                });
+                return;
+            }
+            
+            // Get selected members
+            const checkboxes = groupMembersList.querySelectorAll('.member-checkbox');
+            const members = [currentUserId]; // Always include current user
+            
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked && checkbox.dataset.userId !== currentUserId) {
+                    members.push(checkbox.dataset.userId);
+                }
+            });
+            
+            if (members.length < 2) {
+                showNotification({
+                    title: 'Error',
+                    message: 'Please select at least one other member',
+                    type: 'error',
+                    duration: 3000
+                });
+                return;
+            }
+            
+            try {
+                // Create group data
+                const groupData = {
+                    name: name,
+                    description: description,
+                    members: members,
+                    createdAt: new Date().toISOString(),
+                    createdBy: currentUserId,
+                    isSubjectGroup: false,
+                    isClassGroup: false
+                };
+                
+                // Generate a unique ID for the group
+                const newGroupRef = push(groupChatsRef);
+                await set(newGroupRef, groupData);
+                
+                // Close modal
+                newGroupModal.style.display = 'none';
+                
+                // Show success notification
+                showNotification({
+                    title: 'Success',
+                    message: 'Group created successfully',
+                    type: 'success',
+                    duration: 3000
+                });
+                
+                // Reload groups
+                await loadGroupChats();
+                
+            } catch (error) {
+                console.error('Error creating group:', error);
+                showNotification({
+                    title: 'Error',
+                    message: 'Failed to create group',
+                    type: 'error',
+                    duration: 3000
+                });
+            }
+        }
+        
+        // Set up real-time listeners
+        function setupRealTimeListeners() {
+            // Listen for new private messages
+            onChildAdded(privateMessagesRef, (snapshot) => {
+                const message = snapshot.val();
+                
+                // If message is for current user and not from themselves
+                if (message.recipientId === currentUserId && message.senderId !== currentUserId) {
+                    // If chat is open with this sender, add message to chat
+                    if (currentChat && currentChat.type === 'private' && currentChat.id === message.senderId) {
+                        addMessageToChat(message);
+                        markMessagesAsRead(message.senderId);
+                    } else {
+                        // Otherwise, update chat list item
+                        updatePrivateChatListItem(message);
+                        
+                        // Show notification
+                        const sender = getUserInfo(message.senderId);
+                        if (sender) {
+                            showNotification({
+                                title: `New message from ${sender.name}`,
+                                message: message.content,
+                                type: 'info',
+                                duration: 5000
+                            });
+                        }
+                    }
+                }
+            });
+            
+            // Listen for new group messages
+            onChildAdded(ref(db, 'groupMessages'), (snapshot) => {
+                const groupMessages = snapshot.val();
+                const groupId = snapshot.key;
+                
+                // Only process if this is a group the user is a member of
+                if (currentChatMembers.includes(currentUserId)) {
+                    // Get the latest message (last child added)
+                    let latestMessage = null;
+                    let latestMessageId = null;
+                    
+                    for (const messageId in groupMessages) {
+                        const message = groupMessages[messageId];
+                        if (!latestMessage || new Date(message.timestamp) > new Date(latestMessage.timestamp)) {
+                            latestMessage = message;
+                            latestMessageId = messageId;
+                        }
+                    }
+                    
+                    if (latestMessage && latestMessage.senderId !== currentUserId) {
+                        // If viewing this group, add message to chat
+                        if (currentChat && currentChat.type === 'group' && currentChat.id === groupId) {
+                            addMessageToChat({
+                                id: latestMessageId,
+                                ...latestMessage
+                            });
+                            
+                            // Mark as read
+                            markGroupMessagesAsRead(groupId);
+                        } else {
+                            // Otherwise, update group chat list item
+                            updateGroupChatListItem();
+                            
+                            // Show notification if not viewing groups tab
+                            if (document.querySelector('.tab.active').getAttribute('data-tab') !== 'groups') {
+                                const sender = getUserInfo(latestMessage.senderId);
+                                const group = currentChatData;
+                                
+                                if (sender && group) {
+                                    showNotification({
+                                        title: `New message in ${group.name}`,
+                                        message: `${sender.name}: ${latestMessage.content.substring(0, 50)}...`,
+                                        type: 'info',
+                                        duration: 5000
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Get user info from any collection (teachers, students, alumni)
+        function getUserInfo(userId) {
+            if (allTeachers[userId]) {
+                return { id: userId, ...allTeachers[userId] };
+            } else if (allStudents[userId]) {
+                return { id: userId, ...allStudents[userId] };
+            } else if (allAlumni[userId]) {
+                return { id: userId, ...allAlumni[userId] };
+            }
+            return null;
+        }
+        
+        // Format time for display
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            
+            // If today, show time
+            if (date.toDateString() === now.toDateString()) {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+            
+            // If yesterday, show "Yesterday"
+            const yesterday = new Date(now);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            if (date.toDateString() === yesterday.toDateString()) {
+                return 'Yesterday';
+            }
+            
+            // Otherwise, show date
+            return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+        }
+        
+        // Format date for display
+        function formatDate(timestamp) {
+            if (!timestamp) return 'Unknown date';
+            
+            const date = new Date(timestamp);
+            return date.toLocaleDateString([], { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+        
+        // Initialize the app
+        loadingScreen.style.display = 'flex';
+        mainContainer.style.display = 'none';
+        
+        // Start the app
+        initApp();
+    </script>
+</body>
+</html>
