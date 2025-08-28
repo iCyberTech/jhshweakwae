@@ -8,118 +8,119 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* Enhanced Notification Styles */
-.notification {
-    padding: 18px 20px;
-    border-radius: 12px;
-    margin-bottom: 15px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    border-left: 5px solid rgba(255, 255, 255, 0.3);
-    align-items: flex-start;
-}
+        .notification {
+            padding: 18px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            border-left: 5px solid rgba(255, 255, 255, 0.3);
+            align-items: flex-start;
+        }
 
-.notification.success {
-    background: linear-gradient(135deg, rgba(0, 184, 148, 0.9) 0%, rgba(0, 184, 148, 1) 100%);
-}
+        .notification.success {
+            background: linear-gradient(135deg, rgba(0, 184, 148, 0.9) 0%, rgba(0, 184, 148, 1) 100%);
+        }
 
-.notification.error {
-    background: linear-gradient(135deg, rgba(214, 48, 49, 0.9) 0%, rgba(214, 48, 49, 1) 100%);
-}
+        .notification.error {
+            background: linear-gradient(135deg, rgba(214, 48, 49, 0.9) 0%, rgba(214, 48, 49, 1) 100%);
+        }
 
-.notification.warning {
-    background: linear-gradient(135deg, rgba(253, 203, 110, 0.9) 0%, rgba(253, 203, 110, 1) 100%);
-    color: #2d3436;
-}
+        .notification.warning {
+            background: linear-gradient(135deg, rgba(253, 203, 110, 0.9) 0%, rgba(253, 203, 110, 1) 100%);
+            color: #2d3436;
+        }
 
-.notification.info {
-    background: linear-gradient(135deg, rgba(9, 132, 227, 0.9) 0%, rgba(9, 132, 227, 1) 100%);
-}
+        .notification.info {
+            background: linear-gradient(135deg, rgba(9, 132, 227, 0.9) 0%, rgba(9, 132, 227, 1) 100%);
+        }
 
-.notification-icon {
-    font-size: 22px;
-    margin-right: 15px;
-    margin-top: 2px;
-    flex-shrink: 0;
-}
+        .notification-icon {
+            font-size: 22px;
+            margin-right: 15px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
 
-.notification-content {
-    line-height: 1.4;
-}
+        .notification-content {
+            line-height: 1.4;
+        }
 
-.notification-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 6px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
+        .notification-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
 
-.notification-message {
-    font-size: 0.9rem;
-    opacity: 0.95;
-    line-height: 1.5;
-}
+        .notification-message {
+            font-size: 0.9rem;
+            opacity: 0.95;
+            line-height: 1.5;
+        }
 
-.notification-close {
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-    margin-left: 15px;
-    margin-top: 2px;
-}
+        .notification-close {
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+            margin-left: 15px;
+            margin-top: 2px;
+        }
 
-.notification-close:hover {
-    opacity: 1;
-}
+        .notification-close:hover {
+            opacity: 1;
+        }
 
-/* Animation enhancements */
-@keyframes slideIn {
-    from {
-        transform: translateX(120%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
+        /* Animation enhancements */
+        @keyframes slideIn {
+            from {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
 
-@keyframes slideOut {
-    to {
-        transform: translateX(120%);
-        opacity: 0;
-    }
-}
+        @keyframes slideOut {
+            to {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+        }
 
-.notification.show {
-    animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
+        .notification.show {
+            animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
 
-.notification.hide {
-    animation: slideOut 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
-}
+        .notification.hide {
+            animation: slideOut 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+        }
 
-/* Responsive adjustments */
-@media (max-width: 480px) {
-    .notification-container {
-        width: 95%;
-        right: 10px;
-    }
-    
-    .notification {
-        padding: 15px;
-    }
-    
-    .notification-icon {
-        font-size: 20px;
-        margin-right: 12px;
-    }
-    
-    .notification-title {
-        font-size: 0.95rem;
-    }
-    
-    .notification-message {
-        font-size: 0.85rem;
-    }
-}
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .notification-container {
+                width: 95%;
+                right: 10px;
+            }
+            
+            .notification {
+                padding: 15px;
+            }
+            
+            .notification-icon {
+                font-size: 20px;
+                margin-right: 12px;
+            }
+            
+            .notification-title {
+                font-size: 0.95rem;
+            }
+            
+            .notification-message {
+                font-size: 0.85rem;
+            }
+        }
+        
         :root {
             --primary-color: #6c5ce7;
             --secondary-color: #a29bfe;
@@ -546,12 +547,45 @@
             border: none;
         }
 
+        /* Updated logout button styles */
         .logout-btn {
             position: fixed;
-            top: 20px;
+            bottom: 20px;
             right: 20px;
             z-index: 10001;
             background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: var(--transition);
+            display: none;
+            opacity: 0;
+            transform: translateY(100px);
+        }
+
+        .logout-btn.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+            transform: translateY(-5px) scale(1.05);
+        }
+
+        .toggle-logout-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10002;
+            background: var(--primary-color);
             color: white;
             border: none;
             border-radius: 50%;
@@ -566,9 +600,13 @@
             display: none;
         }
 
-        .logout-btn:hover {
-            background: #c0392b;
-            transform: translateY(-2px);
+        .toggle-logout-btn.visible {
+            display: flex;
+        }
+
+        .toggle-logout-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-3px);
         }
 
         /* Auto-login checkbox */
@@ -626,6 +664,11 @@
             
             .btn {
                 width: 100%;
+            }
+            
+            .logout-btn, .toggle-logout-btn {
+                bottom: 15px;
+                right: 15px;
             }
         }
     </style>
@@ -712,6 +755,9 @@
         <button class="logout-btn" id="logout-btn">
             <i class="fas fa-sign-out-alt"></i>
         </button>
+        <button class="toggle-logout-btn" id="toggle-logout-btn">
+            <i class="fas fa-chevron-up"></i>
+        </button>
         <iframe id="content-frame" allowfullscreen></iframe>
     </div>
     
@@ -750,6 +796,7 @@
         const iframeContainer = document.getElementById('iframe-container');
         const contentFrame = document.getElementById('content-frame');
         const logoutBtn = document.getElementById('logout-btn');
+        const toggleLogoutBtn = document.getElementById('toggle-logout-btn');
         const rememberMeCheckbox = document.getElementById('remember-me');
         
         // Firebase references
@@ -762,9 +809,33 @@
         // Current user ID for logout functionality
         let currentUserId = null;
         
-        // Check for saved credentials on page load
-        document.addEventListener('DOMContentLoaded', () => {
+        // Check for existing session on page load
+        document.addEventListener('DOMContentLoaded', async () => {
             const savedCredentials = localStorage.getItem('cramnerd_credentials');
+            const activeSession = sessionStorage.getItem('cramnerd_active_session');
+            
+            // If there's an active session but no saved credentials, clear the session
+            if (activeSession && !savedCredentials) {
+                sessionStorage.removeItem('cramnerd_active_session');
+            }
+            
+            // If there's a saved session but no active session, log out the previous user
+            if (savedCredentials && !activeSession) {
+                try {
+                    const { userId } = JSON.parse(savedCredentials);
+                    await remove(ref(db, `credentials/${userId}/deviceInfo`));
+                    localStorage.removeItem('cramnerd_credentials');
+                    showNotification({
+                        title: 'Session Cleared',
+                        message: 'Previous user session has been cleared',
+                        type: 'info'
+                    });
+                } catch (error) {
+                    console.error('Error clearing previous session:', error);
+                }
+            }
+            
+            // Load saved credentials if available
             if (savedCredentials) {
                 try {
                     const { userId, password, rememberMe } = JSON.parse(savedCredentials);
@@ -772,11 +843,6 @@
                         userIdInput.value = userId;
                         passwordInput.value = password;
                         rememberMeCheckbox.checked = true;
-                        
-                        // Auto-login if credentials are saved
-                        setTimeout(() => {
-                            document.getElementById('signin-btn').click();
-                        }, 500);
                     }
                 } catch (e) {
                     console.error('Error parsing saved credentials:', e);
@@ -947,9 +1013,14 @@
         // Load content in iframe
         function loadContentInIframe(url) {
             iframeContainer.classList.add('active');
-            logoutBtn.style.display = 'flex';
+            toggleLogoutBtn.classList.add('visible');
             contentFrame.src = url;
         }
+        
+        // Toggle logout button visibility
+        toggleLogoutBtn.addEventListener('click', function() {
+            logoutBtn.classList.toggle('visible');
+        });
         
         // Logout functionality
         async function handleLogout() {
@@ -959,12 +1030,14 @@
                 // Remove device info from database
                 await remove(ref(db, `credentials/${currentUserId}/deviceInfo`));
                 
-                // Clear saved credentials from localStorage
+                // Clear saved credentials and session
                 localStorage.removeItem('cramnerd_credentials');
+                sessionStorage.removeItem('cramnerd_active_session');
                 
                 // Hide iframe and show login screen
                 iframeContainer.classList.remove('active');
-                logoutBtn.style.display = 'none';
+                toggleLogoutBtn.classList.remove('visible');
+                logoutBtn.classList.remove('visible');
                 contentFrame.src = '';
                 currentUserId = null;
                 
@@ -1006,6 +1079,19 @@
                 signinBtn.innerHTML = '<div class="loading-spinner"></div> Signing In...';
                 signinBtn.disabled = true;
                 
+                // Check if another user is already logged in on this browser
+                const activeSession = sessionStorage.getItem('cramnerd_active_session');
+                if (activeSession && activeSession !== userId) {
+                    // Log out the previous user
+                    await remove(ref(db, `credentials/${activeSession}/deviceInfo`));
+                    localStorage.removeItem('cramnerd_credentials');
+                    showNotification({
+                        title: 'Session Switched',
+                        message: 'Previous user session has been cleared',
+                        type: 'info'
+                    });
+                }
+                
                 // Get the credential
                 const credentialRef = ref(db, `credentials/${userId}`);
                 const credentialSnapshot = await get(credentialRef);
@@ -1037,6 +1123,9 @@
                     // Clear any previously saved credentials
                     localStorage.removeItem('cramnerd_credentials');
                 }
+                
+                // Set active session
+                sessionStorage.setItem('cramnerd_active_session', userId);
                 
                 // Get browser details and device information
                 const browserDetails = getBrowserDetails();
