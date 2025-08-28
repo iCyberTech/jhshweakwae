@@ -440,6 +440,7 @@
         .notification-title {
             font-weight: 600;
             margin-bottom: 4px;
+            font-size: 16px;
         }
 
         .notification-message {
@@ -555,7 +556,7 @@
             z-index: 10001;
             background: var(--danger-color);
             color: white;
-            border: none;
+            border: null;
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -587,7 +588,7 @@
             z-index: 10002;
             background: var(--primary-color);
             color: white;
-            border: none;
+            border: null;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -669,6 +670,14 @@
             .logout-btn, .toggle-logout-btn {
                 bottom: 15px;
                 right: 15px;
+            }
+            
+            .notification-title {
+                font-size: 14px;
+            }
+            
+            .notification-message {
+                font-size: 12px;
             }
         }
     </style>
@@ -851,7 +860,7 @@
             }
         });
         
-        // Function to get browser details - FIXED FOR MOBILE DEVICES
+        // Function to get browser details - FIXED FOR MOBILE
         function getBrowserDetails() {
             const userAgent = navigator.userAgent;
             let browserName = "Unknown";
@@ -878,7 +887,7 @@
                 browserVersion = match ? match[1] : "Unknown";
             }
             
-            // Detect OS - FIXED FOR MOBILE DEVICES
+            // Detect OS - FIXED FOR MOBILE
             if (userAgent.includes("Windows")) {
                 osName = "Windows";
                 if (userAgent.includes("Windows NT 10.0")) osVersion = "10";
@@ -897,7 +906,7 @@
                 osVersion = match ? match[1] : "Unknown";
             } else if (userAgent.includes("iOS") || userAgent.includes("iPhone") || userAgent.includes("iPad")) {
                 osName = "iOS";
-                const match = userAgent.match(/OS (\d+[._]\d+)/);
+                const match = userAgent.match(/OS (\d+[._]\d+[._]?\d*)/);
                 osVersion = match ? match[1].replace(/_/g, ".") : "Unknown";
             }
             
