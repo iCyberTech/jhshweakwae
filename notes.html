@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>School Notes Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -28,6 +28,7 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -35,6 +36,7 @@ body {
     color: var(--text-color);
     min-height: 100vh;
     overflow-x: hidden;
+    position: relative;
 }
 
 /* Loading Screen */
@@ -83,6 +85,7 @@ body {
 .container {
     display: flex;
     min-height: 100vh;
+    position: relative;
 }
 
 /* Sidebar */
@@ -94,12 +97,20 @@ body {
     border-right: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease;
+    position: relative;
+    z-index: 100;
+    height: 100vh;
+    overflow-y: auto;
 }
 
 .sidebar-header {
     padding: 20px;
     border-bottom: 1px solid var(--glass-border);
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 10;
 }
 
 .user-info {
@@ -157,6 +168,7 @@ body {
     cursor: pointer;
     color: var(--text-color);
     transition: color 0.2s ease;
+    padding: 8px;
 }
 
 .sidebar-actions i:hover {
@@ -166,6 +178,10 @@ body {
 .search-bar {
     padding: 15px 20px;
     border-bottom: 1px solid var(--glass-border);
+    position: sticky;
+    top: 107px;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 10;
 }
 
 .search-container {
@@ -182,11 +198,11 @@ body {
 
 .search-container input {
     width: 100%;
-    padding: 10px 15px 10px 40px;
+    padding: 12px 15px 12px 40px;
     border-radius: 20px;
     border: 1px solid var(--glass-border);
     background: rgba(255, 255, 255, 0.3);
-    font-size: 0.9rem;
+    font-size: 1rem;
 }
 
 .search-container input:focus {
@@ -197,16 +213,21 @@ body {
 .tab-bar {
     display: flex;
     border-bottom: 1px solid var(--glass-border);
+    position: sticky;
+    top: 163px;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 10;
 }
 
 .tab {
     flex: 1;
     text-align: center;
-    padding: 12px;
+    padding: 15px 12px;
     cursor: pointer;
     font-weight: 500;
     transition: all 0.2s ease;
     border-bottom: 2px solid transparent;
+    font-size: 0.95rem;
 }
 
 .tab.active {
@@ -278,6 +299,8 @@ body {
     display: flex;
     flex-direction: column;
     position: relative;
+    height: 100vh;
+    overflow-y: auto;
 }
 
 .content-header {
@@ -288,12 +311,16 @@ body {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--glass-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .content-header-back {
     margin-right: 15px;
     cursor: pointer;
     display: none;
+    padding: 8px;
 }
 
 .content-header-back i {
@@ -325,6 +352,7 @@ body {
     cursor: pointer;
     color: var(--text-color);
     transition: color 0.2s ease;
+    padding: 8px;
 }
 
 .content-header-actions i:hover {
@@ -366,8 +394,8 @@ body {
 }
 
 .week-nav-btn {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     border: 1px solid var(--glass-border);
     background: rgba(255, 255, 255, 0.5);
@@ -393,12 +421,16 @@ body {
 
 .week-day {
     text-align: center;
-    padding: 8px 5px;
+    padding: 10px 5px;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.3);
     border: 1px solid var(--glass-border);
     cursor: pointer;
     transition: all 0.2s ease;
+    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .week-day:hover {
@@ -434,11 +466,17 @@ body {
 
 .week-selector-dropdown {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border-radius: 8px;
     border: 1px solid var(--glass-border);
     background: rgba(255, 255, 255, 0.5);
-    font-size: 0.9rem;
+    font-size: 1rem;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
 }
 
 .week-selector-dropdown:focus {
@@ -460,18 +498,24 @@ body {
 }
 
 .form-label {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 600;
     margin-bottom: 8px;
     color: var(--text-color);
 }
 
 .form-select {
-    padding: 10px;
+    padding: 12px;
     border-radius: 8px;
     border: 1px solid var(--glass-border);
     background: rgba(255, 255, 255, 0.5);
-    font-size: 0.9rem;
+    font-size: 1rem;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
 }
 
 .form-select:focus {
@@ -486,7 +530,7 @@ body {
 
 #note-title {
     width: 100%;
-    padding: 12px 15px;
+    padding: 15px;
     font-size: 1.5rem;
     font-weight: 600;
     border: none;
@@ -523,15 +567,26 @@ body {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
+    padding: 15px 0;
+    position: sticky;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    margin: 0 -20px;
+    padding: 15px 20px;
 }
 
 .btn {
-    padding: 10px 20px;
+    padding: 12px 24px;
     border-radius: 20px;
     border: none;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    font-size: 1rem;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-secondary {
@@ -598,12 +653,13 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    padding: 20px;
 }
 
 .modal-content {
     background: white;
     border-radius: 15px;
-    width: 90%;
+    width: 100%;
     max-width: 500px;
     max-height: 90vh;
     overflow: hidden;
@@ -631,6 +687,7 @@ body {
     font-size: 1.5rem;
     cursor: pointer;
     color: var(--light-text);
+    padding: 5px;
 }
 
 .modal-body {
@@ -648,12 +705,16 @@ body {
 }
 
 .modal-btn {
-    padding: 8px 16px;
+    padding: 12px 20px;
     border-radius: 6px;
     border: none;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .modal-btn-secondary {
@@ -678,7 +739,7 @@ body {
 .member-item {
     display: flex;
     align-items: center;
-    padding: 10px;
+    padding: 12px;
     border-radius: 8px;
     margin-bottom: 8px;
     background: rgba(0, 0, 0, 0.03);
@@ -715,8 +776,8 @@ body {
 }
 
 .member-checkbox {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
     cursor: pointer;
 }
 
@@ -800,13 +861,38 @@ body {
     margin-left: 15px;
     font-size: 18px;
     opacity: 0.8;
+    padding: 5px;
 }
 
 .notification-close:hover {
     opacity: 1;
 }
 
+/* Mobile Menu Button */
+.mobile-menu-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 101;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: none;
+}
+
 /* Responsive Design */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 300px;
+    }
+}
+
 @media (max-width: 768px) {
     .container {
         flex-direction: column;
@@ -814,7 +900,7 @@ body {
     
     .sidebar {
         width: 100%;
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         height: 100%;
@@ -822,8 +908,12 @@ body {
         transform: translateX(-100%);
     }
     
-    .sidebar.hidden {
-        transform: translateX(-100%);
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    
+    .mobile-menu-btn {
+        display: flex;
     }
     
     .main-content.active {
@@ -844,7 +934,8 @@ body {
     }
     
     .week-day {
-        padding: 6px 2px;
+        padding: 8px 2px;
+        min-height: 50px;
     }
     
     .week-day-name {
@@ -854,9 +945,42 @@ body {
     .week-day-number {
         font-size: 0.9rem;
     }
+    
+    .modal {
+        padding: 10px;
+    }
+    
+    .modal-content {
+        width: 100%;
+    }
+    
+    .note-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
 }
 
 @media (max-width: 480px) {
+    .sidebar-header {
+        padding: 15px;
+    }
+    
+    .search-bar {
+        padding: 10px 15px;
+    }
+    
+    .tab {
+        padding: 12px 8px;
+        font-size: 0.85rem;
+    }
+    
+    .content-header {
+        padding: 12px 15px;
+    }
+    
     .content-header-title {
         font-size: 1.1rem;
     }
@@ -871,15 +995,110 @@ body {
     
     #note-title {
         font-size: 1.3rem;
+        padding: 12px;
+    }
+    
+    .note-editor {
+        padding: 15px;
+    }
+    
+    .week-selector-container {
+        padding: 12px;
+    }
+    
+    .week-nav-btn {
+        width: 36px;
+        height: 36px;
     }
     
     .modal-content {
-        width: 95%;
+        border-radius: 12px;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 15px;
+    }
+    
+    .member-item {
+        padding: 10px;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+    }
+    
+    .empty-state h3 {
+        font-size: 1.3rem;
+    }
+    
+    .empty-state p {
+        font-size: 0.9rem;
+    }
+}
+
+/* Touch device improvements */
+@media (hover: none) and (pointer: coarse) {
+    .note-item:hover {
+        transform: none;
+    }
+    
+    .week-nav-btn:hover {
+        background: rgba(255, 255, 255, 0.5);
+        color: inherit;
+        border-color: var(--glass-border);
+    }
+    
+    .week-nav-btn:active {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+    
+    .sidebar-actions i:hover,
+    .content-header-actions i:hover {
+        color: var(--text-color);
+    }
+    
+    .sidebar-actions i:active,
+    .content-header-actions i:active {
+        color: var(--primary-color);
+    }
+    
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.5);
+    }
+    
+    .btn-secondary:active {
+        background: rgba(255, 255, 255, 0.7);
+    }
+    
+    .btn-primary:hover {
+        background: var(--primary-color);
+        transform: none;
+    }
+    
+    .btn-primary:active {
+        background: var(--secondary-color);
+        transform: translateY(-2px);
+    }
+}
+
+/* Prevent zoom on input focus for mobile */
+@media (max-width: 768px) {
+    input, select, textarea {
+        font-size: 16px !important;
     }
 }
     </style>
 </head>
 <body>
+    <!-- Mobile Menu Button -->
+    <div class="mobile-menu-btn" id="mobile-menu-btn">
+        <i class="fas fa-bars"></i>
+    </div>
+
     <!-- Loading Screen -->
     <div class="loading-screen" id="loading-screen">
         <div class="loading-logo">SN</div>
@@ -1088,6 +1307,7 @@ body {
         const saveBtn = document.getElementById('save-btn');
         const newNoteBtn = document.getElementById('new-note-btn');
         const newNoteSidebarBtn = document.getElementById('new-note-sidebar-btn');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         
         // Week selector elements
         const currentWeekDisplay = document.getElementById('current-week-display');
@@ -1620,6 +1840,11 @@ body {
         
         // Set up event listeners
         function setupEventListeners() {
+            // Mobile menu button
+            mobileMenuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+            });
+            
             // Tab switching
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -1631,6 +1856,11 @@ body {
                     
                     // Reload notes based on selected tab
                     loadNotes();
+                    
+                    // On mobile, close sidebar after selecting a tab
+                    if (window.innerWidth < 768) {
+                        sidebar.classList.remove('active');
+                    }
                 });
             });
             
@@ -1641,6 +1871,11 @@ body {
                 emptyState.style.display = 'flex';
                 noteEditorContainer.style.display = 'none';
                 currentNote = null;
+                
+                // On mobile, show sidebar when going back
+                if (window.innerWidth < 768) {
+                    sidebar.classList.add('active');
+                }
             });
             
             // New note buttons
@@ -1658,6 +1893,11 @@ body {
                     noteEditorContainer.style.display = 'none';
                     currentNote = null;
                     isNewNote = false;
+                    
+                    // On mobile, show sidebar when canceling new note
+                    if (window.innerWidth < 768) {
+                        sidebar.classList.add('active');
+                    }
                 } else if (currentNote) {
                     // If editing existing note, reload it to discard changes
                     loadNote(currentNote.id);
@@ -1695,18 +1935,35 @@ body {
                     shareModal.style.display = 'none';
                 }
             });
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth < 768 && 
+                    sidebar.classList.contains('active') && 
+                    !sidebar.contains(e.target) && 
+                    e.target !== mobileMenuBtn) {
+                    sidebar.classList.remove('active');
+                }
+            });
         }
         
         // Handle window resize
         function handleResize() {
             if (window.innerWidth >= 768) {
                 sidebar.classList.remove('hidden');
+                sidebar.classList.remove('active');
                 mainContent.classList.add('active');
+                mobileMenuBtn.style.display = 'none';
                 
                 if (currentNote) {
                     emptyState.style.display = 'none';
                 } else {
                     emptyState.style.display = 'flex';
+                }
+            } else {
+                mobileMenuBtn.style.display = 'flex';
+                if (!currentNote) {
+                    sidebar.classList.add('active');
                 }
             }
         }
@@ -1986,7 +2243,7 @@ body {
             
             // For mobile, hide sidebar and show main content
             if (window.innerWidth < 768) {
-                sidebar.classList.add('hidden');
+                sidebar.classList.remove('active');
                 mainContent.classList.add('active');
             }
             
@@ -2012,7 +2269,7 @@ body {
             
             // For mobile, hide sidebar and show main content
             if (window.innerWidth < 768) {
-                sidebar.classList.add('hidden');
+                sidebar.classList.remove('active');
                 mainContent.classList.add('active');
             }
             
@@ -2215,6 +2472,11 @@ body {
                 currentNote = null;
                 emptyState.style.display = 'flex';
                 noteEditorContainer.style.display = 'none';
+                
+                // On mobile, show sidebar after deletion
+                if (window.innerWidth < 768) {
+                    sidebar.classList.add('active');
+                }
                 
                 // Reload notes list
                 await loadNotes();
