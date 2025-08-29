@@ -413,6 +413,11 @@
             justify-content: space-around;
             padding: 8px 0;
             z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .bottom-nav.hidden {
+            transform: translateY(100%);
         }
 
         .nav-item {
@@ -900,7 +905,7 @@
             </div>
         </div>
 
-        <nav class="bottom-nav">
+        <nav class="bottom-nav" id="bottom-nav">
             <a href="#" class="nav-item active" id="dashboard-nav">
                 <div class="nav-icon">
                     <i class="fas fa-tachometer-alt"></i>
@@ -965,6 +970,7 @@
         const greetingTitle = document.getElementById('greeting-title');
         const greetingSubtitle = document.getElementById('greeting-subtitle');
         const notificationContainer = document.getElementById('notification-container');
+        const bottomNav = document.getElementById('bottom-nav');
         
         // Attendance elements
         const attendanceStatus = document.getElementById('attendance-status');
@@ -1066,6 +1072,15 @@
             });
             
             return notification;
+        }
+        
+        // Toggle bottom navigation visibility
+        function toggleBottomNav(show) {
+            if (show) {
+                bottomNav.classList.remove('hidden');
+            } else {
+                bottomNav.classList.add('hidden');
+            }
         }
         
         // Identify the current teacher based on device info
@@ -1558,6 +1573,9 @@
                     // Update greeting
                     updateGreeting();
                     greetingSubtitle.textContent = 'Let\'s make today productive';
+                    
+                    // Show bottom navigation
+                    toggleBottomNav(true);
                 } else {
                     // Show the corresponding frame
                     const frameId = navId.replace('-nav', '-frame');
@@ -1569,6 +1587,9 @@
                             frame.style.display = 'none';
                         }
                     });
+                    
+                    // Hide bottom navigation when viewing iframe content
+                    toggleBottomNav(false);
                     
                     // Update greeting based on the selected frame
                     const pageTitle = this.querySelector('span').textContent;
@@ -1589,6 +1610,9 @@
                     nav.classList.remove('active');
                 });
                 document.getElementById('dashboard-nav').classList.add('active');
+                
+                // Show bottom navigation
+                toggleBottomNav(true);
                 
                 // Restore dashboard greeting
                 updateGreeting();
