@@ -366,7 +366,7 @@
 
         .close-modal {
             background: none;
-            border: none;
+            border: null;
             font-size: 24px;
             cursor: pointer;
             color: #7f8c8d;
@@ -457,7 +457,7 @@
 
         .notification-close {
             background: none;
-            border: none;
+            border: null;
             color: inherit;
             cursor: pointer;
             margin-left: 15px;
@@ -623,36 +623,6 @@
             transform: translateY(-5px) scale(1.05);
         }
 
-        .toggle-logout-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 10002;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: var(--transition);
-            display: none;
-            touch-action: manipulation;
-        }
-
-        .toggle-logout-btn.visible {
-            display: flex;
-        }
-
-        .toggle-logout-btn:hover {
-            background: var(--secondary-color);
-            transform: translateY(-3px);
-        }
-
         /* Auto-login checkbox */
         .remember-me {
             display: flex;
@@ -732,16 +702,11 @@
                 font-size: 14px;
             }
             
-            .logout-btn, .toggle-logout-btn {
+            .logout-btn {
                 bottom: 15px;
                 right: 15px;
                 width: 45px;
                 height: 45px;
-            }
-            
-            .toggle-logout-btn {
-                width: 35px;
-                height: 35px;
             }
             
             .notification-title {
@@ -873,9 +838,6 @@
         <button class="logout-btn" id="logout-btn">
             <i class="fas fa-sign-out-alt"></i>
         </button>
-        <button class="toggle-logout-btn" id="toggle-logout-btn">
-            <i class="fas fa-chevron-up"></i>
-        </button>
         <iframe id="content-frame" allowfullscreen></iframe>
     </div>
     
@@ -914,7 +876,6 @@
         const iframeContainer = document.getElementById('iframe-container');
         const contentFrame = document.getElementById('content-frame');
         const logoutBtn = document.getElementById('logout-btn');
-        const toggleLogoutBtn = document.getElementById('toggle-logout-btn');
         const rememberMeCheckbox = document.getElementById('remember-me');
         const iframeBackBtn = document.getElementById('iframe-back-btn');
         const iframeRefreshBtn = document.getElementById('iframe-refresh-btn');
@@ -1141,7 +1102,6 @@
         // Load content in iframe
         function loadContentInIframe(url) {
             iframeContainer.classList.add('active');
-            toggleLogoutBtn.classList.add('visible');
             contentFrame.src = url;
             
             // Add mobile-friendly iframe attributes
@@ -1166,11 +1126,6 @@
             handleLogout();
         });
         
-        // Toggle logout button visibility
-        toggleLogoutBtn.addEventListener('click', function() {
-            logoutBtn.classList.toggle('visible');
-        });
-        
         // Logout functionality
         async function handleLogout() {
             try {
@@ -1185,7 +1140,6 @@
                 
                 // Hide iframe and show login screen
                 iframeContainer.classList.remove('active');
-                toggleLogoutBtn.classList.remove('visible');
                 logoutBtn.classList.remove('visible');
                 contentFrame.src = '';
                 currentUserId = null;
