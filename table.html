@@ -35,7 +35,7 @@
 
         .subjects-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 15px;
         }
 
@@ -64,7 +64,7 @@
         }
 
         .subject-name {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
             color: var(--primary-color);
         }
@@ -78,6 +78,7 @@
             justify-content: center;
             color: white;
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            font-size: 0.9rem;
         }
 
         .class-info {
@@ -180,7 +181,7 @@
             z-index: 9999;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
         .notification {
@@ -234,7 +235,7 @@
 
         .notification-title {
             font-weight: 600;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
             font-size: 0.95rem;
         }
 
@@ -256,11 +257,11 @@
         /* Mobile-specific styles */
         @media (max-width: 768px) {
             body {
-                padding: 10px;
+                padding: 12px;
             }
             
             .subjects-container {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
                 gap: 10px;
             }
             
@@ -270,13 +271,13 @@
             }
             
             .subject-name {
-                font-size: 1.1rem;
+                font-size: 0.95rem;
             }
             
             .subject-icon {
-                width: 32px;
-                height: 32px;
-                font-size: 0.9rem;
+                width: 30px;
+                height: 30px;
+                font-size: 0.8rem;
             }
             
             .class-name {
@@ -285,29 +286,6 @@
             
             .schedule {
                 font-size: 0.8rem;
-            }
-            
-            .time {
-                font-size: 0.8rem;
-            }
-            
-            .notification-container {
-                width: 90%;
-                right: 5%;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .subject-header {
-                margin-bottom: 10px;
-            }
-            
-            .subject-name {
-                font-size: 1rem;
-            }
-            
-            .class-item {
-                padding: 6px 0;
             }
             
             .day {
@@ -315,31 +293,51 @@
                 padding: 2px 5px;
             }
             
-            .no-subjects {
-                padding: 20px;
-                font-size: 0.9rem;
+            .time {
+                font-size: 0.8rem;
             }
             
-            .loading-text {
-                font-size: 1rem;
+            .notification-container {
+                width: 300px;
+                top: 10px;
+                right: 10px;
+            }
+            
+            .notification {
+                padding: 12px 15px;
             }
         }
 
-        @media (max-width: 360px) {
+        @media (max-width: 480px) {
+            .subjects-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            
             .subject-card {
                 padding: 10px;
             }
             
             .subject-name {
-                font-size: 0.95rem;
+                font-size: 0.9rem;
             }
             
-            .class-name {
-                font-size: 0.85rem;
+            .subject-header {
+                margin-bottom: 8px;
             }
             
-            .schedule {
-                font-size: 0.75rem;
+            .class-item {
+                padding: 6px 0;
+            }
+            
+            .notification-container {
+                width: 280px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .subjects-container {
+                grid-template-columns: 1fr;
             }
         }
     </style>
