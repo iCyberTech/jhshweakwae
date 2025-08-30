@@ -1106,6 +1106,69 @@ body {
     box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
 }
 
+/* Mobile New Note Modal */
+.mobile-note-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.mobile-note-modal-content {
+    background: white;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.mobile-note-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.mobile-note-modal-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.mobile-note-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--light-text);
+    padding: 5px;
+}
+
+.mobile-note-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.mobile-note-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-color);
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
     .sidebar {
@@ -1125,19 +1188,19 @@ body {
         left: 0;
         height: 100%;
         z-index: 100;
-        transform: translateX(-100%);
+        transform: translateX(0);
     }
     
-    .sidebar.active {
-        transform: translateX(0);
+    .main-content {
+        display: none;
+    }
+    
+    .main-content.active {
+        display: flex;
     }
     
     .mobile-menu-btn {
         display: flex;
-    }
-    
-    .main-content.active {
-        margin-left: 0;
     }
     
     .content-header-back {
@@ -1363,6 +1426,78 @@ body {
     <!-- Notification Container -->
     <div class="notification-container" id="notification-container"></div>
 
+    <!-- Mobile New Note Modal -->
+    <div class="mobile-note-modal" id="mobile-note-modal">
+        <div class="mobile-note-modal-content">
+            <div class="mobile-note-modal-header">
+                <div class="mobile-note-modal-title">Create New Note</div>
+                <button class="mobile-note-modal-close" id="close-mobile-note-modal">&times;</button>
+            </div>
+            <div class="mobile-note-modal-body">
+                <!-- Mobile Form Sections -->
+                <div class="mobile-form-section">
+                    <h4><i class="fas fa-book"></i> Note Details</h4>
+                    <div class="mobile-form-row">
+                        <div class="mobile-form-group">
+                            <label class="mobile-form-label" for="mobile-modal-note-subject">Subject</label>
+                            <select id="mobile-modal-note-subject" class="mobile-form-select">
+                                <option value="">Select Subject</option>
+                            </select>
+                        </div>
+                        <div class="mobile-form-group">
+                            <label class="mobile-form-label" for="mobile-modal-note-class">Class</label>
+                            <select id="mobile-modal-note-class" class="mobile-form-select">
+                                <option value="">Select Class</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mobile Week Selector -->
+                <div class="mobile-week-selector">
+                    <h4><i class="fas fa-calendar"></i> Week Selection</h4>
+                    <div class="mobile-week-header">
+                        <div class="mobile-week-title" id="mobile-modal-week-display">Week 1</div>
+                        <div class="mobile-week-nav">
+                            <button class="mobile-week-nav-btn" id="mobile-modal-prev-week-btn">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="mobile-week-nav-btn" id="mobile-modal-next-week-btn">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <select id="mobile-modal-note-week" class="mobile-week-dropdown">
+                        <option value="">Select Week</option>
+                        <option value="1">Week 1</option>
+                        <option value="2">Week 2</option>
+                        <option value="3">Week 3</option>
+                        <option value="4">Week 4</option>
+                        <option value="5">Week 5</option>
+                        <option value="6">Week 6</option>
+                        <option value="7">Week 7</option>
+                        <option value="8">Week 8</option>
+                        <option value="9">Week 9</option>
+                        <option value="10">Week 10</option>
+                        <option value="11">Week 11</option>
+                        <option value="12">Week 12</option>
+                    </select>
+                </div>
+                
+                <!-- Mobile Note Content -->
+                <div class="mobile-form-section">
+                    <h4><i class="fas fa-edit"></i> Note Content</h4>
+                    <input type="text" id="mobile-modal-note-title" class="mobile-note-title" placeholder="Note Title">
+                    <textarea id="mobile-modal-note-content" class="mobile-note-content" placeholder="Write your note here..."></textarea>
+                </div>
+            </div>
+            <div class="mobile-note-modal-footer">
+                <button class="mobile-btn mobile-btn-secondary" id="mobile-modal-cancel-btn">Cancel</button>
+                <button class="mobile-btn mobile-btn-primary" id="mobile-modal-save-btn">Save Note</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Container -->
     <div class="container" id="main-container" style="display: none;">
         <!-- Sidebar -->
@@ -1579,7 +1714,7 @@ body {
                 <button class="modal-btn modal-btn-secondary" id="cancel-share-btn">Cancel</button>
                 <button class="modal-btn modal-btn-primary" id="confirm-share-btn">Share</button>
             </div>
-        </div>
+</div>
     </div>
 
     <script type="module">
@@ -1643,6 +1778,20 @@ body {
         const mobileNoteContent = document.getElementById('mobile-note-content');
         const mobileCancelBtn = document.getElementById('mobile-cancel-btn');
         const mobileSaveBtn = document.getElementById('mobile-save-btn');
+        
+        // Mobile modal elements
+        const mobileNoteModal = document.getElementById('mobile-note-modal');
+        const closeMobileNoteModal = document.getElementById('close-mobile-note-modal');
+        const mobileModalNoteSubject = document.getElementById('mobile-modal-note-subject');
+        const mobileModalNoteClass = document.getElementById('mobile-modal-note-class');
+        const mobileModalWeekDisplay = document.getElementById('mobile-modal-week-display');
+        const mobileModalPrevWeekBtn = document.getElementById('mobile-modal-prev-week-btn');
+        const mobileModalNextWeekBtn = document.getElementById('mobile-modal-next-week-btn');
+        const mobileModalNoteWeek = document.getElementById('mobile-modal-note-week');
+        const mobileModalNoteTitle = document.getElementById('mobile-modal-note-title');
+        const mobileModalNoteContent = document.getElementById('mobile-modal-note-content');
+        const mobileModalCancelBtn = document.getElementById('mobile-modal-cancel-btn');
+        const mobileModalSaveBtn = document.getElementById('mobile-modal-save-btn');
         
         // Week selector elements
         const currentWeekDisplay = document.getElementById('current-week-display');
@@ -1764,7 +1913,7 @@ body {
                 // Get current device info from browser
                 const userAgent = navigator.userAgent;
                 const screenResolution = `${window.screen.width}x${window.screen.height}`;
-                const language = navigator.language;
+                const language = navig.language;
                 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
                 
                 // Find matching user based on device info
@@ -1905,6 +2054,11 @@ body {
                     loadingScreen.style.display = 'none';
                     mainContainer.style.display = 'flex';
                     
+                    // On mobile, show sidebar by default
+                    if (window.innerWidth < 768) {
+                        mainContent.style.display = 'none';
+                    }
+                    
                     showNotification({
                         title: 'Welcome Back',
                         message: `You're logged in as ${user.name || 'User'}`,
@@ -2032,6 +2186,8 @@ body {
             noteClass.innerHTML = '<option value="">Select Class</option>';
             mobileNoteSubject.innerHTML = '<option value="">Select Subject</option>';
             mobileNoteClass.innerHTML = '<option value="">Select Class</option>';
+            mobileModalNoteSubject.innerHTML = '<option value="">Select Subject</option>';
+            mobileModalNoteClass.innerHTML = '<option value="">Select Class</option>';
             
             // Add subjects based on user type
             if (userType === 'teacher') {
@@ -2041,7 +2197,12 @@ body {
                     option.value = subject.id;
                     option.textContent = subject.name;
                     noteSubject.appendChild(option);
-                    mobileNoteSubject.appendChild(option.cloneNode(true));
+                    
+                    const mobileOption = option.cloneNode(true);
+                    mobileNoteSubject.appendChild(mobileOption);
+                    
+                    const modalOption = option.cloneNode(true);
+                    mobileModalNoteSubject.appendChild(modalOption);
                 });
             } else if (userType === 'student') {
                 // Students can only see subjects from their class
@@ -2050,7 +2211,12 @@ body {
                     option.value = subject.id;
                     option.textContent = subject.name;
                     noteSubject.appendChild(option);
-                    mobileNoteSubject.appendChild(option.cloneNode(true));
+                    
+                    const mobileOption = option.cloneNode(true);
+                    mobileNoteSubject.appendChild(mobileOption);
+                    
+                    const modalOption = option.cloneNode(true);
+                    mobileModalNoteSubject.appendChild(modalOption);
                 });
             }
             
@@ -2064,7 +2230,12 @@ body {
                         option.value = classId;
                         option.textContent = classData.name;
                         noteClass.appendChild(option);
-                        mobileNoteClass.appendChild(option.cloneNode(true));
+                        
+                        const mobileOption = option.cloneNode(true);
+                        mobileNoteClass.appendChild(mobileOption);
+                        
+                        const modalOption = option.cloneNode(true);
+                        mobileModalNoteClass.appendChild(modalOption);
                     }
                 });
             } else if (userType === 'student') {
@@ -2076,7 +2247,12 @@ body {
                         option.value = currentUserData.class;
                         option.textContent = classData.name;
                         noteClass.appendChild(option);
-                        mobileNoteClass.appendChild(option.cloneNode(true));
+                        
+                        const mobileOption = option.cloneNode(true);
+                        mobileNoteClass.appendChild(mobileOption);
+                        
+                        const modalOption = option.cloneNode(true);
+                        mobileModalNoteClass.appendChild(modalOption);
                     }
                 }
             }
@@ -2108,6 +2284,7 @@ body {
                     setWeek(currentWeek - 1);
                     noteWeekDropdown.value = currentWeek;
                     mobileNoteWeek.value = currentWeek;
+                    mobileModalNoteWeek.value = currentWeek;
                 }
             });
             
@@ -2116,6 +2293,7 @@ body {
                     setWeek(currentWeek + 1);
                     noteWeekDropdown.value = currentWeek;
                     mobileNoteWeek.value = currentWeek;
+                    mobileModalNoteWeek.value = currentWeek;
                 }
             });
             
@@ -2125,6 +2303,7 @@ body {
                     setWeek(currentWeek - 1);
                     noteWeekDropdown.value = currentWeek;
                     mobileNoteWeek.value = currentWeek;
+                    mobileModalNoteWeek.value = currentWeek;
                 }
             });
             
@@ -2133,6 +2312,26 @@ body {
                     setWeek(currentWeek + 1);
                     noteWeekDropdown.value = currentWeek;
                     mobileNoteWeek.value = currentWeek;
+                    mobileModalNoteWeek.value = currentWeek;
+                }
+            });
+            
+            // Mobile modal week navigation
+            mobileModalPrevWeekBtn.addEventListener('click', () => {
+                if (currentWeek > 1) {
+                    setWeek(currentWeek - 1);
+                    noteWeekDropdown.value = currentWeek;
+                    mobileNoteWeek.value = currentWeek;
+                    mobileModalNoteWeek.value = currentWeek;
+                }
+            });
+            
+            mobileModalNextWeekBtn.addEventListener('click', () => {
+                if (currentWeek < 12) {
+                    setWeek(currentWeek + 1);
+                    noteWeekDropdown.value = currentWeek;
+                    mobileNoteWeek.value = currentWeek;
+                    mobileModalNoteWeek.value = currentWeek;
                 }
             });
             
@@ -2142,6 +2341,7 @@ body {
                 if (week >= 1 && week <= 12) {
                     setWeek(week);
                     mobileNoteWeek.value = week;
+                    mobileModalNoteWeek.value = week;
                 }
             });
             
@@ -2150,6 +2350,16 @@ body {
                 if (week >= 1 && week <= 12) {
                     setWeek(week);
                     noteWeekDropdown.value = week;
+                    mobileModalNoteWeek.value = week;
+                }
+            });
+            
+            mobileModalNoteWeek.addEventListener('change', (e) => {
+                const week = parseInt(e.target.value);
+                if (week >= 1 && week <= 12) {
+                    setWeek(week);
+                    noteWeekDropdown.value = week;
+                    mobileNoteWeek.value = week;
                 }
             });
             
@@ -2173,6 +2383,7 @@ body {
             currentWeek = week;
             currentWeekDisplay.textContent = `Week ${week}`;
             mobileWeekDisplay.textContent = `Week ${week}`;
+            mobileModalWeekDisplay.textContent = `Week ${week}`;
             
             // Calculate dates for this week (assuming a 12-week semester starting from current date)
             const today = new Date();
@@ -2207,6 +2418,7 @@ body {
             // Update dropdowns to match
             noteWeekDropdown.value = week;
             mobileNoteWeek.value = week;
+            mobileModalNoteWeek.value = week;
             
             // If we're editing a note and it's for this week, highlight it
             if (currentNote && currentNote.week == week) {
@@ -2218,7 +2430,10 @@ body {
         function setupEventListeners() {
             // Mobile menu button
             mobileMenuBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('active');
+                if (window.innerWidth < 768) {
+                    mainContent.classList.toggle('active');
+                    sidebar.classList.toggle('active');
+                }
             });
             
             // Tab switching
@@ -2232,39 +2447,54 @@ body {
                     
                     // Reload notes based on selected tab
                     loadNotes();
-                    
-                    // On mobile, close sidebar after selecting a tab
-                    if (window.innerWidth < 768) {
-                        sidebar.classList.remove('active');
-                    }
                 });
             });
             
             // Back button (for mobile)
             backBtn.addEventListener('click', () => {
-                sidebar.classList.remove('hidden');
-                mainContent.classList.remove('active');
+                if (window.innerWidth < 768) {
+                    mainContent.classList.remove('active');
+                    sidebar.classList.add('active');
+                }
+                
                 emptyState.style.display = 'flex';
                 noteEditorContainer.style.display = 'none';
                 currentNote = null;
-                
-                // On mobile, show sidebar when going back
-                if (window.innerWidth < 768) {
-                    sidebar.classList.add('active');
-                }
             });
             
             // New note buttons
-            newNoteBtn.addEventListener('click', createNewNote);
-            newNoteSidebarBtn.addEventListener('click', createNewNote);
+            newNoteBtn.addEventListener('click', () => {
+                if (window.innerWidth < 768) {
+                    showMobileNoteModal();
+                } else {
+                    createNewNote();
+                }
+            });
+            
+            newNoteSidebarBtn.addEventListener('click', () => {
+                if (window.innerWidth < 768) {
+                    showMobileNoteModal();
+                } else {
+                    createNewNote();
+                }
+            });
             
             // Save note buttons
             saveBtn.addEventListener('click', saveNote);
             mobileSaveBtn.addEventListener('click', saveNote);
+            mobileModalSaveBtn.addEventListener('click', saveNoteFromModal);
             
             // Cancel buttons
             cancelBtn.addEventListener('click', cancelNote);
             mobileCancelBtn.addEventListener('click', cancelNote);
+            mobileModalCancelBtn.addEventListener('click', () => {
+                mobileNoteModal.style.display = 'none';
+            });
+            
+            // Close mobile modal button
+            closeMobileNoteModal.addEventListener('click', () => {
+                mobileNoteModal.style.display = 'none';
+            });
             
             // Share button
             shareBtn.addEventListener('click', showShareModal);
@@ -2280,34 +2510,62 @@ body {
             // Sync desktop and mobile form fields
             noteTitle.addEventListener('input', (e) => {
                 mobileNoteTitle.value = e.target.value;
+                mobileModalNoteTitle.value = e.target.value;
             });
             
             mobileNoteTitle.addEventListener('input', (e) => {
                 noteTitle.value = e.target.value;
+                mobileModalNoteTitle.value = e.target.value;
+            });
+            
+            mobileModalNoteTitle.addEventListener('input', (e) => {
+                noteTitle.value = e.target.value;
+                mobileNoteTitle.value = e.target.value;
             });
             
             noteContent.addEventListener('input', (e) => {
                 mobileNoteContent.value = e.target.value;
+                mobileModalNoteContent.value = e.target.value;
             });
             
             mobileNoteContent.addEventListener('input', (e) => {
                 noteContent.value = e.target.value;
+                mobileModalNoteContent.value = e.target.value;
+            });
+            
+            mobileModalNoteContent.addEventListener('input', (e) => {
+                noteContent.value = e.target.value;
+                mobileNoteContent.value = e.target.value;
             });
             
             noteSubject.addEventListener('change', (e) => {
                 mobileNoteSubject.value = e.target.value;
+                mobileModalNoteSubject.value = e.target.value;
             });
             
             mobileNoteSubject.addEventListener('change', (e) => {
                 noteSubject.value = e.target.value;
+                mobileModalNoteSubject.value = e.target.value;
+            });
+            
+            mobileModalNoteSubject.addEventListener('change', (e) => {
+                noteSubject.value = e.target.value;
+                mobileNoteSubject.value = e.target.value;
             });
             
             noteClass.addEventListener('change', (e) => {
                 mobileNoteClass.value = e.target.value;
+                mobileModalNoteClass.value = e.target.value;
             });
             
             mobileNoteClass.addEventListener('change', (e) => {
                 noteClass.value = e.target.value;
+                mobileModalNoteClass.value = e.target.value;
+            });
+            
+            mobileModalNoteClass.addEventListener('change', (e) => {
+                noteClass.value = e.target.value;
+                mobileNoteClass.value = e.target.value;
             });
             
             // Window resize handler
@@ -2329,15 +2587,8 @@ body {
                 if (e.target === shareModal) {
                     shareModal.style.display = 'none';
                 }
-            });
-            
-            // Close sidebar when clicking outside on mobile
-            document.addEventListener('click', (e) => {
-                if (window.innerWidth < 768 && 
-                    sidebar.classList.contains('active') && 
-                    !sidebar.contains(e.target) && 
-                    e.target !== mobileMenuBtn) {
-                    sidebar.classList.remove('active');
+                if (e.target === mobileNoteModal) {
+                    mobileNoteModal.style.display = 'none';
                 }
             });
         }
@@ -2345,9 +2596,8 @@ body {
         // Handle window resize
         function handleResize() {
             if (window.innerWidth >= 768) {
-                sidebar.classList.remove('hidden');
-                sidebar.classList.remove('active');
-                mainContent.classList.add('active');
+                sidebar.style.display = 'flex';
+                mainContent.style.display = 'flex';
                 mobileMenuBtn.style.display = 'none';
                 
                 if (currentNote) {
@@ -2358,8 +2608,112 @@ body {
             } else {
                 mobileMenuBtn.style.display = 'flex';
                 if (!currentNote) {
-                    sidebar.classList.add('active');
+                    mainContent.style.display = 'none';
+                    sidebar.style.display = 'flex';
                 }
+            }
+        }
+        
+        // Show mobile note modal
+        function showMobileNoteModal() {
+            // Reset form
+            mobileModalNoteTitle.value = '';
+            mobileModalNoteContent.value = '';
+            mobileModalNoteSubject.value = '';
+            mobileModalNoteClass.value = '';
+            setWeek(1); // Default to week 1
+            
+            // For teachers, allow selecting subject and class
+            if (userType === 'teacher') {
+                mobileModalNoteSubject.disabled = false;
+                mobileModalNoteClass.disabled = false;
+            } else {
+                // For students, set to their class and first subject (can be changed)
+                if (currentUserData.class) {
+                    mobileModalNoteClass.value = currentUserData.class;
+                    mobileModalNoteClass.disabled = true;
+                    
+                    if (userSubjects.length > 0) {
+                        mobileModalNoteSubject.value = userSubjects[0].id;
+                    }
+                }
+            }
+            
+            // Show modal
+            mobileNoteModal.style.display = 'flex';
+        }
+        
+        // Save note from mobile modal
+        async function saveNoteFromModal() {
+            const title = mobileModalNoteTitle.value.trim();
+            const content = mobileModalNoteContent.value.trim();
+            const subjectId = mobileModalNoteSubject.value;
+            const classId = mobileModalNoteClass.value;
+            const week = currentWeek;
+            
+            if (!title) {
+                showNotification({
+                    title: 'Error',
+                    message: 'Please enter a title for your note',
+                    type: 'error',
+                    duration: 3000
+                });
+                return;
+            }
+            
+            if (!subjectId || !classId || !week) {
+                showNotification({
+                    title: 'Error',
+                    message: 'Please select subject, class, and week',
+                    type: 'error',
+                    duration: 3000
+                });
+                return;
+            }
+            
+            try {
+                const now = new Date().toISOString();
+                const noteData = {
+                    title: title,
+                    content: content,
+                    subjectId: subjectId,
+                    classId: classId,
+                    week: week,
+                    updatedAt: now,
+                    ownerName: currentUserData.name,
+                    createdAt: now
+                };
+                
+                // Create new note
+                const newNoteRef = push(ref(db, `notes/${currentUserId}`));
+                await set(newNoteRef, noteData);
+                
+                currentNote = {
+                    id: newNoteRef.key,
+                    ...noteData
+                };
+                
+                showNotification({
+                    title: 'Success',
+                    message: 'Note created successfully',
+                    type: 'success',
+                    duration: 3000
+                });
+                
+                // Close modal
+                mobileNoteModal.style.display = 'none';
+                
+                // Reload notes list
+                await loadNotes();
+                
+            } catch (error) {
+                console.error('Error saving note:', error);
+                showNotification({
+                    title: 'Error',
+                    message: 'Failed to save note',
+                    type: 'error',
+                    duration: 3000
+                });
             }
         }
         
@@ -2646,12 +3000,6 @@ body {
             emptyState.style.display = 'none';
             noteEditorContainer.style.display = 'flex';
             
-            // For mobile, hide sidebar and show main content
-            if (window.innerWidth < 768) {
-                sidebar.classList.remove('active');
-                mainContent.classList.add('active');
-            }
-            
             // Focus on title
             if (window.innerWidth < 768) {
                 mobileNoteTitle.focus();
@@ -2677,10 +3025,10 @@ body {
             emptyState.style.display = 'none';
             noteEditorContainer.style.display = 'flex';
             
-            // For mobile, hide sidebar and show main content
+            // For mobile, show main content and hide sidebar
             if (window.innerWidth < 768) {
-                sidebar.classList.remove('active');
                 mainContent.classList.add('active');
+                sidebar.classList.remove('active');
             }
             
             // Set the week for this note
@@ -2688,6 +3036,7 @@ body {
                 setWeek(parseInt(note.week));
                 noteWeekDropdown.value = note.week;
                 mobileNoteWeek.value = note.week;
+                mobileModalNoteWeek.value = note.week;
             }
             
             // Highlight active note in list
@@ -2730,6 +3079,7 @@ body {
             setWeek(note.week || 1);
             noteWeekDropdown.value = note.week || '';
             mobileNoteWeek.value = note.week || '';
+            mobileModalNoteWeek.value = note.week || '';
             
             // Disable editing if this is a shared note and user is not the owner
             if (currentNote.ownerId && currentNote.ownerId !== currentUserId) {
@@ -2774,6 +3124,7 @@ body {
                 
                 // On mobile, show sidebar when canceling new note
                 if (window.innerWidth < 768) {
+                    mainContent.classList.remove('active');
                     sidebar.classList.add('active');
                 }
             } else if (currentNote) {
@@ -2925,6 +3276,7 @@ body {
                 
                 // On mobile, show sidebar after deletion
                 if (window.innerWidth < 768) {
+                    mainContent.classList.remove('active');
                     sidebar.classList.add('active');
                 }
                 
