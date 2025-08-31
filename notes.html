@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>School Notes Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -28,7 +28,6 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -36,7 +35,6 @@ body {
     color: var(--text-color);
     min-height: 100vh;
     overflow-x: hidden;
-    position: relative;
 }
 
 /* Loading Screen */
@@ -84,45 +82,39 @@ body {
 /* Main Container */
 .container {
     display: flex;
+    flex-direction: column;
     min-height: 100vh;
-    position: relative;
 }
 
-/* Sidebar */
+/* Sidebar as main page */
 .sidebar {
-    width: 350px;
+    width: 100%;
     background: var(--glass-bg);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border-right: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s ease;
-    position: relative;
-    z-index: 100;
-    height: 100vh;
-    overflow-y: auto;
+    transition: all 0.3s ease;
 }
 
 .sidebar-header {
-    padding: 20px;
+    padding: 15px;
     border-bottom: 1px solid var(--glass-border);
-    position: sticky;
-    top: 0;
-    background: rgba(255, 255, 255, 0.7);
-    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .user-info {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 15px;
 }
 
 .user-avatar {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid white;
@@ -131,14 +123,14 @@ body {
 
 .user-name {
     font-weight: 600;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 .user-badge {
     display: inline-block;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 0.7rem;
+    padding: 3px 6px;
+    border-radius: 10px;
+    font-size: 0.6rem;
     font-weight: 600;
 }
 
@@ -159,7 +151,6 @@ body {
 
 .sidebar-actions {
     display: flex;
-    justify-content: flex-end;
     gap: 15px;
 }
 
@@ -168,7 +159,6 @@ body {
     cursor: pointer;
     color: var(--text-color);
     transition: color 0.2s ease;
-    padding: 8px;
 }
 
 .sidebar-actions i:hover {
@@ -176,12 +166,8 @@ body {
 }
 
 .search-bar {
-    padding: 15px 20px;
+    padding: 12px 15px;
     border-bottom: 1px solid var(--glass-border);
-    position: sticky;
-    top: 107px;
-    background: rgba(255, 255, 255, 0.7);
-    z-index: 10;
 }
 
 .search-container {
@@ -198,11 +184,11 @@ body {
 
 .search-container input {
     width: 100%;
-    padding: 12px 15px 12px 40px;
+    padding: 10px 15px 10px 40px;
     border-radius: 20px;
     border: 1px solid var(--glass-border);
     background: rgba(255, 255, 255, 0.3);
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 .search-container input:focus {
@@ -213,21 +199,17 @@ body {
 .tab-bar {
     display: flex;
     border-bottom: 1px solid var(--glass-border);
-    position: sticky;
-    top: 163px;
-    background: rgba(255, 255, 255, 0.7);
-    z-index: 10;
 }
 
 .tab {
     flex: 1;
     text-align: center;
-    padding: 15px 12px;
+    padding: 12px;
     cursor: pointer;
     font-weight: 500;
     transition: all 0.2s ease;
     border-bottom: 2px solid transparent;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .tab.active {
@@ -239,12 +221,13 @@ body {
     flex: 1;
     overflow-y: auto;
     padding: 10px;
+    max-height: 50vh;
 }
 
 .note-item {
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
     background: rgba(255, 255, 255, 0.3);
     border: 1px solid var(--glass-border);
     cursor: pointer;
@@ -266,18 +249,18 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .note-item-title {
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.9rem;
     flex: 1;
-    margin-right: 10px;
+    margin-right: 8px;
 }
 
 .note-item-date {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: var(--light-text);
     white-space: nowrap;
 }
@@ -289,7 +272,7 @@ body {
 }
 
 .note-item-content {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--light-text);
 }
 
@@ -299,32 +282,26 @@ body {
     display: flex;
     flex-direction: column;
     position: relative;
-    height: 100vh;
-    overflow-y: auto;
 }
 
 .content-header {
     display: flex;
     align-items: center;
-    padding: 15px 20px;
+    padding: 12px 15px;
     background: var(--glass-bg);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--glass-border);
-    position: sticky;
-    top: 0;
-    z-index: 10;
 }
 
 .content-header-back {
-    margin-right: 15px;
+    margin-right: 12px;
     cursor: pointer;
-    display: none;
-    padding: 8px;
+    display: flex;
 }
 
 .content-header-back i {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
 }
 
 .content-header-info {
@@ -333,26 +310,25 @@ body {
 
 .content-header-title {
     font-weight: 600;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin-bottom: 4px;
 }
 
 .content-header-subtitle {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: var(--light-text);
 }
 
 .content-header-actions {
     display: flex;
-    gap: 15px;
+    gap: 12px;
 }
 
 .content-header-actions i {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     cursor: pointer;
     color: var(--text-color);
     transition: color 0.2s ease;
-    padding: 8px;
 }
 
 .content-header-actions i:hover {
@@ -362,55 +338,166 @@ body {
 /* Note Editor */
 .note-editor {
     flex: 1;
-    padding: 20px;
+    padding: 15px;
     overflow-y: auto;
     display: none;
 }
 
-/* Note Meta Info (Read-only) */
-.note-meta-info {
-    margin-bottom: 20px;
+/* Week Selector */
+.week-selector-container {
+    margin-bottom: 15px;
     background: rgba(255, 255, 255, 0.3);
-    border-radius: 10px;
-    padding: 15px;
+    border-radius: 8px;
+    padding: 12px;
     border: 1px solid var(--glass-border);
 }
 
-.meta-item {
+.week-selector-header {
     display: flex;
-    margin-bottom: 10px;
+    justify-content: space-between;
     align-items: center;
+    margin-bottom: 12px;
 }
 
-.meta-item:last-child {
-    margin-bottom: 0;
-}
-
-.meta-label {
+.current-week-display {
     font-weight: 600;
-    min-width: 80px;
-    margin-right: 10px;
-    color: var(--light-text);
+    font-size: 1rem;
 }
 
-.meta-value {
-    flex: 1;
+.week-navigation {
+    display: flex;
+    gap: 6px;
+}
+
+.week-nav-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.week-nav-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-bottom: 12px;
+}
+
+.week-day {
+    text-align: center;
+    padding: 6px 3px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--glass-border);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.week-day:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.week-day.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.week-day.has-notes::after {
+    content: "";
+    display: block;
+    width: 5px;
+    height: 5px;
+    background-color: var(--success-color);
+    border-radius: 50%;
+    margin: 4px auto 0;
+}
+
+.week-day-name {
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.week-day-number {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.week-selector-dropdown {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+.week-selector-dropdown:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Note Meta */
+.note-meta {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-color);
+}
+
+.form-select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
 }
 
 /* Note Content */
 .note-content {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 #note-title {
     width: 100%;
-    padding: 15px;
-    font-size: 1.5rem;
+    padding: 10px 12px;
+    font-size: 1.3rem;
     font-weight: 600;
     border: none;
     border-bottom: 1px solid var(--glass-border);
     background: transparent;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
 }
 
 #note-title:focus {
@@ -420,12 +507,12 @@ body {
 
 #note-content {
     width: 100%;
-    min-height: 300px;
-    padding: 15px;
-    border-radius: 8px;
+    min-height: 200px;
+    padding: 12px;
+    border-radius: 6px;
     border: 1px solid var(--glass-border);
     background: rgba(255, 255, 255, 0.3);
-    font-size: 1rem;
+    font-size: 0.9rem;
     line-height: 1.6;
     resize: vertical;
 }
@@ -440,27 +527,17 @@ body {
 .note-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    padding: 15px 0;
-    position: sticky;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
-    margin: 0 -20px;
-    padding: 15px 20px;
+    gap: 8px;
 }
 
 .btn {
-    padding: 12px 24px;
-    border-radius: 20px;
+    padding: 8px 16px;
+    border-radius: 18px;
     border: none;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    font-size: 1rem;
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    font-size: 0.9rem;
 }
 
 .btn-secondary {
@@ -493,29 +570,30 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 40px 20px;
+    padding: 30px 15px;
 }
 
 .empty-state i {
-    font-size: 4rem;
+    font-size: 3rem;
     color: var(--light-text);
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     opacity: 0.5;
 }
 
 .empty-state h3 {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
+    font-size: 1.3rem;
+    margin-bottom: 8px;
     color: var(--text-color);
 }
 
 .empty-state p {
     color: var(--light-text);
-    margin-bottom: 20px;
-    max-width: 400px;
+    margin-bottom: 15px;
+    max-width: 300px;
+    font-size: 0.9rem;
 }
 
-/* Modal */
+/* Modal - Updated for mobile */
 .modal {
     position: fixed;
     top: 0;
@@ -527,14 +605,14 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    padding: 20px;
+    padding: 15px;
 }
 
 .modal-content {
     background: white;
-    border-radius: 15px;
+    border-radius: 12px;
     width: 100%;
-    max-width: 500px;
+    max-width: 100%;
     max-height: 90vh;
     overflow: hidden;
     display: flex;
@@ -546,26 +624,25 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    padding: 15px;
     border-bottom: 1px solid var(--border-color);
 }
 
 .modal-title {
     font-weight: 600;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
 }
 
 .modal-close {
     background: none;
     border: none;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     cursor: pointer;
     color: var(--light-text);
-    padding: 5px;
 }
 
 .modal-body {
-    padding: 20px;
+    padding: 15px;
     overflow-y: auto;
     flex: 1;
 }
@@ -573,22 +650,19 @@ body {
 .modal-footer {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    padding: 15px 20px;
+    gap: 8px;
+    padding: 12px 15px;
     border-top: 1px solid var(--border-color);
 }
 
 .modal-btn {
-    padding: 12px 20px;
+    padding: 8px 16px;
     border-radius: 6px;
     border: none;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    font-size: 0.9rem;
 }
 
 .modal-btn-secondary {
@@ -613,9 +687,9 @@ body {
 .member-item {
     display: flex;
     align-items: center;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 8px;
+    padding: 8px;
+    border-radius: 6px;
+    margin-bottom: 6px;
     background: rgba(0, 0, 0, 0.03);
 }
 
@@ -624,11 +698,11 @@ body {
 }
 
 .member-avatar {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     object-fit: cover;
-    margin-right: 12px;
+    margin-right: 10px;
 }
 
 .member-info {
@@ -637,186 +711,42 @@ body {
 
 .member-name {
     font-weight: 600;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
+    font-size: 0.9rem;
 }
 
 .member-role {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--light-text);
 }
 
 .member-status {
-    margin-left: 10px;
+    margin-left: 8px;
 }
 
 .member-checkbox {
-    width: 22px;
-    height: 22px;
+    width: 18px;
+    height: 18px;
     cursor: pointer;
-}
-
-/* New Note Modal Specific Styles */
-.new-note-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-label {
-    font-size: 0.95rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--text-color);
-}
-
-.form-select, .form-input {
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.5);
-    font-size: 1rem;
-}
-
-.form-select:focus, .form-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-}
-
-/* Week Selector in Modal */
-.week-selector-container {
-    margin-bottom: 10px;
-}
-
-.week-selector-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.current-week-display {
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-
-.week-navigation {
-    display: flex;
-    gap: 8px;
-}
-
-.week-nav-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.5);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.week-nav-btn:hover {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
-
-.week-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
-    margin-bottom: 15px;
-}
-
-.week-day {
-    text-align: center;
-    padding: 10px 5px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.3);
-    border: 1px solid var(--glass-border);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    min-height: 60px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.week-day:hover {
-    background: rgba(255, 255, 255, 0.5);
-}
-
-.week-day.active {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
-
-.week-day.has-notes::after {
-    content: "";
-    display: block;
-    width: 6px;
-    height: 6px;
-    background-color: var(--success-color);
-    border-radius: 50%;
-    margin: 5px auto 0;
-}
-
-.week-day-name {
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
-.week-day-number {
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.week-selector-dropdown {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.5);
-    font-size: 1rem;
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 16px;
-}
-
-.week-selector-dropdown:focus {
-    outline: none;
-    border-color: var(--primary-color);
 }
 
 /* Notification Styles */
 .notification-container {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 350px;
-    max-width: 90%;
+    top: 15px;
+    right: 15px;
+    width: 300px;
+    max-width: 85%;
     z-index: 9999;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .notification {
     position: relative;
-    padding: 16px 20px;
-    border-radius: 10px;
+    padding: 12px 15px;
+    border-radius: 8px;
     color: white;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     display: flex;
@@ -854,8 +784,8 @@ body {
 }
 
 .notification-icon {
-    margin-right: 12px;
-    font-size: 20px;
+    margin-right: 10px;
+    font-size: 18px;
 }
 
 .notification-content {
@@ -864,11 +794,12 @@ body {
 
 .notification-title {
     font-weight: 600;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
+    font-size: 0.9rem;
 }
 
 .notification-message {
-    font-size: 14px;
+    font-size: 0.8rem;
     opacity: 0.9;
 }
 
@@ -877,243 +808,147 @@ body {
     border: none;
     color: inherit;
     cursor: pointer;
-    margin-left: 15px;
-    font-size: 18px;
+    margin-left: 12px;
+    font-size: 16px;
     opacity: 0.8;
-    padding: 5px;
 }
 
 .notification-close:hover {
     opacity: 1;
 }
 
-/* Mobile Menu Button */
-.mobile-menu-btn {
+/* Mobile Create Note Modal */
+.create-note-modal {
     position: fixed;
-    top: 20px;
-    left: 20px;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--primary-color);
-    color: white;
-    display: flex;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
     align-items: center;
     justify-content: center;
-    z-index: 101;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    display: none;
+    z-index: 1000;
+    padding: 15px;
+}
+
+.create-note-content {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 100%;
+    height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.create-note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.create-note-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.create-note-close {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: var(--light-text);
+}
+
+.create-note-body {
+    padding: 15px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.create-note-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 15px;
+    border-top: 1px solid var(--border-color);
 }
 
 /* Responsive Design */
-@media (max-width: 1024px) {
-    .sidebar {
-        width: 300px;
-    }
-}
-
-@media (max-width: 768px) {
+@media (min-width: 769px) {
     .container {
-        flex-direction: column;
+        flex-direction: row;
     }
     
     .sidebar {
-        width: 100%;
-        position: fixed;
+        width: 350px;
+        height: 100vh;
+        position: sticky;
         top: 0;
-        left: 0;
-        height: 100%;
-        z-index: 100;
-        transform: translateX(-100%);
+        border-right: 1px solid var(--glass-border);
+        border-bottom: none;
     }
     
-    .sidebar.active {
-        transform: translateX(0);
-    }
-    
-    .mobile-menu-btn {
-        display: flex;
-    }
-    
-    .main-content.active {
-        margin-left: 0;
-    }
-    
-    .content-header-back {
-        display: block;
-    }
-    
-    .week-grid {
-        grid-template-columns: repeat(7, 1fr);
-        gap: 4px;
-    }
-    
-    .week-day {
-        padding: 8px 2px;
-        min-height: 50px;
-    }
-    
-    .week-day-name {
-        font-size: 0.7rem;
-    }
-    
-    .week-day-number {
-        font-size: 0.9rem;
-    }
-    
-    .modal {
-        padding: 10px;
+    .notes-list {
+        max-height: none;
     }
     
     .modal-content {
-        width: 100%;
+        width: 90%;
+        max-width: 500px;
     }
     
-    .note-actions {
-        flex-direction: column;
+    .create-note-content {
+        width: 90%;
+        max-width: 500px;
+        height: auto;
+        max-height: 90vh;
     }
     
-    .btn {
-        width: 100%;
+    .note-meta {
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
     }
 }
 
 @media (max-width: 480px) {
-    .sidebar-header {
-        padding: 15px;
-    }
-    
-    .search-bar {
-        padding: 10px 15px;
-    }
-    
-    .tab {
-        padding: 12px 8px;
-        font-size: 0.85rem;
-    }
-    
-    .content-header {
-        padding: 12px 15px;
-    }
-    
     .content-header-title {
-        font-size: 1.1rem;
-    }
-    
-    .content-header-subtitle {
-        font-size: 0.8rem;
-    }
-    
-    .current-week-display {
         font-size: 1rem;
     }
     
-    #note-title {
-        font-size: 1.3rem;
-        padding: 12px;
+    .content-header-subtitle {
+        font-size: 0.75rem;
     }
     
-    .note-editor {
-        padding: 15px;
-    }
-    
-    .week-selector-container {
-        padding: 12px;
-    }
-    
-    .week-nav-btn {
-        width: 36px;
-        height: 36px;
-    }
-    
-    .modal-content {
-        border-radius: 12px;
-    }
-    
-    .modal-header,
-    .modal-body,
-    .modal-footer {
-        padding: 15px;
-    }
-    
-    .member-item {
-        padding: 10px;
-    }
-    
-    .empty-state i {
-        font-size: 3rem;
-    }
-    
-    .empty-state h3 {
-        font-size: 1.3rem;
-    }
-    
-    .empty-state p {
+    .current-week-display {
         font-size: 0.9rem;
     }
-}
-
-/* Touch device improvements */
-@media (hover: none) and (pointer: coarse) {
-    .note-item:hover {
-        transform: none;
+    
+    #note-title {
+        font-size: 1.1rem;
     }
     
-    .week-nav-btn:hover {
-        background: rgba(255, 255, 255, 0.5);
-        color: inherit;
-        border-color: var(--glass-border);
+    .week-day-name {
+        font-size: 0.6rem;
     }
     
-    .week-nav-btn:active {
-        background: var(--primary-color);
-        color: white;
-        border-color: var(--primary-color);
+    .week-day-number {
+        font-size: 0.8rem;
     }
     
-    .sidebar-actions i:hover,
-    .content-header-actions i:hover {
-        color: var(--text-color);
-    }
-    
-    .sidebar-actions i:active,
-    .content-header-actions i:active {
-        color: var(--primary-color);
-    }
-    
-    .btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.5);
-    }
-    
-    .btn-secondary:active {
-        background: rgba(255, 255, 255, 0.7);
-    }
-    
-    .btn-primary:hover {
-        background: var(--primary-color);
-        transform: none;
-    }
-    
-    .btn-primary:active {
-        background: var(--secondary-color);
-        transform: translateY(-2px);
-    }
-}
-
-/* Prevent zoom on input focus for mobile */
-@media (max-width: 768px) {
-    input, select, textarea {
-        font-size: 16px !important;
+    .tab {
+        padding: 10px;
+        font-size: 0.8rem;
     }
 }
     </style>
 </head>
 <body>
-    <!-- Mobile Menu Button -->
-    <div class="mobile-menu-btn" id="mobile-menu-btn">
-        <i class="fas fa-bars"></i>
-    </div>
-
     <!-- Loading Screen -->
     <div class="loading-screen" id="loading-screen">
         <div class="loading-logo">SN</div>
@@ -1177,19 +1012,51 @@ body {
             </div>
             
             <div class="note-editor" id="note-editor-container">
-                <!-- Note Meta Info (Read-only) -->
-                <div class="note-meta-info" id="note-meta-info">
-                    <div class="meta-item">
-                        <div class="meta-label">Subject:</div>
-                        <div class="meta-value" id="meta-subject"></div>
+                <!-- Enhanced Week Selector -->
+                <div class="week-selector-container">
+                    <div class="week-selector-header">
+                        <div class="current-week-display" id="current-week-display">Week 1</div>
+                        <div class="week-navigation">
+                            <button class="week-nav-btn" id="prev-week-btn">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="week-nav-btn" id="next-week-btn">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="meta-item">
-                        <div class="meta-label">Class:</div>
-                        <div class="meta-value" id="meta-class"></div>
+                    <div class="week-grid" id="week-grid">
+                        <!-- Days will be populated by JavaScript -->
                     </div>
-                    <div class="meta-item">
-                        <div class="meta-label">Week:</div>
-                        <div class="meta-value" id="meta-week"></div>
+                    <select id="note-week" class="week-selector-dropdown">
+                        <option value="">Select Week</option>
+                        <option value="1">Week 1</option>
+                        <option value="2">Week 2</option>
+                        <option value="3">Week 3</option>
+                        <option value="4">Week 4</option>
+                        <option value="5">Week 5</option>
+                        <option value="6">Week 6</option>
+                        <option value="7">Week 7</option>
+                        <option value="8">Week 8</option>
+                        <option value="9">Week 9</option>
+                        <option value="10">Week 10</option>
+                        <option value="11">Week 11</option>
+                        <option value="12">Week 12</option>
+                    </select>
+                </div>
+                
+                <div class="note-meta">
+                    <div class="form-group">
+                        <label class="form-label" for="note-subject">Subject</label>
+                        <select id="note-subject" class="form-select">
+                            <option value="">Select Subject</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="note-class">Class</label>
+                        <select id="note-class" class="form-select">
+                            <option value="">Select Class</option>
+                        </select>
                     </div>
                 </div>
                 
@@ -1210,70 +1077,6 @@ body {
                 <h3>No Note Selected</h3>
                 <p>Select a note from the sidebar or create a new one</p>
                 <button class="btn" id="new-note-sidebar-btn">New Note</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- New Note Modal -->
-    <div class="modal" id="new-note-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Create New Note</div>
-                <button class="modal-close" id="close-new-note-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="new-note-form">
-                    <div class="form-group">
-                        <label class="form-label" for="new-note-subject">Subject</label>
-                        <select id="new-note-subject" class="form-select">
-                            <option value="">Select Subject</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="new-note-class">Class</label>
-                        <select id="new-note-class" class="form-select">
-                            <option value="">Select Class</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Enhanced Week Selector -->
-                    <div class="week-selector-container">
-                        <div class="week-selector-header">
-                            <div class="current-week-display" id="current-week-display">Week 1</div>
-                            <div class="week-navigation">
-                                <button class="week-nav-btn" id="prev-week-btn">
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
-                                <button class="week-nav-btn" id="next-week-btn">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="week-grid" id="week-grid">
-                            <!-- Days will be populated by JavaScript -->
-                        </div>
-                        <select id="new-note-week" class="week-selector-dropdown">
-                            <option value="">Select Week</option>
-                            <option value="1">Week 1</option>
-                            <option value="2">Week 2</option>
-                            <option value="3">Week 3</option>
-                            <option value="4">Week 4</option>
-                            <option value="5">Week 5</option>
-                            <option value="6">Week 6</option>
-                            <option value="7">Week 7</option>
-                            <option value="8">Week 8</option>
-                            <option value="9">Week 9</option>
-                            <option value="10">Week 10</option>
-                            <option value="11">Week 11</option>
-                            <option value="12">Week 12</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn modal-btn-secondary" id="cancel-new-note-btn">Cancel</button>
-                <button class="modal-btn modal-btn-primary" id="confirm-new-note-btn">Create Note</button>
             </div>
         </div>
     </div>
@@ -1345,26 +1148,15 @@ body {
         const shareBtn = document.getElementById('share-btn');
         const deleteBtn = document.getElementById('delete-btn');
         const noteEditorContainer = document.getElementById('note-editor-container');
-        const noteMetaInfo = document.getElementById('note-meta-info');
-        const metaSubject = document.getElementById('meta-subject');
-        const metaClass = document.getElementById('meta-class');
-        const metaWeek = document.getElementById('meta-week');
+        const noteSubject = document.getElementById('note-subject');
+        const noteClass = document.getElementById('note-class');
+        const noteWeekDropdown = document.getElementById('note-week');
         const noteTitle = document.getElementById('note-title');
         const noteContent = document.getElementById('note-content');
         const cancelBtn = document.getElementById('cancel-btn');
         const saveBtn = document.getElementById('save-btn');
         const newNoteBtn = document.getElementById('new-note-btn');
         const newNoteSidebarBtn = document.getElementById('new-note-sidebar-btn');
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        
-        // New Note Modal elements
-        const newNoteModal = document.getElementById('new-note-modal');
-        const closeNewNoteModal = document.getElementById('close-new-note-modal');
-        const cancelNewNoteBtn = document.getElementById('cancel-new-note-btn');
-        const confirmNewNoteBtn = document.getElementById('confirm-new-note-btn');
-        const newNoteSubject = document.getElementById('new-note-subject');
-        const newNoteClass = document.getElementById('new-note-class');
-        const newNoteWeekDropdown = document.getElementById('new-note-week');
         
         // Week selector elements
         const currentWeekDisplay = document.getElementById('current-week-display');
@@ -1407,11 +1199,6 @@ body {
         let isNewNote = false;
         let currentWeek = 1;
         let notesByWeek = {};
-        let selectedNoteMeta = {
-            subjectId: '',
-            classId: '',
-            week: 1
-        };
         
         // Show notification function (same as connect.html)
         function showNotification({ title, message, type = 'info', duration = 5000 }) {
@@ -1750,8 +1537,8 @@ body {
         // Populate subject and class dropdowns
         function populateDropdowns() {
             // Clear existing options
-            newNoteSubject.innerHTML = '<option value="">Select Subject</option>';
-            newNoteClass.innerHTML = '<option value="">Select Class</option>';
+            noteSubject.innerHTML = '<option value="">Select Subject</option>';
+            noteClass.innerHTML = '<option value="">Select Class</option>';
             
             // Add subjects based on user type
             if (userType === 'teacher') {
@@ -1760,7 +1547,7 @@ body {
                     const option = document.createElement('option');
                     option.value = subject.id;
                     option.textContent = subject.name;
-                    newNoteSubject.appendChild(option);
+                    noteSubject.appendChild(option);
                 });
             } else if (userType === 'student') {
                 // Students can only see subjects from their class
@@ -1768,7 +1555,7 @@ body {
                     const option = document.createElement('option');
                     option.value = subject.id;
                     option.textContent = subject.name;
-                    newNoteSubject.appendChild(option);
+                    noteSubject.appendChild(option);
                 });
             }
             
@@ -1781,7 +1568,7 @@ body {
                         const option = document.createElement('option');
                         option.value = classId;
                         option.textContent = classData.name;
-                        newNoteClass.appendChild(option);
+                        noteClass.appendChild(option);
                     }
                 });
             } else if (userType === 'student') {
@@ -1792,7 +1579,7 @@ body {
                         const option = document.createElement('option');
                         option.value = currentUserData.class;
                         option.textContent = classData.name;
-                        newNoteClass.appendChild(option);
+                        noteClass.appendChild(option);
                     }
                 }
             }
@@ -1822,19 +1609,19 @@ body {
             prevWeekBtn.addEventListener('click', () => {
                 if (currentWeek > 1) {
                     setWeek(currentWeek - 1);
-                    newNoteWeekDropdown.value = currentWeek;
+                    noteWeekDropdown.value = currentWeek;
                 }
             });
             
             nextWeekBtn.addEventListener('click', () => {
                 if (currentWeek < 12) {
                     setWeek(currentWeek + 1);
-                    newNoteWeekDropdown.value = currentWeek;
+                    noteWeekDropdown.value = currentWeek;
                 }
             });
             
             // Event listener for dropdown
-            newNoteWeekDropdown.addEventListener('change', (e) => {
+            noteWeekDropdown.addEventListener('change', (e) => {
                 const week = parseInt(e.target.value);
                 if (week >= 1 && week <= 12) {
                     setWeek(week);
@@ -1892,7 +1679,7 @@ body {
             });
             
             // Update dropdown to match
-            newNoteWeekDropdown.value = week;
+            noteWeekDropdown.value = week;
             
             // If we're editing a note and it's for this week, highlight it
             if (currentNote && currentNote.week == week) {
@@ -1902,11 +1689,6 @@ body {
         
         // Set up event listeners
         function setupEventListeners() {
-            // Mobile menu button
-            mobileMenuBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('active');
-            });
-            
             // Tab switching
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -1918,11 +1700,6 @@ body {
                     
                     // Reload notes based on selected tab
                     loadNotes();
-                    
-                    // On mobile, close sidebar after selecting a tab
-                    if (window.innerWidth < 768) {
-                        sidebar.classList.remove('active');
-                    }
                 });
             });
             
@@ -1933,16 +1710,11 @@ body {
                 emptyState.style.display = 'flex';
                 noteEditorContainer.style.display = 'none';
                 currentNote = null;
-                
-                // On mobile, show sidebar when going back
-                if (window.innerWidth < 768) {
-                    sidebar.classList.add('active');
-                }
             });
             
             // New note buttons
-            newNoteBtn.addEventListener('click', showNewNoteModal);
-            newNoteSidebarBtn.addEventListener('click', showNewNoteModal);
+            newNoteBtn.addEventListener('click', createNewNote);
+            newNoteSidebarBtn.addEventListener('click', createNewNote);
             
             // Save note button
             saveBtn.addEventListener('click', saveNote);
@@ -1955,11 +1727,6 @@ body {
                     noteEditorContainer.style.display = 'none';
                     currentNote = null;
                     isNewNote = false;
-                    
-                    // On mobile, show sidebar when canceling new note
-                    if (window.innerWidth < 768) {
-                        sidebar.classList.add('active');
-                    }
                 } else if (currentNote) {
                     // If editing existing note, reload it to discard changes
                     loadNote(currentNote.id);
@@ -1977,17 +1744,6 @@ body {
                 filterNotes(e.target.value);
             });
             
-            // New Note Modal event listeners
-            closeNewNoteModal.addEventListener('click', () => {
-                newNoteModal.style.display = 'none';
-            });
-            
-            cancelNewNoteBtn.addEventListener('click', () => {
-                newNoteModal.style.display = 'none';
-            });
-            
-            confirmNewNoteBtn.addEventListener('click', createNewNote);
-            
             // Window resize handler
             window.addEventListener('resize', handleResize);
             
@@ -2004,21 +1760,8 @@ body {
             
             // Close modal when clicking outside
             window.addEventListener('click', (e) => {
-                if (e.target === newNoteModal) {
-                    newNoteModal.style.display = 'none';
-                }
                 if (e.target === shareModal) {
                     shareModal.style.display = 'none';
-                }
-            });
-            
-            // Close sidebar when clicking outside on mobile
-            document.addEventListener('click', (e) => {
-                if (window.innerWidth < 768 && 
-                    sidebar.classList.contains('active') && 
-                    !sidebar.contains(e.target) && 
-                    e.target !== mobileMenuBtn) {
-                    sidebar.classList.remove('active');
                 }
             });
         }
@@ -2027,93 +1770,14 @@ body {
         function handleResize() {
             if (window.innerWidth >= 768) {
                 sidebar.classList.remove('hidden');
-                sidebar.classList.remove('active');
                 mainContent.classList.add('active');
-                mobileMenuBtn.style.display = 'none';
                 
                 if (currentNote) {
                     emptyState.style.display = 'none';
                 } else {
                     emptyState.style.display = 'flex';
                 }
-            } else {
-                mobileMenuBtn.style.display = 'flex';
-                if (!currentNote) {
-                    sidebar.classList.add('active');
-                }
             }
-        }
-        
-        // Show new note modal
-        function showNewNoteModal() {
-            // Reset form
-            newNoteSubject.value = '';
-            newNoteClass.value = '';
-            setWeek(1);
-            newNoteWeekDropdown.value = '';
-            
-            // Show modal
-            newNoteModal.style.display = 'flex';
-        }
-        
-        // Create a new note
-        function createNewNote() {
-            const subjectId = newNoteSubject.value;
-            const classId = newNoteClass.value;
-            const week = newNoteWeekDropdown.value;
-            
-            if (!subjectId || !classId || !week) {
-                showNotification({
-                    title: 'Error',
-                    message: 'Please select subject, class, and week',
-                    type: 'error',
-                    duration: 3000
-                });
-                return;
-            }
-            
-            // Store the selected meta data
-            selectedNoteMeta = {
-                subjectId: subjectId,
-                classId: classId,
-                week: parseInt(week)
-            };
-            
-            // Update UI with selected meta data
-            const subjectName = allSubjects[subjectId]?.name || 'Unknown Subject';
-            const className = allClasses[classId]?.name || 'Unknown Class';
-            
-            metaSubject.textContent = subjectName;
-            metaClass.textContent = className;
-            metaWeek.textContent = `Week ${week}`;
-            
-            // Reset form
-            noteTitle.value = '';
-            noteContent.value = '';
-            
-            // Update UI
-            contentHeaderTitle.textContent = 'New Note';
-            contentHeaderSubtitle.textContent = 'Create a new lesson note';
-            
-            // Show editor and hide empty state
-            emptyState.style.display = 'none';
-            noteEditorContainer.style.display = 'flex';
-            
-            // Close modal
-            newNoteModal.style.display = 'none';
-            
-            // For mobile, hide sidebar and show main content
-            if (window.innerWidth < 768) {
-                sidebar.classList.remove('active');
-                mainContent.classList.add('active');
-            }
-            
-            // Focus on title
-            noteTitle.focus();
-            
-            // Set flag
-            isNewNote = true;
-            currentNote = null;
         }
         
         // Load notes based on selected tab
@@ -2186,7 +1850,7 @@ body {
         // Load notes shared with the user
         async function loadSharedNotes() {
             const sharedSnapshot = await get(ref(db, `sharedNotes/${currentUserId}`));
-            const sharedNotes = sharedSnapshot.exists() ? sharedNotes.val() : {};
+            const sharedNotes = sharedSnapshot.exists() ? sharedSnapshot.val() : {};
             
             const notesArray = [];
             
@@ -2257,7 +1921,7 @@ body {
             for (const subject of userSubjects) {
                 if (subject.teacher) {
                     const teacherNotesSnapshot = await get(ref(db, `notes/${subject.teacher}`));
-                    const teacherNotes = teacherNotesSnapshot.exists() ? teacherNotes.val() : {};
+                    const teacherNotes = teacherNotesSnapshot.exists() ? teacherNotesSnapshot.val() : {};
                     
                     for (const noteId in teacherNotes) {
                         const note = teacherNotes[noteId];
@@ -2353,6 +2017,52 @@ body {
             });
         }
         
+        // Create a new note
+        function createNewNote() {
+            currentNote = null;
+            isNewNote = true;
+            
+            // Reset form
+            noteTitle.value = '';
+            noteContent.value = '';
+            noteSubject.value = '';
+            noteClass.value = '';
+            setWeek(1); // Default to week 1
+            
+            // Update UI
+            contentHeaderTitle.textContent = 'New Note';
+            contentHeaderSubtitle.textContent = 'Create a new lesson note';
+            
+            // For teachers, allow selecting subject and class
+            if (userType === 'teacher') {
+                noteSubject.disabled = false;
+                noteClass.disabled = false;
+            } else {
+                // For students, set to their class and first subject (can be changed)
+                if (currentUserData.class) {
+                    noteClass.value = currentUserData.class;
+                    noteClass.disabled = true;
+                    
+                    if (userSubjects.length > 0) {
+                        noteSubject.value = userSubjects[0].id;
+                    }
+                }
+            }
+            
+            // Show editor and hide empty state
+            emptyState.style.display = 'none';
+            noteEditorContainer.style.display = 'flex';
+            
+            // For mobile, hide sidebar and show main content
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('hidden');
+                mainContent.classList.add('active');
+            }
+            
+            // Focus on title
+            noteTitle.focus();
+        }
+        
         // Open a note for viewing/editing
         async function openNote(note) {
             currentNote = note;
@@ -2371,8 +2081,14 @@ body {
             
             // For mobile, hide sidebar and show main content
             if (window.innerWidth < 768) {
-                sidebar.classList.remove('active');
+                sidebar.classList.add('hidden');
                 mainContent.classList.add('active');
+            }
+            
+            // Set the week for this note
+            if (note.week) {
+                setWeek(parseInt(note.week));
+                noteWeekDropdown.value = note.week;
             }
             
             // Highlight active note in list
@@ -2406,30 +2122,25 @@ body {
             // Update form fields
             noteTitle.value = note.title || '';
             noteContent.value = note.content || '';
-            
-            // Update meta info display
-            const subjectName = allSubjects[note.subjectId]?.name || 'Unknown Subject';
-            const className = allClasses[note.classId]?.name || 'Unknown Class';
-            
-            metaSubject.textContent = subjectName;
-            metaClass.textContent = className;
-            metaWeek.textContent = `Week ${note.week || 'N/A'}`;
-            
-            // Store the selected meta data
-            selectedNoteMeta = {
-                subjectId: note.subjectId || '',
-                classId: note.classId || '',
-                week: note.week || 1
-            };
+            noteSubject.value = note.subjectId || '';
+            noteClass.value = note.classId || '';
+            setWeek(note.week || 1);
+            noteWeekDropdown.value = note.week || '';
             
             // Disable editing if this is a shared note and user is not the owner
             if (currentNote.ownerId && currentNote.ownerId !== currentUserId) {
                 noteTitle.readOnly = true;
                 noteContent.readOnly = true;
+                noteSubject.disabled = true;
+                noteClass.disabled = true;
+                noteWeekDropdown.disabled = true;
                 saveBtn.style.display = 'none';
             } else {
                 noteTitle.readOnly = false;
                 noteContent.readOnly = false;
+                noteSubject.disabled = false;
+                noteClass.disabled = false;
+                noteWeekDropdown.disabled = false;
                 saveBtn.style.display = 'block';
             }
         }
@@ -2438,9 +2149,9 @@ body {
         async function saveNote() {
             const title = noteTitle.value.trim();
             const content = noteContent.value.trim();
-            const subjectId = selectedNoteMeta.subjectId;
-            const classId = selectedNoteMeta.classId;
-            const week = selectedNoteMeta.week;
+            const subjectId = noteSubject.value;
+            const classId = noteClass.value;
+            const week = currentWeek;
             
             if (!title) {
                 showNotification({
@@ -2573,11 +2284,6 @@ body {
                 currentNote = null;
                 emptyState.style.display = 'flex';
                 noteEditorContainer.style.display = 'none';
-                
-                // On mobile, show sidebar after deletion
-                if (window.innerWidth < 768) {
-                    sidebar.classList.add('active');
-                }
                 
                 // Reload notes list
                 await loadNotes();
