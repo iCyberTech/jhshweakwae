@@ -578,6 +578,46 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* New Top Bar Styles */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 95;
+            padding: 0 20px;
+            display: none;
+        }
+
+        .top-bar-clock-status {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .top-bar-close {
+            position: absolute;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        .frame-with-topbar {
+            top: 40px;
+            height: calc(100% - 120px);
+        }
+
         @media (max-width: 768px) {
             .cards-container {
                 grid-template-columns: 1fr;
@@ -590,6 +630,19 @@
             .table-container {
                 height: 400px;
             }
+
+            .top-bar {
+                height: 35px;
+            }
+
+            .top-bar-clock-status {
+                font-size: 0.8rem;
+            }
+
+            .frame-with-topbar {
+                top: 35px;
+                height: calc(100% - 115px);
+            }
         }
     </style>
 </head>
@@ -598,6 +651,12 @@
     <div class="loading-screen" id="loading-screen">
         <div class="loading-spinner"></div>
         <div class="loading-text">Loading Teacher Dashboard...</div>
+    </div>
+
+    <!-- Top Bar for non-dashboard pages -->
+    <div class="top-bar" id="top-bar">
+        <div class="top-bar-clock-status" id="top-bar-clock-status">Clocking Status: Not Clocked In</div>
+        <button class="top-bar-close" id="top-bar-close">&times;</button>
     </div>
 
     <!-- Main Dashboard (initially hidden) -->
@@ -792,6 +851,11 @@
         const financeNav = document.getElementById('finance-nav');
         const adminNav = document.getElementById('admin-nav');
         
+        // Top bar elements
+        const topBar = document.getElementById('top-bar');
+        const topBarClockStatus = document.getElementById('top-bar-clock-status');
+        const topBarClose = document.getElementById('top-bar-close');
+        
         // Firebase references
         const authUsersRef = ref(db, 'authUsers');
         const teachersRef = ref(db, 'teachers');
@@ -807,6 +871,7 @@
         let today = getCurrentDate(); // Get current date in YYYY-MM-DD format
         let isInRange = false;
         let isClassTeacher = false;
+        let currentAttendanceStatus = "Not Clocked In";
         
         // Get current date in YYYY-MM-DD format based on local time
         function getCurrentDate() {
@@ -1154,7 +1219,8 @@
                     // Teacher has attendance record for today
                     if (attendanceData.clockIn && !attendanceData.clockOut) {
                         // Clocked in but not clocked out
-                        attendanceStatus.textContent = "Clocked In";
+                        currentAttendanceStatus = "Clocked In";
+                        attendanceStatus.textContent = currentAttendanceStatus;
                         attendanceStatus.style.color = "var(--success-color)";
                         clockInBtn.style.display = 'none';
                         clockOutBtn.style.display = 'block';
@@ -1170,7 +1236,8 @@
                         }
                     } else if (attendanceData.clockIn && attendanceData.clockOut) {
                         // Already clocked out for today
-                        attendanceStatus.textContent = "Clocked Out";
+                        currentAttendanceStatus = "Clocked Out";
+                        attendanceStatus.textContent = currentAttendanceStatus;
                         attendanceStatus.style.color = "var(--info-color)";
                         clockInBtn.style.display = 'none';
                         clockOutBtn.style.display = 'none';
@@ -1188,12 +1255,16 @@
                     }
                 } else {
                     // No attendance record for today
-                    attendanceStatus.textContent = "Not Clocked In";
+                    currentAttendanceStatus = "Not Clocked In";
+                    attendanceStatus.textContent = currentAttendanceStatus;
                     attendanceStatus.style.color = "var(--danger-color)";
                     clockInBtn.style.display = 'block';
                     clockOutBtn.style.display = 'none';
                     attendanceTime.textContent = "";
                 }
+                
+                // Update top bar status
+                topBarClockStatus.textContent = `Clocking Status: ${currentAttendanceStatus}`;
             });
         }
         
@@ -1361,9 +1432,26 @@
                     document.querySelectorAll('.content-frame').forEach(frame => {
                         frame.style.display = 'none';
                     });
+                    // Hide top bar
+                    topBar.style.display = 'none';
                     // Update greeting
                     updateGreeting();
                     greetingSubtitle.textContent = 'Let\'s make today productive';
+                } else if (navId === 'academics-nav') {
+                    // Show the academics frame
+                    document.getElementById('academics-frame').style.display = 'block';
+                    // Hide other frames
+                    document.querySelectorAll('.content-frame').forEach(frame => {
+                        if (frame.id !== 'academics-frame') {
+                            frame.style.display = 'none';
+                        }
+                    });
+                    // Hide top bar for academics
+                    topBar.style.display = 'none';
+                    // Update greeting based on the selected frame
+                    const pageTitle = this.querySelector('span').textContent;
+                    greetingTitle.textContent = `Welcome to ${pageTitle}`;
+                    greetingSubtitle.textContent = `Viewing your ${pageTitle.toLowerCase()} information`;
                 } else {
                     // Show the corresponding frame
                     const frameId = navId.replace('-nav', '-frame');
@@ -1376,12 +1464,21 @@
                         }
                     });
                     
+                    // Show top bar for non-dashboard/non-academics pages
+                    topBar.style.display = 'flex';
+                    
                     // Update greeting based on the selected frame
                     const pageTitle = this.querySelector('span').textContent;
                     greetingTitle.textContent = `Welcome to ${pageTitle}`;
                     greetingSubtitle.textContent = `Viewing your ${pageTitle.toLowerCase()} information`;
                 }
             });
+        });
+        
+        // Close top bar button handler
+        topBarClose.addEventListener('click', function() {
+            // Go back to dashboard when close button is clicked
+            document.getElementById('dashboard-nav').click();
         });
         
         // Notification click handler
