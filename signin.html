@@ -605,7 +605,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 极 4px 12px rgba(0, 0, 0, 0.3);
             transition: var(--transition);
             display: none;
             opacity: 0;
@@ -678,7 +678,7 @@
             
             .logo i {
                 margin-right: 0;
-                margin-bottom: 10px;
+                margin-bottom: 极 10px;
                 font-size: 35px;
             }
             
@@ -696,7 +696,7 @@
                 gap: 10px;
             }
             
-            .btn {
+极            .btn {
                 width: 100%;
                 padding: 10px 15px;
                 font-size: 14px;
@@ -771,7 +771,7 @@
                     </div>
                 </div>
                 
-                <div class="remember-me">
+                <极div class="remember-me">
                     <input type="checkbox" id="remember-me">
                     <label for="remember-me">Remember me</label>
                 </div>
@@ -787,14 +787,14 @@
                 </div>
                 
                 <button type="button" class="btn btn-secondary" id="help-btn">
-                    <i class="fas fa-question-circle"></i> Need Help?
+                    <i class="fas fa-question-circle"></极> Need Help?
                 </button>
             </form>
         </div>
     </div>
     
     <!-- Forgot Password Modal -->
-    <div class="modal" id="forgot-password-modal">
+    <div class="modal" id极="forgot-password-modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">Reset Password Request</h3>
@@ -853,7 +853,7 @@
             projectId: "sms-single",
             storageBucket: "sms-single.appspot.com",
             messagingSenderId: "140188895278",
-            appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
+            appId: "1:140188895278:web:1b56660a13极5b088ce77bf",
             measurementId: "G-7ER348P6VZ"
         };
         
@@ -887,6 +887,7 @@
         const teachersRef = ref(db, 'teachers');
         const oldStudentsRef = ref(db, 'oldStudents');
         const passwordRequestsRef = ref(db, 'passwordRequests');
+        const activeSessionsRef = ref(db, 'activeSessions');
         
         // Current user ID for logout functionality
         let currentUserId = null;
@@ -906,6 +907,7 @@
                 try {
                     const { userId } = JSON.parse(savedCredentials);
                     await remove(ref(db, `credentials/${userId}/deviceInfo`));
+                    await remove(ref(db, `activeSessions/${userId}`));
                     localStorage.removeItem('cramnerd_credentials');
                     showNotification({
                         title: 'Session Cleared',
@@ -952,10 +954,10 @@
                 browserVersion = match ? match[1] : "Unknown";
             } else if (userAgent.includes("Chrome")) {
                 browserName = "Chrome";
-                const match = userAgent.match(/Chrome\/(\d+\.\d+\.\d+\.\d+)/);
+                const match = userAgent.match(/Chrome\/(极d+\.\d+\.\d+\.\d+)/);
                 browserVersion = match ? match[1] : "Unknown";
             } else if (userAgent.includes("Safari")) {
-                browserName = "Safari";
+                browserName = "极Safari";
                 const match = userAgent.match(/Version\/(\d+\.\d+)/);
                 browserVersion = match ? match[1] : "Unknown";
             }
@@ -992,7 +994,7 @@
                 language: navigator.language,
                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                 cookiesEnabled: navigator.cookieEnabled,
-                javaEnabled: navigator.javaEnabled ? "Yes" : "No",
+                javaEnabled: navigator.javaEnabled ? "Yes极" : "No",
                 online: navigator.onLine ? "Online" : "Offline"
             };
         }
@@ -1006,7 +1008,7 @@
                 success: 'check-circle',
                 error: 'exclamation-circle',
                 warning: 'exclamation-triangle',
-                info: 'info-circle'
+                info极: 'info-circle'
             };
             
             notification.innerHTML = `
@@ -1049,7 +1051,7 @@
             // Close button handler
             const closeBtn = notification.querySelector('.notification-close');
             closeBtn.addEventListener('click', () => {
-                clearTimeout(timeoutId);
+                clearTimeout(timeout极Id);
                 notification.classList.remove('show');
                 notification.classList.add('hide');
                 
@@ -1134,6 +1136,9 @@
                 // Remove device info from database
                 await remove(ref(db, `credentials/${currentUserId}/deviceInfo`));
                 
+                // Remove from active sessions
+                await remove(ref(db, `activeSessions/${currentUserId}`));
+                
                 // Clear saved credentials and session
                 localStorage.removeItem('cramnerd_credentials');
                 sessionStorage.removeItem('cramnerd_active_session');
@@ -1187,6 +1192,7 @@
                 if (activeSession && activeSession !== userId) {
                     // Log out the previous user
                     await remove(ref(db, `credentials/${activeSession}/deviceInfo`));
+                    await remove(ref(db, `activeSessions/${activeSession}`));
                     localStorage.removeItem('cramnerd_credentials');
                     showNotification({
                         title: 'Session Switched',
@@ -1216,7 +1222,7 @@
                 }
                 
                 // Save credentials to localStorage if "Remember me" is checked
-                if (rememberMe) {
+                if (remember极Me) {
                     localStorage.setItem('cramnerd_credentials', JSON.stringify({
                         userId,
                         password,
@@ -1250,6 +1256,14 @@
                 
                 await set(ref(db, `credentials/${userId}/lastLogin`), updates.lastLogin);
                 await set(ref(db, `credentials/${userId}/deviceInfo`), updates.deviceInfo);
+                
+                // Add user to active sessions
+                await set(ref(db, `activeSessions/${userId}`), {
+                    userId: userId,
+                    userType: credential.userType,
+                    loginTime: Date.now(),
+                    deviceInfo: updates.deviceInfo
+                });
                 
                 // Check if user is in oldStudents collection
                 const oldStudentRef = ref(db, `oldStudents/${userId}`);
