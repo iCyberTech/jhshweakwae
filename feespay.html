@@ -138,6 +138,8 @@
             background: rgba(255, 255, 255, 0.3);
             padding: 10px 15px;
             border-radius: 10px;
+            display: flex;
+            flex-direction: column;
         }
 
         .detail-label {
@@ -489,6 +491,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
+            position: relative;
         }
 
         .modal-title {
@@ -503,6 +506,9 @@
             font-size: 1.5rem;
             cursor: pointer;
             color: var(--light-text);
+            position: absolute;
+            right: 0;
+            top: 0;
         }
 
         .modal-body {
@@ -1115,8 +1121,10 @@
         const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
         
         // Firebase references
+        const authUsersRef = database.ref('authUsers');
         const teachersRef = database.ref('teachers');
         const classesRef = database.ref('classes');
+        const credentialsRef = database.ref('credentials');
         const feePaymentsRef = database.ref('feePayments');
         const feeSettingsRef = database.ref('feeSettings');
         const classBalancesRef = database.ref('classBalances');
@@ -1197,21 +1205,26 @@
                 auth.onAuthStateChanged(async (user) => {
                     if (user) {
                         try {
-                            // User is signed in, get teacher data
-                            const teacherSnapshot = await teachersRef.child(user.uid).once('value');
+                            // User is signed in
+                            currentTeacherId = user.uid;
+                            
+                            // Get teacher details from teachers collection
+                            const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
+                            
                             if (teacherSnapshot.exists()) {
-                                currentTeacherId = user.uid;
                                 currentTeacherData = teacherSnapshot.val();
                                 resolve(currentTeacherData);
                             } else {
                                 reject(new Error('Teacher data not found'));
                             }
                         } catch (error) {
+                            console.error('Error identifying teacher:', error);
                             reject(error);
                         }
                     } else {
                         // No user is signed in, redirect to login
                         window.location.href = 'login.html';
+                        reject(new Error('No user signed in'));
                     }
                 });
             });
@@ -1228,7 +1241,7 @@
                 const classes = classesSnapshot.val();
                 let assignedClass = null;
                 
-                // Find the first class where teacher ID matches
+                // Find the class where teacher ID matches
                 for (const classId in classes) {
                     if (classes[classId].teacherId === teacherId) {
                         assignedClass = {
@@ -1250,7 +1263,7 @@
         async function loadClassStudents(classId) {
             try {
                 // Get the students array from the class document
-                const classSnapshot = await classesRef.child(classId).once('value');
+                const classSnapshot = await database.ref(`classes/${classId}`).once('value');
                 
                 if (!classSnapshot.exists()) {
                     return [];
@@ -1292,13 +1305,13 @@
         // Get the daily fee amount for the class
         async function getDailyFeeAmount(classId) {
             try {
-                const feeSettingsSnapshot = await feeSettingsRef.child(classId).once('value');
+                const feeSettingsSnapshot = await database.ref(`feeSettings/${classId}`).once('value');
                 if (feeSettingsSnapshot.exists()) {
                     return feeSettingsSnapshot.val().amount || 0;
                 }
                 
                 // Fallback to class dailyAmount if feeSettings doesn't exist
-                const classSnapshot = await classesRef.child(classId).once('value');
+                const classSnapshot = await database.ref(`classes/${classId}`).once('value');
                 if (classSnapshot.exists()) {
                     return classSnapshot.val().dailyAmount || 0;
                 }
@@ -1313,7 +1326,7 @@
         // Load fee payments data for the selected date
         async function loadFeePaymentsData(date) {
             try {
-                const feePaymentsSnapshot = await feePaymentsRef.child(date).once('value');
+                const feePaymentsSnapshot = await database.ref(`feePayments/${date}`).once('value');
                 
                 if (feePaymentsSnapshot.exists()) {
                     return feePaymentsSnapshot.val();
@@ -1329,7 +1342,7 @@
         // Load class balance data
         async function loadClassBalance(classId) {
             try {
-                const balanceSnapshot = await classBalancesRef.child(classId).once('value');
+                const balanceSnapshot = await database.ref(`classBalances/${classId}`).once('value');
                 
                 if (balanceSnapshot.exists()) {
                     return balanceSnapshot.val();
@@ -1344,7 +1357,7 @@
                     lastUpdated: new Date().toISOString()
                 };
                 
-                await classBalancesRef.child(classId).set(defaultBalance);
+                await database.ref(`classBalances/${classId}`).set(defaultBalance);
                 return defaultBalance;
             } catch (error) {
                 console.error('Error loading class balance:', error);
@@ -1431,7 +1444,7 @@
                     lastUpdated: new Date().toISOString()
                 };
                 
-                await classBalancesRef.child(classId).set(updates);
+                await database.ref(`classBalances/${classId}`).set(updates);
                 return true;
             } catch (error) {
                 console.error('Error updating class balance:', error);
@@ -1449,7 +1462,7 @@
                     setAt: new Date().toISOString()
                 };
                 
-                await feeSettingsRef.child(classId).set(feeSettings);
+                await database.ref(`feeSettings/${classId}`).set(feeSettings);
                 dailyFeeAmount = parseFloat(amount);
                 return true;
             } catch (error) {
@@ -1966,7 +1979,7 @@
             mainContent.style.display = 'none';
             
             try {
-                // Identify the current teacher
+                // Identify the current teacher using Firebase Auth
                 const teacher = await identifyCurrentTeacher();
                 
                 if (!teacher) {
