@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Subjects</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
         :root {
             --primary-color: #6c5ce7;
@@ -364,11 +367,7 @@
         </div>
     </div>
 
-    <script type="module">
-        // Import Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        
+    <script>
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
@@ -377,12 +376,14 @@
             storageBucket: "sms-single.appspot.com",
             messagingSenderId: "140188895278",
             appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
-            measurementId: "G-7ER348P6VZ"
+            measurementId: "G-7ER348P6VZ",
+            databaseURL: "https://sms-single-default-rtdb.firebaseio.com/"
         };
         
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
         
         // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
@@ -390,13 +391,6 @@
         const subjectsContainer = document.getElementById('subjects-container');
         const noSubjectsMessage = document.getElementById('no-subjects');
         const notificationContainer = document.getElementById('notification-container');
-        
-        // Firebase references
-        const authUsersRef = ref(db, 'authUsers');
-        const teachersRef = ref(db, 'teachers');
-        const subjectsRef = ref(db, 'subjects');
-        const classesRef = ref(db, 'classes');
-        const credentialsRef = ref(db, 'credentials');
         
         // Global variables
         let currentTeacherId = null;
@@ -459,47 +453,58 @@
             return notification;
         }
         
-        // Identify the current teacher based on device info
+        // Get device fingerprint
+        function getDeviceFingerprint() {
+            const userAgent = navigator.userAgent;
+            const screenResolution = `${window.screen.width}x${window.screen.height}`;
+            const language = navigator.language;
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const plugins = Array.from(navigator.plugins).map(p => p.name).join(',');
+            
+            return {
+                userAgent,
+                screenResolution,
+                language,
+                timezone,
+                plugins
+            };
+        }
+        
+        // Identify the current teacher based on multiple methods
         async function identifyCurrentTeacher() {
             try {
-                // Get all auth users
-                const authUsersSnapshot = await get(authUsersRef);
-                if (!authUsersSnapshot.exists()) {
-                    throw new Error('No auth users found');
+                // Method 1: Check if there's an active session in localStorage
+                const storedTeacherId = localStorage.getItem('currentTeacherId');
+                if (storedTeacherId) {
+                    const teacherRef = database.ref(`teachers/${storedTeacherId}`);
+                    const teacherSnapshot = await teacherRef.once('value');
+                    
+                    if (teacherSnapshot.exists()) {
+                        currentTeacherId = storedTeacherId;
+                        currentTeacherData = teacherSnapshot.val();
+                        return currentTeacherData;
+                    }
                 }
                 
-                const authUsers = authUsersSnapshot.val();
-                const credentialsSnapshot = await get(credentialsRef);
-                const credentials = credentialsSnapshot.exists() ? credentialsSnapshot.val() : {};
-                
-                // Get current device info from browser
-                const userAgent = navigator.userAgent;
-                const screenResolution = `${window.screen.width}x${window.screen.height}`;
-                const language = navigator.language;
-                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                
-                // Find matching teacher based on device info
-                for (const [authId, authUser] of Object.entries(authUsers)) {
-                    if (authUser.userType === 'teacher') {
-                        const teacherCredential = credentials[authUser.userId];
-                        if (teacherCredential && teacherCredential.deviceInfo) {
-                            const deviceInfo = teacherCredential.deviceInfo;
-                            
-                            // Check for matching device characteristics
-                            if (deviceInfo.userAgent === userAgent && 
-                                deviceInfo.screenResolution === screenResolution &&
-                                deviceInfo.language === language && 
-                                deviceInfo.timezone === timezone) {
-                                
-                                // This is likely the current teacher
-                                currentTeacherId = authUser.userId;
-                                
-                                // Get teacher details from teachers collection
-                                const teacherRef = ref(db, `teachers/${currentTeacherId}`);
-                                const teacherSnapshot = await get(teacherRef);
+                // Method 2: Check Firebase Auth current user
+                const currentUser = auth.currentUser;
+                if (currentUser) {
+                    // Find the teacher associated with this auth user
+                    const authUsersSnapshot = await database.ref('authUsers').once('value');
+                    if (authUsersSnapshot.exists()) {
+                        const authUsers = authUsersSnapshot.val();
+                        
+                        for (const [authId, authUser] of Object.entries(authUsers)) {
+                            if (authUser.email === currentUser.email && authUser.userType === 'teacher') {
+                                const teacherRef = database.ref(`teachers/${authUser.userId}`);
+                                const teacherSnapshot = await teacherRef.once('value');
                                 
                                 if (teacherSnapshot.exists()) {
+                                    currentTeacherId = authUser.userId;
                                     currentTeacherData = teacherSnapshot.val();
+                                    
+                                    // Store in localStorage for future sessions
+                                    localStorage.setItem('currentTeacherId', currentTeacherId);
                                     return currentTeacherData;
                                 }
                             }
@@ -507,15 +512,55 @@
                     }
                 }
                 
-                // If no match found, try to get from activeSessions as fallback
-                const activeSessionSnapshot = await get(ref(db, 'activeSessions/teacher'));
+                // Method 3: Check device fingerprint against credentials
+                const deviceFingerprint = getDeviceFingerprint();
+                const credentialsSnapshot = await database.ref('credentials').once('value');
+                
+                if (credentialsSnapshot.exists()) {
+                    const credentials = credentialsSnapshot.val();
+                    
+                    for (const [userId, credential] of Object.entries(credentials)) {
+                        if (credential.userType === 'teacher' && credential.deviceInfo) {
+                            const deviceInfo = credential.deviceInfo;
+                            
+                            // Check for matching device characteristics
+                            const matchScore = 
+                                (deviceInfo.userAgent === deviceFingerprint.userAgent ? 1 : 0) +
+                                (deviceInfo.screenResolution === deviceFingerprint.screenResolution ? 1 : 0) +
+                                (deviceInfo.language === deviceFingerprint.language ? 1 : 0) +
+                                (deviceInfo.timezone === deviceFingerprint.timezone ? 1 : 0);
+                            
+                            // If we have a strong match (at least 3 out of 4)
+                            if (matchScore >= 3) {
+                                const teacherRef = database.ref(`teachers/${userId}`);
+                                const teacherSnapshot = await teacherRef.once('value');
+                                
+                                if (teacherSnapshot.exists()) {
+                                    currentTeacherId = userId;
+                                    currentTeacherData = teacherSnapshot.val();
+                                    
+                                    // Store in localStorage for future sessions
+                                    localStorage.setItem('currentTeacherId', currentTeacherId);
+                                    return currentTeacherData;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Method 4: Check activeSessions as fallback
+                const activeSessionSnapshot = await database.ref('activeSessions/teacher').once('value');
                 if (activeSessionSnapshot.exists()) {
-                    currentTeacherId = activeSessionSnapshot.val();
-                    const teacherRef = ref(db, `teachers/${currentTeacherId}`);
-                    const teacherSnapshot = await get(teacherRef);
+                    const sessionTeacherId = activeSessionSnapshot.val();
+                    const teacherRef = database.ref(`teachers/${sessionTeacherId}`);
+                    const teacherSnapshot = await teacherRef.once('value');
                     
                     if (teacherSnapshot.exists()) {
+                        currentTeacherId = sessionTeacherId;
                         currentTeacherData = teacherSnapshot.val();
+                        
+                        // Store in localStorage for future sessions
+                        localStorage.setItem('currentTeacherId', currentTeacherId);
                         return currentTeacherData;
                     }
                 }
@@ -535,7 +580,7 @@
         // Check for active teacher session
         async function checkActiveSession() {
             try {
-                // First try to identify the teacher based on device info
+                // First try to identify the teacher
                 const teacher = await identifyCurrentTeacher();
                 
                 if (teacher) {
@@ -579,10 +624,10 @@
         
         // Load subjects assigned to this teacher
         function loadTeacherSubjects() {
-            onValue(subjectsRef, async (subjectsSnapshot) => {
+            database.ref('subjects').on('value', async (subjectsSnapshot) => {
                 const subjects = subjectsSnapshot.val();
-                const classesSnapshot = await get(classesRef);
-                const classes = classesSnapshot.exists() ? classesSnapshot.val() : {};
+                const classesSnapshot = await database.ref('classes').once('value');
+                const classes = classesSnapshot.val() || {};
                 
                 // Clear previous content
                 subjectsContainer.innerHTML = '';
