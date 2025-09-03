@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Teacher Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
         /* Enhanced Notification Styles */
         .notification {
@@ -260,7 +257,6 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
-            position: relative;
         }
 
         .card-icon {
@@ -292,12 +288,12 @@
         .card-title {
             font-size: 0.85rem;
             font-weight: 600;
-            margin-bottom: 5px;
         }
 
         .card-value {
             font-size: 1.5rem;
             font-weight: 700;
+            margin-bottom: 5px;
         }
 
         .card-description {
@@ -946,7 +942,11 @@
     <!-- Notification Container -->
     <div class="notification-container" id="notification-container"></div>
 
-    <script>
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, get, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
@@ -955,14 +955,12 @@
             storageBucket: "sms-single.appspot.com",
             messagingSenderId: "140188895278",
             appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
-            measurementId: "G-7ER348P6VZ",
-            databaseURL: "https://sms-single-default-rtdb.firebaseio.com/"
+            measurementId: "G-7ER348P6VZ"
         };
         
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const auth = firebase.auth();
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
         
         // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
@@ -995,10 +993,10 @@
         const frameCloseButtons = document.querySelectorAll('.frame-close');
         
         // Firebase references
-        const teachersRef = database.ref('teachers');
-        const locationSettingsRef = database.ref('locationSettings');
-        const teacherAttendanceRef = database.ref('teacherAttendance');
-        const classesRef = database.ref('classes');
+        const teachersRef = ref(db, 'teachers');
+        const locationSettingsRef = ref(db, 'locationSettings');
+        const teacherAttendanceRef = ref(db, 'teacherAttendance');
+        const classesRef = ref(db, 'classes');
         
         // Global variables
         let currentTeacherId = null;
@@ -1083,157 +1081,79 @@
             }
         }
         
-        // Get browser details function (same as in signin.html)
-        function getBrowserDetails() {
-            const userAgent = navigator.userAgent;
-            let browserName = "Unknown";
-            let browserVersion = "Unknown";
-            let osName = "Unknown";
-            let osVersion = "Unknown";
-            
-            // Detect browser
-            if (userAgent.includes("Firefox")) {
-                browserName = "Firefox";
-                browserVersion = userAgent.match(/Firefox\/(\d+\.\d+)/)[1];
-            } else if (userAgent.includes("Edg")) {
-                browserName = "Edge";
-                browserVersion = userAgent.match(/Edg\/(\d+\.\d+\.\d+\.\d+)/)[1];
-            } else if (userAgent.includes("Chrome")) {
-                browserName = "Chrome";
-                browserVersion = userAgent.match(/Chrome\/(\d+\.\d+\.\d+\.\d+)/)[1];
-            } else if (userAgent.includes("Safari")) {
-                browserName = "Safari";
-                browserVersion = userAgent.match(/Version\/(\d+\.\d+)/)[1];
-            }
-            
-            // Detect OS
-            if (userAgent.includes("Windows")) {
-                osName = "Windows";
-                if (userAgent.includes("Windows NT 10.0")) osVersion = "10";
-                else if (userAgent.includes("Windows NT 6.3")) osVersion = "8.1";
-                else if (userAgent.includes("Windows NT 6.2")) osVersion = "8";
-                else if (userAgent.includes("Windows NT 6.1")) osVersion = "7";
-            } else if (userAgent.includes("Mac")) {
-                osName = "Mac";
-                osVersion = userAgent.match(/Mac OS X (\d+_\d+_\d+)/)[1].replace(/_/g, ".");
-            } else if (userAgent.includes("Linux")) {
-                osName = "Linux";
-            } else if (userAgent.includes("Android")) {
-                osName = "Android";
-                osVersion = userAgent.match(/Android (\d+\.\d+)/)[1];
-            } else if (userAgent.includes("iOS") || userAgent.includes("iPhone") || userAgent.includes("iPad")) {
-                osName = "iOS";
-                osVersion = userAgent.match(/OS (\d+_\d+)/)[1].replace(/_/g, ".");
-            }
-            
-            return {
-                browserName,
-                browserVersion,
-                osName,
-                osVersion,
-                userAgent,
-                screenResolution: `${window.screen.width}x${window.screen.height}`,
-                language: navigator.language,
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-            };
+        // Get teacher ID from URL parameters
+        function getTeacherIdFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('teacherId');
         }
         
-        // Check for active teacher session using Firebase Authentication
-        function checkActiveSession() {
-            auth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    // User is signed in
-                    currentTeacherId = user.uid;
+        // Load teacher data from Firebase
+        async function loadTeacherData(teacherId) {
+            try {
+                const teacherRef = ref(db, `teachers/${teacherId}`);
+                const teacherSnapshot = await get(teacherRef);
+                
+                if (teacherSnapshot.exists()) {
+                    currentTeacherData = teacherSnapshot.val();
+                    currentTeacherId = teacherId;
                     
-                    try {
-                        // Get teacher details from database
-                        const teacherSnapshot = await teachersRef.child(currentTeacherId).once('value');
-                        
-                        if (teacherSnapshot.exists()) {
-                            currentTeacherData = teacherSnapshot.val();
-                            
-                            // Update UI with teacher info
-                            teacherNameElement.textContent = currentTeacherData.name || 'Teacher';
-                            if (currentTeacherData.profileImage) {
-                                profileImg.src = currentTeacherData.profileImage;
-                            }
-                            
-                            // Update greeting based on time of day
-                            updateGreeting();
-                            
-                            // Load location settings
-                            loadLocationSettings();
-                            
-                            // Load teacher attendance
-                            loadTeacherAttendance();
-                            
-                            // Check if teacher is assigned to any class
-                            await checkIfTeacherAssignedToClass(currentTeacherData.name);
-                            
-                            // Load teacher stats
-                            loadTeacherStats();
-                            
-                            // Hide loading screen and show dashboard
-                            loadingScreen.style.display = 'none';
-                            dashboard.style.display = 'block';
-                            
-                            showNotification({
-                                title: 'Welcome Back',
-                                message: `You're logged in as ${currentTeacherData.name || 'Teacher'}`,
-                                type: 'success',
-                                duration: 3000
-                            });
-                        } else {
-                            throw new Error('Teacher data not found');
-                        }
-                    } catch (error) {
-                        console.error('Error loading teacher data:', error);
-                        showNotification({
-                            title: 'Error',
-                            message: 'Failed to load teacher information',
-                            type: 'error'
-                        });
-                        
-                        // Sign out and redirect to login page
-                        auth.signOut().then(() => {
-                            setTimeout(() => {
-                                window.location.href = 'login.html';
-                            }, 2000);
-                        });
+                    // Update UI with teacher info
+                    teacherNameElement.textContent = currentTeacherData.name || 'Teacher';
+                    if (currentTeacherData.profileImage) {
+                        profileImg.src = currentTeacherData.profileImage;
                     }
-                } else {
-                    // No user is signed in
+                    
+                    // Update greeting based on time of day
+                    updateGreeting();
+                    
+                    // Load location settings
+                    loadLocationSettings();
+                    
+                    // Load teacher attendance
+                    loadTeacherAttendance();
+                    
+                    // Check if teacher is assigned to any class
+                    await checkIfTeacherAssignedToClass(currentTeacherData.name);
+                    
+                    // Load teacher stats
+                    loadTeacherStats();
+                    
+                    // Hide loading screen and show dashboard
+                    loadingScreen.style.display = 'none';
+                    dashboard.style.display = 'block';
+                    
                     showNotification({
-                        title: 'Session Expired',
-                        message: 'Please sign in again',
-                        type: 'error',
-                        duration: 0
+                        title: 'Welcome Back',
+                        message: `You're logged in as ${currentTeacherData.name || 'Teacher'}`,
+                        type: 'success',
+                        duration: 3000
                     });
                     
-                    // Redirect to login page after a delay
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
+                    return true;
+                } else {
+                    throw new Error('Teacher not found in database');
                 }
-            }, (error) => {
-                console.error('Auth state change error:', error);
+            } catch (error) {
+                console.error('Error loading teacher data:', error);
                 showNotification({
                     title: 'Error',
-                    message: 'Failed to check authentication status',
+                    message: 'Failed to load teacher information: ' + error.message,
                     type: 'error'
                 });
                 
                 // Redirect to login page after a delay
                 setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 2000);
-            });
+                    window.location.href = 'signin.html';
+                }, 3000);
+                
+                return false;
+            }
         }
         
         // Check if the teacher is assigned to any class
         async function checkIfTeacherAssignedToClass(teacherName) {
             try {
-                const classesSnapshot = await classesRef.once('value');
+                const classesSnapshot = await get(classesRef);
                 if (classesSnapshot.exists()) {
                     const classes = classesSnapshot.val();
                     isClassTeacher = false;
@@ -1265,7 +1185,7 @@
         
         // Load location settings from database
         function loadLocationSettings() {
-            locationSettingsRef.on('value', (snapshot) => {
+            onValue(locationSettingsRef, (snapshot) => {
                 locationSettings = snapshot.val();
                 if (locationSettings) {
                     console.log('Location settings loaded:', locationSettings);
@@ -1358,9 +1278,9 @@
         
         // Load teacher attendance data - matches the exact Firebase structure
         function loadTeacherAttendance() {
-            const todayAttendanceRef = teacherAttendanceRef.child(today).child(currentTeacherId);
+            const todayAttendanceRef = ref(db, `teacherAttendance/${today}/${currentTeacherId}`);
             
-            todayAttendanceRef.on('value', (snapshot) => {
+            onValue(todayAttendanceRef, (snapshot) => {
                 const attendanceData = snapshot.val();
                 
                 if (attendanceData) {
@@ -1443,7 +1363,7 @@
                 };
                 
                 // Update the data in the exact structure from your Firebase
-                await teacherAttendanceRef.child(today).child(currentTeacherId).set(attendanceUpdate);
+                await set(ref(db, `teacherAttendance/${today}/${currentTeacherId}`), attendanceUpdate);
                 
                 showNotification({
                     title: 'Clocked In',
@@ -1488,7 +1408,7 @@
                 };
                 
                 // Update the data in the exact structure from your Firebase
-                await teacherAttendanceRef.child(today).child(currentTeacherId).update(attendanceUpdate);
+                await update(ref(db, `teacherAttendance/${today}/${currentTeacherId}`), attendanceUpdate);
                 
                 showNotification({
                     title: 'Clocked Out',
@@ -1508,7 +1428,7 @@
         // Load teacher stats (classes, students, etc.)
         function loadTeacherStats() {
             // Count classes assigned to this teacher
-            classesRef.on('value', (snapshot) => {
+            onValue(classesRef, (snapshot) {
                 const classes = snapshot.val();
                 let classCount = 0;
                 let studentCount = 0;
@@ -1660,10 +1580,24 @@
             }, 500);
         });
         
-        // Initialize the app - check for active session
-        loadingScreen.style.display = 'flex';
-        dashboard.style.display = 'none';
-        checkActiveSession();
+        // Initialize the app - check for teacher ID in URL
+        const teacherId = getTeacherIdFromURL();
+        if (teacherId) {
+            loadingScreen.style.display = 'flex';
+            dashboard.style.display = 'none';
+            loadTeacherData(teacherId);
+        } else {
+            // No teacher ID found, redirect to signin page
+            showNotification({
+                title: 'Access Denied',
+                message: 'Please sign in to access the dashboard',
+                type: 'error'
+            });
+            
+            setTimeout(() => {
+                window.location.href = 'signin.html';
+            }, 2000);
+        }
     </script>
 </body>
 </html>
