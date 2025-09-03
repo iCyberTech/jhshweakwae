@@ -292,12 +292,12 @@
         .card-title {
             font-size: 0.85rem;
             font-weight: 600;
+            margin-bottom: 5px;
         }
 
         .card-value {
             font-size: 1.5rem;
             font-weight: 700;
-            margin-bottom: 5px;
         }
 
         .card-description {
@@ -947,7 +947,7 @@
     <div class="notification-container" id="notification-container"></div>
 
     <script>
-        // Firebase configuration (same as signin.html)
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
             authDomain: "sms-single.firebaseapp.com",
@@ -1138,20 +1138,16 @@
             };
         }
         
-        // Check for active teacher session
+        // Check for active teacher session using Firebase Authentication
         function checkActiveSession() {
-            loadingScreen.style.display = 'flex';
-            dashboard.style.display = 'none';
-            
-            // Check if user is signed in
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     // User is signed in
                     currentTeacherId = user.uid;
                     
                     try {
-                        // Get teacher data from database
-                        const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
+                        // Get teacher details from database
+                        const teacherSnapshot = await teachersRef.child(currentTeacherId).once('value');
                         
                         if (teacherSnapshot.exists()) {
                             currentTeacherData = teacherSnapshot.val();
@@ -1198,7 +1194,7 @@
                             type: 'error'
                         });
                         
-                        // Sign out and redirect to login
+                        // Sign out and redirect to login page
                         auth.signOut().then(() => {
                             setTimeout(() => {
                                 window.location.href = 'login.html';
@@ -1223,10 +1219,11 @@
                 console.error('Auth state change error:', error);
                 showNotification({
                     title: 'Error',
-                    message: 'Authentication error',
+                    message: 'Failed to check authentication status',
                     type: 'error'
                 });
                 
+                // Redirect to login page after a delay
                 setTimeout(() => {
                     window.location.href = 'login.html';
                 }, 2000);
@@ -1361,7 +1358,7 @@
         
         // Load teacher attendance data - matches the exact Firebase structure
         function loadTeacherAttendance() {
-            const todayAttendanceRef = database.ref(`teacherAttendance/${today}/${currentTeacherId}`);
+            const todayAttendanceRef = teacherAttendanceRef.child(today).child(currentTeacherId);
             
             todayAttendanceRef.on('value', (snapshot) => {
                 const attendanceData = snapshot.val();
@@ -1446,7 +1443,7 @@
                 };
                 
                 // Update the data in the exact structure from your Firebase
-                await database.ref(`teacherAttendance/${today}/${currentTeacherId}`).set(attendanceUpdate);
+                await teacherAttendanceRef.child(today).child(currentTeacherId).set(attendanceUpdate);
                 
                 showNotification({
                     title: 'Clocked In',
@@ -1491,7 +1488,7 @@
                 };
                 
                 // Update the data in the exact structure from your Firebase
-                await database.ref(`teacherAttendance/${today}/${currentTeacherId}`).update(attendanceUpdate);
+                await teacherAttendanceRef.child(today).child(currentTeacherId).update(attendanceUpdate);
                 
                 showNotification({
                     title: 'Clocked Out',
@@ -1664,6 +1661,8 @@
         });
         
         // Initialize the app - check for active session
+        loadingScreen.style.display = 'flex';
+        dashboard.style.display = 'none';
         checkActiveSession();
     </script>
 </body>
