@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CramNerd | Sign In</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -142,7 +142,6 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -153,7 +152,6 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            overflow-x: hidden;
         }
 
         .container {
@@ -235,7 +233,6 @@
             align-items: center;
             justify-content: center;
             width: 100%;
-            touch-action: manipulation;
         }
 
         .btn-primary {
@@ -288,7 +285,6 @@
             cursor: pointer;
             color: #7f8c8d;
             transition: var(--transition);
-            padding: 5px;
         }
 
         .toggle-password:hover {
@@ -344,8 +340,6 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             transform: translateY(-20px);
             transition: var(--transition);
-            max-height: 90vh;
-            overflow-y: auto;
         }
 
         .modal.active .modal-content {
@@ -366,11 +360,10 @@
 
         .close-modal {
             background: none;
-            border: null;
+            border: none;
             font-size: 24px;
             cursor: pointer;
             color: #7f8c8d;
-            padding: 5px;
         }
 
         .form-actions {
@@ -457,14 +450,13 @@
 
         .notification-close {
             background: none;
-            border: null;
+            border: none;
             color: inherit;
             cursor: pointer;
             margin-left: 15px;
             font-size: 18px;
             opacity: 0.8;
             transition: var(--transition);
-            padding: 5px;
         }
 
         .notification-close:hover {
@@ -534,7 +526,7 @@
             color: #e17055;
         }
 
-        /* Iframe container styles - UPDATED FOR MOBILE */
+        /* Iframe container styles */
         .iframe-container {
             position: fixed;
             top: 0;
@@ -544,8 +536,6 @@
             z-index: 10000;
             display: none;
             background: white;
-            overflow: hidden;
-            touch-action: manipulation;
         }
 
         .iframe-container.active {
@@ -556,37 +546,6 @@
             width: 100%;
             height: 100%;
             border: none;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        /* Mobile iframe controls */
-        .iframe-controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 10002;
-            display: flex;
-            gap: 10px;
-        }
-
-        .iframe-control-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 18px;
-            color: #333;
-            transition: all 0.3s ease;
-        }
-
-        .iframe-control-btn:active {
-            transform: scale(0.95);
         }
 
         /* Updated logout button styles */
@@ -597,7 +556,7 @@
             z-index: 10001;
             background: var(--danger-color);
             color: white;
-            border: none;
+            border: null;
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -610,7 +569,6 @@
             display: none;
             opacity: 0;
             transform: translateY(100px);
-            touch-action: manipulation;
         }
 
         .logout-btn.visible {
@@ -621,6 +579,35 @@
         .logout-btn:hover {
             background: #c0392b;
             transform: translateY(-5px) scale(1.05);
+        }
+
+        .toggle-logout-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10002;
+            background: var(--primary-color);
+            color: white;
+            border: null;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+            display: none;
+        }
+
+        .toggle-logout-btn.visible {
+            display: flex;
+        }
+
+        .toggle-logout-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-3px);
         }
 
         /* Auto-login checkbox */
@@ -654,21 +641,11 @@
             .card-title {
                 font-size: 22px;
             }
-            
-            .iframe-control-btn {
-                width: 35px;
-                height: 35px;
-                font-size: 16px;
-            }
         }
 
         @media (max-width: 480px) {
-            body {
-                padding: 15px;
-            }
-            
             .card {
-                padding: 25px 20px;
+                padding: 25px;
             }
             
             .logo {
@@ -679,16 +656,6 @@
             .logo i {
                 margin-right: 0;
                 margin-bottom: 10px;
-                font-size: 35px;
-            }
-            
-            .logo h1 {
-                font-size: 24px;
-            }
-            
-            .card-title {
-                font-size: 20px;
-                margin-bottom: 20px;
             }
             
             .form-actions {
@@ -698,15 +665,11 @@
             
             .btn {
                 width: 100%;
-                padding: 10px 15px;
-                font-size: 14px;
             }
             
-            .logout-btn {
+            .logout-btn, .toggle-logout-btn {
                 bottom: 15px;
                 right: 15px;
-                width: 45px;
-                height: 45px;
             }
             
             .notification-title {
@@ -716,32 +679,6 @@
             .notification-message {
                 font-size: 12px;
             }
-            
-            .modal-content {
-                padding: 20px 15px;
-            }
-            
-            input, textarea {
-                padding: 10px 12px;
-                font-size: 16px; /* Prevents zoom on iOS */
-            }
-            
-            /* Mobile-specific iframe adjustments */
-            .iframe-container {
-                -webkit-overflow-scrolling: touch;
-            }
-            
-            iframe {
-                width: 100%;
-                height: 100%;
-                border: none;
-            }
-        }
-
-        /* Prevent horizontal scrolling on mobile */
-        html, body {
-            max-width: 100%;
-            overflow-x: hidden;
         }
     </style>
 </head>
@@ -824,19 +761,11 @@
     
     <!-- Iframe Container -->
     <div class="iframe-container" id="iframe-container">
-        <div class="iframe-controls">
-            <button class="iframe-control-btn" id="iframe-back-btn">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <button class="iframe-control-btn" id="iframe-refresh-btn">
-                <i class="fas fa-sync-alt"></i>
-            </button>
-            <button class="iframe-control-btn" id="iframe-close-btn">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
         <button class="logout-btn" id="logout-btn">
             <i class="fas fa-sign-out-alt"></i>
+        </button>
+        <button class="toggle-logout-btn" id="toggle-logout-btn">
+            <i class="fas fa-chevron-up"></i>
         </button>
         <iframe id="content-frame" allowfullscreen></iframe>
     </div>
@@ -876,10 +805,8 @@
         const iframeContainer = document.getElementById('iframe-container');
         const contentFrame = document.getElementById('content-frame');
         const logoutBtn = document.getElementById('logout-btn');
+        const toggleLogoutBtn = document.getElementById('toggle-logout-btn');
         const rememberMeCheckbox = document.getElementById('remember-me');
-        const iframeBackBtn = document.getElementById('iframe-back-btn');
-        const iframeRefreshBtn = document.getElementById('iframe-refresh-btn');
-        const iframeCloseBtn = document.getElementById('iframe-close-btn');
         
         // Firebase references
         const credentialsRef = ref(db, 'credentials');
@@ -1102,28 +1029,13 @@
         // Load content in iframe
         function loadContentInIframe(url) {
             iframeContainer.classList.add('active');
+            toggleLogoutBtn.classList.add('visible');
             contentFrame.src = url;
-            
-            // Add mobile-friendly iframe attributes
-            contentFrame.setAttribute('allow', 'fullscreen');
-            contentFrame.setAttribute('importance', 'high');
         }
         
-        // Iframe controls
-        iframeBackBtn.addEventListener('click', function() {
-            try {
-                contentFrame.contentWindow.history.back();
-            } catch (e) {
-                console.log('Cannot navigate back in iframe');
-            }
-        });
-        
-        iframeRefreshBtn.addEventListener('click', function() {
-            contentFrame.contentWindow.location.reload();
-        });
-        
-        iframeCloseBtn.addEventListener('click', function() {
-            handleLogout();
+        // Toggle logout button visibility
+        toggleLogoutBtn.addEventListener('click', function() {
+            logoutBtn.classList.toggle('visible');
         });
         
         // Logout functionality
@@ -1140,6 +1052,7 @@
                 
                 // Hide iframe and show login screen
                 iframeContainer.classList.remove('active');
+                toggleLogoutBtn.classList.remove('visible');
                 logoutBtn.classList.remove('visible');
                 contentFrame.src = '';
                 currentUserId = null;
