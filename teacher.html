@@ -6,6 +6,155 @@
     <title>Teacher Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* New Top Bar Styles */
+        .status-topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: none;
+        }
+
+        .status-topbar.clocked-in {
+            color: var(--success-color);
+        }
+
+        .status-topbar.clocked-out {
+            color: var(--info-color);
+        }
+
+        .status-topbar.not-clocked {
+            color: var(--danger-color);
+        }
+
+        /* Enhanced Notification Styles */
+        .notification {
+            padding: 18px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            border-left: 5px solid rgba(255, 255, 255, 0.3);
+            align-items: flex-start;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, rgba(0, 184, 148, 0.9) 0%, rgba(0, 184, 148, 1) 100%);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, rgba(214, 48, 49, 0.9) 0%, rgba(214, 48, 49, 1) 100%);
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, rgba(253, 203, 110, 0.9) 0%, rgba(253, 203, 110, 1) 100%);
+            color: #2d3436;
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, rgba(9, 132, 227, 0.9) 0%, rgba(9, 132, 227, 1) 100%);
+        }
+
+        .notification-icon {
+            font-size: 22px;
+            margin-right: 15px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            line-height: 1.4;
+        }
+
+        .notification-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            opacity: 0.95;
+            line-height: 1.5;
+        }
+
+        .notification-close {
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+            margin-left: 15px;
+            margin-top: 2px;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+        }
+
+        /* Animation enhancements */
+        @keyframes slideIn {
+            from {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            to {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+        }
+
+        .notification.show {
+            animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .notification.hide {
+            animation: slideOut 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .notification-container {
+                width: 95%;
+                right: 10px;
+            }
+            
+            .notification {
+                padding: 15px;
+            }
+            
+            .notification-icon {
+                font-size: 20px;
+                margin-right: 12px;
+            }
+            
+            .notification-title {
+                font-size: 0.95rem;
+            }
+            
+            .notification-message {
+                font-size: 0.85rem;
+            }
+
+            .status-topbar {
+                font-size: 0.75rem;
+            }
+        }
         :root {
             --primary-color: #6c5ce7;
             --secondary-color: #a29bfe;
@@ -481,6 +630,11 @@
     </style>
 </head>
 <body>
+    <!-- Status Top Bar -->
+    <div class="status-topbar" id="status-topbar">
+        <span id="status-text">Attendance Status</span>
+    </div>
+
     <!-- Loading Screen -->
     <div class="loading-screen" id="loading-screen">
         <div class="loading-spinner"></div>
@@ -580,19 +734,19 @@
 
         <div class="content-frame" id="finance-frame">
             <div class="frame-content">
-                <iframe src="files.html"></iframe>
+                <iframe src="feespay.html"></iframe>
             </div>
         </div>
 
         <div class="content-frame" id="connect-frame">
             <div class="frame-content">
-                <iframe src="files.html"></iframe>
+                <iframe src="connect.html"></iframe>
             </div>
         </div>
 
         <div class="content-frame" id="admin-frame">
             <div class="frame-content">
-                <iframe src="files.html"></iframe>
+                <iframe src="attens.html"></iframe>
             </div>
         </div>
 
@@ -661,6 +815,8 @@
         const greetingTitle = document.getElementById('greeting-title');
         const greetingSubtitle = document.getElementById('greeting-subtitle');
         const notificationContainer = document.getElementById('notification-container');
+        const statusTopbar = document.getElementById('status-topbar');
+        const statusText = document.getElementById('status-text');
         
         // Attendance elements
         const attendanceStatus = document.getElementById('attendance-status');
@@ -680,11 +836,12 @@
         const adminNav = document.getElementById('admin-nav');
         
         // Firebase references
-        const activeSessionRef = ref(db, 'activeSessions/teacher');
+        const authUsersRef = ref(db, 'authUsers');
         const teachersRef = ref(db, 'teachers');
         const locationSettingsRef = ref(db, 'locationSettings');
         const teacherAttendanceRef = ref(db, 'teacherAttendance');
         const classesRef = ref(db, 'classes');
+        const credentialsRef = ref(db, 'credentials');
         
         // Global variables
         let currentTeacherId = null;
@@ -693,6 +850,7 @@
         let today = getCurrentDate(); // Get current date in YYYY-MM-DD format
         let isInRange = false;
         let isClassTeacher = false;
+        let currentAttendanceStatus = "Not Clocked In";
         
         // Get current date in YYYY-MM-DD format based on local time
         function getCurrentDate() {
@@ -701,6 +859,34 @@
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
+        }
+        
+        // Update the status top bar
+        function updateStatusTopbar(status, page) {
+            // Don't show on Dashboard and Academics pages
+            if (page === 'dashboard' || page === 'academics') {
+                statusTopbar.style.display = 'none';
+                return;
+            }
+            
+            // Show on other pages
+            statusTopbar.style.display = 'flex';
+            
+            // Update status text and styling
+            statusText.textContent = `Attendance Status: ${status}`;
+            
+            // Set appropriate styling based on status
+            statusTopbar.classList.remove('clocked-in', 'clocked-out', 'not-clocked');
+            
+            if (status.includes('Clocked In')) {
+                statusTopbar.classList.add('clocked-in');
+            } else if (status.includes('Clocked Out')) {
+                statusTopbar.classList.add('clocked-out');
+            } else {
+                statusTopbar.classList.add('not-clocked');
+            }
+            
+            currentAttendanceStatus = status;
         }
         
         // Show notification function
@@ -760,65 +946,122 @@
             return notification;
         }
         
-        // Check for active teacher session
-        function checkActiveSession() {
-            onValue(activeSessionRef, async (snapshot) => {
-                currentTeacherId = snapshot.val();
+        // Identify the current teacher based on device info
+        async function identifyCurrentTeacher() {
+            try {
+                // Get all auth users
+                const authUsersSnapshot = await get(authUsersRef);
+                if (!authUsersSnapshot.exists()) {
+                    throw new Error('No auth users found');
+                }
                 
-                if (currentTeacherId) {
-                    try {
-                        // Get teacher details
-                        const teacherRef = ref(db, `teachers/${currentTeacherId}`);
-                        const teacherSnapshot = await get(teacherRef);
-                        
-                        if (teacherSnapshot.exists()) {
-                            currentTeacherData = teacherSnapshot.val();
+                const authUsers = authUsersSnapshot.val();
+                const credentialsSnapshot = await get(credentialsRef);
+                const credentials = credentialsSnapshot.exists() ? credentialsSnapshot.val() : {};
+                
+                // Get current device info from browser
+                const userAgent = navigator.userAgent;
+                const screenResolution = `${window.screen.width}x${window.screen.height}`;
+                const language = navigator.language;
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                
+                // Find matching teacher based on device info
+                for (const [authId, authUser] of Object.entries(authUsers)) {
+                    if (authUser.userType === 'teacher') {
+                        const teacherCredential = credentials[authUser.userId];
+                        if (teacherCredential && teacherCredential.deviceInfo) {
+                            const deviceInfo = teacherCredential.deviceInfo;
                             
-                            // Update UI with teacher info
-                            teacherNameElement.textContent = currentTeacherData.name || 'Teacher';
-                            if (currentTeacherData.profileImage) {
-                                profileImg.src = currentTeacherData.profileImage;
+                            // Check for matching device characteristics
+                            if (deviceInfo.userAgent === userAgent && 
+                                deviceInfo.screenResolution === screenResolution &&
+                                deviceInfo.language === language && 
+                                deviceInfo.timezone === timezone) {
+                                
+                                // This is likely the current teacher
+                                currentTeacherId = authUser.userId;
+                                
+                                // Get teacher details from teachers collection
+                                const teacherRef = ref(db, `teachers/${currentTeacherId}`);
+                                const teacherSnapshot = await get(teacherRef);
+                                
+                                if (teacherSnapshot.exists()) {
+                                    currentTeacherData = teacherSnapshot.val();
+                                    return currentTeacherData;
+                                }
                             }
-                            
-                            // Update greeting based on time of day
-                            updateGreeting();
-                            
-                            // Load location settings
-                            loadLocationSettings();
-                            
-                            // Load teacher attendance
-                            loadTeacherAttendance();
-                            
-                            // Check if teacher is a class teacher
-                            await checkIfClassTeacher();
-                            
-                            // Load teacher stats
-                            loadTeacherStats();
-                            
-                            // Hide loading screen and show dashboard
-                            loadingScreen.style.display = 'none';
-                            dashboard.style.display = 'block';
-                            
-                            showNotification({
-                                title: 'Welcome Back',
-                                message: `You're logged in as ${currentTeacherData.name || 'Teacher'}`,
-                                type: 'success',
-                                duration: 3000
-                            });
-                            
-                            return;
                         }
-                    } catch (error) {
-                        console.error('Error fetching teacher details:', error);
-                        showNotification({
-                            title: 'Error',
-                            message: 'Failed to load teacher information',
-                            type: 'error'
-                        });
                     }
                 }
                 
-                // If no active session or error occurred
+                // If no match found, try to get from activeSessions as fallback
+                const activeSessionSnapshot = await get(ref(db, 'activeSessions/teacher'));
+                if (activeSessionSnapshot.exists()) {
+                    currentTeacherId = activeSessionSnapshot.val();
+                    const teacherRef = ref(db, `teachers/${currentTeacherId}`);
+                    const teacherSnapshot = await get(teacherRef);
+                    
+                    if (teacherSnapshot.exists()) {
+                        currentTeacherData = teacherSnapshot.val();
+                        return currentTeacherData;
+                    }
+                }
+                
+                throw new Error('No matching teacher found');
+            } catch (error) {
+                console.error('Error identifying teacher:', error);
+                showNotification({
+                    title: 'Error',
+                    message: 'Failed to identify teacher: ' + error.message,
+                    type: 'error'
+                });
+                return null;
+            }
+        }
+        
+        // Check for active teacher session
+        async function checkActiveSession() {
+            try {
+                // First try to identify the teacher based on device info
+                const teacher = await identifyCurrentTeacher();
+                
+                if (teacher) {
+                    // Update UI with teacher info
+                    teacherNameElement.textContent = teacher.name || 'Teacher';
+                    if (teacher.profileImage) {
+                        profileImg.src = teacher.profileImage;
+                    }
+                    
+                    // Update greeting based on time of day
+                    updateGreeting();
+                    
+                    // Load location settings
+                    loadLocationSettings();
+                    
+                    // Load teacher attendance
+                    loadTeacherAttendance();
+                    
+                    // Check if teacher is assigned to any class
+                    await checkIfTeacherAssignedToClass(teacher.name);
+                    
+                    // Load teacher stats
+                    loadTeacherStats();
+                    
+                    // Hide loading screen and show dashboard
+                    loadingScreen.style.display = 'none';
+                    dashboard.style.display = 'block';
+                    
+                    showNotification({
+                        title: 'Welcome Back',
+                        message: `You're logged in as ${teacher.name || 'Teacher'}`,
+                        type: 'success',
+                        duration: 3000
+                    });
+                    
+                    return;
+                }
+                
+                // If no teacher identified
                 showNotification({
                     title: 'Session Expired',
                     message: 'Please sign in again',
@@ -831,22 +1074,32 @@
                     window.location.href = 'login.html';
                 }, 2000);
                 
-            }, {
-                onlyOnce: true
-            });
+            } catch (error) {
+                console.error('Error checking active session:', error);
+                showNotification({
+                    title: 'Error',
+                    message: 'Failed to load teacher information',
+                    type: 'error'
+                });
+                
+                // Redirect to login page after a delay
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            }
         }
         
-        // Check if the teacher is a class teacher
-        async function checkIfClassTeacher() {
+        // Check if the teacher is assigned to any class
+        async function checkIfTeacherAssignedToClass(teacherName) {
             try {
                 const classesSnapshot = await get(classesRef);
                 if (classesSnapshot.exists()) {
                     const classes = classesSnapshot.val();
                     isClassTeacher = false;
                     
-                    // Check if this teacher is assigned as a class teacher
+                    // Check if this teacher is assigned to any class
                     for (const classId in classes) {
-                        if (classes[classId].teacher === currentTeacherId) {
+                        if (classes[classId].teacher === teacherName) {
                             isClassTeacher = true;
                             break;
                         }
@@ -862,7 +1115,7 @@
                     }
                 }
             } catch (error) {
-                console.error('Error checking class teacher status:', error);
+                console.error('Error checking class assignment:', error);
                 isClassTeacher = false;
                 financeNav.style.display = 'none';
                 adminNav.style.display = 'none';
@@ -982,6 +1235,9 @@
                         const clockInTime = new Date(attendanceData.clockIn);
                         attendanceTime.textContent = `Clocked in at ${formatTime(clockInTime)}`;
                         
+                        // Update status for top bar
+                        updateStatusTopbar("Clocked In", getCurrentPage());
+                        
                         // Check if clock in was out of range
                         if (attendanceData.isOutOfRange) {
                             rangeWarning.style.display = 'block';
@@ -999,6 +1255,9 @@
                         const clockOutTime = new Date(attendanceData.clockOut);
                         attendanceTime.textContent = `Clocked in at ${formatTime(clockInTime)}, out at ${formatTime(clockOutTime)}`;
                         
+                        // Update status for top bar
+                        updateStatusTopbar("Clocked Out", getCurrentPage());
+                        
                         // Check if clock in/out was out of range
                         if (attendanceData.isOutOfRange) {
                             rangeWarning.style.display = 'block';
@@ -1012,8 +1271,25 @@
                     clockInBtn.style.display = 'block';
                     clockOutBtn.style.display = 'none';
                     attendanceTime.textContent = "";
+                    
+                    // Update status for top bar
+                    updateStatusTopbar("Not Clocked In", getCurrentPage());
                 }
             });
+        }
+        
+        // Get current page from navigation
+        function getCurrentPage() {
+            const activeNav = document.querySelector('.nav-item.active');
+            if (!activeNav) return 'dashboard';
+            
+            const navId = activeNav.id;
+            if (navId === 'dashboard-nav') return 'dashboard';
+            if (navId === 'academics-nav') return 'academics';
+            if (navId === 'finance-nav') return 'finance';
+            if (navId === 'connect-nav') return 'connect';
+            if (navId === 'admin-nav') return 'admin';
+            return 'dashboard';
         }
         
         // Format time for display
@@ -1117,28 +1393,21 @@
             onValue(classesRef, (snapshot) => {
                 const classes = snapshot.val();
                 let classCount = 0;
+                let studentCount = 0;
                 
                 if (classes) {
                     for (const classId in classes) {
-                        if (classes[classId].teacher === currentTeacherId) {
+                        if (classes[classId].teacher === currentTeacherData.name) {
                             classCount++;
+                            // Count students in this class
+                            if (classes[classId].students && Array.isArray(classes[classId].students)) {
+                                studentCount += classes[classId].students.length;
+                            }
                         }
                     }
                 }
                 
                 classCountElement.textContent = classCount;
-            });
-            
-            // Count students assigned to this teacher's classes
-            const studentsRef = ref(db, 'students');
-            onValue(studentsRef, (snapshot) => {
-                const students = snapshot.val();
-                let studentCount = 0;
-                
-                if (students) {
-                    studentCount = Object.keys(students).length;
-                }
-                
                 studentCountElement.textContent = studentCount;
             });
             
@@ -1190,6 +1459,9 @@
                     // Update greeting
                     updateGreeting();
                     greetingSubtitle.textContent = 'Let\'s make today productive';
+                    
+                    // Update status bar (hide it for dashboard)
+                    updateStatusTopbar(currentAttendanceStatus, 'dashboard');
                 } else {
                     // Show the corresponding frame
                     const frameId = navId.replace('-nav', '-frame');
@@ -1206,6 +1478,9 @@
                     const pageTitle = this.querySelector('span').textContent;
                     greetingTitle.textContent = `Welcome to ${pageTitle}`;
                     greetingSubtitle.textContent = `Viewing your ${pageTitle.toLowerCase()} information`;
+                    
+                    // Update status bar
+                    updateStatusTopbar(currentAttendanceStatus, navId.replace('-nav', ''));
                 }
             });
         });
