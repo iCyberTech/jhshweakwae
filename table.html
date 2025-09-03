@@ -36,6 +36,58 @@
             padding: 15px;
         }
 
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .greeting h1 {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .greeting p {
+            font-size: 0.85rem;
+            color: var(--light-text);
+        }
+
+        .back-btn {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--glass-border);
+        }
+
+        .back-btn i {
+            color: var(--text-color);
+            font-size: 1.2rem;
+        }
+
         .subjects-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -175,86 +227,105 @@
             margin-top: 15px;
         }
 
+        /* Enhanced Notification Styles */
+        .notification {
+            padding: 18px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            border-left: 5px solid rgba(255, 255, 255, 0.3);
+            align-items: flex-start;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, rgba(0, 184, 148, 0.9) 0%, rgba(0, 184, 148, 1) 100%);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, rgba(214, 48, 49, 0.9) 0%, rgba(214, 48, 49, 1) 100%);
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, rgba(253, 203, 110, 0.9) 0%, rgba(253, 203, 110, 1) 100%);
+            color: #2d3436;
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, rgba(9, 132, 227, 0.9) 0%, rgba(9, 132, 227, 1) 100%);
+        }
+
+        .notification-icon {
+            font-size: 22px;
+            margin-right: 15px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            line-height: 1.4;
+        }
+
+        .notification-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            opacity: 0.95;
+            line-height: 1.5;
+        }
+
+        .notification-close {
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+            margin-left: 15px;
+            margin-top: 2px;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+        }
+
+        /* Animation enhancements */
+        @keyframes slideIn {
+            from {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            to {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+        }
+
+        .notification.show {
+            animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .notification.hide {
+            animation: slideOut 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+        }
+
         .notification-container {
             position: fixed;
             top: 15px;
             right: 15px;
-            width: 320px;
-            max-width: 90%;
+            width: 90%;
+            max-width: 350px;
             z-index: 9999;
             display: flex;
             flex-direction: column;
             gap: 10px;
-        }
-
-        .notification {
-            position: relative;
-            padding: 14px 18px;
-            border-radius: 8px;
-            color: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            transform: translateX(120%);
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            opacity: 0;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-            opacity: 1;
-        }
-
-        .notification.hide {
-            transform: translateX(120%);
-            opacity: 0;
-        }
-
-        .notification.success {
-            background-color: var(--success-color);
-        }
-
-        .notification.error {
-            background-color: var(--danger-color);
-        }
-
-        .notification.warning {
-            background-color: var(--warning-color);
-            color: var(--text-color);
-        }
-
-        .notification.info {
-            background-color: var(--info-color);
-        }
-
-        .notification-icon {
-            margin-right: 10px;
-            font-size: 18px;
-        }
-
-        .notification-content {
-            flex: 1;
-        }
-
-        .notification-title {
-            font-weight: 600;
-            margin-bottom: 4px;
-            font-size: 0.95rem;
-        }
-
-        .notification-message {
-            font-size: 0.85rem;
-            opacity: 0.9;
-        }
-
-        .notification-close {
-            background: none;
-            border: none;
-            color: inherit;
-            cursor: pointer;
-            margin-left: 12px;
-            font-size: 16px;
-            opacity: 0.8;
         }
 
         /* Mobile-specific styles */
@@ -342,6 +413,16 @@
             .subjects-container {
                 grid-template-columns: 1fr;
             }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .back-btn {
+                align-self: flex-end;
+            }
         }
     </style>
 </head>
@@ -357,6 +438,19 @@
 
     <!-- Main Content -->
     <div id="main-content" style="display: none;">
+        <div class="header">
+            <div class="profile">
+                <img id="profile-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="profile-img">
+                <div class="greeting">
+                    <h1 id="greeting-title">My Subjects, <span id="teacher-name">Teacher</span></h1>
+                    <p id="greeting-subtitle">View your teaching schedule</p>
+                </div>
+            </div>
+            <div class="back-btn" id="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </div>
+        </div>
+
         <div class="subjects-container" id="subjects-container">
             <!-- Subjects will be dynamically inserted here -->
         </div>
@@ -391,6 +485,17 @@
         const subjectsContainer = document.getElementById('subjects-container');
         const noSubjectsMessage = document.getElementById('no-subjects');
         const notificationContainer = document.getElementById('notification-container');
+        const teacherNameElement = document.getElementById('teacher-name');
+        const profileImg = document.getElementById('profile-img');
+        const greetingTitle = document.getElementById('greeting-title');
+        const greetingSubtitle = document.getElementById('greeting-subtitle');
+        const backBtn = document.getElementById('back-btn');
+        
+        // Firebase references
+        const authUsersRef = database.ref('authUsers');
+        const teachersRef = database.ref('teachers');
+        const subjectsRef = database.ref('subjects');
+        const classesRef = database.ref('classes');
         
         // Global variables
         let currentTeacherId = null;
@@ -453,96 +558,120 @@
             return notification;
         }
         
-        // Check for active teacher session
-        function checkActiveSession() {
-            loadingScreen.style.display = 'flex';
-            mainContent.style.display = 'none';
-            
-            // Check if user is signed in
-            auth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    try {
-                        // Get user data from authUsers
-                        const authUsersSnapshot = await database.ref('authUsers').once('value');
-                        const authUsers = authUsersSnapshot.val();
-                        
-                        let teacherAuthData = null;
-                        
-                        // Find the teacher with matching UID
-                        for (const uid in authUsers) {
-                            if (uid === user.uid && authUsers[uid].userType === 'teacher') {
-                                teacherAuthData = authUsers[uid];
-                                currentTeacherId = teacherAuthData.userId;
-                                break;
+        // Identify the current teacher based on Firebase Auth
+        async function identifyCurrentTeacher() {
+            return new Promise((resolve, reject) => {
+                // Check if user is already signed in
+                const unsubscribe = auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        try {
+                            // User is signed in, get their data from authUsers
+                            const authUserSnapshot = await database.ref(`authUsers/${user.uid}`).once('value');
+                            
+                            if (authUserSnapshot.exists()) {
+                                const authUser = authUserSnapshot.val();
+                                
+                                if (authUser.userType === 'teacher') {
+                                    currentTeacherId = authUser.userId;
+                                    
+                                    // Get teacher details from teachers collection
+                                    const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
+                                    
+                                    if (teacherSnapshot.exists()) {
+                                        currentTeacherData = teacherSnapshot.val();
+                                        unsubscribe();
+                                        resolve(currentTeacherData);
+                                        return;
+                                    }
+                                }
                             }
+                            
+                            // If we reach here, the auth user doesn't have proper teacher data
+                            unsubscribe();
+                            reject(new Error('Teacher data not found for authenticated user'));
+                        } catch (error) {
+                            unsubscribe();
+                            reject(error);
                         }
-                        
-                        if (!teacherAuthData) {
-                            throw new Error('Teacher account not found in database');
-                        }
-                        
-                        // Get teacher details
-                        const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
-                        if (!teacherSnapshot.exists()) {
-                            throw new Error('Teacher details not found');
-                        }
-                        
-                        currentTeacherData = teacherSnapshot.val();
-                        
-                        // Load teacher's subjects
-                        loadTeacherSubjects();
-                        
-                        // Hide loading screen and show main content
-                        loadingScreen.style.display = 'none';
-                        mainContent.style.display = 'block';
-                        
-                    } catch (error) {
-                        console.error('Error loading teacher data:', error);
-                        showNotification({
-                            title: 'Error',
-                            message: 'Failed to load teacher information: ' + error.message,
-                            type: 'error'
-                        });
-                        
-                        // Sign out and redirect to login
-                        auth.signOut();
-                        setTimeout(() => {
-                            window.location.href = 'login.html';
-                        }, 3000);
+                    } else {
+                        // No user is signed in
+                        unsubscribe();
+                        reject(new Error('No user is currently signed in'));
                     }
-                } else {
-                    // No user is signed in
+                }, (error) => {
+                    unsubscribe();
+                    reject(error);
+                });
+            });
+        }
+        
+        // Check for active teacher session
+        async function checkActiveSession() {
+            try {
+                // First try to identify the teacher based on auth state
+                const teacher = await identifyCurrentTeacher();
+                
+                if (teacher) {
+                    // Update UI with teacher info
+                    teacherNameElement.textContent = teacher.name || 'Teacher';
+                    if (teacher.profileImage) {
+                        profileImg.src = teacher.profileImage;
+                    }
+                    
+                    // Update greeting based on time of day
+                    updateGreeting();
+                    
+                    // Load teacher's subjects
+                    loadTeacherSubjects();
+                    
+                    // Hide loading screen and show main content
+                    loadingScreen.style.display = 'none';
+                    mainContent.style.display = 'block';
+                    
                     showNotification({
-                        title: 'Session Expired',
-                        message: 'Please sign in again',
-                        type: 'error'
+                        title: 'Subjects Loaded',
+                        message: 'Viewing your teaching schedule',
+                        type: 'success',
+                        duration: 3000
                     });
                     
-                    // Redirect to login page after a delay
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
+                    return;
                 }
-            }, (error) => {
-                console.error('Auth state change error:', error);
+                
+                // If no teacher identified
+                showNotification({
+                    title: 'Session Expired',
+                    message: 'Please sign in again',
+                    type: 'error',
+                    duration: 0
+                });
+                
+                // Redirect to login page after a delay
+                setTimeout(() => {
+                    window.location.href = 'logins.html';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error checking active session:', error);
                 showNotification({
                     title: 'Error',
-                    message: 'Authentication error: ' + error.message,
+                    message: 'Failed to load teacher information',
                     type: 'error'
                 });
                 
+                // Redirect to login page after a delay
                 setTimeout(() => {
-                    window.location.href = 'login.html';
+                    window.location.href = 'logins.html';
                 }, 2000);
-            });
+            }
         }
         
         // Load subjects assigned to this teacher
         function loadTeacherSubjects() {
-            database.ref('subjects').on('value', async (subjectsSnapshot) => {
+            subjectsRef.on('value', async (subjectsSnapshot) => {
                 const subjects = subjectsSnapshot.val();
-                const classesSnapshot = await database.ref('classes').once('value');
-                const classes = classesSnapshot.val() || {};
+                const classesSnapshot = await classesRef.once('value');
+                const classes = classesSnapshot.exists() ? classesSnapshot.val() : {};
                 
                 // Clear previous content
                 subjectsContainer.innerHTML = '';
@@ -728,7 +857,30 @@
             return 'book-open'; // default icon
         }
         
+        // Update greeting based on time of day
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            let timeOfDay;
+            
+            if (hour < 12) {
+                timeOfDay = 'Morning';
+            } else if (hour < 18) {
+                timeOfDay = 'Afternoon';
+            } else {
+                timeOfDay = 'Evening';
+            }
+            
+            greetingTitle.textContent = `Good ${timeOfDay}, ${currentTeacherData.name || 'Teacher'}!`;
+        }
+        
+        // Back button functionality
+        backBtn.addEventListener('click', function() {
+            window.history.back();
+        });
+        
         // Initialize the app - check for active session
+        loadingScreen.style.display = 'flex';
+        mainContent.style.display = 'none';
         checkActiveSession();
     </script>
 </body>
