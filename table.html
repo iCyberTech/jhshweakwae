@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Subjects</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
         :root {
             --primary-color: #6c5ce7;
@@ -364,12 +367,8 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    
     <script>
-        // Firebase configuration (same as logins.html)
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
             authDomain: "sms-single.firebaseapp.com",
@@ -454,34 +453,27 @@
             return notification;
         }
         
-        // Check for active teacher session
-        async function checkActiveSession() {
-            try {
-                // Check if there's a currently signed-in user
-                const currentUser = auth.currentUser;
-                
-                if (currentUser) {
-                    // Get the teacher data from authUsers
-                    const authUsersRef = database.ref('authUsers');
-                    const authUsersSnapshot = await authUsersRef.orderByChild('email').equalTo(currentUser.email).once('value');
-                    
-                    if (authUsersSnapshot.exists()) {
+        // Check authentication state
+        function checkAuthState() {
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    try {
+                        // Get user data from authUsers
+                        const authUsersSnapshot = await database.ref('authUsers').once('value');
                         const authUsers = authUsersSnapshot.val();
-                        let teacherAuthData = null;
                         
-                        // Find the teacher user
-                        for (const authId in authUsers) {
-                            if (authUsers[authId].userType === 'teacher') {
-                                teacherAuthData = authUsers[authId];
-                                currentTeacherId = teacherAuthData.userId;
+                        let teacherAuthData = null;
+                        for (const [uid, authUser] of Object.entries(authUsers)) {
+                            if (authUser.email === user.email) {
+                                teacherAuthData = authUser;
+                                currentTeacherId = authUser.userId;
                                 break;
                             }
                         }
                         
-                        if (teacherAuthData) {
+                        if (teacherAuthData && teacherAuthData.userType === 'teacher') {
                             // Get teacher details from teachers collection
-                            const teacherRef = database.ref(`teachers/${currentTeacherId}`);
-                            const teacherSnapshot = await teacherRef.once('value');
+                            const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
                             
                             if (teacherSnapshot.exists()) {
                                 currentTeacherData = teacherSnapshot.val();
@@ -496,27 +488,51 @@
                                 return;
                             }
                         }
+                        
+                        // If user is not a teacher or data not found
+                        showNotification({
+                            title: 'Access Denied',
+                            message: 'This portal is for teachers only',
+                            type: 'error'
+                        });
+                        
+                        // Sign out and redirect to login
+                        await auth.signOut();
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
+                        
+                    } catch (error) {
+                        console.error('Error checking auth state:', error);
+                        showNotification({
+                            title: 'Error',
+                            message: 'Failed to load teacher information',
+                            type: 'error'
+                        });
+                        
+                        // Redirect to login page after a delay
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
                     }
+                } else {
+                    // No user is signed in
+                    showNotification({
+                        title: 'Session Expired',
+                        message: 'Please sign in again',
+                        type: 'error'
+                    });
+                    
+                    // Redirect to login page after a delay
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
                 }
-                
-                // If no teacher identified or not logged in
-                showNotification({
-                    title: 'Authentication Required',
-                    message: 'Please sign in to access your subjects',
-                    type: 'error',
-                    duration: 3000
-                });
-                
-                // Redirect to login page after a delay
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 2000);
-                
-            } catch (error) {
-                console.error('Error checking active session:', error);
+            }, (error) => {
+                console.error('Auth state error:', error);
                 showNotification({
                     title: 'Error',
-                    message: 'Failed to load teacher information',
+                    message: 'Authentication error occurred',
                     type: 'error'
                 });
                 
@@ -524,17 +540,15 @@
                 setTimeout(() => {
                     window.location.href = 'login.html';
                 }, 2000);
-            }
+            });
         }
         
         // Load subjects assigned to this teacher
         function loadTeacherSubjects() {
-            const subjectsRef = database.ref('subjects');
-            
-            subjectsRef.on('value', async (subjectsSnapshot) => {
+            database.ref('subjects').on('value', async (subjectsSnapshot) => {
                 const subjects = subjectsSnapshot.val();
                 const classesSnapshot = await database.ref('classes').once('value');
-                const classes = classesSnapshot.val() || {};
+                const classes = classesSnapshot.exists() ? classesSnapshot.val() : {};
                 
                 // Clear previous content
                 subjectsContainer.innerHTML = '';
@@ -720,28 +734,10 @@
             return 'book-open'; // default icon
         }
         
-        // Initialize the app - check for active session
+        // Initialize the app - check authentication state
         loadingScreen.style.display = 'flex';
         mainContent.style.display = 'none';
-        
-        // Check if user is already signed in when page loads
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                checkActiveSession();
-            } else {
-                // No user is signed in, redirect to login
-                showNotification({
-                    title: 'Authentication Required',
-                    message: 'Please sign in to access your subjects',
-                    type: 'error',
-                    duration: 3000
-                });
-                
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 2000);
-            }
-        });
+        checkAuthState();
     </script>
 </body>
 </html>
