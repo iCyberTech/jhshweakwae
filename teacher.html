@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Teacher Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
         /* Enhanced Notification Styles */
         .notification {
@@ -943,9 +946,6 @@
     <!-- Notification Container -->
     <div class="notification-container" id="notification-container"></div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script>
         // Firebase configuration (same as signin.html)
         const firebaseConfig = {
@@ -999,8 +999,6 @@
         const locationSettingsRef = database.ref('locationSettings');
         const teacherAttendanceRef = database.ref('teacherAttendance');
         const classesRef = database.ref('classes');
-        const credentialsRef = database.ref('credentials');
-        const activeSessionsRef = database.ref('activeSessions');
         
         // Global variables
         let currentTeacherId = null;
@@ -1140,149 +1138,105 @@
             };
         }
         
-        // Identify the current teacher based on active session
-        async function identifyCurrentTeacher() {
-            try {
-                // Check if there's a currently authenticated user
-                const user = auth.currentUser;
-                
-                if (user) {
-                    // Get teacher details from the database
-                    const teacherSnapshot = await database.ref(`teachers/${user.uid}`).once('value');
-                    
-                    if (teacherSnapshot.exists()) {
-                        currentTeacherData = teacherSnapshot.val();
-                        currentTeacherId = user.uid;
-                        
-                        // Update active sessions
-                        await database.ref(`activeSessions/teacher`).set(user.uid);
-                        
-                        return currentTeacherData;
-                    }
-                }
-                
-                // Fallback: Check active sessions in database
-                const activeSessionsSnapshot = await database.ref('activeSessions').once('value');
-                if (!activeSessionsSnapshot.exists()) {
-                    throw new Error('No active sessions found');
-                }
-                
-                const activeSessions = activeSessionsSnapshot.val();
-                const currentBrowserDetails = getBrowserDetails();
-                
-                // Check if there's an active teacher session
-                if (activeSessions.teacher) {
-                    // Get teacher details
-                    const teacherSnapshot = await database.ref(`teachers/${activeSessions.teacher}`).once('value');
-                    
-                    if (teacherSnapshot.exists()) {
-                        currentTeacherData = teacherSnapshot.val();
-                        currentTeacherId = activeSessions.teacher;
-                        
-                        // Verify device info matches
-                        const credentialsSnapshot = await database.ref(`credentials/${currentTeacherId}`).once('value');
-                        if (credentialsSnapshot.exists()) {
-                            const credentials = credentialsSnapshot.val();
-                            if (credentials.deviceInfo) {
-                                const deviceInfo = credentials.deviceInfo;
-                                
-                                // Check if device info matches
-                                if (deviceInfo.userAgent === currentBrowserDetails.userAgent && 
-                                    deviceInfo.screenResolution === currentBrowserDetails.screenResolution &&
-                                    deviceInfo.timezone === currentBrowserDetails.timezone) {
-                                    return currentTeacherData;
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                throw new Error('No matching teacher session found');
-            } catch (error) {
-                console.error('Error identifying teacher:', error);
-                showNotification({
-                    title: 'Error',
-                    message: 'Failed to identify teacher: ' + error.message,
-                    type: 'error'
-                });
-                return null;
-            }
-        }
-        
         // Check for active teacher session
-        async function checkActiveSession() {
-            try {
-                // First try to identify the teacher based on active session
-                const teacher = await identifyCurrentTeacher();
-                
-                if (teacher) {
-                    // Update UI with teacher info
-                    teacherNameElement.textContent = teacher.name || 'Teacher';
-                    if (teacher.profileImage) {
-                        profileImg.src = teacher.profileImage;
+        function checkActiveSession() {
+            loadingScreen.style.display = 'flex';
+            dashboard.style.display = 'none';
+            
+            // Check if user is signed in
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    // User is signed in
+                    currentTeacherId = user.uid;
+                    
+                    try {
+                        // Get teacher data from database
+                        const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
+                        
+                        if (teacherSnapshot.exists()) {
+                            currentTeacherData = teacherSnapshot.val();
+                            
+                            // Update UI with teacher info
+                            teacherNameElement.textContent = currentTeacherData.name || 'Teacher';
+                            if (currentTeacherData.profileImage) {
+                                profileImg.src = currentTeacherData.profileImage;
+                            }
+                            
+                            // Update greeting based on time of day
+                            updateGreeting();
+                            
+                            // Load location settings
+                            loadLocationSettings();
+                            
+                            // Load teacher attendance
+                            loadTeacherAttendance();
+                            
+                            // Check if teacher is assigned to any class
+                            await checkIfTeacherAssignedToClass(currentTeacherData.name);
+                            
+                            // Load teacher stats
+                            loadTeacherStats();
+                            
+                            // Hide loading screen and show dashboard
+                            loadingScreen.style.display = 'none';
+                            dashboard.style.display = 'block';
+                            
+                            showNotification({
+                                title: 'Welcome Back',
+                                message: `You're logged in as ${currentTeacherData.name || 'Teacher'}`,
+                                type: 'success',
+                                duration: 3000
+                            });
+                        } else {
+                            throw new Error('Teacher data not found');
+                        }
+                    } catch (error) {
+                        console.error('Error loading teacher data:', error);
+                        showNotification({
+                            title: 'Error',
+                            message: 'Failed to load teacher information',
+                            type: 'error'
+                        });
+                        
+                        // Sign out and redirect to login
+                        auth.signOut().then(() => {
+                            setTimeout(() => {
+                                window.location.href = 'login.html';
+                            }, 2000);
+                        });
                     }
-                    
-                    // Update greeting based on time of day
-                    updateGreeting();
-                    
-                    // Load location settings
-                    loadLocationSettings();
-                    
-                    // Load teacher attendance
-                    loadTeacherAttendance();
-                    
-                    // Check if teacher is assigned to any class
-                    await checkIfTeacherAssignedToClass(teacher.name);
-                    
-                    // Load teacher stats
-                    loadTeacherStats();
-                    
-                    // Hide loading screen and show dashboard
-                    loadingScreen.style.display = 'none';
-                    dashboard.style.display = 'block';
-                    
+                } else {
+                    // No user is signed in
                     showNotification({
-                        title: 'Welcome Back',
-                        message: `You're logged in as ${teacher.name || 'Teacher'}`,
-                        type: 'success',
-                        duration: 3000
+                        title: 'Session Expired',
+                        message: 'Please sign in again',
+                        type: 'error',
+                        duration: 0
                     });
                     
-                    return;
+                    // Redirect to login page after a delay
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
                 }
-                
-                // If no teacher identified
-                showNotification({
-                    title: 'Session Expired',
-                    message: 'Please sign in again',
-                    type: 'error',
-                    duration: 0
-                });
-                
-                // Redirect to login page after a delay
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 2000);
-                
-            } catch (error) {
-                console.error('Error checking active session:', error);
+            }, (error) => {
+                console.error('Auth state change error:', error);
                 showNotification({
                     title: 'Error',
-                    message: 'Failed to load teacher information',
+                    message: 'Authentication error',
                     type: 'error'
                 });
                 
-                // Redirect to login page after a delay
                 setTimeout(() => {
                     window.location.href = 'login.html';
                 }, 2000);
-            }
+            });
         }
         
         // Check if the teacher is assigned to any class
         async function checkIfTeacherAssignedToClass(teacherName) {
             try {
-                const classesSnapshot = await database.ref('classes').once('value');
+                const classesSnapshot = await classesRef.once('value');
                 if (classesSnapshot.exists()) {
                     const classes = classesSnapshot.val();
                     isClassTeacher = false;
@@ -1314,7 +1268,7 @@
         
         // Load location settings from database
         function loadLocationSettings() {
-            database.ref('locationSettings').on('value', (snapshot) => {
+            locationSettingsRef.on('value', (snapshot) => {
                 locationSettings = snapshot.val();
                 if (locationSettings) {
                     console.log('Location settings loaded:', locationSettings);
@@ -1407,7 +1361,9 @@
         
         // Load teacher attendance data - matches the exact Firebase structure
         function loadTeacherAttendance() {
-            database.ref(`teacherAttendance/${today}/${currentTeacherId}`).on('value', (snapshot) => {
+            const todayAttendanceRef = database.ref(`teacherAttendance/${today}/${currentTeacherId}`);
+            
+            todayAttendanceRef.on('value', (snapshot) => {
                 const attendanceData = snapshot.val();
                 
                 if (attendanceData) {
@@ -1555,7 +1511,7 @@
         // Load teacher stats (classes, students, etc.)
         function loadTeacherStats() {
             // Count classes assigned to this teacher
-            database.ref('classes').on('value', (snapshot) => {
+            classesRef.on('value', (snapshot) => {
                 const classes = snapshot.val();
                 let classCount = 0;
                 let studentCount = 0;
@@ -1708,19 +1664,7 @@
         });
         
         // Initialize the app - check for active session
-        loadingScreen.style.display = 'flex';
-        dashboard.style.display = 'none';
-        
-        // Check if user is already signed in
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // User is signed in
-                checkActiveSession();
-            } else {
-                // No user is signed in, check for active session in database
-                checkActiveSession();
-            }
-        });
+        checkActiveSession();
     </script>
 </body>
 </html>
