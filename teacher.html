@@ -257,6 +257,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
+            position: relative;
         }
 
         .card-icon {
@@ -993,12 +994,12 @@
         const frameCloseButtons = document.querySelectorAll('.frame-close');
         
         // Firebase references
-        const authUsersRef = ref(db, 'authUsers');
         const teachersRef = ref(db, 'teachers');
         const locationSettingsRef = ref(db, 'locationSettings');
         const teacherAttendanceRef = ref(db, 'teacherAttendance');
         const classesRef = ref(db, 'classes');
         const credentialsRef = ref(db, 'credentials');
+        const activeSessionsRef = ref(db, 'activeSessions');
         
         // Global variables
         let currentTeacherId = null;
@@ -1083,47 +1084,94 @@
             }
         }
         
-        // Identify the current teacher based on device info
+        // Get browser details function (same as in signin.html)
+        function getBrowserDetails() {
+            const userAgent = navigator.userAgent;
+            let browserName = "Unknown";
+            let browserVersion = "Unknown";
+            let osName = "Unknown";
+            let osVersion = "Unknown";
+            
+            // Detect browser
+            if (userAgent.includes("Firefox")) {
+                browserName = "Firefox";
+                browserVersion = userAgent.match(/Firefox\/(\d+\.\d+)/)[1];
+            } else if (userAgent.includes("Edg")) {
+                browserName = "Edge";
+                browserVersion = userAgent.match(/Edg\/(\d+\.\d+\.\d+\.\d+)/)[1];
+            } else if (userAgent.includes("Chrome")) {
+                browserName = "Chrome";
+                browserVersion = userAgent.match(/Chrome\/(\d+\.\d+\.\d+\.\d+)/)[1];
+            } else if (userAgent.includes("Safari")) {
+                browserName = "Safari";
+                browserVersion = userAgent.match(/Version\/(\d+\.\d+)/)[1];
+            }
+            
+            // Detect OS
+            if (userAgent.includes("Windows")) {
+                osName = "Windows";
+                if (userAgent.includes("Windows NT 10.0")) osVersion = "10";
+                else if (userAgent.includes("Windows NT 6.3")) osVersion = "8.1";
+                else if (userAgent.includes("Windows NT 6.2")) osVersion = "8";
+                else if (userAgent.includes("Windows NT 6.1")) osVersion = "7";
+            } else if (userAgent.includes("Mac")) {
+                osName = "Mac";
+                osVersion = userAgent.match(/Mac OS X (\d+_\d+_\d+)/)[1].replace(/_/g, ".");
+            } else if (userAgent.includes("Linux")) {
+                osName = "Linux";
+            } else if (userAgent.includes("Android")) {
+                osName = "Android";
+                osVersion = userAgent.match(/Android (\d+\.\d+)/)[1];
+            } else if (userAgent.includes("iOS") || userAgent.includes("iPhone") || userAgent.includes("iPad")) {
+                osName = "iOS";
+                osVersion = userAgent.match(/OS (\d+_\d+)/)[1].replace(/_/g, ".");
+            }
+            
+            return {
+                browserName,
+                browserVersion,
+                osName,
+                osVersion,
+                userAgent,
+                screenResolution: `${window.screen.width}x${window.screen.height}`,
+                language: navigator.language,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+        }
+        
+        // Identify the current teacher based on active session
         async function identifyCurrentTeacher() {
             try {
-                // Get all auth users
-                const authUsersSnapshot = await get(authUsersRef);
-                if (!authUsersSnapshot.exists()) {
-                    throw new Error('No auth users found');
+                // Get active sessions
+                const activeSessionsSnapshot = await get(activeSessionsRef);
+                if (!activeSessionsSnapshot.exists()) {
+                    throw new Error('No active sessions found');
                 }
                 
-                const authUsers = authUsersSnapshot.val();
-                const credentialsSnapshot = await get(credentialsRef);
-                const credentials = credentialsSnapshot.exists() ? credentialsSnapshot.val() : {};
+                const activeSessions = activeSessionsSnapshot.val();
+                const currentBrowserDetails = getBrowserDetails();
                 
-                // Get current device info from browser
-                const userAgent = navigator.userAgent;
-                const screenResolution = `${window.screen.width}x${window.screen.height}`;
-                const language = navigator.language;
-                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                
-                // Find matching teacher based on device info
-                for (const [authId, authUser] of Object.entries(authUsers)) {
-                    if (authUser.userType === 'teacher') {
-                        const teacherCredential = credentials[authUser.userId];
-                        if (teacherCredential && teacherCredential.deviceInfo) {
-                            const deviceInfo = teacherCredential.deviceInfo;
-                            
-                            // Check for matching device characteristics
-                            if (deviceInfo.userAgent === userAgent && 
-                                deviceInfo.screenResolution === screenResolution &&
-                                deviceInfo.language === language && 
-                                deviceInfo.timezone === timezone) {
+                // Check if there's an active teacher session
+                if (activeSessions.teacher) {
+                    // Get teacher details
+                    const teacherRef = ref(db, `teachers/${activeSessions.teacher}`);
+                    const teacherSnapshot = await get(teacherRef);
+                    
+                    if (teacherSnapshot.exists()) {
+                        currentTeacherData = teacherSnapshot.val();
+                        currentTeacherId = activeSessions.teacher;
+                        
+                        // Verify device info matches
+                        const credentialsSnapshot = await get(ref(db, `credentials/${currentTeacherId}`));
+                        if (credentialsSnapshot.exists()) {
+                            const credentials = credentialsSnapshot.val();
+                            if (credentials.deviceInfo) {
+                                const deviceInfo = credentials.deviceInfo;
                                 
-                                // This is likely the current teacher
-                                currentTeacherId = authUser.userId;
-                                
-                                // Get teacher details from teachers collection
-                                const teacherRef = ref(db, `teachers/${currentTeacherId}`);
-                                const teacherSnapshot = await get(teacherRef);
-                                
-                                if (teacherSnapshot.exists()) {
-                                    currentTeacherData = teacherSnapshot.val();
+                                // Check if device info matches
+                                if (deviceInfo.userAgent === currentBrowserDetails.userAgent && 
+                                    deviceInfo.screenResolution === currentBrowserDetails.screenResolution &&
+                                    deviceInfo.timezone === currentBrowserDetails.timezone) {
                                     return currentTeacherData;
                                 }
                             }
@@ -1131,20 +1179,7 @@
                     }
                 }
                 
-                // If no match found, try to get from activeSessions as fallback
-                const activeSessionSnapshot = await get(ref(db, 'activeSessions/teacher'));
-                if (activeSessionSnapshot.exists()) {
-                    currentTeacherId = activeSessionSnapshot.val();
-                    const teacherRef = ref(db, `teachers/${currentTeacherId}`);
-                    const teacherSnapshot = await get(teacherRef);
-                    
-                    if (teacherSnapshot.exists()) {
-                        currentTeacherData = teacherSnapshot.val();
-                        return currentTeacherData;
-                    }
-                }
-                
-                throw new Error('No matching teacher found');
+                throw new Error('No matching teacher session found');
             } catch (error) {
                 console.error('Error identifying teacher:', error);
                 showNotification({
@@ -1159,7 +1194,7 @@
         // Check for active teacher session
         async function checkActiveSession() {
             try {
-                // First try to identify the teacher based on device info
+                // First try to identify the teacher based on active session
                 const teacher = await identifyCurrentTeacher();
                 
                 if (teacher) {
@@ -1504,7 +1539,7 @@
         // Load teacher stats (classes, students, etc.)
         function loadTeacherStats() {
             // Count classes assigned to this teacher
-            onValue(classesRef, (snapshot) => {
+            onValue(classesRef, (snapshot) {
                 const classes = snapshot.val();
                 let classCount = 0;
                 let studentCount = 0;
