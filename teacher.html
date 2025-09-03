@@ -943,12 +943,11 @@
     <!-- Notification Container -->
     <div class="notification-container" id="notification-container"></div>
 
-    <script type="module">
-        // Import Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, get, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        
-        // Firebase configuration
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script>
+        // Firebase configuration (same as signin.html)
         const firebaseConfig = {
             apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
             authDomain: "sms-single.firebaseapp.com",
@@ -956,12 +955,14 @@
             storageBucket: "sms-single.appspot.com",
             messagingSenderId: "140188895278",
             appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
-            measurementId: "G-7ER348P6VZ"
+            measurementId: "G-7ER348P6VZ",
+            databaseURL: "https://sms-single-default-rtdb.firebaseio.com/"
         };
         
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
         
         // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
@@ -994,12 +995,12 @@
         const frameCloseButtons = document.querySelectorAll('.frame-close');
         
         // Firebase references
-        const teachersRef = ref(db, 'teachers');
-        const locationSettingsRef = ref(db, 'locationSettings');
-        const teacherAttendanceRef = ref(db, 'teacherAttendance');
-        const classesRef = ref(db, 'classes');
-        const credentialsRef = ref(db, 'credentials');
-        const activeSessionsRef = ref(db, 'activeSessions');
+        const teachersRef = database.ref('teachers');
+        const locationSettingsRef = database.ref('locationSettings');
+        const teacherAttendanceRef = database.ref('teacherAttendance');
+        const classesRef = database.ref('classes');
+        const credentialsRef = database.ref('credentials');
+        const activeSessionsRef = database.ref('activeSessions');
         
         // Global variables
         let currentTeacherId = null;
@@ -1142,8 +1143,26 @@
         // Identify the current teacher based on active session
         async function identifyCurrentTeacher() {
             try {
-                // Get active sessions
-                const activeSessionsSnapshot = await get(activeSessionsRef);
+                // Check if there's a currently authenticated user
+                const user = auth.currentUser;
+                
+                if (user) {
+                    // Get teacher details from the database
+                    const teacherSnapshot = await database.ref(`teachers/${user.uid}`).once('value');
+                    
+                    if (teacherSnapshot.exists()) {
+                        currentTeacherData = teacherSnapshot.val();
+                        currentTeacherId = user.uid;
+                        
+                        // Update active sessions
+                        await database.ref(`activeSessions/teacher`).set(user.uid);
+                        
+                        return currentTeacherData;
+                    }
+                }
+                
+                // Fallback: Check active sessions in database
+                const activeSessionsSnapshot = await database.ref('activeSessions').once('value');
                 if (!activeSessionsSnapshot.exists()) {
                     throw new Error('No active sessions found');
                 }
@@ -1154,15 +1173,14 @@
                 // Check if there's an active teacher session
                 if (activeSessions.teacher) {
                     // Get teacher details
-                    const teacherRef = ref(db, `teachers/${activeSessions.teacher}`);
-                    const teacherSnapshot = await get(teacherRef);
+                    const teacherSnapshot = await database.ref(`teachers/${activeSessions.teacher}`).once('value');
                     
                     if (teacherSnapshot.exists()) {
                         currentTeacherData = teacherSnapshot.val();
                         currentTeacherId = activeSessions.teacher;
                         
                         // Verify device info matches
-                        const credentialsSnapshot = await get(ref(db, `credentials/${currentTeacherId}`));
+                        const credentialsSnapshot = await database.ref(`credentials/${currentTeacherId}`).once('value');
                         if (credentialsSnapshot.exists()) {
                             const credentials = credentialsSnapshot.val();
                             if (credentials.deviceInfo) {
@@ -1264,7 +1282,7 @@
         // Check if the teacher is assigned to any class
         async function checkIfTeacherAssignedToClass(teacherName) {
             try {
-                const classesSnapshot = await get(classesRef);
+                const classesSnapshot = await database.ref('classes').once('value');
                 if (classesSnapshot.exists()) {
                     const classes = classesSnapshot.val();
                     isClassTeacher = false;
@@ -1296,7 +1314,7 @@
         
         // Load location settings from database
         function loadLocationSettings() {
-            onValue(locationSettingsRef, (snapshot) => {
+            database.ref('locationSettings').on('value', (snapshot) => {
                 locationSettings = snapshot.val();
                 if (locationSettings) {
                     console.log('Location settings loaded:', locationSettings);
@@ -1389,9 +1407,7 @@
         
         // Load teacher attendance data - matches the exact Firebase structure
         function loadTeacherAttendance() {
-            const todayAttendanceRef = ref(db, `teacherAttendance/${today}/${currentTeacherId}`);
-            
-            onValue(todayAttendanceRef, (snapshot) => {
+            database.ref(`teacherAttendance/${today}/${currentTeacherId}`).on('value', (snapshot) => {
                 const attendanceData = snapshot.val();
                 
                 if (attendanceData) {
@@ -1474,7 +1490,7 @@
                 };
                 
                 // Update the data in the exact structure from your Firebase
-                await set(ref(db, `teacherAttendance/${today}/${currentTeacherId}`), attendanceUpdate);
+                await database.ref(`teacherAttendance/${today}/${currentTeacherId}`).set(attendanceUpdate);
                 
                 showNotification({
                     title: 'Clocked In',
@@ -1519,7 +1535,7 @@
                 };
                 
                 // Update the data in the exact structure from your Firebase
-                await update(ref(db, `teacherAttendance/${today}/${currentTeacherId}`), attendanceUpdate);
+                await database.ref(`teacherAttendance/${today}/${currentTeacherId}`).update(attendanceUpdate);
                 
                 showNotification({
                     title: 'Clocked Out',
@@ -1539,7 +1555,7 @@
         // Load teacher stats (classes, students, etc.)
         function loadTeacherStats() {
             // Count classes assigned to this teacher
-            onValue(classesRef, (snapshot) {
+            database.ref('classes').on('value', (snapshot) => {
                 const classes = snapshot.val();
                 let classCount = 0;
                 let studentCount = 0;
@@ -1694,7 +1710,17 @@
         // Initialize the app - check for active session
         loadingScreen.style.display = 'flex';
         dashboard.style.display = 'none';
-        checkActiveSession();
+        
+        // Check if user is already signed in
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // User is signed in
+                checkActiveSession();
+            } else {
+                // No user is signed in, check for active session in database
+                checkActiveSession();
+            }
+        });
     </script>
 </body>
 </html>
