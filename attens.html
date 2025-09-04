@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Class Attendance</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
         :root {
             --primary-color: #6c5ce7;
@@ -631,11 +634,7 @@
         </div>
     </div>
 
-    <script type="module">
-        // Import Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, get, onValue, set, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        
+    <script>
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
@@ -644,12 +643,14 @@
             storageBucket: "sms-single.appspot.com",
             messagingSenderId: "140188895278",
             appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
-            measurementId: "G-7ER348P6VZ"
+            measurementId: "G-7ER348P6VZ",
+            databaseURL: "https://sms-single-default-rtdb.firebaseio.com/"
         };
         
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
         
         // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
@@ -685,11 +686,10 @@
         const confirmationMessage = document.getElementById('confirmation-message');
         
         // Firebase references
-        const authUsersRef = ref(db, 'authUsers');
-        const teachersRef = ref(db, 'teachers');
-        const classesRef = ref(db, 'classes');
-        const credentialsRef = ref(db, 'credentials');
-        const attendanceRef = ref(db, 'attendance');
+        const authUsersRef = database.ref('authUsers');
+        const teachersRef = database.ref('teachers');
+        const classesRef = database.ref('classes');
+        const attendanceRef = database.ref('attendance');
         
         // Global variables
         let currentTeacherId = null;
@@ -702,78 +702,57 @@
         // Set today's date as default
         attendanceDate.value = currentDate;
         
-        // Identify the current teacher based on device info
+        // Identify the current teacher based on Firebase Auth (same as teacher dashboard)
         async function identifyCurrentTeacher() {
-            try {
-                // Get all auth users
-                const authUsersSnapshot = await get(authUsersRef);
-                if (!authUsersSnapshot.exists()) {
-                    throw new Error('No auth users found');
-                }
-                
-                const authUsers = authUsersSnapshot.val();
-                const credentialsSnapshot = await get(credentialsRef);
-                const credentials = credentialsSnapshot.exists() ? credentialsSnapshot.val() : {};
-                
-                // Get current device info from browser
-                const userAgent = navigator.userAgent;
-                const screenResolution = `${window.screen.width}x${window.screen.height}`;
-                const language = navigator.language;
-                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                
-                // Find matching teacher based on device info
-                for (const [authId, authUser] of Object.entries(authUsers)) {
-                    if (authUser.userType === 'teacher') {
-                        const teacherCredential = credentials[authUser.userId];
-                        if (teacherCredential && teacherCredential.deviceInfo) {
-                            const deviceInfo = teacherCredential.deviceInfo;
+            return new Promise((resolve, reject) => {
+                // Check if user is already signed in
+                const unsubscribe = auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        try {
+                            // User is signed in, get their data from authUsers
+                            const authUserSnapshot = await database.ref(`authUsers/${user.uid}`).once('value');
                             
-                            // Check for matching device characteristics
-                            if (deviceInfo.userAgent === userAgent && 
-                                deviceInfo.screenResolution === screenResolution &&
-                                deviceInfo.language === language && 
-                                deviceInfo.timezone === timezone) {
+                            if (authUserSnapshot.exists()) {
+                                const authUser = authUserSnapshot.val();
                                 
-                                // This is likely the current teacher
-                                currentTeacherId = authUser.userId;
-                                
-                                // Get teacher details from teachers collection
-                                const teacherRef = ref(db, `teachers/${currentTeacherId}`);
-                                const teacherSnapshot = await get(teacherRef);
-                                
-                                if (teacherSnapshot.exists()) {
-                                    currentTeacherData = teacherSnapshot.val();
-                                    return currentTeacherData;
+                                if (authUser.userType === 'teacher') {
+                                    currentTeacherId = authUser.userId;
+                                    
+                                    // Get teacher details from teachers collection
+                                    const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
+                                    
+                                    if (teacherSnapshot.exists()) {
+                                        currentTeacherData = teacherSnapshot.val();
+                                        unsubscribe();
+                                        resolve(currentTeacherData);
+                                        return;
+                                    }
                                 }
                             }
+                            
+                            // If we reach here, the auth user doesn't have proper teacher data
+                            unsubscribe();
+                            reject(new Error('Teacher data not found for authenticated user'));
+                        } catch (error) {
+                            unsubscribe();
+                            reject(error);
                         }
+                    } else {
+                        // No user is signed in
+                        unsubscribe();
+                        reject(new Error('No user is currently signed in'));
                     }
-                }
-                
-                // If no match found, try to get from activeSessions as fallback
-                const activeSessionSnapshot = await get(ref(db, 'activeSessions/teacher'));
-                if (activeSessionSnapshot.exists()) {
-                    currentTeacherId = activeSessionSnapshot.val();
-                    const teacherRef = ref(db, `teachers/${currentTeacherId}`);
-                    const teacherSnapshot = await get(teacherRef);
-                    
-                    if (teacherSnapshot.exists()) {
-                        currentTeacherData = teacherSnapshot.val();
-                        return currentTeacherData;
-                    }
-                }
-                
-                throw new Error('No matching teacher found');
-            } catch (error) {
-                console.error('Error identifying teacher:', error);
-                return null;
-            }
+                }, (error) => {
+                    unsubscribe();
+                    reject(error);
+                });
+            });
         }
         
         // Find the class assigned to this teacher
         async function findAssignedClass(teacherName) {
             try {
-                const classesSnapshot = await get(classesRef);
+                const classesSnapshot = await database.ref('classes').once('value');
                 if (!classesSnapshot.exists()) {
                     return null;
                 }
@@ -803,8 +782,7 @@
         async function loadClassStudents(classId) {
             try {
                 // Get the students array from the class document
-                const classRef = ref(db, `classes/${classId}`);
-                const classSnapshot = await get(classRef);
+                const classSnapshot = await database.ref(`classes/${classId}`).once('value');
                 
                 if (!classSnapshot.exists()) {
                     return [];
@@ -818,7 +796,7 @@
                 }
                 
                 // Get all students from the students collection
-                const allStudentsSnapshot = await get(ref(db, 'students'));
+                const allStudentsSnapshot = await database.ref('students').once('value');
                 if (!allStudentsSnapshot.exists()) {
                     return [];
                 }
@@ -846,7 +824,7 @@
         // Load attendance data for the selected date
         async function loadAttendanceData(classId, date) {
             try {
-                const attendanceSnapshot = await get(ref(db, `attendance/${classId}/${date}`));
+                const attendanceSnapshot = await database.ref(`attendance/${classId}/${date}`).once('value');
                 
                 if (attendanceSnapshot.exists()) {
                     return attendanceSnapshot.val();
@@ -1036,7 +1014,7 @@
                     confirmSaveBtn.onclick = async () => {
                         try {
                             // Save to Firebase
-                            await update(ref(db), updates);
+                            await database.ref().update(updates);
                             confirmationModal.classList.remove('active');
                             resolve(true);
                             
@@ -1121,9 +1099,9 @@
                 console.error('Initialization error:', error);
                 loadingScreen.querySelector('.loading-text').textContent = 'Error loading class information';
                 
-                // Redirect to dashboard after a delay
+                // Redirect to login page after a delay
                 setTimeout(() => {
-                    window.location.href = 'dashboard.html';
+                    window.location.href = 'logins.html';
                 }, 2000);
             }
         }
