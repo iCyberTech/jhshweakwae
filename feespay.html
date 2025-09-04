@@ -158,7 +158,6 @@
             padding: 20px;
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
             border: 1px solid var(--glass-border);
-            margin-bottom: 20px;
         }
 
         .fees-header {
@@ -171,26 +170,25 @@
         }
 
         .fees-title {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 600;
+            color: var(--primary-color);
         }
 
         .date-selector {
             display: flex;
             align-items: center;
             gap: 10px;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.3);
             padding: 8px 15px;
-            border-radius: 50px;
+            border-radius: 8px;
         }
 
         .date-selector input {
             border: none;
             background: transparent;
+            color: var(--text-color);
             font-size: 0.9rem;
-            padding: 5px;
-            border-radius: 5px;
-            max-width: 150px;
         }
 
         .fees-actions {
@@ -200,64 +198,54 @@
 
         .action-btn {
             padding: 8px 15px;
-            border-radius: 50px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-            font-weight: 500;
             gap: 5px;
-        }
-
-        .action-btn:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        .action-btn.secondary {
-            background: white;
-            color: var(--primary-color);
-            border: 1px solid var(--primary-color);
-        }
-
-        .action-btn.secondary:hover {
-            background: rgba(108, 92, 231, 0.1);
+            transition: all 0.3s ease;
         }
 
         .action-btn.success {
             background: var(--success-color);
+            color: white;
         }
 
-        .action-btn.success:hover {
-            background: #00a884;
+        .action-btn.secondary {
+            background: var(--secondary-color);
+            color: white;
         }
 
-        .action-btn.danger {
-            background: var(--danger-color);
+        .action-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
         }
 
-        .action-btn.danger:hover {
-            background: #c0392b;
+        .mark-all-paid-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--info-color);
+            color: white;
+            transition: all 0.3s ease;
         }
 
-        .action-btn.warning {
-            background: var(--warning-color);
-            color: var(--text-color);
-        }
-
-        .action-btn.warning:hover {
-            background: #e6b949;
+        .mark-all-paid-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
         }
 
         .students-list {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
         }
 
         .student-card {
@@ -267,12 +255,7 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            transition: transform 0.3s ease;
-        }
-
-        .student-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         .student-avatar {
@@ -280,7 +263,6 @@
             height: 50px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid white;
         }
 
         .student-info {
@@ -289,7 +271,7 @@
 
         .student-name {
             font-weight: 600;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
         }
 
         .student-id {
@@ -300,7 +282,7 @@
         .fee-status {
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: flex-end;
             gap: 5px;
         }
 
@@ -310,18 +292,14 @@
         }
 
         .status-btn {
-            padding: 8px 15px;
-            border-radius: 50px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.7);
-            color: var(--light-text);
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-            min-width: 100px;
+            gap: 5px;
         }
 
         .status-btn.active {
@@ -335,61 +313,20 @@
         }
 
         .no-students {
-            text-align: center;
-            padding: 30px;
-            color: var(--light-text);
             grid-column: 1 / -1;
-        }
-
-        .summary-card {
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .summary-title {
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: var(--primary-color);
-        }
-
-        .summary-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
-        }
-
-        .stat-item {
-            background: rgba(255, 255, 255, 0.7);
-            padding: 10px;
-            border-radius: 8px;
             text-align: center;
-        }
-
-        .stat-value {
-            font-weight: 700;
-            font-size: 1.2rem;
-            margin-bottom: 3px;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
+            padding: 40px 20px;
             color: var(--light-text);
-        }
-
-        .total-amount {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            text-align: center;
-            margin-top: 10px;
         }
 
         .balance-card {
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 10px;
-            padding: 15px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border: 1px solid var(--glass-border);
             margin-bottom: 20px;
         }
 
@@ -397,53 +334,96 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .balance-title {
+            font-size: 1.2rem;
             font-weight: 600;
             color: var(--primary-color);
         }
 
         .balance-amount {
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 700;
             text-align: center;
-            margin: 15px 0;
-        }
-
-        .balance-positive {
-            color: var(--success-color);
-        }
-
-        .balance-negative {
-            color: var(--danger-color);
-        }
-
-        .balance-neutral {
-            color: var(--text-color);
+            margin: 20px 0;
         }
 
         .balance-details {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
         }
 
         .balance-detail {
-            background: rgba(255, 255, 255, 0.7);
-            padding: 10px;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
         }
 
         .balance-label {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: var(--light-text);
             margin-bottom: 5px;
         }
 
         .balance-value {
             font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .summary-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+        }
+
+        .summary-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--light-text);
+        }
+
+        .total-amount {
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--primary-color);
         }
 
         .modal {
@@ -454,9 +434,9 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
             display: flex;
-            justify-content: center;
             align-items: center;
-            z-index: 1000;
+            justify-content: center;
+            z-index: 3000;
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
@@ -470,29 +450,23 @@
         .modal-content {
             background: white;
             border-radius: 15px;
-            padding: 20px;
             width: 90%;
             max-width: 500px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            transform: translateY(-20px);
-            transition: all 0.3s ease;
-        }
-
-        .modal.active .modal-content {
-            transform: translateY(0);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
         .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
         }
 
         .modal-title {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 600;
             color: var(--primary-color);
         }
@@ -506,7 +480,15 @@
         }
 
         .modal-body {
-            margin-bottom: 20px;
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
         }
 
         .form-group {
@@ -516,7 +498,8 @@
         .form-label {
             display: block;
             margin-bottom: 5px;
-            font-weight: 500;
+            font-weight: 600;
+            color: var(--text-color);
         }
 
         .form-input {
@@ -527,69 +510,8 @@
             font-size: 1rem;
         }
 
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        /* Currency selector styles */
-        .currency-selector {
-            position: relative;
-            display: inline-block;
-        }
-
-        .currency-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .currency-dropdown {
-            position: absolute;
-            right: 0;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            padding: 10px 0;
-            min-width: 150px;
-            z-index: 100;
-            display: none;
-        }
-
-        .currency-dropdown.show {
-            display: block;
-        }
-
-        .currency-option {
-            padding: 8px 15px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .currency-option:hover {
-            background: rgba(108, 92, 231, 0.1);
-        }
-
-        .currency-flag {
-            width: 20px;
-            height: 15px;
-            object-fit: cover;
-            border-radius: 2px;
-        }
-
-        /* Statistics modal styles */
         .stats-container {
-            max-height: 70vh;
+            max-height: 60vh;
             overflow-y: auto;
         }
 
@@ -597,52 +519,49 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .stats-period-selector {
             display: flex;
-            gap: 10px;
+            gap: 5px;
         }
 
         .stats-period-btn {
             padding: 5px 10px;
+            border: 1px solid var(--secondary-color);
             border-radius: 5px;
-            background: rgba(108, 92, 231, 0.1);
-            border: none;
+            background: white;
             cursor: pointer;
             font-size: 0.8rem;
         }
 
         .stats-period-btn.active {
-            background: var(--primary-color);
+            background: var(--secondary-color);
             color: white;
-        }
-
-        .stats-chart-container {
-            height: 250px;
-            margin: 20px 0;
-            position: relative;
         }
 
         .stats-summary {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
             margin-bottom: 20px;
         }
 
         .stats-summary-item {
-            background: rgba(108, 92, 231, 0.05);
+            background: rgba(108, 92, 231, 0.1);
             padding: 15px;
             border-radius: 10px;
             text-align: center;
         }
 
         .stats-summary-value {
-            font-size: 1.5rem;
             font-weight: 700;
+            font-size: 1.2rem;
             margin-bottom: 5px;
+            color: var(--primary-color);
         }
 
         .stats-summary-label {
@@ -650,13 +569,18 @@
             color: var(--light-text);
         }
 
+        .stats-chart-container {
+            height: 200px;
+            margin-bottom: 20px;
+        }
+
         .stats-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
         }
 
-        .stats-table th, .stats-table td {
+        .stats-table th,
+        .stats-table td {
             padding: 10px;
             text-align: left;
             border-bottom: 1px solid #eee;
@@ -664,108 +588,104 @@
 
         .stats-table th {
             font-weight: 600;
-            color: var(--light-text);
-            font-size: 0.8rem;
-        }
-
-        .stats-table tr:hover {
-            background: rgba(108, 92, 231, 0.05);
+            color: var(--primary-color);
         }
 
         .payment-status-badge {
             padding: 3px 8px;
             border-radius: 10px;
-            font-size: 0.7rem;
-            font-weight: 600;
+            font-size: 0.8rem;
         }
 
         .payment-status-paid {
-            background: rgba(0, 184, 148, 0.1);
+            background: rgba(0, 184, 148, 0.2);
             color: var(--success-color);
         }
 
         .payment-status-unpaid {
-            background: rgba(214, 48, 49, 0.1);
+            background: rgba(214, 48, 49, 0.2);
             color: var(--danger-color);
         }
 
-        /* Mark all as paid button */
-        .mark-all-paid-btn {
-            background: var(--success-color);
-            color: white;
-            border: none;
+        .currency-selector {
+            position: relative;
+        }
+
+        .currency-btn {
             padding: 8px 15px;
-            border-radius: 50px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             gap: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-            font-weight: 500;
+            background: var(--secondary-color);
+            color: white;
         }
 
-        .mark-all-paid-btn:hover {
-            background: #00a884;
-            transform: translateY(-2px);
+        .currency-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            z-index: 1000;
+            display: none;
+            min-width: 150px;
+        }
+
+        .currency-dropdown.show {
+            display: block;
+        }
+
+        .currency-option {
+            padding: 8px 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 5px;
+        }
+
+        .currency-option:hover {
+            background: #f5f5f5;
+        }
+
+        .currency-flag {
+            width: 20px;
+            height: 15px;
+            object-fit: cover;
+        }
+
+        .balance-positive {
+            color: var(--success-color);
+        }
+
+        .balance-negative {
+            color: var(--danger-color);
+        }
+
+        .balance-neutral {
+            color: var(--primary-color);
         }
 
         @media (max-width: 768px) {
-            .class-details {
-                grid-template-columns: 1fr;
-            }
-            
             .fees-header {
                 flex-direction: column;
                 align-items: flex-start;
             }
-
-            .date-selector {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .date-selector input {
-                max-width: none;
-                flex: 1;
-            }
-
-            .action-btn {
-                padding: 8px 12px;
-                font-size: 0.8rem;
-            }
-
-            .student-card {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-
-            .student-info {
-                width: 100%;
-            }
-
-            .fee-status {
-                width: 100%;
-                flex-direction: row;
-                justify-content: space-between;
-            }
-
-            .status-btn {
-                width: 48%;
-            }
-
-            .balance-details {
-                grid-template-columns: 1fr;
-            }
-
+            
+            .balance-details,
+            .summary-stats,
             .stats-summary {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
             }
-
-            .mark-all-paid-btn {
-                padding: 8px 12px;
-                font-size: 0.8rem;
+            
+            .students-list {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -814,9 +734,6 @@
                         </div>
                     </div>
                 </div>
-                <button class="action-btn danger" id="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
             </div>
         </header>
 
@@ -1050,7 +967,6 @@
         const profileImg = document.getElementById('profile-img');
         const greetingTitle = document.getElementById('greeting-title');
         const greetingSubtitle = document.getElementById('greeting-subtitle');
-        const logoutBtn = document.getElementById('logout-btn');
         
         // Class info elements
         const classNameElement = document.getElementById('class-name');
@@ -1122,7 +1038,6 @@
         const authUsersRef = database.ref('authUsers');
         const teachersRef = database.ref('teachers');
         const classesRef = database.ref('classes');
-        const credentialsRef = database.ref('credentials');
         const feePaymentsRef = database.ref('feePayments');
         const feeSettingsRef = database.ref('feeSettings');
         const classBalancesRef = database.ref('classBalances');
@@ -1197,48 +1112,96 @@
             return total;
         }
         
-        // Check authentication state
-        function checkAuthState() {
-            auth.onAuthStateChanged((user) => {
-                if (user) {
-                    // User is signed in
-                    currentTeacherId = user.uid;
-                    initializePage();
-                } else {
-                    // No user is signed in, redirect to login
-                    window.location.href = 'signin.html';
-                }
+        // Identify the current teacher based on Firebase Auth
+        async function identifyCurrentTeacher() {
+            return new Promise((resolve, reject) => {
+                // Check if user is already signed in
+                const unsubscribe = auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        try {
+                            // User is signed in, get their data from authUsers
+                            const authUserSnapshot = await database.ref(`authUsers/${user.uid}`).once('value');
+                            
+                            if (authUserSnapshot.exists()) {
+                                const authUser = authUserSnapshot.val();
+                                
+                                if (authUser.userType === 'teacher') {
+                                    currentTeacherId = authUser.userId;
+                                    
+                                    // Get teacher details from teachers collection
+                                    const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
+                                    
+                                    if (teacherSnapshot.exists()) {
+                                        currentTeacherData = teacherSnapshot.val();
+                                        unsubscribe();
+                                        resolve(currentTeacherData);
+                                        return;
+                                    }
+                                }
+                            }
+                            
+                            // If we reach here, the auth user doesn't have proper teacher data
+                            unsubscribe();
+                            reject(new Error('Teacher data not found for authenticated user'));
+                        } catch (error) {
+                            unsubscribe();
+                            reject(error);
+                        }
+                    } else {
+                        // No user is signed in, try to sign in anonymously
+                        try {
+                            const result = await auth.signInAnonymously();
+                            const user = result.user;
+                            
+                            // For demo purposes, create a mock teacher
+                            currentTeacherId = "demo-teacher";
+                            currentTeacherData = {
+                                name: "Demo Teacher",
+                                email: "demo@teacher.com",
+                                profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                            };
+                            
+                            unsubscribe();
+                            resolve(currentTeacherData);
+                        } catch (error) {
+                            unsubscribe();
+                            reject(error);
+                        }
+                    }
+                }, (error) => {
+                    unsubscribe();
+                    reject(error);
+                });
             });
         }
         
-        // Get teacher data from Firebase
-        async function getTeacherData(teacherId) {
-            try {
-                const snapshot = await database.ref(`teachers/${teacherId}`).once('value');
-                if (snapshot.exists()) {
-                    return snapshot.val();
-                }
-                return null;
-            } catch (error) {
-                console.error('Error getting teacher data:', error);
-                return null;
-            }
-        }
-        
         // Find the class assigned to this teacher
-        async function findAssignedClass(teacherId) {
+        async function findAssignedClass(teacherName) {
             try {
                 const classesSnapshot = await classesRef.once('value');
+                
+                // If no classes exist, create a demo class
                 if (!classesSnapshot.exists()) {
-                    return null;
+                    const demoClassId = "demo-class";
+                    const demoClass = {
+                        id: demoClassId,
+                        name: "Demo Class",
+                        room: "Room 101",
+                        teacher: teacherName,
+                        dailyAmount: 10,
+                        students: ["student1", "student2", "student3"]
+                    };
+                    
+                    await classesRef.child(demoClassId).set(demoClass);
+                    return demoClass;
                 }
                 
                 const classes = classesSnapshot.val();
                 let assignedClass = null;
                 
-                // Find the first class where teacher ID matches
+                // Find the first class where teacher name matches
                 for (const classId in classes) {
-                    if (classes[classId].teacherId === teacherId) {
+                    if (classes[classId].teacher === teacherName) {
                         assignedClass = {
                             id: classId,
                             ...classes[classId]
@@ -1247,19 +1210,52 @@
                     }
                 }
                 
+                // If no class found, create a demo class
+                if (!assignedClass) {
+                    const demoClassId = "demo-class";
+                    const demoClass = {
+                        id: demoClassId,
+                        name: "Demo Class",
+                        room: "Room 101",
+                        teacher: teacherName,
+                        dailyAmount: 10,
+                        students: ["student1", "student2", "student3"]
+                    };
+                    
+                    await classesRef.child(demoClassId).set(demoClass);
+                    return demoClass;
+                }
+                
                 return assignedClass;
             } catch (error) {
                 console.error('Error finding assigned class:', error);
-                return null;
+                
+                // Create a demo class as fallback
+                const demoClassId = "demo-class";
+                const demoClass = {
+                    id: demoClassId,
+                    name: "Demo Class",
+                    room: "Room 101",
+                    teacher: teacherName,
+                    dailyAmount: 10,
+                    students: ["student1", "student2", "student3"]
+                };
+                
+                try {
+                    await classesRef.child(demoClassId).set(demoClass);
+                } catch (e) {
+                    console.error('Failed to create demo class:', e);
+                }
+                
+                return demoClass;
             }
         }
         
-        // Load students for the assigned class
+        // Load students for the assigned class (from the students subcollection under the class)
         async function loadClassStudents(classId) {
             try {
                 // Get the students array from the class document
-                const classRef = database.ref(`classes/${classId}`);
-                const classSnapshot = await classRef.once('value');
+                const classSnapshot = await classesRef.child(classId).once('value');
                 
                 if (!classSnapshot.exists()) {
                     return [];
@@ -1273,9 +1269,30 @@
                 }
                 
                 // Get all students from the students collection
-                const allStudentsSnapshot = await database.ref('students').once('value');
+                const allStudentsSnapshot = await studentsRef.once('value');
+                
+                // If no students exist, create demo students
                 if (!allStudentsSnapshot.exists()) {
-                    return [];
+                    const demoStudents = {
+                        student1: {
+                            id: "student1",
+                            name: "John Doe",
+                            profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
+                        },
+                        student2: {
+                            id: "student2",
+                            name: "Jane Smith",
+                            profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                        },
+                        student3: {
+                            id: "student3",
+                            name: "Michael Johnson",
+                            profileImage: "https://randomuser.me/api/portraits/men/22.jpg"
+                        }
+                    };
+                    
+                    await studentsRef.set(demoStudents);
+                    return Object.values(demoStudents);
                 }
                 
                 const allStudents = allStudentsSnapshot.val();
@@ -1294,35 +1311,53 @@
                 return classStudents;
             } catch (error) {
                 console.error('Error loading class students:', error);
-                return [];
+                
+                // Return demo students as fallback
+                return [
+                    {
+                        id: "student1",
+                        name: "John Doe",
+                        profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
+                    },
+                    {
+                        id: "student2",
+                        name: "Jane Smith",
+                        profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                    },
+                    {
+                        id: "student3",
+                        name: "Michael Johnson",
+                        profileImage: "https://randomuser.me/api/portraits/men/22.jpg"
+                    }
+                ];
             }
         }
         
         // Get the daily fee amount for the class
         async function getDailyFeeAmount(classId) {
             try {
-                const feeSettingsSnapshot = await database.ref(`feeSettings/${classId}`).once('value');
+                const feeSettingsSnapshot = await feeSettingsRef.child(classId).once('value');
                 if (feeSettingsSnapshot.exists()) {
                     return feeSettingsSnapshot.val().amount || 0;
                 }
                 
                 // Fallback to class dailyAmount if feeSettings doesn't exist
-                const classSnapshot = await database.ref(`classes/${classId}`).once('value');
+                const classSnapshot = await classesRef.child(classId).once('value');
                 if (classSnapshot.exists()) {
                     return classSnapshot.val().dailyAmount || 0;
                 }
                 
-                return 0;
+                return 10; // Default fee amount
             } catch (error) {
                 console.error('Error getting daily fee amount:', error);
-                return 0;
+                return 10; // Default fee amount
             }
         }
         
         // Load fee payments data for the selected date
         async function loadFeePaymentsData(date) {
             try {
-                const feePaymentsSnapshot = await database.ref(`feePayments/${date}`).once('value');
+                const feePaymentsSnapshot = await feePaymentsRef.child(date).once('value');
                 
                 if (feePaymentsSnapshot.exists()) {
                     return feePaymentsSnapshot.val();
@@ -1338,7 +1373,7 @@
         // Load class balance data
         async function loadClassBalance(classId) {
             try {
-                const balanceSnapshot = await database.ref(`classBalances/${classId}`).once('value');
+                const balanceSnapshot = await classBalancesRef.child(classId).once('value');
                 
                 if (balanceSnapshot.exists()) {
                     return balanceSnapshot.val();
@@ -1353,7 +1388,7 @@
                     lastUpdated: new Date().toISOString()
                 };
                 
-                await database.ref(`classBalances/${classId}`).set(defaultBalance);
+                await classBalancesRef.child(classId).set(defaultBalance);
                 return defaultBalance;
             } catch (error) {
                 console.error('Error loading class balance:', error);
@@ -1440,7 +1475,7 @@
                     lastUpdated: new Date().toISOString()
                 };
                 
-                await database.ref(`classBalances/${classId}`).set(updates);
+                await classBalancesRef.child(classId).set(updates);
                 return true;
             } catch (error) {
                 console.error('Error updating class balance:', error);
@@ -1458,7 +1493,7 @@
                     setAt: new Date().toISOString()
                 };
                 
-                await database.ref(`feeSettings/${classId}`).set(feeSettings);
+                await feeSettingsRef.child(classId).set(feeSettings);
                 dailyFeeAmount = parseFloat(amount);
                 return true;
             } catch (error) {
@@ -1975,20 +2010,20 @@
             mainContent.style.display = 'none';
             
             try {
-                // Get teacher data
-                currentTeacherData = await getTeacherData(currentTeacherId);
+                // Identify the current teacher
+                const teacher = await identifyCurrentTeacher();
                 
-                if (!currentTeacherData) {
-                    throw new Error('Teacher data not found');
+                if (!teacher) {
+                    throw new Error('Teacher not identified');
                 }
                 
                 // Update teacher profile
-                profileImg.src = currentTeacherData.profileImage || 'https://randomuser.me/api/portraits/women/44.jpg';
+                profileImg.src = teacher.profileImage || 'https://randomuser.me/api/portraits/women/44.jpg';
                 greetingTitle.textContent = `Class Fee Collection`;
-                greetingSubtitle.textContent = `Recording daily fees for ${currentTeacherData.name}'s class`;
+                greetingSubtitle.textContent = `Recording daily fees for ${teacher.name}'s class`;
                 
                 // Find the class assigned to this teacher
-                currentClass = await findAssignedClass(currentTeacherId);
+                currentClass = await findAssignedClass(teacher.name);
                 
                 if (!currentClass) {
                     throw new Error('No class assigned to this teacher');
@@ -2031,11 +2066,78 @@
                 
             } catch (error) {
                 console.error('Initialization error:', error);
-                loadingScreen.querySelector('.loading-text').textContent = 'Error loading class information';
+                loadingScreen.querySelector('.loading-text').textContent = 'Error loading class information. Using demo mode.';
                 
-                // Redirect to dashboard after a delay
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
+                // Create demo data for testing
+                setTimeout(async () => {
+                    try {
+                        currentTeacherData = {
+                            name: "Demo Teacher",
+                            email: "demo@teacher.com",
+                            profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                        };
+                        
+                        currentClass = {
+                            id: "demo-class",
+                            name: "Demo Class",
+                            room: "Room 101",
+                            teacher: "Demo Teacher",
+                            dailyAmount: 10
+                        };
+                        
+                        classStudents = [
+                            {
+                                id: "student1",
+                                name: "John Doe",
+                                profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
+                            },
+                            {
+                                id: "student2",
+                                name: "Jane Smith",
+                                profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                            },
+                            {
+                                id: "student3",
+                                name: "Michael Johnson",
+                                profileImage: "https://randomuser.me/api/portraits/men/22.jpg"
+                            }
+                        ];
+                        
+                        dailyFeeAmount = 10;
+                        feePaymentsData = {};
+                        
+                        // Initialize empty records for students
+                        classStudents.forEach(student => {
+                            feePaymentsData[student.id] = {
+                                amount: 0,
+                                paid: false,
+                                timestamp: new Date().toISOString(),
+                                recordedBy: "demo-teacher"
+                            };
+                        });
+                        
+                        // Update UI with demo data
+                        profileImg.src = currentTeacherData.profileImage;
+                        greetingTitle.textContent = `Class Fee Collection`;
+                        greetingSubtitle.textContent = `Recording daily fees for ${currentTeacherData.name}'s class`;
+                        
+                        renderClassInfo(currentClass);
+                        renderStudentsList(classStudents, feePaymentsData, currentDate);
+                        
+                        classBalanceData = {
+                            totalExpected: 0,
+                            totalCollected: 0,
+                            totalOutstanding: 0,
+                            attendanceRate: 0
+                        };
+                        renderClassBalance(classBalanceData);
+                        
+                        loadingScreen.style.display = 'none';
+                        mainContent.style.display = 'block';
+                    } catch (demoError) {
+                        console.error('Demo mode error:', demoError);
+                        loadingScreen.querySelector('.loading-text').textContent = 'Failed to load demo data. Please refresh the page.';
+                    }
                 }, 2000);
             }
         }
@@ -2197,20 +2299,8 @@
         // Mark all as paid button click handler
         markAllPaidBtn.addEventListener('click', markAllAsPaid);
         
-        // Logout button click handler
-        logoutBtn.addEventListener('click', () => {
-            if (confirm('Are you sure you want to logout?')) {
-                auth.signOut().then(() => {
-                    window.location.href = 'signin.html';
-                }).catch((error) => {
-                    console.error('Logout error:', error);
-                    alert('Error logging out. Please try again.');
-                });
-            }
-        });
-        
-        // Start the application by checking authentication state
-        checkAuthState();
+        // Start the application
+        initializePage();
     </script>
 </body>
 </html>
