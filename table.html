@@ -52,6 +52,45 @@
             color: var(--light-text);
         }
 
+        .days-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .day-section {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .day-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .day-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-left: 10px;
+        }
+
+        .day-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+
         .subjects-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -394,11 +433,11 @@
     <div id="main-content" style="display: none;">
         <div class="header">
             <h1 class="page-title">My Teaching Schedule</h1>
-            <p class="subtitle">View your assigned subjects and classes</p>
+            <p class="subtitle">View your assigned subjects and classes by day</p>
         </div>
 
-        <div class="subjects-container" id="subjects-container">
-            <!-- Subjects will be dynamically inserted here -->
+        <div class="days-container" id="days-container">
+            <!-- Days will be dynamically inserted here -->
         </div>
 
         <div id="no-subjects" class="no-subjects" style="display: none;">
@@ -428,7 +467,7 @@
         // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
         const mainContent = document.getElementById('main-content');
-        const subjectsContainer = document.getElementById('subjects-container');
+        const daysContainer = document.getElementById('days-container');
         const noSubjectsMessage = document.getElementById('no-subjects');
         const notificationContainer = document.getElementById('notification-container');
         
@@ -441,6 +480,9 @@
         // Global variables
         let currentTeacherId = null;
         let currentTeacherData = null;
+        
+        // Days of the week
+        const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         
         // Show notification function
         function showNotification({ title, message, type = 'info', duration = 5000 }) {
@@ -606,7 +648,7 @@
                 const classes = classesSnapshot.exists() ? classesSnapshot.val() : {};
                 
                 // Clear previous content
-                subjectsContainer.innerHTML = '';
+                daysContainer.innerHTML = '';
                 
                 if (!subjects) {
                     noSubjectsMessage.style.display = 'block';
@@ -634,121 +676,166 @@
                     return;
                 }
                 
-                // Display each subject with its class information
-                teacherSubjects.forEach(subject => {
-                    const subjectCard = document.createElement('div');
-                    subjectCard.className = 'subject-card';
-                    
-                    // Subject header with name and icon
-                    const subjectHeader = document.createElement('div');
-                    subjectHeader.className = 'subject-header';
-                    
-                    const subjectName = document.createElement('div');
-                    subjectName.className = 'subject-name';
-                    subjectName.textContent = subject.name;
-                    
-                    const subjectIcon = document.createElement('div');
-                    subjectIcon.className = 'subject-icon';
-                    
-                    // Choose icon based on subject name
-                    const icon = getSubjectIcon(subject.name);
-                    subjectIcon.innerHTML = `<i class="fas fa-${icon}"></i>`;
-                    
-                    subjectHeader.appendChild(subjectName);
-                    subjectHeader.appendChild(subjectIcon);
-                    
-                    // Class information
-                    const classInfo = document.createElement('div');
-                    classInfo.className = 'class-info';
-                    
-                    // Check if assignments is an array (multiple assignments)
-                    if (Array.isArray(subject.assignments)) {
-                        subject.assignments.forEach(assignment => {
-                            if (assignment.classId) {
-                                const classItem = createClassItem(assignment.classId, classes, assignment.schedule);
-                                classInfo.appendChild(classItem);
-                            }
+                // Group subjects by day
+                const subjectsByDay = groupSubjectsByDay(teacherSubjects, classes);
+                
+                // Display each day with its subjects
+                daysOfWeek.forEach(day => {
+                    if (subjectsByDay[day] && subjectsByDay[day].length > 0) {
+                        const daySection = document.createElement('div');
+                        daySection.className = 'day-section';
+                        
+                        // Day header with name and icon
+                        const dayHeader = document.createElement('div');
+                        dayHeader.className = 'day-header';
+                        
+                        const dayIcon = document.createElement('div');
+                        dayIcon.className = 'day-icon';
+                        dayIcon.innerHTML = `<i class="fas fa-calendar-day"></i>`;
+                        
+                        const dayName = document.createElement('div');
+                        dayName.className = 'day-name';
+                        dayName.textContent = day;
+                        
+                        dayHeader.appendChild(dayIcon);
+                        dayHeader.appendChild(dayName);
+                        
+                        // Subjects container for this day
+                        const subjectsContainer = document.createElement('div');
+                        subjectsContainer.className = 'subjects-container';
+                        
+                        // Add subject cards for this day
+                        subjectsByDay[day].forEach(subjectData => {
+                            const subjectCard = createSubjectCard(subjectData, classes);
+                            subjectsContainer.appendChild(subjectCard);
                         });
-                    } 
-                    // Check if assignments is an object with classId property (single assignment)
-                    else if (subject.assignments.classId) {
-                        const classItem = createClassItem(subject.assignments.classId, classes, subject.assignments.schedule);
-                        classInfo.appendChild(classItem);
+                        
+                        // Put it all together
+                        daySection.appendChild(dayHeader);
+                        daySection.appendChild(subjectsContainer);
+                        daysContainer.appendChild(daySection);
                     }
-                    // No class assignments
-                    else {
-                        const noClassInfo = document.createElement('div');
-                        noClassInfo.textContent = 'No specific class assigned';
-                        noClassInfo.style.color = 'var(--light-text)';
-                        noClassInfo.style.fontStyle = 'italic';
-                        classInfo.appendChild(noClassInfo);
-                    }
-                    
-                    // Put it all together
-                    subjectCard.appendChild(subjectHeader);
-                    subjectCard.appendChild(classInfo);
-                    subjectsContainer.appendChild(subjectCard);
                 });
+                
+                // Check if there are any days with subjects
+                if (daysContainer.children.length === 0) {
+                    noSubjectsMessage.style.display = 'block';
+                }
             });
         }
         
-        // Create a class information item
-        function createClassItem(classId, classes, schedule) {
+        // Group subjects by day
+        function groupSubjectsByDay(teacherSubjects, classes) {
+            const subjectsByDay = {};
+            
+            // Initialize empty arrays for each day
+            daysOfWeek.forEach(day => {
+                subjectsByDay[day] = [];
+            });
+            
+            // Process each subject
+            teacherSubjects.forEach(subject => {
+                // Check if assignments is an array (multiple assignments)
+                if (Array.isArray(subject.assignments)) {
+                    subject.assignments.forEach(assignment => {
+                        if (assignment.classId && assignment.schedule && assignment.schedule.days) {
+                            assignment.schedule.days.forEach(day => {
+                                if (daysOfWeek.includes(day)) {
+                                    const classData = classes[assignment.classId] || {};
+                                    subjectsByDay[day].push({
+                                        subjectId: subject.id,
+                                        subjectName: subject.name,
+                                        classId: assignment.classId,
+                                        className: classData.name || `Class ${assignment.classId}`,
+                                        schedule: assignment.schedule
+                                    });
+                                }
+                            });
+                        }
+                    });
+                } 
+                // Check if assignments is an object with classId property (single assignment)
+                else if (subject.assignments.classId && subject.assignments.schedule && subject.assignments.schedule.days) {
+                    subject.assignments.schedule.days.forEach(day => {
+                        if (daysOfWeek.includes(day)) {
+                            const classData = classes[subject.assignments.classId] || {};
+                            subjectsByDay[day].push({
+                                subjectId: subject.id,
+                                subjectName: subject.name,
+                                classId: subject.assignments.classId,
+                                className: classData.name || `Class ${subject.assignments.classId}`,
+                                schedule: subject.assignments.schedule
+                            });
+                        }
+                    });
+                }
+            });
+            
+            return subjectsByDay;
+        }
+        
+        // Create a subject card
+        function createSubjectCard(subjectData, classes) {
+            const subjectCard = document.createElement('div');
+            subjectCard.className = 'subject-card';
+            
+            // Subject header with name and icon
+            const subjectHeader = document.createElement('div');
+            subjectHeader.className = 'subject-header';
+            
+            const subjectName = document.createElement('div');
+            subjectName.className = 'subject-name';
+            subjectName.textContent = subjectData.subjectName;
+            
+            const subjectIcon = document.createElement('div');
+            subjectIcon.className = 'subject-icon';
+            
+            // Choose icon based on subject name
+            const icon = getSubjectIcon(subjectData.subjectName);
+            subjectIcon.innerHTML = `<i class="fas fa-${icon}"></i>`;
+            
+            subjectHeader.appendChild(subjectName);
+            subjectHeader.appendChild(subjectIcon);
+            
+            // Class information
+            const classInfo = document.createElement('div');
+            classInfo.className = 'class-info';
+            
             const classItem = document.createElement('div');
             classItem.className = 'class-item';
             
-            const classInfo = document.createElement('div');
+            const classInfoDiv = document.createElement('div');
             
             const className = document.createElement('div');
             className.className = 'class-name';
-            
-            // Find class name from classes collection
-            if (classes[classId]) {
-                className.textContent = classes[classId].name || `Class ${classId}`;
-            } else {
-                className.textContent = `Class ${classId}`;
-            }
+            className.textContent = subjectData.className;
             
             const scheduleInfo = document.createElement('div');
             scheduleInfo.className = 'schedule';
             
-            if (schedule) {
-                const daysDiv = document.createElement('div');
-                daysDiv.className = 'days';
-                
-                if (schedule.days) {
-                    schedule.days.forEach(day => {
-                        const daySpan = document.createElement('span');
-                        daySpan.className = 'day';
-                        daySpan.textContent = day;
-                        daysDiv.appendChild(daySpan);
-                    });
-                }
-                
-                const timeDiv = document.createElement('div');
-                timeDiv.className = 'time';
-                if (schedule.time) {
-                    timeDiv.textContent = `${schedule.time.from} - ${schedule.time.to}`;
-                } else {
-                    timeDiv.textContent = 'No specific time set';
-                    timeDiv.style.color = 'var(--light-text)';
-                    timeDiv.style.fontStyle = 'italic';
-                }
-                
-                scheduleInfo.appendChild(daysDiv);
-                scheduleInfo.appendChild(timeDiv);
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'time';
+            if (subjectData.schedule && subjectData.schedule.time) {
+                timeDiv.textContent = `${subjectData.schedule.time.from} - ${subjectData.schedule.time.to}`;
             } else {
-                scheduleInfo.textContent = 'No schedule set';
-                scheduleInfo.style.color = 'var(--light-text)';
-                scheduleInfo.style.fontStyle = 'italic';
+                timeDiv.textContent = 'No specific time set';
+                timeDiv.style.color = 'var(--light-text)';
+                timeDiv.style.fontStyle = 'italic';
             }
             
-            classInfo.appendChild(className);
-            classInfo.appendChild(scheduleInfo);
+            scheduleInfo.appendChild(timeDiv);
             
-            classItem.appendChild(classInfo);
+            classInfoDiv.appendChild(className);
+            classInfoDiv.appendChild(scheduleInfo);
             
-            return classItem;
+            classItem.appendChild(classInfoDiv);
+            classInfo.appendChild(classItem);
+            
+            // Put it all together
+            subjectCard.appendChild(subjectHeader);
+            subjectCard.appendChild(classInfo);
+            
+            return subjectCard;
         }
         
         // Get appropriate icon for subject
