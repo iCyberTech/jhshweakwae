@@ -37,55 +37,19 @@
         }
 
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 20px;
+            text-align: center;
         }
 
-        .profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .profile-img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .greeting h1 {
-            font-size: 1.3rem;
+        .page-title {
+            font-size: 1.5rem;
             font-weight: 600;
+            color: var(--primary-color);
         }
 
-        .greeting p {
-            font-size: 0.85rem;
+        .subtitle {
+            font-size: 0.9rem;
             color: var(--light-text);
-        }
-
-        .back-btn {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--glass-border);
-        }
-
-        .back-btn i {
-            color: var(--text-color);
-            font-size: 1.2rem;
         }
 
         .subjects-container {
@@ -413,16 +377,6 @@
             .subjects-container {
                 grid-template-columns: 1fr;
             }
-            
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            
-            .back-btn {
-                align-self: flex-end;
-            }
         }
     </style>
 </head>
@@ -439,16 +393,8 @@
     <!-- Main Content -->
     <div id="main-content" style="display: none;">
         <div class="header">
-            <div class="profile">
-                <img id="profile-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="profile-img">
-                <div class="greeting">
-                    <h1 id="greeting-title">My Subjects, <span id="teacher-name">Teacher</span></h1>
-                    <p id="greeting-subtitle">View your teaching schedule</p>
-                </div>
-            </div>
-            <div class="back-btn" id="back-btn">
-                <i class="fas fa-arrow-left"></i>
-            </div>
+            <h1 class="page-title">My Teaching Schedule</h1>
+            <p class="subtitle">View your assigned subjects and classes</p>
         </div>
 
         <div class="subjects-container" id="subjects-container">
@@ -485,11 +431,6 @@
         const subjectsContainer = document.getElementById('subjects-container');
         const noSubjectsMessage = document.getElementById('no-subjects');
         const notificationContainer = document.getElementById('notification-container');
-        const teacherNameElement = document.getElementById('teacher-name');
-        const profileImg = document.getElementById('profile-img');
-        const greetingTitle = document.getElementById('greeting-title');
-        const greetingSubtitle = document.getElementById('greeting-subtitle');
-        const backBtn = document.getElementById('back-btn');
         
         // Firebase references
         const authUsersRef = database.ref('authUsers');
@@ -612,15 +553,6 @@
                 const teacher = await identifyCurrentTeacher();
                 
                 if (teacher) {
-                    // Update UI with teacher info
-                    teacherNameElement.textContent = teacher.name || 'Teacher';
-                    if (teacher.profileImage) {
-                        profileImg.src = teacher.profileImage;
-                    }
-                    
-                    // Update greeting based on time of day
-                    updateGreeting();
-                    
                     // Load teacher's subjects
                     loadTeacherSubjects();
                     
@@ -834,27 +766,6 @@
             
             return 'book-open'; // default icon
         }
-        
-        // Update greeting based on time of day
-        function updateGreeting() {
-            const hour = new Date().getHours();
-            let timeOfDay;
-            
-            if (hour < 12) {
-                timeOfDay = 'Morning';
-            } else if (hour < 18) {
-                timeOfDay = 'Afternoon';
-            } else {
-                timeOfDay = 'Evening';
-            }
-            
-            greetingTitle.textContent = `Good ${timeOfDay}, ${currentTeacherData.name || 'Teacher'}!`;
-        }
-        
-        // Back button functionality
-        backBtn.addEventListener('click', function() {
-            window.history.back();
-        });
         
         // Initialize the app - check for active session
         loadingScreen.style.display = 'flex';
