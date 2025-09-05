@@ -686,10 +686,13 @@
                 
                 for (const subjectId in subjects) {
                     const subject = subjects[subjectId];
-                    if (subject.teacher === currentTeacherId) {
+                    
+                    // Check if this teacher is assigned to this subject
+                    if (subject.assignments && subject.assignments[currentTeacherId]) {
                         teacherSubjects.push({
                             id: subjectId,
-                            ...subject
+                            name: subject.name,
+                            assignments: subject.assignments[currentTeacherId]
                         });
                     }
                 }
@@ -726,47 +729,22 @@
                     const classInfo = document.createElement('div');
                     classInfo.className = 'class-info';
                     
-                    if (subject.class) {
-                        // Single class assignment
-                        const classItem = createClassItem(subject.class, classes, subject.schedule);
-                        classInfo.appendChild(classItem);
-                    } else if (subject.classes) {
-                        // Multiple classes assignment
-                        subject.classes.forEach(classId => {
-                            const classItem = createClassItem(classId, classes, subject.schedule);
-                            classInfo.appendChild(classItem);
+                    // Check if assignments is an array (multiple assignments)
+                    if (Array.isArray(subject.assignments)) {
+                        subject.assignments.forEach(assignment => {
+                            if (assignment.classId) {
+                                const classItem = createClassItem(assignment.classId, classes, assignment.schedule);
+                                classInfo.appendChild(classItem);
+                            }
                         });
-                    } else if (subject.schedule) {
-                        // Schedule without specific class assignment
-                        const scheduleInfo = document.createElement('div');
-                        scheduleInfo.className = 'schedule';
-                        
-                        const daysDiv = document.createElement('div');
-                        daysDiv.className = 'days';
-                        
-                        if (subject.schedule.days) {
-                            subject.schedule.days.forEach(day => {
-                                const daySpan = document.createElement('span');
-                                daySpan.className = 'day';
-                                daySpan.textContent = day;
-                                daysDiv.appendChild(daySpan);
-                            });
-                        }
-                        
-                        const timeDiv = document.createElement('div');
-                        timeDiv.className = 'time';
-                        if (subject.schedule.time) {
-                            timeDiv.textContent = `${subject.schedule.time.from} - ${subject.schedule.time.to}`;
-                        } else {
-                            timeDiv.textContent = 'No specific time set';
-                            timeDiv.style.color = 'var(--light-text)';
-                            timeDiv.style.fontStyle = 'italic';
-                        }
-                        
-                        scheduleInfo.appendChild(daysDiv);
-                        scheduleInfo.appendChild(timeDiv);
-                        classInfo.appendChild(scheduleInfo);
-                    } else {
+                    } 
+                    // Check if assignments is an object with classId property (single assignment)
+                    else if (subject.assignments.classId) {
+                        const classItem = createClassItem(subject.assignments.classId, classes, subject.assignments.schedule);
+                        classInfo.appendChild(classItem);
+                    }
+                    // No class assignments
+                    else {
                         const noClassInfo = document.createElement('div');
                         noClassInfo.textContent = 'No specific class assigned';
                         noClassInfo.style.color = 'var(--light-text)';
