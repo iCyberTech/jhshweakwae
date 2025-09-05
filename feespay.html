@@ -20,6 +20,7 @@
             --danger-color: #d63031;
             --warning-color: #fdcb6e;
             --info-color: #0984e3;
+            --exam-color: #e17055;
         }
 
         * {
@@ -218,6 +219,11 @@
             color: white;
         }
 
+        .action-btn.exam {
+            background: var(--exam-color);
+            color: white;
+        }
+
         .action-btn:hover {
             opacity: 0.9;
             transform: translateY(-2px);
@@ -291,6 +297,10 @@
             color: var(--primary-color);
         }
 
+        .fee-amount.exam {
+            color: var(--exam-color);
+        }
+
         .status-btn {
             padding: 5px 10px;
             border: none;
@@ -309,6 +319,11 @@
 
         .status-btn.inactive {
             background: var(--danger-color);
+            color: white;
+        }
+
+        .status-btn.exam {
+            background: var(--exam-color);
             color: white;
         }
 
@@ -672,6 +687,30 @@
             color: var(--primary-color);
         }
 
+        .fee-type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .fee-type-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            color: var(--text-color);
+        }
+
+        .fee-type-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
         @media (max-width: 768px) {
             .fees-header {
                 flex-direction: column;
@@ -753,6 +792,10 @@
                     <div class="detail-label">Daily Fee</div>
                     <div class="detail-value" id="class-daily-fee">-</div>
                 </div>
+                <div class="detail-item">
+                    <div class="detail-label">Exam Fee</div>
+                    <div class="detail-value" id="class-exam-fee">-</div>
+                </div>
             </div>
         </div>
 
@@ -760,9 +803,14 @@
         <div class="balance-card" id="class-balance" style="display: none;">
             <div class="balance-header">
                 <h3 class="balance-title">Class Financial Summary</h3>
-                <button class="action-btn secondary" id="set-fee-btn">
-                    <i class="fas fa-cog"></i> Set Default Fee
-                </button>
+                <div>
+                    <button class="action-btn secondary" id="set-fee-btn">
+                        <i class="fas fa-cog"></i> Set Daily Fee
+                    </button>
+                    <button class="action-btn exam" id="set-exam-fee-btn">
+                        <i class="fas fa-cog"></i> Set Exam Fee
+                    </button>
+                </div>
             </div>
             <div class="balance-amount" id="total-balance">₵0.00</div>
             <div class="balance-details">
@@ -787,7 +835,7 @@
 
         <!-- Daily Fee Summary -->
         <div class="summary-card" id="fee-summary" style="display: none;">
-            <div class="summary-title">Today's Fee Collection Summary</div>
+            <div class="summary-title" id="fee-summary-title">Today's Fee Collection Summary</div>
             <div class="summary-stats">
                 <div class="stat-item">
                     <div class="stat-value" id="total-students">0</div>
@@ -812,7 +860,7 @@
         <!-- Fees Container -->
         <div class="fees-container">
             <div class="fees-header">
-                <h3 class="fees-title">Student Fee Payments</h3>
+                <h3 class="fees-title" id="fees-title">Student Fee Payments</h3>
                 <div class="date-selector">
                     <i class="fas fa-calendar-alt"></i>
                     <input type="date" id="fees-date" value="">
@@ -828,6 +876,15 @@
                         <i class="fas fa-redo"></i> Reset
                     </button>
                 </div>
+            </div>
+
+            <div class="fee-type-selector">
+                <button class="fee-type-btn active" id="daily-fee-btn">
+                    <i class="fas fa-calendar-day"></i> Daily Fees
+                </button>
+                <button class="fee-type-btn" id="exam-fee-btn">
+                    <i class="fas fa-file-alt"></i> Exam Fees
+                </button>
             </div>
 
             <div class="students-list" id="students-list">
@@ -860,13 +917,13 @@
     <div class="modal" id="fee-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Set Default Fee Amount</h3>
+                <h3 class="modal-title" id="fee-modal-title">Set Default Fee Amount</h3>
                 <button class="close-btn" id="close-fee-modal">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="fee-amount" class="form-label">Daily Fee Amount (<span id="fee-currency-symbol">₵</span>)</label>
-                    <input type="number" id="fee-amount" class="form-input" placeholder="Enter daily fee amount" step="0.01" min="0">
+                    <label for="fee-amount" class="form-label">Fee Amount (<span id="fee-currency-symbol">₵</span>)</label>
+                    <input type="number" id="fee-amount" class="form-input" placeholder="Enter fee amount" step="0.01" min="0">
                 </div>
                 <div class="form-group">
                     <label for="fee-description" class="form-label">Fee Description (Optional)</label>
@@ -973,6 +1030,7 @@
         const classIdElement = document.getElementById('class-id');
         const classRoomElement = document.getElementById('class-room');
         const classDailyFeeElement = document.getElementById('class-daily-fee');
+        const classExamFeeElement = document.getElementById('class-exam-fee');
         
         // Balance elements
         const classBalanceElement = document.getElementById('class-balance');
@@ -988,11 +1046,17 @@
         const resetBtn = document.getElementById('reset-btn');
         const studentsListElement = document.getElementById('students-list');
         const feeSummary = document.getElementById('fee-summary');
+        const feeSummaryTitle = document.getElementById('fee-summary-title');
+        const feesTitle = document.getElementById('fees-title');
         const totalStudentsElement = document.getElementById('total-students');
         const paidCountElement = document.getElementById('paid-count');
         const unpaidCountElement = document.getElementById('unpaid-count');
         const totalCollectedElement = document.getElementById('total-collected');
         const expectedTotalElement = document.getElementById('expected-total');
+        
+        // Fee type selector elements
+        const dailyFeeBtn = document.getElementById('daily-fee-btn');
+        const examFeeBtn = document.getElementById('exam-fee-btn');
         
         // Modal elements
         const confirmationModal = document.getElementById('confirmation-modal');
@@ -1003,12 +1067,14 @@
         
         // Fee modal elements
         const feeModal = document.getElementById('fee-modal');
+        const feeModalTitle = document.getElementById('fee-modal-title');
         const closeFeeModalBtn = document.getElementById('close-fee-modal');
         const cancelFeeBtn = document.getElementById('cancel-fee-btn');
         const saveFeeBtn = document.getElementById('save-fee-btn');
         const feeAmountInput = document.getElementById('fee-amount');
         const feeDescriptionInput = document.getElementById('fee-description');
         const setFeeBtn = document.getElementById('set-fee-btn');
+        const setExamFeeBtn = document.getElementById('set-exam-fee-btn');
         const feeCurrencySymbol = document.getElementById('fee-currency-symbol');
         
         // Statistics modal elements
@@ -1039,7 +1105,9 @@
         const teachersRef = database.ref('teachers');
         const classesRef = database.ref('classes');
         const feePaymentsRef = database.ref('feePayments');
+        const printingFeesRef = database.ref('printingFees');
         const feeSettingsRef = database.ref('feeSettings');
+        const examFeeSettingsRef = database.ref('examFeeSettings');
         const classBalancesRef = database.ref('classBalances');
         const studentsRef = database.ref('students');
         
@@ -1049,14 +1117,19 @@
         let currentClass = null;
         let classStudents = [];
         let feePaymentsData = {};
+        let printingFeesData = {};
         let currentDate = new Date().toISOString().split('T')[0];
         let dailyFeeAmount = 0;
+        let examFeeAmount = 0;
         let classBalanceData = {
             totalExpected: 0,
             totalCollected: 0,
             totalOutstanding: 0,
             attendanceRate: 0
         };
+        
+        // Fee type tracking
+        let currentFeeType = 'daily'; // 'daily' or 'exam'
         
         // Currency settings
         let currentCurrencySettings = {
@@ -1080,6 +1153,7 @@
         function updateCurrencyDisplays() {
             // Update class info
             classDailyFeeElement.textContent = formatCurrency(dailyFeeAmount);
+            classExamFeeElement.textContent = formatCurrency(examFeeAmount);
             
             // Update balance elements
             totalBalanceElement.textContent = formatCurrency(classBalanceData.totalCollected);
@@ -1089,7 +1163,12 @@
             
             // Update fee summary
             totalCollectedElement.textContent = formatCurrency(getTotalCollected());
-            expectedTotalElement.textContent = `Expected Total: ${formatCurrency(dailyFeeAmount * classStudents.length)}`;
+            
+            if (currentFeeType === 'daily') {
+                expectedTotalElement.textContent = `Expected Total: ${formatCurrency(dailyFeeAmount * classStudents.length)}`;
+            } else {
+                expectedTotalElement.textContent = `Expected Total: ${formatCurrency(examFeeAmount * classStudents.length)}`;
+            }
             
             // Update fee modal currency symbol
             feeCurrencySymbol.textContent = currentCurrencySettings.symbol;
@@ -1103,8 +1182,10 @@
         // Get total collected for current date
         function getTotalCollected() {
             let total = 0;
+            const currentFeeData = currentFeeType === 'daily' ? feePaymentsData : printingFeesData;
+            
             classStudents.forEach(student => {
-                const payment = feePaymentsData[student.id] || {};
+                const payment = currentFeeData[student.id] || {};
                 if (payment.paid) {
                     total += payment.amount || 0;
                 }
@@ -1130,7 +1211,7 @@
                                     
                                     // Get teacher details from teachers collection
                                     const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
-                                    
+                                                    
                                     if (teacherSnapshot.exists()) {
                                         currentTeacherData = teacherSnapshot.val();
                                         unsubscribe();
@@ -1189,6 +1270,7 @@
                         room: "Room 101",
                         teacher: teacherName,
                         dailyAmount: 10,
+                        examAmount: 50,
                         students: ["student1", "student2", "student3"]
                     };
                     
@@ -1219,6 +1301,7 @@
                         room: "Room 101",
                         teacher: teacherName,
                         dailyAmount: 10,
+                        examAmount: 50,
                         students: ["student1", "student2", "student3"]
                     };
                     
@@ -1238,6 +1321,7 @@
                     room: "Room 101",
                     teacher: teacherName,
                     dailyAmount: 10,
+                    examAmount: 50,
                     students: ["student1", "student2", "student3"]
                 };
                 
@@ -1354,6 +1438,27 @@
             }
         }
         
+        // Get the exam fee amount for the class
+        async function getExamFeeAmount(classId) {
+            try {
+                const examFeeSettingsSnapshot = await examFeeSettingsRef.child(classId).once('value');
+                if (examFeeSettingsSnapshot.exists()) {
+                    return examFeeSettingsSnapshot.val().amount || 0;
+                }
+                
+                // Fallback to class examAmount if examFeeSettings doesn't exist
+                const classSnapshot = await classesRef.child(classId).once('value');
+                if (classSnapshot.exists()) {
+                    return classSnapshot.val().examAmount || 0;
+                }
+                
+                return 50; // Default exam fee amount
+            } catch (error) {
+                console.error('Error getting exam fee amount:', error);
+                return 50; // Default exam fee amount
+            }
+        }
+        
         // Load fee payments data for the selected date
         async function loadFeePaymentsData(date) {
             try {
@@ -1366,6 +1471,40 @@
                 return {};
             } catch (error) {
                 console.error('Error loading fee payments data:', error);
+                return {};
+            }
+        }
+        
+        // Load printing fees data for the selected date
+        async function loadPrintingFeesData(date) {
+            try {
+                // For printing fees, we'll use a different structure
+                // We'll store by student ID and date
+                const printingFeesSnapshot = await printingFeesRef.orderByChild('date').equalTo(new Date(date).getTime()).once('value');
+                
+                if (printingFeesSnapshot.exists()) {
+                    const feesData = printingFeesSnapshot.val();
+                    const result = {};
+                    
+                    // Convert the data to the same format as feePaymentsData
+                    for (const key in feesData) {
+                        const fee = feesData[key];
+                        if (fee.classId === currentClass.id) {
+                            result[fee.studentId] = {
+                                amount: fee.amount,
+                                paid: true,
+                                timestamp: fee.date,
+                                recordedBy: currentTeacherId
+                            };
+                        }
+                    }
+                    
+                    return result;
+                }
+                
+                return {};
+            } catch (error) {
+                console.error('Error loading printing fees data:', error);
                 return {};
             }
         }
@@ -1484,17 +1623,23 @@
         }
         
         // Set default fee amount for the class
-        async function setDefaultFee(classId, amount, description = '') {
+        async function setDefaultFee(classId, amount, description = '', feeType = 'daily') {
             try {
                 const feeSettings = {
                     amount: parseFloat(amount),
-                    description: description || 'Daily class fee',
+                    description: description || (feeType === 'daily' ? 'Daily class fee' : 'Examination fee'),
                     setBy: currentTeacherId,
                     setAt: new Date().toISOString()
                 };
                 
-                await feeSettingsRef.child(classId).set(feeSettings);
-                dailyFeeAmount = parseFloat(amount);
+                if (feeType === 'daily') {
+                    await feeSettingsRef.child(classId).set(feeSettings);
+                    dailyFeeAmount = parseFloat(amount);
+                } else {
+                    await examFeeSettingsRef.child(classId).set(feeSettings);
+                    examFeeAmount = parseFloat(amount);
+                }
+                
                 return true;
             } catch (error) {
                 console.error('Error setting default fee:', error);
@@ -1508,6 +1653,7 @@
             classIdElement.textContent = classData.id || '-';
             classRoomElement.textContent = classData.room || 'Not assigned';
             classDailyFeeElement.textContent = formatCurrency(dailyFeeAmount);
+            classExamFeeElement.textContent = formatCurrency(examFeeAmount);
         }
         
         // Render class balance information
@@ -1574,6 +1720,9 @@
                 studentCard.className = 'student-card';
                 studentCard.dataset.studentId = studentId;
                 
+                const feeAmount = currentFeeType === 'daily' ? dailyFeeAmount : examFeeAmount;
+                const feeClass = currentFeeType === 'daily' ? '' : 'exam';
+                
                 studentCard.innerHTML = `
                     <img src="${student.profileImage || student.avatar || 'https://randomuser.me/api/portraits/lego/1.jpg'}" 
                          alt="${student.name}" 
@@ -1583,8 +1732,8 @@
                         <div class="student-id">ID: ${student.id || 'N/A'}</div>
                     </div>
                     <div class="fee-status">
-                        <div class="fee-amount">${formatCurrency(dailyFeeAmount)}</div>
-                        <button class="status-btn ${isPaid ? 'active' : 'inactive'}" 
+                        <div class="fee-amount ${feeClass}">${formatCurrency(feeAmount)}</div>
+                        <button class="status-btn ${isPaid ? 'active' : 'inactive'} ${feeClass}" 
                                 data-status="${isPaid ? 'paid' : 'unpaid'}" 
                                 title="${isPaid ? 'Paid' : 'Unpaid'}">
                             ${isPaid ? '<i class="fas fa-check-circle"></i> Paid' : '<i class="fas fa-times-circle"></i> Unpaid'}
@@ -1599,7 +1748,18 @@
             paidCountElement.textContent = paidCount;
             unpaidCountElement.textContent = unpaidCount;
             totalCollectedElement.textContent = formatCurrency(totalCollected);
-            expectedTotalElement.textContent = `Expected Total: ${formatCurrency(dailyFeeAmount * students.length)}`;
+            
+            const feeAmount = currentFeeType === 'daily' ? dailyFeeAmount : examFeeAmount;
+            expectedTotalElement.textContent = `Expected Total: ${formatCurrency(feeAmount * students.length)}`;
+            
+            // Update titles based on fee type
+            if (currentFeeType === 'daily') {
+                feeSummaryTitle.textContent = "Today's Fee Collection Summary";
+                feesTitle.textContent = "Student Fee Payments";
+            } else {
+                feeSummaryTitle.textContent = "Examination Fee Collection Summary";
+                feesTitle.textContent = "Student Examination Fee Payments";
+            }
             
             // Add event listeners to status buttons
             document.querySelectorAll('.status-btn').forEach(btn => {
@@ -1624,8 +1784,11 @@
                     }
                     
                     // Update fee payments data
-                    if (!feePaymentsData[studentId]) {
-                        feePaymentsData[studentId] = {
+                    const currentFeeData = currentFeeType === 'daily' ? feePaymentsData : printingFeesData;
+                    const feeAmount = currentFeeType === 'daily' ? dailyFeeAmount : examFeeAmount;
+                    
+                    if (!currentFeeData[studentId]) {
+                        currentFeeData[studentId] = {
                             amount: 0,
                             paid: false,
                             timestamp: new Date().toISOString(),
@@ -1633,10 +1796,10 @@
                         };
                     }
                     
-                    feePaymentsData[studentId].paid = newStatus === 'paid';
-                    feePaymentsData[studentId].amount = newStatus === 'paid' ? dailyFeeAmount : 0;
-                    feePaymentsData[studentId].timestamp = new Date().toISOString();
-                    feePaymentsData[studentId].recordedBy = currentTeacherId;
+                    currentFeeData[studentId].paid = newStatus === 'paid';
+                    currentFeeData[studentId].amount = newStatus === 'paid' ? feeAmount : 0;
+                    currentFeeData[studentId].timestamp = new Date().toISOString();
+                    currentFeeData[studentId].recordedBy = currentTeacherId;
                     
                     // Update summary counts
                     updateSummaryCounts();
@@ -1650,9 +1813,11 @@
             let unpaidCount = 0;
             let totalCollected = 0;
             
+            const currentFeeData = currentFeeType === 'daily' ? feePaymentsData : printingFeesData;
+            
             classStudents.forEach(student => {
                 const studentId = student.id;
-                const payment = feePaymentsData[studentId] || {};
+                const payment = currentFeeData[studentId] || {};
                 
                 if (payment.paid) {
                     paidCount++;
@@ -1670,11 +1835,14 @@
         // Mark all students as paid
         function markAllAsPaid() {
             if (confirm('Are you sure you want to mark all students as paid?')) {
+                const currentFeeData = currentFeeType === 'daily' ? feePaymentsData : printingFeesData;
+                const feeAmount = currentFeeType === 'daily' ? dailyFeeAmount : examFeeAmount;
+                
                 classStudents.forEach(student => {
                     const studentId = student.id;
                     
-                    if (!feePaymentsData[studentId]) {
-                        feePaymentsData[studentId] = {
+                    if (!currentFeeData[studentId]) {
+                        currentFeeData[studentId] = {
                             amount: 0,
                             paid: false,
                             timestamp: new Date().toISOString(),
@@ -1682,14 +1850,15 @@
                         };
                     }
                     
-                    feePaymentsData[studentId].paid = true;
-                    feePaymentsData[studentId].amount = dailyFeeAmount;
-                    feePaymentsData[studentId].timestamp = new Date().toISOString();
-                    feePaymentsData[studentId].recordedBy = currentTeacherId;
+                    currentFeeData[studentId].paid = true;
+                    currentFeeData[studentId].amount = feeAmount;
+                    currentFeeData[studentId].timestamp = new Date().toISOString();
+                    currentFeeData[studentId].recordedBy = currentTeacherId;
                 });
                 
                 // Re-render the students list
-                renderStudentsList(classStudents, feePaymentsData, currentDate);
+                const currentFeeData = currentFeeType === 'daily' ? feePaymentsData : printingFeesData;
+                renderStudentsList(classStudents, currentFeeData, currentDate);
             }
         }
         
@@ -1697,33 +1866,58 @@
         async function saveFeePaymentsData(date) {
             try {
                 // Show confirmation modal
-                confirmationMessage.textContent = `Are you sure you want to save fee payments for ${date}?`;
+                const feeTypeText = currentFeeType === 'daily' ? 'fee' : 'examination fee';
+                confirmationMessage.textContent = `Are you sure you want to save ${feeTypeText} payments for ${date}?`;
                 confirmationModal.classList.add('active');
                 
                 // Wait for user confirmation
                 return new Promise((resolve) => {
                     confirmSaveBtn.onclick = async () => {
                         try {
-                            // Prepare the data to be saved
-                            const updates = {};
-                            const timestamp = new Date().toISOString();
-                            
-                            // Only include students with payment data
-                            for (const studentId in feePaymentsData) {
-                                updates[`feePayments/${date}/${studentId}`] = {
-                                    ...feePaymentsData[studentId],
-                                    timestamp: timestamp
-                                };
+                            if (currentFeeType === 'daily') {
+                                // Prepare the data to be saved for daily fees
+                                const updates = {};
+                                const timestamp = new Date().toISOString();
+                                
+                                // Only include students with payment data
+                                for (const studentId in feePaymentsData) {
+                                    updates[`feePayments/${date}/${studentId}`] = {
+                                        ...feePaymentsData[studentId],
+                                        timestamp: timestamp
+                                    };
+                                }
+                                
+                                // Save to Firebase
+                                await database.ref().update(updates);
+                                
+                                // Update class balance
+                                const newBalance = await calculateClassBalance(currentClass.id);
+                                await updateClassBalance(currentClass.id, newBalance);
+                                classBalanceData = newBalance;
+                                renderClassBalance(classBalanceData);
+                            } else {
+                                // Save examination fees to printingFees collection
+                                const updates = {};
+                                const timestamp = new Date().getTime();
+                                
+                                // Only include students with payment data
+                                for (const studentId in printingFeesData) {
+                                    if (printingFeesData[studentId].paid) {
+                                        const feeId = printingFeesRef.push().key;
+                                        updates[`printingFees/${feeId}`] = {
+                                            amount: printingFeesData[studentId].amount,
+                                            classId: currentClass.id,
+                                            date: timestamp,
+                                            deleted: false,
+                                            studentId: studentId,
+                                            recordedBy: currentTeacherId
+                                        };
+                                    }
+                                }
+                                
+                                // Save to Firebase
+                                await database.ref().update(updates);
                             }
-                            
-                            // Save to Firebase
-                            await database.ref().update(updates);
-                            
-                            // Update class balance
-                            const newBalance = await calculateClassBalance(currentClass.id);
-                            await updateClassBalance(currentClass.id, newBalance);
-                            classBalanceData = newBalance;
-                            renderClassBalance(classBalanceData);
                             
                             confirmationModal.classList.remove('active');
                             resolve(true);
@@ -1752,37 +1946,121 @@
         // Reset fee payments data for the current date
         function resetFeePaymentsData() {
             if (confirm('Are you sure you want to reset all fee payments for today?')) {
-                feePaymentsData = {};
-                classStudents.forEach(student => {
-                    feePaymentsData[student.id] = {
-                        amount: 0,
-                        paid: false,
-                        timestamp: new Date().toISOString(),
-                        recordedBy: currentTeacherId
-                    };
-                });
-                renderStudentsList(classStudents, feePaymentsData, currentDate);
+                if (currentFeeType === 'daily') {
+                    feePaymentsData = {};
+                    classStudents.forEach(student => {
+                        feePaymentsData[student.id] = {
+                            amount: 0,
+                            paid: false,
+                            timestamp: new Date().toISOString(),
+                            recordedBy: currentTeacherId
+                        };
+                    });
+                } else {
+                    printingFeesData = {};
+                    classStudents.forEach(student => {
+                        printingFeesData[student.id] = {
+                            amount: 0,
+                            paid: false,
+                            timestamp: new Date().toISOString(),
+                            recordedBy: currentTeacherId
+                        };
+                    });
+                }
+                
+                const currentFeeData = currentFeeType === 'daily' ? feePaymentsData : printingFeesData;
+                renderStudentsList(classStudents, currentFeeData, currentDate);
             }
         }
         
         // Handle date change
         async function handleDateChange(newDate) {
             currentDate = newDate;
-            feePaymentsData = await loadFeePaymentsData(currentDate);
             
-            // Initialize empty records for students without payment data
-            classStudents.forEach(student => {
-                if (!feePaymentsData[student.id]) {
-                    feePaymentsData[student.id] = {
-                        amount: 0,
-                        paid: false,
-                        timestamp: new Date().toISOString(),
-                        recordedBy: currentTeacherId
-                    };
-                }
-            });
+            if (currentFeeType === 'daily') {
+                feePaymentsData = await loadFeePaymentsData(currentDate);
+                
+                // Initialize empty records for students without payment data
+                classStudents.forEach(student => {
+                    if (!feePaymentsData[student.id]) {
+                        feePaymentsData[student.id] = {
+                            amount: 0,
+                            paid: false,
+                            timestamp: new Date().toISOString(),
+                            recordedBy: currentTeacherId
+                        };
+                    }
+                });
+                
+                renderStudentsList(classStudents, feePaymentsData, currentDate);
+            } else {
+                // For exam fees, we don't use date filtering in the same way
+                // But we'll still load any existing exam fees for this date
+                printingFeesData = await loadPrintingFeesData(currentDate);
+                
+                // Initialize empty records for students without payment data
+                classStudents.forEach(student => {
+                    if (!printingFeesData[student.id]) {
+                        printingFeesData[student.id] = {
+                            amount: 0,
+                            paid: false,
+                            timestamp: new Date().toISOString(),
+                            recordedBy: currentTeacherId
+                        };
+                    }
+                });
+                
+                renderStudentsList(classStudents, printingFeesData, currentDate);
+            }
+        }
+        
+        // Handle fee type change
+        async function handleFeeTypeChange(feeType) {
+            currentFeeType = feeType;
             
-            renderStudentsList(classStudents, feePaymentsData, currentDate);
+            // Update UI for fee type buttons
+            if (feeType === 'daily') {
+                dailyFeeBtn.classList.add('active');
+                examFeeBtn.classList.remove('active');
+            } else {
+                dailyFeeBtn.classList.remove('active');
+                examFeeBtn.classList.add('active');
+            }
+            
+            // Load the appropriate fee data
+            if (feeType === 'daily') {
+                feePaymentsData = await loadFeePaymentsData(currentDate);
+                
+                // Initialize empty records for students without payment data
+                classStudents.forEach(student => {
+                    if (!feePaymentsData[student.id]) {
+                        feePaymentsData[student.id] = {
+                            amount: 0,
+                            paid: false,
+                            timestamp: new Date().toISOString(),
+                            recordedBy: currentTeacherId
+                        };
+                    }
+                });
+                
+                renderStudentsList(classStudents, feePaymentsData, currentDate);
+            } else {
+                printingFeesData = await loadPrintingFeesData(currentDate);
+                
+                // Initialize empty records for students without payment data
+                classStudents.forEach(student => {
+                    if (!printingFeesData[student.id]) {
+                        printingFeesData[student.id] = {
+                            amount: 0,
+                            paid: false,
+                            timestamp: new Date().toISOString(),
+                            recordedBy: currentTeacherId
+                        };
+                    }
+                });
+                
+                renderStudentsList(classStudents, printingFeesData, currentDate);
+            }
         }
         
         // Load payment statistics
@@ -2032,6 +2310,9 @@
                 // Get the daily fee amount for this class
                 dailyFeeAmount = await getDailyFeeAmount(currentClass.id);
                 
+                // Get the exam fee amount for this class
+                examFeeAmount = await getExamFeeAmount(currentClass.id);
+                
                 // Render class information
                 renderClassInfo(currentClass);
                 
@@ -2045,6 +2326,21 @@
                 classStudents.forEach(student => {
                     if (!feePaymentsData[student.id]) {
                         feePaymentsData[student.id] = {
+                            amount: 0,
+                            paid: false,
+                            timestamp: new Date().toISOString(),
+                            recordedBy: currentTeacherId
+                        };
+                    }
+                });
+                
+                // Initialize printing fees data
+                printingFeesData = await loadPrintingFeesData(currentDate);
+                
+                // Initialize empty records for students without payment data
+                classStudents.forEach(student => {
+                    if (!printingFeesData[student.id]) {
+                        printingFeesData[student.id] = {
                             amount: 0,
                             paid: false,
                             timestamp: new Date().toISOString(),
@@ -2082,7 +2378,8 @@
                             name: "Demo Class",
                             room: "Room 101",
                             teacher: "Demo Teacher",
-                            dailyAmount: 10
+                            dailyAmount: 10,
+                            examAmount: 50
                         };
                         
                         classStudents = [
@@ -2104,11 +2401,20 @@
                         ];
                         
                         dailyFeeAmount = 10;
+                        examFeeAmount = 50;
                         feePaymentsData = {};
+                        printingFeesData = {};
                         
                         // Initialize empty records for students
                         classStudents.forEach(student => {
                             feePaymentsData[student.id] = {
+                                amount: 0,
+                                paid: false,
+                                timestamp: new Date().toISOString(),
+                                recordedBy: "demo-teacher"
+                            };
+                            
+                            printingFeesData[student.id] = {
                                 amount: 0,
                                 paid: false,
                                 timestamp: new Date().toISOString(),
@@ -2166,9 +2472,94 @@
         
         // Set fee button click handler
         setFeeBtn.addEventListener('click', () => {
+            feeModalTitle.textContent = "Set Default Daily Fee Amount";
             feeAmountInput.value = dailyFeeAmount;
             feeDescriptionInput.value = '';
             feeModal.classList.add('active');
+            
+            // Set up save handler for daily fee
+            saveFeeBtn.onclick = async () => {
+                const amount = parseFloat(feeAmountInput.value);
+                const description = feeDescriptionInput.value;
+                
+                if (isNaN(amount) || amount <= 0) {
+                    alert('Please enter a valid fee amount');
+                    return;
+                }
+                
+                try {
+                    const success = await setDefaultFee(currentClass.id, amount, description, 'daily');
+                    if (success) {
+                        alert('Default daily fee amount updated successfully!');
+                        classDailyFeeElement.textContent = formatCurrency(amount);
+                        feeModal.classList.remove('active');
+                        
+                        // Update all current payments to use the new amount
+                        classStudents.forEach(student => {
+                            if (feePaymentsData[student.id] && feePaymentsData[student.id].paid) {
+                                feePaymentsData[student.id].amount = amount;
+                            }
+                        });
+                        
+                        // Re-render the students list
+                        renderStudentsList(classStudents, feePaymentsData, currentDate);
+                        
+                        // Recalculate and update class balance
+                        const newBalance = await calculateClassBalance(currentClass.id);
+                        await updateClassBalance(currentClass.id, newBalance);
+                        classBalanceData = newBalance;
+                        renderClassBalance(classBalanceData);
+                    } else {
+                        alert('Failed to update fee amount. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error saving fee amount:', error);
+                    alert('An error occurred while saving the fee amount');
+                }
+            };
+        });
+        
+        // Set exam fee button click handler
+        setExamFeeBtn.addEventListener('click', () => {
+            feeModalTitle.textContent = "Set Default Examination Fee Amount";
+            feeAmountInput.value = examFeeAmount;
+            feeDescriptionInput.value = '';
+            feeModal.classList.add('active');
+            
+            // Set up save handler for exam fee
+            saveFeeBtn.onclick = async () => {
+                const amount = parseFloat(feeAmountInput.value);
+                const description = feeDescriptionInput.value;
+                
+                if (isNaN(amount) || amount <= 0) {
+                    alert('Please enter a valid fee amount');
+                    return;
+                }
+                
+                try {
+                    const success = await setDefaultFee(currentClass.id, amount, description, 'exam');
+                    if (success) {
+                        alert('Default examination fee amount updated successfully!');
+                        classExamFeeElement.textContent = formatCurrency(amount);
+                        feeModal.classList.remove('active');
+                        
+                        // Update all current payments to use the new amount
+                        classStudents.forEach(student => {
+                            if (printingFeesData[student.id] && printingFeesData[student.id].paid) {
+                                printingFeesData[student.id].amount = amount;
+                            }
+                        });
+                        
+                        // Re-render the students list
+                        renderStudentsList(classStudents, printingFeesData, currentDate);
+                    } else {
+                        alert('Failed to update fee amount. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error saving fee amount:', error);
+                    alert('An error occurred while saving the fee amount');
+                }
+            };
         });
         
         // Close fee modal
@@ -2184,47 +2575,6 @@
         feeModal.addEventListener('click', (e) => {
             if (e.target === feeModal) {
                 feeModal.classList.remove('active');
-            }
-        });
-        
-        // Save fee button click handler
-        saveFeeBtn.addEventListener('click', async () => {
-            const amount = parseFloat(feeAmountInput.value);
-            const description = feeDescriptionInput.value;
-            
-            if (isNaN(amount) || amount <= 0) {
-                alert('Please enter a valid fee amount');
-                return;
-            }
-            
-            try {
-                const success = await setDefaultFee(currentClass.id, amount, description);
-                if (success) {
-                    alert('Default fee amount updated successfully!');
-                    classDailyFeeElement.textContent = formatCurrency(amount);
-                    feeModal.classList.remove('active');
-                    
-                    // Update all current payments to use the new amount
-                    classStudents.forEach(student => {
-                        if (feePaymentsData[student.id] && feePaymentsData[student.id].paid) {
-                            feePaymentsData[student.id].amount = amount;
-                        }
-                    });
-                    
-                    // Re-render the students list
-                    renderStudentsList(classStudents, feePaymentsData, currentDate);
-                    
-                    // Recalculate and update class balance
-                    const newBalance = await calculateClassBalance(currentClass.id);
-                    await updateClassBalance(currentClass.id, newBalance);
-                    classBalanceData = newBalance;
-                    renderClassBalance(classBalanceData);
-                } else {
-                    alert('Failed to update fee amount. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error saving fee amount:', error);
-                alert('An error occurred while saving the fee amount');
             }
         });
         
@@ -2298,6 +2648,15 @@
         
         // Mark all as paid button click handler
         markAllPaidBtn.addEventListener('click', markAllAsPaid);
+        
+        // Fee type button click handlers
+        dailyFeeBtn.addEventListener('click', () => {
+            handleFeeTypeChange('daily');
+        });
+        
+        examFeeBtn.addEventListener('click', () => {
+            handleFeeTypeChange('exam');
+        });
         
         // Start the application
         initializePage();
