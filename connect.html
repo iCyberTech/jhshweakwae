@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>School Communication Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
 :root {
     --primary-color: #6c5ce7;
@@ -336,7 +333,7 @@ body {
     color: var(--light-text);
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overcept: ellipsis;
     flex: 1;
 }
 
@@ -1643,7 +1640,12 @@ body {
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, get, onValue, set, push, onChildAdded, onChildChanged, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
@@ -1656,9 +1658,9 @@ body {
         };
         
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const auth = firebase.auth();
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
         
         // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
@@ -1698,6 +1700,7 @@ body {
         const emojiSearch = document.getElementById('emoji-search');
         const attachBtn = document.getElementById('attach-btn');
         const attachmentModal = document.getElementById('attachment-modal');
+        const menuBtn = document.getElementById('menu-btn');
         
         // Modal elements
         const newGroupModal = document.getElementById('new-group-modal');
@@ -1709,18 +1712,18 @@ body {
         const groupMembersList = document.getElementById('group-members-list');
         
         // Firebase references
-        const authUsersRef = db.ref('authUsers');
-        const teachersRef = db.ref('teachers');
-        const studentsRef = db.ref('students');
-        const alumniRef = db.ref('alumni');
-        const credentialsRef = db.ref('credentials');
-        const classesRef = db.ref('classes');
-        const subjectsRef = db.ref('subjects');
-        const privateMessagesRef = db.ref('privateMessages');
-        const groupChatsRef = db.ref('groupChats');
-        const groupMessagesRef = db.ref('groupMessages');
-        const activeSessionsRef = db.ref('activeSessions');
-        const onlineStatusRef = db.ref('onlineStatus');
+        const authUsersRef = ref(db, 'authUsers');
+        const teachersRef = ref(db, 'teachers');
+        const studentsRef = ref(db, 'students');
+        const alumniRef = ref(db, 'alumni');
+        const credentialsRef = ref(db, 'credentials');
+        const classesRef = ref(db, 'classes');
+        const subjectsRef = ref(db, 'subjects');
+        const privateMessagesRef = ref(db, 'privateMessages');
+        const groupChatsRef = ref(db, 'groupChats');
+        const groupMessagesRef = ref(db, 'groupMessages');
+        const activeSessionsRef = ref(db, 'activeSessions');
+        const onlineStatusRef = ref(db, 'onlineStatus');
         
         // Global variables
         let currentUserId = null;
@@ -1797,61 +1800,77 @@ body {
             return notification;
         }
         
-        // Identify the current user based on Firebase auth
-        function identifyCurrentUser() {
-            return new Promise((resolve, reject) => {
-                auth.onAuthStateChanged(async (user) => {
-                    if (user) {
-                        // User is signed in
-                        currentUserId = user.uid;
-                        
-                        try {
-                            // Get user data from authUsers
-                            const authUserSnapshot = await authUsersRef.child(currentUserId).once('value');
-                            if (!authUserSnapshot.exists()) {
-                                throw new Error('User not found in authUsers');
-                            }
+        // Identify the current user based on authentication
+        async function identifyCurrentUser() {
+            try {
+                // Check if user is authenticated
+                return new Promise((resolve, reject) => {
+                    onAuthStateChanged(auth, async (user) => {
+                        if (user) {
+                            // User is signed in
+                            const email = user.email;
                             
-                            const authUser = authUserSnapshot.val();
-                            userType = authUser.userType; // 'student', 'teacher', or 'alumni'
-                            
-                            // Get user details from appropriate collection
-                            let userRef;
-                            if (userType === 'teacher') {
-                                userRef = teachersRef.child(currentUserId);
-                            } else if (userType === 'student') {
-                                userRef = studentsRef.child(currentUserId);
-                            } else if (userType === 'alumni') {
-                                userRef = alumniRef.child(currentUserId);
+                            // Extract user ID from email (assuming format: ID@cramnerd.sms)
+                            const emailParts = email.split('@');
+                            if (emailParts.length === 2 && emailParts[1] === 'cramnerd.sms') {
+                                currentUserId = emailParts[0];
+                                
+                                // Determine user type based on ID format
+                                if (currentUserId.startsWith('TCH')) {
+                                    userType = 'teacher';
+                                } else if (currentUserId.startsWith('STD')) {
+                                    userType = 'student';
+                                } else if (currentUserId.startsWith('ALM')) {
+                                    userType = 'alumni';
+                                } else {
+                                    throw new Error('Unknown user type');
+                                }
+                                
+                                // Get user details from appropriate collection
+                                let userRef;
+                                if (userType === 'teacher') {
+                                    userRef = ref(db, `teachers/${currentUserId}`);
+                                } else if (userType === 'student') {
+                                    userRef = ref(db, `students/${currentUserId}`);
+                                } else if (userType === 'alumni') {
+                                    userRef = ref(db, `alumni/${currentUserId}`);
+                                } else {
+                                    throw new Error('Unknown user type');
+                                }
+                                
+                                const userSnapshot = await get(userRef);
+                                
+                                if (userSnapshot.exists()) {
+                                    currentUserData = userSnapshot.val();
+                                    currentUserData.id = currentUserId;
+                                    resolve(currentUserData);
+                                } else {
+                                    reject(new Error('User data not found'));
+                                }
                             } else {
-                                throw new Error('Unknown user type');
+                                reject(new Error('Invalid email format'));
                             }
-                            
-                            const userSnapshot = await userRef.once('value');
-                            
-                            if (userSnapshot.exists()) {
-                                currentUserData = userSnapshot.val();
-                                currentUserData.id = currentUserId;
-                                resolve(currentUserData);
-                            } else {
-                                throw new Error('User data not found');
-                            }
-                        } catch (error) {
-                            console.error('Error identifying user:', error);
-                            reject(error);
+                        } else {
+                            // User is signed out
+                            reject(new Error('No user signed in'));
                         }
-                    } else {
-                        // No user is signed in
-                        reject(new Error('No user signed in'));
-                    }
+                    });
                 });
-            });
+            } catch (error) {
+                console.error('Error identifying user:', error);
+                showNotification({
+                    title: 'Error',
+                    message: 'Failed to identify user: ' + error.message,
+                    type: 'error'
+                });
+                return null;
+            }
         }
         
         // Initialize the app
         async function initApp() {
             try {
-                // First try to identify the user based on Firebase auth
+                // First try to identify the user based on authentication
                 const user = await identifyCurrentUser();
                 
                 if (user) {
@@ -1951,27 +1970,27 @@ body {
         // Load all users (teachers, students, alumni)
         async function loadAllUsers() {
             // Load teachers
-            const teachersSnapshot = await teachersRef.once('value');
+            const teachersSnapshot = await get(teachersRef);
             allTeachers = teachersSnapshot.exists() ? teachersSnapshot.val() : {};
             
             // Load students
-            const studentsSnapshot = await studentsRef.once('value');
+            const studentsSnapshot = await get(studentsRef);
             allStudents = studentsSnapshot.exists() ? studentsSnapshot.val() : {};
             
             // Load alumni
-            const alumniSnapshot = await alumniRef.once('value');
+            const alumniSnapshot = await get(alumniRef);
             allAlumni = alumniSnapshot.exists() ? alumniSnapshot.val() : {};
         }
         
         // Load all classes
         async function loadAllClasses() {
-            const snapshot = await classesRef.once('value');
+            const snapshot = await get(classesRef);
             allClasses = snapshot.exists() ? snapshot.val() : {};
         }
         
         // Load all subjects
         async function loadAllSubjects() {
-            const snapshot = await subjectsRef.once('value');
+            const snapshot = await get(subjectsRef);
             allSubjects = snapshot.exists() ? snapshot.val() : {};
         }
         
@@ -2042,8 +2061,8 @@ body {
                     const groupId = `subject_${subjectId}_class_${classId}`;
                     
                     // Check if group already exists
-                    const groupRef = groupChatsRef.child(groupId);
-                    const groupSnapshot = await groupRef.once('value');
+                    const groupRef = ref(db, `groupChats/${groupId}`);
+                    const groupSnapshot = await get(groupRef);
                     
                     if (!groupSnapshot.exists()) {
                         // Get all students in this class
@@ -2074,7 +2093,7 @@ body {
                             classId: classId
                         };
                         
-                        await groupRef.set(groupData);
+                        await set(groupRef, groupData);
                         
                         console.log(`Created group for ${subject.name} in ${classData?.name}`);
                     }
@@ -2093,8 +2112,8 @@ body {
                     const groupId = `class_${classId}`;
                     
                     // Check if group already exists
-                    const groupRef = groupChatsRef.child(groupId);
-                    const groupSnapshot = await groupRef.once('value');
+                    const groupRef = ref(db, `groupChats/${groupId}`);
+                    const groupSnapshot = await get(groupRef);
                     
                     if (!groupSnapshot.exists()) {
                         // Get all students in this class
@@ -2139,7 +2158,7 @@ body {
                             teacher: classTeacher || null
                         };
                         
-                        await groupRef.set(groupData);
+                        await set(groupRef, groupData);
                         
                         console.log(`Created group for ${classData.name} class`);
                     }
@@ -2150,15 +2169,15 @@ body {
         // Set up online status tracking
         function setupOnlineStatus() {
             // Set user as online
-            onlineStatusRef.child(currentUserId).set(true);
+            set(ref(db, `onlineStatus/${currentUserId}`), true);
             
             // Update every 30 seconds to keep status active
             userStatusInterval = setInterval(() => {
-                onlineStatusRef.child(currentUserId).set(true);
+                set(ref(db, `onlineStatus/${currentUserId}`), true);
             }, 30000);
             
             // Listen for online status changes
-            onlineStatusRef.on('value', (snapshot) => {
+            onValue(ref(db, 'onlineStatus'), (snapshot) => {
                 onlineUsers = snapshot.exists() ? snapshot.val() : {};
                 
                 // Update status indicators in chat list
@@ -2257,6 +2276,29 @@ body {
             // Search input
             searchInput.addEventListener('input', (e) => {
                 filterChats(e.target.value);
+            });
+            
+            // Menu button (logout)
+            menuBtn.addEventListener('click', () => {
+                signOut(auth).then(() => {
+                    showNotification({
+                        title: 'Signed Out',
+                        message: 'You have been successfully signed out',
+                        type: 'success',
+                        duration: 3000
+                    });
+                    
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 1000);
+                }).catch((error) => {
+                    showNotification({
+                        title: 'Error',
+                        message: 'Failed to sign out: ' + error.message,
+                        type: 'error',
+                        duration: 3000
+                    });
+                });
             });
             
             // Window resize handler
@@ -2472,7 +2514,7 @@ body {
         // Load private chats
         async function loadPrivateChats() {
             // Get all private messages involving this user
-            const messagesSnapshot = await privateMessagesRef.once('value');
+            const messagesSnapshot = await get(privateMessagesRef);
             const allMessages = messagesSnapshot.exists() ? messagesSnapshot.val() : {};
             
             // Find unique conversations
@@ -2747,7 +2789,7 @@ body {
         // Load group chats
         async function loadGroupChats() {
             // Get all group chats
-            const groupsSnapshot = await groupChatsRef.once('value');
+            const groupsSnapshot = await get(groupChatsRef);
             const allGroups = groupsSnapshot.exists() ? groupsSnapshot.val() : {};
             
             // Filter groups relevant to this user
@@ -2948,7 +2990,7 @@ body {
             chatMessages.innerHTML = '';
             
             // Get all private messages between current user and chat participant
-            const messagesSnapshot = await privateMessagesRef.once('value');
+            const messagesSnapshot = await get(privateMessagesRef);
             const allMessages = messagesSnapshot.exists() ? messagesSnapshot.val() : {};
             
             const messagesArray = [];
@@ -2979,7 +3021,7 @@ body {
             chatMessages.innerHTML = '';
             
             // Get all messages for this group
-            const messagesSnapshot = await groupMessagesRef.child(currentChat.id).once('value');
+            const messagesSnapshot = await get(ref(db, `groupMessages/${currentChat.id}`));
             const allMessages = messagesSnapshot.exists() ? messagesSnapshot.val() : {};
             
             const messagesArray = [];
@@ -3079,19 +3121,19 @@ body {
                 message.recipientId = currentChat.id;
                 
                 // Add to database
-                const newMessageRef = privateMessagesRef.push();
-                await newMessageRef.set(message);
+                const newMessageRef = push(privateMessagesRef);
+                await set(newMessageRef, message);
                 
                 // Update last message in chat list
                 updatePrivateChatListItem(message);
                 
             } else if (currentChat.type === 'group') {
                 // Add to database
-                const newMessageRef = groupMessagesRef.child(currentChat.id).push();
-                await newMessageRef.set(message);
+                const newMessageRef = push(ref(db, `groupMessages/${currentChat.id}`));
+                await set(newMessageRef, message);
                 
                 // Update last message in group chat
-                await groupChatsRef.child(currentChat.id).update({
+                await update(ref(db, `groupChats/${currentChat.id}`), {
                     lastMessage: {
                         content: content,
                         timestamp: message.timestamp,
@@ -3103,9 +3145,8 @@ body {
                 // Increment unread count for other members
                 currentChatMembers.forEach(memberId => {
                     if (memberId !== currentUserId) {
-                        groupChatsRef.child(currentChat.id).child('unreadCounts').child(memberId).transaction((count) => {
-                            return (count || 0) + 1;
-                        });
+                        update(ref(db, `groupChats/${currentChat.id}/unreadCounts/${memberId}`), 
+                            (count) => (count || 0) + 1);
                     }
                 });
                 
@@ -3165,7 +3206,7 @@ body {
         
         // Mark private messages as read
         async function markMessagesAsRead(senderId) {
-            const messagesSnapshot = await privateMessagesRef.once('value');
+            const messagesSnapshot = await get(privateMessagesRef);
             const allMessages = messagesSnapshot.exists() ? messagesSnapshot.val() : {};
             
             const updates = {};
@@ -3182,7 +3223,7 @@ body {
             }
             
             if (Object.keys(updates).length > 0) {
-                await privateMessagesRef.update(updates);
+                await update(privateMessagesRef, updates);
                 
                 // Update chat list item
                 const chatItem = document.querySelector(`.chat-item[data-user-id="${senderId}"]`);
@@ -3199,7 +3240,7 @@ body {
         // Mark group messages as read
         async function markGroupMessagesAsRead(groupId) {
             // Reset unread count for current user
-            await groupChatsRef.child(groupId).child('unreadCounts').child(currentUserId).set(0);
+            await set(ref(db, `groupChats/${groupId}/unreadCounts/${currentUserId}`), 0);
             
             // Update chat list item
             const chatItem = document.querySelector(`.chat-item[data-group-id="${groupId}"]`);
@@ -3463,8 +3504,8 @@ body {
                 };
                 
                 // Generate a unique ID for the group
-                const newGroupRef = groupChatsRef.push();
-                await newGroupRef.set(groupData);
+                const newGroupRef = push(groupChatsRef);
+                await set(newGroupRef, groupData);
                 
                 // Close modal
                 newGroupModal.style.display = 'none';
@@ -3494,7 +3535,7 @@ body {
         // Set up real-time listeners
         function setupRealTimeListeners() {
             // Listen for new private messages
-            privateMessagesRef.on('child_added', (snapshot) => {
+            onChildAdded(privateMessagesRef, (snapshot) => {
                 const message = snapshot.val();
                 
                 // If message is for current user and not from themselves
@@ -3522,7 +3563,7 @@ body {
             });
             
             // Listen for new group messages
-            groupMessagesRef.on('child_added', (snapshot) => {
+            onChildAdded(ref(db, 'groupMessages'), (snapshot) => {
                 const groupMessages = snapshot.val();
                 const groupId = snapshot.key;
                 
@@ -3568,7 +3609,6 @@ body {
                                     });
                                 }
                             }
-                        }
                         }
                     }
                 }
