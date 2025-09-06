@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CramNerd SMS - Sign In</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -41,6 +40,7 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
         }
 
         .container {
@@ -52,7 +52,7 @@
             padding: 40px;
             box-shadow: var(--shadow);
             text-align: center;
-            position: relative;
+            z-index: 1;
         }
 
         .logo {
@@ -250,22 +250,22 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Floating download icon */
+        /* Floating download button */
         .floating-download {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 30px;
+            right: 30px;
             width: 60px;
             height: 60px;
             background: var(--primary-color);
             color: white;
             border-radius: 50%;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             box-shadow: var(--shadow);
             cursor: pointer;
-            z-index: 1000;
+            z-index: 100;
             transition: var(--transition);
         }
 
@@ -278,80 +278,79 @@
             font-size: 24px;
         }
 
-        /* Navigation controls */
-        .nav-controls {
+        /* Modal styles */
+        .modal-overlay {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
             display: flex;
+            justify-content: center;
             align-items: center;
             z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
         }
 
-        .nav-expand {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
             box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .modal h3 {
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+
+        .modal p {
+            margin-bottom: 25px;
+            color: var(--dark-color);
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
             transition: var(--transition);
         }
 
-        .nav-expand:hover {
+        .modal-btn.confirm {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .modal-btn.confirm:hover {
             background: var(--secondary-color);
         }
 
-        .nav-buttons {
-            display: flex;
-            margin-right: 10px;
-            opacity: 0;
-            width: 0;
-            overflow: hidden;
-            transition: var(--transition);
-        }
-
-        .nav-buttons.expanded {
-            opacity: 1;
-            width: 130px;
-        }
-
-        .nav-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+        .modal-btn.cancel {
             background: var(--light-color);
             color: var(--dark-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 10px;
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
         }
 
-        .nav-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .nav-btn.back:hover {
-            background: var(--info-color);
-            color: white;
-        }
-
-        .nav-btn.refresh:hover {
-            background: var(--success-color);
-            color: white;
-        }
-
-        .nav-btn.exit:hover {
-            background: var(--danger-color);
-            color: white;
+        .modal-btn.cancel:hover {
+            background: #e4e6eb;
         }
 
         /* Responsive adjustments */
@@ -374,15 +373,10 @@
             }
             
             .floating-download {
-                bottom: 15px;
-                right: 15px;
+                bottom: 20px;
+                right: 20px;
                 width: 50px;
                 height: 50px;
-            }
-            
-            .nav-controls {
-                top: 15px;
-                right: 15px;
             }
         }
 
@@ -405,28 +399,14 @@
             }
             
             .floating-download {
+                bottom: 15px;
+                right: 15px;
                 width: 45px;
                 height: 45px;
-                bottom: 10px;
-                right: 10px;
             }
             
             .floating-download i {
                 font-size: 20px;
-            }
-            
-            .nav-controls {
-                top: 10px;
-                right: 10px;
-            }
-            
-            .nav-expand, .nav-btn {
-                width: 35px;
-                height: 35px;
-            }
-            
-            .nav-buttons.expanded {
-                width: 115px;
             }
         }
     </style>
@@ -468,26 +448,20 @@
         </div>
     </div>
     
-    <!-- Floating download icon -->
-    <div class="floating-download" onclick="downloadApk()">
-        <i class="fas fa-download"></i>
+    <!-- Floating download button -->
+    <div class="floating-download" id="downloadBtn">
+        <i>📱</i>
     </div>
     
-    <!-- Navigation controls -->
-    <div class="nav-controls">
-        <div class="nav-buttons" id="navButtons">
-            <div class="nav-btn back" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i>
+    <!-- Download confirmation modal -->
+    <div class="modal-overlay" id="downloadModal">
+        <div class="modal">
+            <h3>Download CramNerd App</h3>
+            <p>The app is currently only available for Android devices. Do you want to download?</p>
+            <div class="modal-buttons">
+                <button class="modal-btn confirm" id="confirmDownload">Yes, Download</button>
+                <button class="modal-btn cancel" id="cancelDownload">Cancel</button>
             </div>
-            <div class="nav-btn refresh" onclick="refreshPage()">
-                <i class="fas fa-sync-alt"></i>
-            </div>
-            <div class="nav-btn exit" onclick="exitApp()">
-                <i class="fas fa-times"></i>
-            </div>
-        </div>
-        <div class="nav-expand" onclick="toggleNavButtons()">
-            <i class="fas fa-bars" id="navExpandIcon"></i>
         </div>
     </div>
     
@@ -518,8 +492,10 @@
         const loginBtn = document.getElementById('loginBtn');
         const toast = document.getElementById('toast');
         const userTypes = document.querySelectorAll('.user-type');
-        const navButtons = document.getElementById('navButtons');
-        const navExpandIcon = document.getElementById('navExpandIcon');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const downloadModal = document.getElementById('downloadModal');
+        const confirmDownload = document.getElementById('confirmDownload');
+        const cancelDownload = document.getElementById('cancelDownload');
         
         // Current user type
         let currentUserType = 'student';
@@ -684,49 +660,34 @@
             }
         });
         
-        // Download APK file
-        function downloadApk() {
-            // Create a temporary link element
+        // Download functionality
+        downloadBtn.addEventListener('click', () => {
+            downloadModal.classList.add('active');
+        });
+        
+        confirmDownload.addEventListener('click', () => {
+            // Create a temporary link to trigger download
             const link = document.createElement('a');
             link.href = 'cramnerd.apk';
             link.download = 'cramnerd.apk';
-            
-            // Simulate click to trigger download
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             
-            showToast('Downloading CramNerd app...', 'info');
-        }
+            downloadModal.classList.remove('active');
+            showToast('Download started!', 'success');
+        });
         
-        // Toggle navigation buttons
-        function toggleNavButtons() {
-            navButtons.classList.toggle('expanded');
-            
-            if (navButtons.classList.contains('expanded')) {
-                navExpandIcon.className = 'fas fa-times';
-            } else {
-                navExpandIcon.className = 'fas fa-bars';
+        cancelDownload.addEventListener('click', () => {
+            downloadModal.classList.remove('active');
+        });
+        
+        // Close modal when clicking outside
+        downloadModal.addEventListener('click', (e) => {
+            if (e.target === downloadModal) {
+                downloadModal.classList.remove('active');
             }
-        }
-        
-        // Navigation functions
-        function goBack() {
-            window.history.back();
-        }
-        
-        function refreshPage() {
-            window.location.reload();
-        }
-        
-        function exitApp() {
-            if (confirm('Are you sure you want to exit?')) {
-                window.close();
-                
-                // If window.close doesn't work (due to browser restrictions)
-                showToast('Use your device back button to exit', 'info');
-            }
-        }
+        });
     </script>
 </body>
 </html>
