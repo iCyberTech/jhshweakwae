@@ -21,6 +21,9 @@
             --warning-color: #fdcb6e;
             --info-color: #0984e3;
             --exam-color: #e17055;
+            --term1-color: #e17055;
+            --term2-color: #00b894;
+            --term3-color: #0984e3;
         }
 
         * {
@@ -299,6 +302,15 @@
 
         .fee-amount.exam {
             color: var(--exam-color);
+        }
+
+        .fee-amount-input {
+            width: 80px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: 600;
         }
 
         .status-btn {
@@ -712,6 +724,41 @@
             border-color: var(--exam-color);
         }
 
+        .term-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .term-btn {
+            padding: 8px 15px;
+            border: 1px solid var(--secondary-color);
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .term-btn.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .term-btn.term1.active {
+            background: var(--term1-color);
+            border-color: var(--term1-color);
+        }
+
+        .term-btn.term2.active {
+            background: var(--term2-color);
+            border-color: var(--term2-color);
+        }
+
+        .term-btn.term3.active {
+            background: var(--term3-color);
+            border-color: var(--term3-color);
+        }
+
         @media (max-width: 768px) {
             .fees-header {
                 flex-direction: column;
@@ -840,6 +887,11 @@
             <div class="fee-type-selector">
                 <button class="fee-type-btn active" data-fee-type="daily">Daily Fees</button>
                 <button class="fee-type-btn exam" data-fee-type="exam">Exam Fees</button>
+            </div>
+            <div id="term-selector-container" class="term-selector" style="display: none;">
+                <button class="term-btn term1 active" data-term="term1">Term 1</button>
+                <button class="term-btn term2" data-term="term2">Term 2</button>
+                <button class="term-btn term3" data-term="term3">Term 3</button>
             </div>
             <div class="summary-stats">
                 <div class="stat-item">
@@ -1049,6 +1101,8 @@
         const unpaidCountElement = document.getElementById('unpaid-count');
         const totalCollectedElement = document.getElementById('total-collected');
         const expectedTotalElement = document.getElementById('expected-total');
+        const termSelectorContainer = document.getElementById('term-selector-container');
+        const termBtns = document.querySelectorAll('.term-btn');
         
         // Modal elements
         const confirmationModal = document.getElementById('confirmation-modal');
@@ -1123,6 +1177,7 @@
             attendanceRate: 0
         };
         let currentFeeType = 'daily'; // 'daily' or 'exam'
+        let currentTerm = 'term1'; // 'term1', 'term2', or 'term3'
         
         // Currency settings
         let currentCurrencySettings = {
@@ -1153,6 +1208,7 @@
             totalExpectedElement.textContent = formatCurrency(classBalanceData.totalExpected);
             totalCollectedBalanceElement.textContent = formatCurrency(classBalanceData.totalCollected);
             totalOutstandingElement.textContent = formatCurrency(classBalanceData.totalOutstanding);
+            attendanceRateElement.textContent = `${classBalanceData.attendanceRate}%`;
             
             // Update fee summary based on current fee type
             if (currentFeeType === 'daily') {
@@ -1468,10 +1524,13 @@
             }
         }
         
-        // Load exam fee payments data for the selected date
-        async function loadExamFeePaymentsData() {
+        // Load exam fee payments data for the selected term
+        async function loadExamFeePaymentsData(term) {
             try {
-                const examFeePaymentsSnapshot = await printingFeesRef.orderByChild('classId').equalTo(currentClass.id).once('value');
+                const examFeePaymentsSnapshot = await printingFeesRef
+                    .orderByChild('classId')
+                    .equalTo(currentClass.id)
+                    .once('value');
                 
                 if (examFeePaymentsSnapshot.exists()) {
                     const payments = examFeePaymentsSnapshot.val();
@@ -1480,13 +1539,14 @@
                     // Format the data to match the structure of feePaymentsData
                     Object.keys(payments).forEach(key => {
                         const payment = payments[key];
-                        if (!payment.deleted) {
+                        if (!payment.deleted && payment.term === term) {
                             if (!formattedPayments[payment.studentId]) {
                                 formattedPayments[payment.studentId] = {
                                     amount: payment.amount,
                                     paid: true,
                                     timestamp: payment.date,
-                                    recordedBy: currentTeacherId
+                                    recordedBy: currentTeacherId,
+                                    term: payment.term
                                 };
                             }
                         }
@@ -1673,7 +1733,7 @@
         }
         
         // Render students list with fee payment options
-        function renderStudentsList(students, paymentsData, selectedDate, feeType) {
+        function renderStudentsList(students, paymentsData, selectedDate, feeType, term) {
             studentsListElement.innerHTML = '';
             
             if (students.length === 0) {
@@ -1723,7 +1783,7 @@
                         <div class="student-id">ID: ${student.id || 'N/A'}</div>
                     </div>
                     <div class="fee-status">
-                        <div class="fee-amount ${feeType === 'exam' ? 'exam' : ''}">${formatCurrency(feeAmount)}</div>
+                        <input type="number" class="fee-amount-input" value="${amountPaid > 0 ? amountPaid : feeAmount}" step="0.01" min="0">
                         <button class="status-btn ${isPaid ? 'active' : 'inactive'} ${feeType === 'exam' ? 'exam' : ''}" 
                                 data-status="${isPaid ? 'paid' : 'unpaid'}" 
                                 title="${isPaid ? 'Paid' : 'Unpaid'}">
@@ -1748,6 +1808,8 @@
                     const studentId = card.dataset.studentId;
                     const currentStatus = this.dataset.status;
                     const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid';
+                    const amountInput = card.querySelector('.fee-amount-input');
+                    const amount = parseFloat(amountInput.value) || 0;
                     
                     // Update UI
                     this.dataset.status = newStatus;
@@ -1775,7 +1837,7 @@
                         }
                         
                         feePaymentsData[studentId].paid = newStatus === 'paid';
-                        feePaymentsData[studentId].amount = newStatus === 'paid' ? dailyFeeAmount : 0;
+                        feePaymentsData[studentId].amount = newStatus === 'paid' ? amount : 0;
                         feePaymentsData[studentId].timestamp = new Date().toISOString();
                         feePaymentsData[studentId].recordedBy = currentTeacherId;
                     } else {
@@ -1784,14 +1846,56 @@
                                 amount: 0,
                                 paid: false,
                                 timestamp: new Date().toISOString(),
-                                recordedBy: currentTeacherId
+                                recordedBy: currentTeacherId,
+                                term: currentTerm
                             };
                         }
                         
                         examFeePaymentsData[studentId].paid = newStatus === 'paid';
-                        examFeePaymentsData[studentId].amount = newStatus === 'paid' ? examFeeAmount : 0;
+                        examFeePaymentsData[studentId].amount = newStatus === 'paid' ? amount : 0;
                         examFeePaymentsData[studentId].timestamp = new Date().toISOString();
                         examFeePaymentsData[studentId].recordedBy = currentTeacherId;
+                        examFeePaymentsData[studentId].term = currentTerm;
+                    }
+                    
+                    // Update summary counts
+                    updateSummaryCounts();
+                });
+            });
+            
+            // Add event listeners to amount inputs
+            document.querySelectorAll('.fee-amount-input').forEach(input => {
+                input.addEventListener('change', function() {
+                    const card = this.closest('.student-card');
+                    const studentId = card.dataset.studentId;
+                    const amount = parseFloat(this.value) || 0;
+                    const statusBtn = card.querySelector('.status-btn');
+                    const isPaid = statusBtn.dataset.status === 'paid';
+                    
+                    // Update payments data based on fee type
+                    if (currentFeeType === 'daily') {
+                        if (!feePaymentsData[studentId]) {
+                            feePaymentsData[studentId] = {
+                                amount: 0,
+                                paid: false,
+                                timestamp: new Date().toISOString(),
+                                recordedBy: currentTeacherId
+                            };
+                        }
+                        
+                        feePaymentsData[studentId].amount = isPaid ? amount : 0;
+                    } else {
+                        if (!examFeePaymentsData[studentId]) {
+                            examFeePaymentsData[studentId] = {
+                                amount: 0,
+                                paid: false,
+                                timestamp: new Date().toISOString(),
+                                recordedBy: currentTeacherId,
+                                term: currentTerm
+                            };
+                        }
+                        
+                        examFeePaymentsData[studentId].amount = isPaid ? amount : 0;
                     }
                     
                     // Update summary counts
@@ -1844,6 +1948,10 @@
                         };
                     }
                     
+                    if (currentFeeType === 'exam') {
+                        paymentsData[studentId].term = currentTerm;
+                    }
+                    
                     paymentsData[studentId].paid = true;
                     paymentsData[studentId].amount = feeAmount;
                     paymentsData[studentId].timestamp = new Date().toISOString();
@@ -1851,7 +1959,7 @@
                 });
                 
                 // Re-render the students list
-                renderStudentsList(classStudents, paymentsData, currentDate, currentFeeType);
+                renderStudentsList(classStudents, paymentsData, currentDate, currentFeeType, currentTerm);
             }
         }
         
@@ -1893,23 +2001,31 @@
                                 
                                 for (const studentId in examFeePaymentsData) {
                                     const payment = examFeePaymentsData[studentId];
-                                    if (payment.paid) {
-                                        // Check if this student already has an exam fee payment
+                                    if (payment.paid && payment.term === currentTerm) {
+                                        // Check if this student already has an exam fee payment for this term
                                         const existingPaymentsSnapshot = await printingFeesRef
                                             .orderByChild('studentId')
                                             .equalTo(studentId)
                                             .once('value');
                                         
+                                        let paymentExists = false;
                                         if (existingPaymentsSnapshot.exists()) {
-                                            // Update existing payment
                                             const existingPayments = existingPaymentsSnapshot.val();
-                                            const paymentKey = Object.keys(existingPayments)[0];
-                                            await printingFeesRef.child(paymentKey).update({
-                                                amount: payment.amount,
-                                                date: timestamp,
-                                                recordedBy: currentTeacherId
-                                            });
-                                        } else {
+                                            for (const key in existingPayments) {
+                                                if (existingPayments[key].term === currentTerm) {
+                                                    // Update existing payment
+                                                    await printingFeesRef.child(key).update({
+                                                        amount: payment.amount,
+                                                        date: timestamp,
+                                                        recordedBy: currentTeacherId
+                                                    });
+                                                    paymentExists = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        
+                                        if (!paymentExists) {
                                             // Create new payment
                                             await printingFeesRef.push({
                                                 amount: payment.amount,
@@ -1917,7 +2033,8 @@
                                                 date: timestamp,
                                                 deleted: false,
                                                 studentId: studentId,
-                                                recordedBy: currentTeacherId
+                                                recordedBy: currentTeacherId,
+                                                term: currentTerm
                                             });
                                         }
                                     }
@@ -1955,7 +2072,7 @@
                     feePaymentsData = {};
                     classStudents.forEach(student => {
                         feePaymentsData[student.id] = {
-                            amount: 0,
+                            amount: dailyFeeAmount,
                             paid: false,
                             timestamp: new Date().toISOString(),
                             recordedBy: currentTeacherId
@@ -1965,10 +2082,11 @@
                     examFeePaymentsData = {};
                     classStudents.forEach(student => {
                         examFeePaymentsData[student.id] = {
-                            amount: 0,
+                            amount: examFeeAmount,
                             paid: false,
                             timestamp: new Date().toISOString(),
-                            recordedBy: currentTeacherId
+                            recordedBy: currentTeacherId,
+                            term: currentTerm
                         };
                     });
                 }
@@ -1976,7 +2094,8 @@
                 renderStudentsList(classStudents, 
                     currentFeeType === 'daily' ? feePaymentsData : examFeePaymentsData, 
                     currentDate, 
-                    currentFeeType
+                    currentFeeType,
+                    currentTerm
                 );
             }
         }
@@ -1991,7 +2110,7 @@
                 classStudents.forEach(student => {
                     if (!feePaymentsData[student.id]) {
                         feePaymentsData[student.id] = {
-                            amount: 0,
+                            amount: dailyFeeAmount,
                             paid: false,
                             timestamp: new Date().toISOString(),
                             recordedBy: currentTeacherId
@@ -1999,7 +2118,7 @@
                     }
                 });
                 
-                renderStudentsList(classStudents, feePaymentsData, currentDate, currentFeeType);
+                renderStudentsList(classStudents, feePaymentsData, currentDate, currentFeeType, currentTerm);
             }
         }
         
@@ -2024,6 +2143,13 @@
                 ? "Student Fee Payments" 
                 : "Student Examination Fee Payments";
             
+            // Show/hide term selector
+            if (feeType === 'exam') {
+                termSelectorContainer.style.display = 'flex';
+            } else {
+                termSelectorContainer.style.display = 'none';
+            }
+            
             if (feeType === 'daily') {
                 // Load daily fee payments for the selected date
                 feePaymentsData = await loadFeePaymentsData(currentDate);
@@ -2032,7 +2158,7 @@
                 classStudents.forEach(student => {
                     if (!feePaymentsData[student.id]) {
                         feePaymentsData[student.id] = {
-                            amount: 0,
+                            amount: dailyFeeAmount,
                             paid: false,
                             timestamp: new Date().toISOString(),
                             recordedBy: currentTeacherId
@@ -2040,24 +2166,59 @@
                     }
                 });
                 
-                renderStudentsList(classStudents, feePaymentsData, currentDate, feeType);
+                renderStudentsList(classStudents, feePaymentsData, currentDate, feeType, currentTerm);
             } else {
-                // Load exam fee payments
-                examFeePaymentsData = await loadExamFeePaymentsData();
+                // Load exam fee payments for the current term
+                examFeePaymentsData = await loadExamFeePaymentsData(currentTerm);
                 
                 // Initialize empty records for students without payment data
                 classStudents.forEach(student => {
                     if (!examFeePaymentsData[student.id]) {
                         examFeePaymentsData[student.id] = {
-                            amount: 0,
+                            amount: examFeeAmount,
                             paid: false,
                             timestamp: new Date().toISOString(),
-                            recordedBy: currentTeacherId
+                            recordedBy: currentTeacherId,
+                            term: currentTerm
                         };
                     }
                 });
                 
-                renderStudentsList(classStudents, examFeePaymentsData, currentDate, feeType);
+                renderStudentsList(classStudents, examFeePaymentsData, currentDate, feeType, currentTerm);
+            }
+        }
+        
+        // Handle term change
+        async function handleTermChange(term) {
+            currentTerm = term;
+            
+            // Update UI based on term
+            termBtns.forEach(btn => {
+                if (btn.dataset.term === term) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            if (currentFeeType === 'exam') {
+                // Load exam fee payments for the selected term
+                examFeePaymentsData = await loadExamFeePaymentsData(currentTerm);
+                
+                // Initialize empty records for students without payment data
+                classStudents.forEach(student => {
+                    if (!examFeePaymentsData[student.id]) {
+                        examFeePaymentsData[student.id] = {
+                            amount: examFeeAmount,
+                            paid: false,
+                            timestamp: new Date().toISOString(),
+                            recordedBy: currentTeacherId,
+                            term: currentTerm
+                        };
+                    }
+                });
+                
+                renderStudentsList(classStudents, examFeePaymentsData, currentDate, currentFeeType, currentTerm);
             }
         }
         
@@ -2320,14 +2481,14 @@
                 // Load fee payments data for today
                 feePaymentsData = await loadFeePaymentsData(currentDate);
                 
-                // Load exam fee payments data
-                examFeePaymentsData = await loadExamFeePaymentsData();
+                // Load exam fee payments data for term 1
+                examFeePaymentsData = await loadExamFeePaymentsData(currentTerm);
                 
                 // Initialize empty records for students without payment data
                 classStudents.forEach(student => {
                     if (!feePaymentsData[student.id]) {
                         feePaymentsData[student.id] = {
-                            amount: 0,
+                            amount: dailyFeeAmount,
                             paid: false,
                             timestamp: new Date().toISOString(),
                             recordedBy: currentTeacherId
@@ -2336,10 +2497,11 @@
                     
                     if (!examFeePaymentsData[student.id]) {
                         examFeePaymentsData[student.id] = {
-                            amount: 0,
+                            amount: examFeeAmount,
                             paid: false,
                             timestamp: new Date().toISOString(),
-                            recordedBy: currentTeacherId
+                            recordedBy: currentTeacherId,
+                            term: currentTerm
                         };
                     }
                 });
@@ -2349,7 +2511,7 @@
                 renderClassBalance(classBalanceData);
                 
                 // Render students with fee payment options (default to daily fees)
-                renderStudentsList(classStudents, feePaymentsData, currentDate, 'daily');
+                renderStudentsList(classStudents, feePaymentsData, currentDate, 'daily', currentTerm);
                 
                 // Hide loading screen and show main content
                 loadingScreen.style.display = 'none';
@@ -2403,17 +2565,18 @@
                         // Initialize empty records for students
                         classStudents.forEach(student => {
                             feePaymentsData[student.id] = {
-                                amount: 0,
+                                amount: dailyFeeAmount,
                                 paid: false,
                                 timestamp: new Date().toISOString(),
                                 recordedBy: "demo-teacher"
                             };
                             
                             examFeePaymentsData[student.id] = {
-                                amount: 0,
+                                amount: examFeeAmount,
                                 paid: false,
                                 timestamp: new Date().toISOString(),
-                                recordedBy: "demo-teacher"
+                                recordedBy: "demo-teacher",
+                                term: currentTerm
                             };
                         });
                         
@@ -2423,7 +2586,7 @@
                         greetingSubtitle.textContent = `Recording daily fees for ${currentTeacherData.name}'s class`;
                         
                         renderClassInfo(currentClass);
-                        renderStudentsList(classStudents, feePaymentsData, currentDate, 'daily');
+                        renderStudentsList(classStudents, feePaymentsData, currentDate, 'daily', currentTerm);
                         
                         classBalanceData = {
                             totalExpected: 0,
@@ -2491,13 +2654,13 @@
                         
                         // Update all current payments to use the new amount
                         classStudents.forEach(student => {
-                            if (feePaymentsData[student.id] && feePaymentsData[student.id].paid) {
+                            if (feePaymentsData[student.id]) {
                                 feePaymentsData[student.id].amount = amount;
                             }
                         });
                         
                         // Re-render the students list
-                        renderStudentsList(classStudents, feePaymentsData, currentDate, currentFeeType);
+                        renderStudentsList(classStudents, feePaymentsData, currentDate, currentFeeType, currentTerm);
                         
                         // Recalculate and update class balance
                         const newBalance = await calculateClassBalance(currentClass.id);
@@ -2540,13 +2703,13 @@
                         
                         // Update all current payments to use the new amount
                         classStudents.forEach(student => {
-                            if (examFeePaymentsData[student.id] && examFeePaymentsData[student.id].paid) {
+                            if (examFeePaymentsData[student.id]) {
                                 examFeePaymentsData[student.id].amount = amount;
                             }
                         });
                         
                         // Re-render the students list
-                        renderStudentsList(classStudents, examFeePaymentsData, currentDate, currentFeeType);
+                        renderStudentsList(classStudents, examFeePaymentsData, currentDate, currentFeeType, currentTerm);
                     } else {
                         alert('Failed to update exam fee amount. Please try again.');
                     }
@@ -2649,6 +2812,14 @@
             btn.addEventListener('click', () => {
                 const feeType = btn.dataset.feeType;
                 handleFeeTypeChange(feeType);
+            });
+        });
+        
+        // Term button click handlers
+        termBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const term = btn.dataset.term;
+                handleTermChange(term);
             });
         });
         
