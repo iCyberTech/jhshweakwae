@@ -201,19 +201,18 @@
 
         .class-info {
             margin-top: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
         }
 
         .class-name {
             font-weight: 600;
+            margin-bottom: 8px;
             color: var(--text-color);
         }
 
         .schedule {
             font-size: 0.9rem;
             color: var(--light-text);
+            margin-bottom: 12px;
         }
 
         .days {
@@ -590,6 +589,7 @@
         .notification-title {
             font-weight: 600;
             margin-bottom: 4px;
+            font-size: 16px;
         }
 
         .notification-message {
@@ -891,7 +891,7 @@
     </div>
 
     <script>
-        // Firebase configuration
+        // Firebase configuration (same as in logins.html)
         const firebaseConfig = {
             apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
             authDomain: "sms-single.firebaseapp.com",
@@ -900,7 +900,7 @@
             messagingSenderId: "140188895278",
             appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
             measurementId: "G-7ER348P6VZ",
-            databaseURL: "https://sms-single-default-rtdb.firebaseio.io/"
+            databaseURL: "https://sms-single-default-rtdb.firebaseio.com/"
         };
         
         // Initialize Firebase
@@ -940,17 +940,6 @@
         // Published grades elements
         const publishedGradesContainer = document.getElementById('published-grades-container');
         const noPublishedGrades = document.getElementById('no-published-grades');
-        
-        // Firebase references
-        const authUsersRef = database.ref('authUsers');
-        const teachersRef = database.ref('teachers');
-        const classesRef = database.ref('classes');
-        const credentialsRef = database.ref('credentials');
-        const subjectsRef = database.ref('subjects');
-        const studentsRef = database.ref('students');
-        const gradesRef = database.ref('grades');
-        const publishedGradesRef = database.ref('publishedGrades');
-        const settingsRef = database.ref('settings');
         
         // Global variables
         let currentTeacherId = null;
@@ -1020,92 +1009,157 @@
             return notification;
         }
         
-        // Check authentication state
-        function checkAuthState() {
-            auth.onAuthStateChanged((user) => {
-                if (user) {
-                    // User is signed in
-                    currentTeacherId = user.uid;
-                    initializePage();
-                } else {
-                    // No user is signed in, redirect to login
-                    window.location.href = 'signin.html';
-                }
+        // Identify the current teacher based on Firebase Auth
+        async function identifyCurrentTeacher() {
+            return new Promise((resolve, reject) => {
+                // Check if user is already signed in
+                const unsubscribe = auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        try {
+                            // Get user data from authUsers
+                            const authUsersSnapshot = await database.ref('authUsers').once('value');
+                            if (!authUsersSnapshot.exists()) {
+                                throw new Error('No auth users found');
+                            }
+                            
+                            const authUsers = authUsersSnapshot.val();
+                            let teacherUserId = null;
+                            
+                            // Find the teacher user in authUsers
+                            for (const [authId, authUser] of Object.entries(authUsers)) {
+                                if (authUser.email === user.email && authUser.userType === 'teacher') {
+                                    teacherUserId = authUser.userId;
+                                    currentTeacherId = teacherUserId;
+                                    break;
+                                }
+                            }
+                            
+                            if (!teacherUserId) {
+                                throw new Error('No matching teacher found in authUsers');
+                            }
+                            
+                            // Get teacher details from teachers collection
+                            const teacherRef = database.ref(`teachers/${currentTeacherId}`);
+                            const teacherSnapshot = await teacherRef.once('value');
+                            
+                            if (teacherSnapshot.exists()) {
+                                currentTeacherData = teacherSnapshot.val();
+                                resolve(currentTeacherData);
+                            } else {
+                                throw new Error('Teacher data not found');
+                            }
+                        } catch (error) {
+                            console.error('Error identifying teacher:', error);
+                            reject(error);
+                        }
+                    } else {
+                        // No user is signed in, try to get from activeSessions
+                        database.ref('activeSessions/teacher').once('value')
+                            .then((snapshot) => {
+                                if (snapshot.exists()) {
+                                    currentTeacherId = snapshot.val();
+                                    const teacherRef = database.ref(`teachers/${currentTeacherId}`);
+                                    return teacherRef.once('value');
+                                } else {
+                                    throw new Error('No active teacher session found');
+                                }
+                            })
+                            .then((teacherSnapshot) => {
+                                if (teacherSnapshot.exists()) {
+                                    currentTeacherData = teacherSnapshot.val();
+                                    resolve(currentTeacherData);
+                                } else {
+                                    throw new Error('Teacher data not found');
+                                }
+                            })
+                            .catch((error) => {
+                                console.error('Error identifying teacher:', error);
+                                reject(error);
+                            });
+                    }
+                }, (error) => {
+                    console.error('Auth state change error:', error);
+                    reject(error);
+                });
+                
+                // Set timeout to unsubscribe if it takes too long
+                setTimeout(() => {
+                    unsubscribe();
+                }, 10000);
             });
         }
         
-        // Get teacher data from Firebase
-        async function getTeacherData(teacherId) {
+        // Initialize the app
+        async function initApp() {
             try {
-                const snapshot = await database.ref(`teachers/${teacherId}`).once('value');
-                if (snapshot.exists()) {
-                    return snapshot.val();
+                // First try to identify the teacher
+                const teacher = await identifyCurrentTeacher();
+                
+                if (teacher) {
+                    // Update UI with teacher info
+                    teacherName.textContent = teacher.name || 'Teacher';
+                    
+                    // Set avatar - use profileImage if available, otherwise use dicebear
+                    const avatarUrl = teacher.profileImage || 
+                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentTeacherId}`;
+                    teacherAvatar.src = avatarUrl;
+                    
+                    // Load teacher's subjects
+                    await loadTeacherSubjects();
+                    
+                    // Load all classes
+                    await loadAllClasses();
+                    
+                    // Load all students
+                    await loadAllStudents();
+                    
+                    // Load grade settings
+                    await loadGradeSettings();
+                    
+                    // Populate subject dropdown for grade entry
+                    populateSubjectDropdown();
+                    
+                    // Load published grades
+                    await loadPublishedGrades();
+                    
+                    // Hide loading screen and show main content
+                    loadingScreen.style.display = 'none';
+                    mainContent.style.display = 'block';
+                    
+                    showNotification({
+                        title: 'Welcome Back',
+                        message: `You're logged in as ${teacher.name || 'Teacher'}`,
+                        type: 'success',
+                        duration: 3000
+                    });
+                    
+                    return;
                 }
-                return null;
+                
+                // If no teacher identified
+                showNotification({
+                    title: 'Session Expired',
+                    message: 'Please sign in again',
+                    type: 'error',
+                    duration: 0
+                });
+                
+                // Redirect to login page after a delay
+                setTimeout(() => {
+                    window.location.href = 'logins.html';
+                }, 2000);
+                
             } catch (error) {
-                console.error('Error getting teacher data:', error);
+                console.error('Error initializing app:', error);
                 showNotification({
                     title: 'Error',
                     message: 'Failed to load teacher information',
                     type: 'error'
                 });
-                return null;
-            }
-        }
-        
-        // Initialize the page
-        async function initializePage() {
-            loadingScreen.style.display = 'flex';
-            mainContent.style.display = 'none';
-            
-            try {
-                // Get teacher data
-                currentTeacherData = await getTeacherData(currentTeacherId);
                 
-                if (!currentTeacherData) {
-                    throw new Error('Teacher data not found');
-                }
-                
-                // Update teacher profile
-                teacherAvatar.src = currentTeacherData.profileImage || 'https://randomuser.me/api/portraits/women/44.jpg';
-                teacherName.textContent = currentTeacherData.name || 'Teacher';
-                
-                // Load teacher's subjects
-                await loadTeacherSubjects();
-                
-                // Load all classes
-                await loadAllClasses();
-                
-                // Load all students
-                await loadAllStudents();
-                
-                // Load grade settings
-                await loadGradeSettings();
-                
-                // Populate subject dropdown for grade entry
-                populateSubjectDropdown();
-                
-                // Load published grades
-                await loadPublishedGrades();
-                
-                // Hide loading screen and show main content
-                loadingScreen.style.display = 'none';
-                mainContent.style.display = 'block';
-                
-                showNotification({
-                    title: 'Welcome Back',
-                    message: `You're logged in as ${currentTeacherData.name || 'Teacher'}`,
-                    type: 'success',
-                    duration: 3000
-                });
-                
-            } catch (error) {
-                console.error('Initialization error:', error);
-                loadingScreen.querySelector('.loading-text').textContent = 'Error loading teacher information';
-                
-                // Redirect to dashboard after a delay
+                // Redirect to login page after a delay
                 setTimeout(() => {
-                    window.location.href = 'dashboard.html';
+                    window.location.href = 'logins.html';
                 }, 2000);
             }
         }
@@ -1142,7 +1196,8 @@
                     showNotification({
                         title: 'Selection Required',
                         message: 'Please select a subject, class, and term',
-                        type: 'warning'
+                        type: 'warning',
+                        duration: 3000
                     });
                     return;
                 }
@@ -1167,135 +1222,127 @@
         
         // Load teacher's subjects
         async function loadTeacherSubjects() {
-            try {
-                const snapshot = await subjectsRef.once('value');
-                const subjects = snapshot.exists() ? snapshot.val() : {};
-                
-                // Clear previous content
-                subjectsContainer.innerHTML = '';
-                
-                if (!subjects) {
-                    noSubjectsMessage.style.display = 'block';
-                    return;
+            const subjectsRef = database.ref('subjects');
+            const snapshot = await subjectsRef.once('value');
+            const subjects = snapshot.exists() ? snapshot.val() : {};
+            
+            // Clear previous content
+            subjectsContainer.innerHTML = '';
+            
+            if (!subjects) {
+                noSubjectsMessage.style.display = 'block';
+                return;
+            }
+            
+            // Filter subjects assigned to this teacher
+            teacherSubjects = [];
+            
+            for (const subjectId in subjects) {
+                const subject = subjects[subjectId];
+                if (subject.teacher === currentTeacherId) {
+                    teacherSubjects.push({
+                        id: subjectId,
+                        ...subject
+                    });
                 }
+            }
+            
+            if (teacherSubjects.length === 0) {
+                noSubjectsMessage.style.display = 'block';
+                return;
+            }
+            
+            // Display each subject with its class information
+            teacherSubjects.forEach(subject => {
+                const subjectCard = document.createElement('div');
+                subjectCard.className = 'subject-card';
                 
-                // Filter subjects assigned to this teacher
-                teacherSubjects = [];
+                // Subject header with name and icon
+                const subjectHeader = document.createElement('div');
+                subjectHeader.className = 'subject-header';
                 
-                for (const subjectId in subjects) {
-                    const subject = subjects[subjectId];
-                    if (subject.teacher === currentTeacherId) {
-                        teacherSubjects.push({
-                            id: subjectId,
-                            ...subject
+                const subjectName = document.createElement('div');
+                subjectName.className = 'subject-name';
+                subjectName.textContent = subject.name;
+                
+                const subjectIcon = document.createElement('div');
+                subjectIcon.className = 'subject-icon';
+                
+                // Choose icon based on subject name
+                const icon = getSubjectIcon(subject.name);
+                subjectIcon.innerHTML = `<i class="fas fa-${icon}"></i>`;
+                
+                subjectHeader.appendChild(subjectName);
+                subjectHeader.appendChild(subjectIcon);
+                
+                // Class information
+                const classInfo = document.createElement('div');
+                classInfo.className = 'class-info';
+                
+                if (subject.class) {
+                    // Single class assignment
+                    const classItem = createClassItem(subject.class, subject.schedule);
+                    classInfo.appendChild(classItem);
+                } else {
+                    // Check if this subject is assigned to multiple classes
+                    if (subject.schedule) {
+                        const scheduleInfo = document.createElement('div');
+                        scheduleInfo.className = 'schedule';
+                        
+                        const daysDiv = document.createElement('div');
+                        daysDiv.className = 'days';
+                        
+                        subject.schedule.days.forEach(day => {
+                            const daySpan = document.createElement('span');
+                            daySpan.className = 'day';
+                            daySpan.textContent = day;
+                            daysDiv.appendChild(daySpan);
                         });
+                        
+                        const timeDiv = document.createElement('div');
+                        timeDiv.className = 'time';
+                        timeDiv.textContent = `${subject.schedule.time.from} - ${subject.schedule.time.to}`;
+                        
+                        scheduleInfo.appendChild(daysDiv);
+                        scheduleInfo.appendChild(timeDiv);
+                        classInfo.appendChild(scheduleInfo);
+                    } else {
+                        const noClassInfo = document.createElement('div');
+                        noClassInfo.textContent = 'No specific class assigned';
+                        noClassInfo.style.color = 'var(--light-text)';
+                        noClassInfo.style.fontStyle = 'italic';
+                        classInfo.appendChild(noClassInfo);
                     }
                 }
                 
-                if (teacherSubjects.length === 0) {
-                    noSubjectsMessage.style.display = 'block';
-                    return;
-                }
-                
-                // Display each subject with its class information
-                teacherSubjects.forEach(subject => {
-                    const subjectCard = document.createElement('div');
-                    subjectCard.className = 'subject-card';
+                // Add button to grade this subject
+                const gradeBtn = document.createElement('button');
+                gradeBtn.className = 'btn btn-primary';
+                gradeBtn.style.marginTop = '10px';
+                gradeBtn.style.width = '100%';
+                gradeBtn.innerHTML = '<i class="fas fa-edit"></i> Enter Grades';
+                gradeBtn.addEventListener('click', () => {
+                    // Switch to grades tab
+                    document.querySelector('.tab[data-tab="grades"]').click();
                     
-                    // Subject header with name and icon
-                    const subjectHeader = document.createElement('div');
-                    subjectHeader.className = 'subject-header';
-                    
-                    const subjectName = document.createElement('div');
-                    subjectName.className = 'subject-name';
-                    subjectName.textContent = subject.name;
-                    
-                    const subjectIcon = document.createElement('div');
-                    subjectIcon.className = 'subject-icon';
-                    
-                    // Choose icon based on subject name
-                    const icon = getSubjectIcon(subject.name);
-                    subjectIcon.innerHTML = `<i class="fas fa-${icon}"></i>`;
-                    
-                    subjectHeader.appendChild(subjectName);
-                    subjectHeader.appendChild(subjectIcon);
-                    
-                    // Class information
-                    const classInfo = document.createElement('div');
-                    classInfo.className = 'class-info';
+                    // Set the subject and class dropdowns
+                    subjectSelect.value = subject.id;
+                    updateClassDropdown();
                     
                     if (subject.class) {
-                        // Single class assignment
-                        const classItem = createClassItem(subject.class, subject.schedule);
-                        classInfo.appendChild(classItem);
-                    } else {
-                        // Check if this subject is assigned to multiple classes
-                        if (subject.schedule) {
-                            const scheduleInfo = document.createElement('div');
-                            scheduleInfo.className = 'schedule';
-                            
-                            const daysDiv = document.createElement('div');
-                            daysDiv.className = 'days';
-                            
-                            subject.schedule.days.forEach(day => {
-                                const daySpan = document.createElement('span');
-                                daySpan.className = 'day';
-                                daySpan.textContent = day;
-                                daysDiv.appendChild(daySpan);
-                            });
-                            
-                            const timeDiv = document.createElement('div');
-                            timeDiv.className = 'time';
-                            timeDiv.textContent = `${subject.schedule.time.from} - ${subject.schedule.time.to}`;
-                            
-                            scheduleInfo.appendChild(daysDiv);
-                            scheduleInfo.appendChild(timeDiv);
-                            classInfo.appendChild(scheduleInfo);
-                        } else {
-                            const noClassInfo = document.createElement('div');
-                            noClassInfo.textContent = 'No specific class assigned';
-                            noClassInfo.style.color = 'var(--light-text)';
-                            noClassInfo.style.fontStyle = 'italic';
-                            classInfo.appendChild(noClassInfo);
-                        }
+                        classSelect.value = subject.class;
                     }
                     
-                    // Add button to grade this subject
-                    const gradeBtn = document.createElement('button');
-                    gradeBtn.className = 'btn btn-primary';
-                    gradeBtn.style.marginTop = '10px';
-                    gradeBtn.style.width = '100%';
-                    gradeBtn.innerHTML = '<i class="fas fa-edit"></i> Enter Grades';
-                    gradeBtn.addEventListener('click', () => {
-                        // Switch to grades tab
-                        document.querySelector('.tab[data-tab="grades"]').click();
-                        
-                        // Set the subject and class dropdowns
-                        subjectSelect.value = subject.id;
-                        updateClassDropdown();
-                        
-                        if (subject.class) {
-                            classSelect.value = subject.class;
-                        }
-                        
-                        // Trigger load students
-                        loadStudentsBtn.click();
-                    });
-                    
-                    // Put it all together
-                    subjectCard.appendChild(subjectHeader);
-                    subjectCard.appendChild(classInfo);
-                    subjectCard.appendChild(gradeBtn);
-                    subjectsContainer.appendChild(subjectCard);
+                    // Trigger load students
+                    loadStudentsBtn.click();
                 });
-            } catch (error) {
-                console.error('Error loading subjects:', error);
-                showNotification({
-                    title: 'Error',
-                    message: 'Failed to load subjects',
-                    type: 'error'
-                });
-            }
+                
+                // Put it all together
+                subjectCard.appendChild(subjectHeader);
+                subjectCard.appendChild(classInfo);
+                subjectCard.appendChild(gradeBtn);
+                subjectsContainer.appendChild(subjectCard);
+            });
         }
         
         // Create a class information item
@@ -1346,50 +1393,26 @@
         
         // Load all classes
         async function loadAllClasses() {
-            try {
-                const snapshot = await classesRef.once('value');
-                allClasses = snapshot.exists() ? snapshot.val() : {};
-            } catch (error) {
-                console.error('Error loading classes:', error);
-                showNotification({
-                    title: 'Error',
-                    message: 'Failed to load classes',
-                    type: 'error'
-                });
-            }
+            const classesRef = database.ref('classes');
+            const snapshot = await classesRef.once('value');
+            allClasses = snapshot.exists() ? snapshot.val() : {};
         }
         
         // Load all students
         async function loadAllStudents() {
-            try {
-                const snapshot = await studentsRef.once('value');
-                allStudents = snapshot.exists() ? snapshot.val() : {};
-            } catch (error) {
-                console.error('Error loading students:', error);
-                showNotification({
-                    title: 'Error',
-                    message: 'Failed to load students',
-                    type: 'error'
-                });
-            }
+            const studentsRef = database.ref('students');
+            const snapshot = await studentsRef.once('value');
+            allStudents = snapshot.exists() ? snapshot.val() : {};
         }
         
         // Load grade settings
         async function loadGradeSettings() {
-            try {
-                const snapshot = await settingsRef.once('value');
-                gradeSettings = snapshot.exists() ? snapshot.val() : {};
-                
-                // Update grade weights display
-                updateGradeWeightsDisplay();
-            } catch (error) {
-                console.error('Error loading grade settings:', error);
-                showNotification({
-                    title: 'Error',
-                    message: 'Failed to load grade settings',
-                    type: 'error'
-                });
-            }
+            const settingsRef = database.ref('settings');
+            const snapshot = await settingsRef.once('value');
+            gradeSettings = snapshot.exists() ? snapshot.val() : {};
+            
+            // Update grade weights display
+            updateGradeWeightsDisplay();
         }
         
         // Update grade weights display
@@ -1595,33 +1618,30 @@
         
         // Load existing grades for a student
         async function loadExistingGrades(studentId) {
-            try {
-                const snapshot = await gradesRef.once('value');
-                const grades = snapshot.exists() ? snapshot.val() : {};
+            const gradesRef = database.ref('grades');
+            const snapshot = await gradesRef.once('value');
+            const grades = snapshot.exists() ? snapshot.val() : {};
+            
+            // Find grades for this student in the selected subject and term
+            for (const gradeId in grades) {
+                const grade = grades[gradeId];
                 
-                // Find grades for this student in the selected subject and term
-                for (const gradeId in grades) {
-                    const grade = grades[gradeId];
+                if (grade.studentId === studentId && 
+                    grade.subject === selectedSubject && 
+                    grade.term === selectedTerm &&
+                    grade.class === allClasses[selectedClass].name) {
                     
-                    if (grade.studentId === studentId && 
-                        grade.subject === selectedSubject && 
-                        grade.term === selectedTerm &&
-                        grade.class === allClasses[selectedClass].name) {
-                        
-                        // Fill in the inputs
-                        document.querySelector(`input[data-student="${studentId}"][data-type="assignments"]`).value = grade.assignments || '';
-                        document.querySelector(`input[data-student="${studentId}"][data-type="projects"]`).value = grade.projects || '';
-                        document.querySelector(`input[data-student="${studentId}"][data-type="classScore"]`).value = grade.classScore || '';
-                        document.querySelector(`input[data-student="${studentId}"][data-type="finalExam"]`).value = grade.finalExam || '';
-                        
-                        // Trigger calculation
-                        calculateGrades();
-                        
-                        break;
-                    }
+                    // Fill in the inputs
+                    document.querySelector(`input[data-student="${studentId}"][data-type="assignments"]`).value = grade.assignments || '';
+                    document.querySelector(`input[data-student="${studentId}"][data-type="projects"]`).value = grade.projects || '';
+                    document.querySelector(`input[data-student="${studentId}"][data-type="classScore"]`).value = grade.classScore || '';
+                    document.querySelector(`input[data-student="${studentId}"][data-type="finalExam"]`).value = grade.finalExam || '';
+                    
+                    // Trigger calculation
+                    calculateGrades();
+                    
+                    break;
                 }
-            } catch (error) {
-                console.error('Error loading existing grades:', error);
             }
         }
         
@@ -1681,146 +1701,129 @@
             // Get all student rows
             const rows = studentsGradeTable.querySelectorAll('tr');
             
-            try {
-                // Save each student's grades
-                for (const row of rows) {
-                    const studentId = row.querySelector('.total-grade').getAttribute('data-student');
-                    const student = allStudents[studentId];
-                    if (!student) continue;
+            // Save each student's grades
+            for (const row of rows) {
+                const studentId = row.querySelector('.total-grade').getAttribute('data-student');
+                const student = allStudents[studentId];
+                if (!student) continue;
+                
+                const assignments = parseFloat(row.querySelector('input[data-type="assignments"]').value) || 0;
+                const projects = parseFloat(row.querySelector('input[data-type="projects"]').value) || 0;
+                const classScore = parseFloat(row.querySelector('input[data-type="classScore"]').value) || 0;
+                const finalExam = parseFloat(row.querySelector('input[data-type="finalExam"]').value) || 0;
+                const total = parseFloat(row.querySelector('.total-grade').textContent);
+                const letterGrade = row.querySelector('.letter-grade').textContent;
+                
+                // Create grade data
+                const gradeData = {
+                    studentId,
+                    studentName: student.name,
+                    class: className,
+                    subject: subject.name,
+                    term: selectedTerm,
+                    assignments: assignments.toString(),
+                    projects: projects.toString(),
+                    classScore: classScore.toString(),
+                    finalExam: finalExam.toString(),
+                    totalScore: total.toString(),
+                    letterGrade,
+                    status: 'draft',
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                // Check if this grade already exists
+                const gradesRef = database.ref('grades');
+                const snapshot = await gradesRef.once('value');
+                const grades = snapshot.exists() ? snapshot.val() : {};
+                
+                let gradeExists = false;
+                let existingGradeId = null;
+                
+                for (const gradeId in grades) {
+                    const grade = grades[gradeId];
                     
-                    const assignments = parseFloat(row.querySelector('input[data-type="assignments"]').value) || 0;
-                    const projects = parseFloat(row.querySelector('input[data-type="projects"]').value) || 0;
-                    const classScore = parseFloat(row.querySelector('input[data-type="classScore"]').value) || 0;
-                    const finalExam = parseFloat(row.querySelector('input[data-type="finalExam"]').value) || 0;
-                    const total = parseFloat(row.querySelector('.total-grade').textContent);
-                    const letterGrade = row.querySelector('.letter-grade').textContent;
-                    
-                    // Create grade data
-                    const gradeData = {
-                        studentId,
-                        studentName: student.name,
-                        class: className,
-                        subject: subject.name,
-                        subjectId: selectedSubject,
-                        term: selectedTerm,
-                        assignments: assignments.toString(),
-                        projects: projects.toString(),
-                        classScore: classScore.toString(),
-                        finalExam: finalExam.toString(),
-                        totalScore: total.toString(),
-                        letterGrade,
-                        status: 'draft',
-                        lastUpdated: new Date().toISOString()
-                    };
-                    
-                    // Check if this grade already exists
-                    const snapshot = await gradesRef.once('value');
-                    const grades = snapshot.exists() ? snapshot.val() : {};
-                    
-                    let gradeExists = false;
-                    let existingGradeId = null;
-                    
-                    for (const gradeId in grades) {
-                        const grade = grades[gradeId];
+                    if (grade.studentId === studentId && 
+                        grade.subject === subject.name && 
+                        grade.term === selectedTerm &&
+                        grade.class === className) {
                         
-                        if (grade.studentId === studentId && 
-                            grade.subjectId === selectedSubject && 
-                            grade.term === selectedTerm &&
-                            grade.class === className) {
-                            
-                            gradeExists = true;
-                            existingGradeId = gradeId;
-                            break;
-                        }
-                    }
-                    
-                    // Save or update the grade
-                    if (gradeExists) {
-                        // Update existing grade
-                        await database.ref(`grades/${existingGradeId}`).set(gradeData);
-                    } else {
-                        // Create new grade
-                        await gradesRef.push(gradeData);
+                        gradeExists = true;
+                        existingGradeId = gradeId;
+                        break;
                     }
                 }
                 
-                showNotification({
-                    title: 'Success',
-                    message: 'Grades saved successfully!',
-                    type: 'success',
-                    duration: 3000
-                });
-            } catch (error) {
-                console.error('Error saving grades:', error);
-                showNotification({
-                    title: 'Error',
-                    message: 'Failed to save grades',
-                    type: 'error'
-                });
+                // Save or update the grade
+                if (gradeExists) {
+                    // Update existing grade
+                    await database.ref(`grades/${existingGradeId}`).set(gradeData);
+                } else {
+                    // Create new grade
+                    await database.ref('grades').push(gradeData);
+                }
             }
+            
+            showNotification({
+                title: 'Success',
+                message: 'Grades saved successfully!',
+                type: 'success',
+                duration: 3000
+            });
         }
         
         // Load published grades
         async function loadPublishedGrades() {
-            try {
-                const snapshot = await publishedGradesRef.once('value');
-                const publishedGrades = snapshot.exists() ? snapshot.val() : {};
+            const publishedRef = database.ref('publishedGrades');
+            const snapshot = await publishedRef.once('value');
+            const publishedGrades = snapshot.exists() ? snapshot.val() : {};
+            
+            // Clear previous content
+            publishedGradesContainer.innerHTML = '';
+            
+            if (Object.keys(publishedGrades).length === 0) {
+                noPublishedGrades.style.display = 'block';
+                return;
+            }
+            
+            // Filter grades published by this teacher
+            const teacherPublishedGrades = [];
+            
+            for (const gradeId in publishedGrades) {
+                const grade = publishedGrades[gradeId];
                 
-                // Clear previous content
-                publishedGradesContainer.innerHTML = '';
-                
-                if (Object.keys(publishedGrades).length === 0) {
-                    noPublishedGrades.style.display = 'block';
-                    return;
-                }
-                
-                // Filter grades published by this teacher
-                const teacherPublishedGrades = [];
-                
-                for (const gradeId in publishedGrades) {
-                    const grade = publishedGrades[gradeId];
-                    
-                    // In a real app, you'd check if this teacher published these grades
-                    // For now, we'll assume all published grades are relevant
-                    teacherPublishedGrades.push({
-                        id: gradeId,
-                        ...grade
-                    });
-                }
-                
-                if (teacherPublishedGrades.length === 0) {
-                    noPublishedGrades.style.display = 'block';
-                    return;
-                }
-                
-                // Display published grades
-                teacherPublishedGrades.forEach(grade => {
-                    const gradeCard = document.createElement('div');
-                    gradeCard.className = 'subject-card';
-                    gradeCard.style.marginBottom = '20px';
-                    
-                    gradeCard.innerHTML = `
-                        <div class="subject-header">
-                            <div class="subject-name">${grade.subject} - ${grade.class}</div>
-                            <div class="subject-icon"><i class="fas fa-check"></i></div>
-                        </div>
-                        <div class="class-info">
-                            <p><strong>Term:</strong> ${grade.term}</p>
-                            <p><strong>Published:</strong> ${new Date(grade.publishedAt).toLocaleString()}</p>
-                            <p><strong>Students:</strong> ${grade.studentCount}</p>
-                        </div>
-                    `;
-                    
-                    publishedGradesContainer.appendChild(gradeCard);
-                });
-            } catch (error) {
-                console.error('Error loading published grades:', error);
-                showNotification({
-                    title: 'Error',
-                    message: 'Failed to load published grades',
-                    type: 'error'
+                // In a real app, you'd check if this teacher published these grades
+                // For now, we'll assume all published grades are relevant
+                teacherPublishedGrades.push({
+                    id: gradeId,
+                    ...grade
                 });
             }
+            
+            if (teacherPublishedGrades.length === 0) {
+                noPublishedGrades.style.display = 'block';
+                return;
+            }
+            
+            // Display published grades
+            teacherPublishedGrades.forEach(grade => {
+                const gradeCard = document.createElement('div');
+                gradeCard.className = 'subject-card';
+                gradeCard.style.marginBottom = '20px';
+                
+                gradeCard.innerHTML = `
+                    <div class="subject-header">
+                        <div class="subject-name">${grade.subject} - ${grade.class}</div>
+                        <div class="subject-icon"><i class="fas fa-check"></i></div>
+                    </div>
+                    <div class="class-info">
+                        <p><strong>Term:</strong> ${grade.term}</p>
+                        <p><strong>Published:</strong> ${new Date(grade.publishedAt).toLocaleString()}</p>
+                        <p><strong>Students:</strong> ${grade.studentCount}</p>
+                    </div>
+                `;
+                
+                publishedGradesContainer.appendChild(gradeCard);
+            });
         }
         
         // Get appropriate icon for subject
@@ -1840,11 +1843,15 @@
         }
         
         // Initialize the app
-        window.onload = function() {
-            setupTabs();
-            setupGradeForm();
-            checkAuthState();
-        };
+        loadingScreen.style.display = 'flex';
+        mainContent.style.display = 'none';
+        
+        // Set up tabs and grade form
+        setupTabs();
+        setupGradeForm();
+        
+        // Start the app
+        initApp();
     </script>
 </body>
 </html>
