@@ -6,6 +6,10 @@
     <title>Teacher Homework & Grading</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <style>
         :root {
             --primary-color: #6c5ce7;
@@ -31,17 +35,12 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: var(--text-color);
             min-height: 100vh;
+            padding: 20px;
         }
 
         .container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            transition: all 0.3s;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .header {
@@ -466,7 +465,6 @@
         .file-preview i {
             margin-right: 10px;
             color: var(--primary-color);
-            font-size: 1.2rem;
         }
 
         .file-preview-info {
@@ -475,6 +473,7 @@
 
         .file-preview-name {
             font-weight: 500;
+            word-break: break-all;
         }
 
         .file-preview-size {
@@ -487,7 +486,6 @@
             border: none;
             color: var(--danger-color);
             cursor: pointer;
-            font-size: 1.2rem;
         }
 
         .submission-item {
@@ -588,6 +586,11 @@
             .user-profile span {
                 display: none;
             }
+            
+            .grade-form {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
 
         /* Custom scrollbar */
@@ -623,9 +626,9 @@
         <span id="notification-message">Notification message</span>
     </div>
 
-    <!-- Main Content -->
     <div class="container">
-        <div class="main-content" id="main-content">
+        <!-- Main Content -->
+        <div id="main-content" style="display: none;">
             <div class="header">
                 <h1 id="page-title">Homework Management</h1>
                 <div class="user-profile">
@@ -871,10 +874,6 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     
     <script>
         // Firebase configuration
@@ -966,11 +965,11 @@
         const classesRef = database.ref('classes');
         const credentialsRef = database.ref('credentials');
         const subjectsRef = database.ref('subjects');
+        const homeworkRef = database.ref('homework');
+        const gradesRef = database.ref('grades');
         const studentsRef = database.ref('students');
         const oldStudentsRef = database.ref('oldStudents');
         const graduatedClassesRef = database.ref('graduatedClasses');
-        const homeworkRef = database.ref('homework');
-        const gradesRef = database.ref('grades');
         
         // Global variables
         let currentTeacherId = null;
@@ -1101,13 +1100,13 @@
                 }
                 
                 // Fallback to device identification if active session not found
-                const authUsersSnapshot = await authUsersRef.once('value');
+                const authUsersSnapshot = await database.ref('authUsers').once('value');
                 if (!authUsersSnapshot.exists()) {
                     throw new Error('No auth users found');
                 }
                 
                 const authUsers = authUsersSnapshot.val();
-                const credentialsSnapshot = await credentialsRef.once('value');
+                const credentialsSnapshot = await database.ref('credentials').once('value');
                 const credentials = credentialsSnapshot.exists() ? credentialsSnapshot.val() : {};
                 
                 // Get current device info from browser
@@ -1718,7 +1717,7 @@
             try {
                 // Upload files if any
                 if (currentFiles.length > 0) {
-                    const homeworkRef = homeworkRef.push();
+                    const homeworkRef = database.ref('homework').push();
                     homework.id = homeworkRef.key;
                     
                     const uploadedFiles = await uploadFiles(currentFiles, homeworkRef.key);
@@ -1728,7 +1727,7 @@
                     await homeworkRef.set(homework);
                 } else {
                     // Save homework without files
-                    const homeworkRef = homeworkRef.push();
+                    const homeworkRef = database.ref('homework').push();
                     await homeworkRef.set(homework);
                 }
                 
@@ -2352,7 +2351,7 @@
                 savePromise = gradeRef.update(grade);
             } else {
                 // Create new grade
-                const gradeRef = gradesRef.push();
+                const gradeRef = database.ref('grades').push();
                 savePromise = gradeRef.set(grade);
             }
             
