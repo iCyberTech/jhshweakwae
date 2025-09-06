@@ -2,15 +2,124 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Teacher Homework & Grading</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <style>
+        /* Enhanced Notification Styles */
+        .notification {
+            padding: 18px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            border-left: 5px solid rgba(255, 255, 255, 0.3);
+            align-items: flex-start;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, rgba(0, 184, 148, 0.9) 0%, rgba(0, 184, 148, 1) 100%);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, rgba(214, 48, 49, 0.9) 0%, rgba(214, 48, 49, 1) 100%);
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, rgba(253, 203, 110, 0.9) 0%, rgba(253, 203, 110, 1) 100%);
+            color: #2d3436;
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, rgba(9, 132, 227, 0.9) 0%, rgba(9, 132, 227, 1) 100%);
+        }
+
+        .notification-icon {
+            font-size: 22px;
+            margin-right: 15px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            line-height: 1.4;
+        }
+
+        .notification-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            opacity: 0.95;
+            line-height: 1.5;
+        }
+
+        .notification-close {
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+            margin-left: 15px;
+            margin-top: 2px;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+        }
+
+        /* Animation enhancements */
+        @keyframes slideIn {
+            from {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            to {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+        }
+
+        .notification.show {
+            animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .notification.hide {
+            animation: slideOut 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .notification-container {
+                width: 95%;
+                right: 10px;
+            }
+            
+            .notification {
+                padding: 15px;
+            }
+            
+            .notification-icon {
+                font-size: 20px;
+                margin-right: 12px;
+            }
+            
+            .notification-title {
+                font-size: 0.95rem;
+            }
+            
+            .notification-message {
+                font-size: 0.85rem;
+            }
+        }
         :root {
             --primary-color: #6c5ce7;
             --secondary-color: #a29bfe;
@@ -29,66 +138,126 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: var(--text-color);
             min-height: 100vh;
-            padding: 20px;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 15px;
         }
 
-        .header {
+        header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
-        .header h1 {
-            font-size: 1.8rem;
-            color: var(--primary-color);
-        }
-
-        .user-profile {
+        .profile {
             display: flex;
             align-items: center;
+            gap: 10px;
+            min-width: 0;
         }
 
-        .user-profile img {
+        .profile-img {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            margin-right: 10px;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
         }
 
-        .user-profile span {
-            font-weight: 500;
+        .greeting h1 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .greeting p {
+            font-size: 0.85rem;
+            color: var(--light-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .notification-bell {
+            position: relative;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+
+        .notification-bell i {
+            color: var(--text-color);
+            font-size: 1.2rem;
+        }
+
+        .notification-dot {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 8px;
+            height: 8px;
+            background-color: #e74c3c;
+            border-radius: 50%;
+            border: 2px solid var(--glass-bg);
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 15px;
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
             border: 1px solid var(--glass-border);
-            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+            min-height: 120px;
+        }
+
+        .card:active {
+            transform: translateY(2px);
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             padding-bottom: 10px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
@@ -252,7 +421,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -473,7 +642,6 @@
 
         .file-preview-name {
             font-weight: 500;
-            word-break: break-all;
         }
 
         .file-preview-size {
@@ -578,6 +746,63 @@
             color: var(--danger-color);
         }
 
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .bottom-nav.hidden {
+            transform: translateY(100%);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--light-text);
+            text-decoration: none;
+            font-size: 0.7rem;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 5px;
+            min-width: 60px;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .nav-item.active .nav-icon {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+        }
+
+        .nav-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 1.4rem;
@@ -585,11 +810,6 @@
 
             .user-profile span {
                 display: none;
-            }
-            
-            .grade-form {
-                flex-direction: column;
-                align-items: flex-start;
             }
         }
 
@@ -620,22 +840,22 @@
         <div class="loading-text">Loading Teacher Dashboard...</div>
     </div>
 
-    <!-- Real-time Notification -->
-    <div class="real-time-notification" id="real-time-notification">
-        <i class="fas fa-check-circle"></i>
-        <span id="notification-message">Notification message</span>
-    </div>
-
-    <div class="container">
-        <!-- Main Content -->
-        <div id="main-content" style="display: none;">
-            <div class="header">
-                <h1 id="page-title">Homework Management</h1>
-                <div class="user-profile">
-                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Teacher" id="header-teacher-avatar">
-                    <span id="header-teacher-name">Loading...</span>
+    <!-- Main Dashboard -->
+    <div id="dashboard" style="display: none;">
+        <div class="container">
+            <header>
+                <div class="profile">
+                    <img id="profile-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="profile-img">
+                    <div class="greeting">
+                        <h1 id="greeting-title">Good Morning, <span id="teacher-name">Teacher</span>!</h1>
+                        <p id="greeting-subtitle">Let's make today productive</p>
+                    </div>
                 </div>
-            </div>
+                <div class="notification-bell">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-dot"></span>
+                </div>
+            </header>
 
             <!-- Tab Container -->
             <div class="tab-container">
@@ -777,6 +997,43 @@
         </div>
     </div>
 
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" id="bottom-nav">
+        <a href="#" class="nav-item active" id="dashboard-nav">
+            <div class="nav-icon">
+                <i class="fas fa-tachometer-alt"></i>
+            </div>
+            <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" id="academics-nav">
+            <div class="nav-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <span>Academics</span>
+        </a>
+        <a href="#" class="nav-item" id="finance-nav" style="display: none;">
+            <div class="nav-icon">
+                <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <span>Finance</span>
+        </a>
+        <a href="#" class="nav-item" id="connect-nav">
+            <div class="nav-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <span>Connect</span>
+        </a>
+        <a href="#" class="nav-item" id="admin-nav" style="display: none;">
+            <div class="nav-icon">
+                <i class="fas fa-cog"></i>
+            </div>
+            <span>Admin</span>
+        </a>
+    </nav>
+
+    <!-- Notification Container -->
+    <div class="notification-container" id="notification-container"></div>
+
     <!-- Homework Detail Modal -->
     <div class="modal" id="homework-detail-modal">
         <div class="modal-content">
@@ -874,6 +1131,10 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     
     <script>
         // Firebase configuration
@@ -884,26 +1145,25 @@
             storageBucket: "sms-single.appspot.com",
             messagingSenderId: "140188895278",
             appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
-            measurementId: "G-7ER348P6VZ",
-            databaseURL: "https://sms-single-default-rtdb.firebaseio.com/"
+            measurementId: "G-7ER348P6VZ"
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        const app = firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const auth = firebase.auth();
         const storage = firebase.storage();
 
         // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
-        const mainContent = document.getElementById('main-content');
-        const headerTeacherName = document.getElementById('header-teacher-name');
-        const headerTeacherAvatar = document.getElementById('header-teacher-avatar');
-        const pageTitle = document.getElementById('page-title');
+        const dashboard = document.getElementById('dashboard');
+        const greetingTitle = document.getElementById('greeting-title');
+        const greetingSubtitle = document.getElementById('greeting-subtitle');
+        const teacherName = document.getElementById('teacher-name');
+        const profileImg = document.getElementById('profile-img');
         const tabs = document.querySelectorAll('.tab');
         const tabContents = document.querySelectorAll('.tab-content');
-        const notification = document.getElementById('real-time-notification');
-        const notificationMessage = document.getElementById('notification-message');
+        const notificationContainer = document.getElementById('notification-container');
         
         // Homework elements
         const homeworkForm = document.getElementById('homework-form');
@@ -959,17 +1219,13 @@
         const editFilePreviewContainer = document.getElementById('edit-file-preview-container');
         const saveHomeworkBtn = document.getElementById('save-homework-btn');
         
-        // Firebase references
-        const authUsersRef = database.ref('authUsers');
-        const teachersRef = database.ref('teachers');
-        const classesRef = database.ref('classes');
-        const credentialsRef = database.ref('credentials');
-        const subjectsRef = database.ref('subjects');
-        const homeworkRef = database.ref('homework');
-        const gradesRef = database.ref('grades');
-        const studentsRef = database.ref('students');
-        const oldStudentsRef = database.ref('oldStudents');
-        const graduatedClassesRef = database.ref('graduatedClasses');
+        // Bottom navigation
+        const bottomNav = document.getElementById('bottom-nav');
+        const dashboardNav = document.getElementById('dashboard-nav');
+        const academicsNav = document.getElementById('academics-nav');
+        const financeNav = document.getElementById('finance-nav');
+        const connectNav = document.getElementById('connect-nav');
+        const adminNav = document.getElementById('admin-nav');
         
         // Global variables
         let currentTeacherId = null;
@@ -1036,18 +1292,109 @@
             }
         });
 
+        // Bottom navigation events
+        dashboardNav.addEventListener('click', (e) => {
+            e.preventDefault();
+            setActiveNav('dashboard');
+        });
+
+        academicsNav.addEventListener('click', (e) => {
+            e.preventDefault();
+            setActiveNav('academics');
+        });
+
+        connectNav.addEventListener('click', (e) => {
+            e.preventDefault();
+            setActiveNav('connect');
+        });
+
         // Functions
-        function showNotification(message, isSuccess = true) {
-            notificationMessage.textContent = message;
-            notification.className = 'real-time-notification';
-            notification.classList.add(isSuccess ? 'success' : 'error');
-            notification.querySelector('i').className = isSuccess ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+        function setActiveNav(navId) {
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
             
-            notification.classList.add('show');
+            // Add active class to clicked nav item
+            document.getElementById(`${navId}-nav`).classList.add('active');
             
+            // Handle navigation based on navId
+            switch(navId) {
+                case 'dashboard':
+                    // Already on dashboard
+                    break;
+                case 'academics':
+                    // Switch to homework tab
+                    switchTab('homework');
+                    break;
+                case 'connect':
+                    // Show notification about this feature
+                    showNotification('Connect feature coming soon!', 'info');
+                    break;
+            }
+        }
+
+        function showNotification(message, type = 'success', title = null) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            // Set icon based on type
+            let icon = 'fas fa-check-circle';
+            if (type === 'error') icon = 'fas fa-exclamation-circle';
+            if (type === 'warning') icon = 'fas fa-exclamation-triangle';
+            if (type === 'info') icon = 'fas fa-info-circle';
+            
+            // Set title based on type if not provided
+            if (!title) {
+                if (type === 'success') title = 'Success';
+                if (type === 'error') title = 'Error';
+                if (type === 'warning') title = 'Warning';
+                if (type === 'info') title = 'Information';
+            }
+            
+            notification.innerHTML = `
+                <div class="notification-icon">
+                    <i class="${icon}"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+                <div class="notification-close">
+                    <i class="fas fa-times"></i>
+                </div>
+            `;
+            
+            // Add close functionality
+            const closeBtn = notification.querySelector('.notification-close');
+            closeBtn.addEventListener('click', () => {
+                notification.classList.add('hide');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 400);
+            });
+            
+            // Add to container
+            notificationContainer.appendChild(notification);
+            
+            // Animate in
             setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
+                notification.classList.add('show');
+            }, 10);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.classList.add('hide');
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 400);
+                }
+            }, 5000);
         }
 
         function switchTab(tabId) {
@@ -1072,82 +1419,16 @@
             // Update page title
             switch(tabId) {
                 case 'homework':
-                    pageTitle.textContent = 'Homework Management';
+                    // Already set
                     break;
                 case 'grading':
-                    pageTitle.textContent = 'Student Grading';
+                    // Already set
                     break;
                 case 'classes':
-                    pageTitle.textContent = 'My Classes & Subjects';
+                    // Already set
                     break;
                 default:
-                    pageTitle.textContent = 'Teacher Dashboard';
-            }
-        }
-
-        async function identifyCurrentTeacher() {
-            try {
-                // First try to get from activeSessions
-                const activeSessionSnapshot = await database.ref('activeSessions/teacher').once('value');
-                if (activeSessionSnapshot.exists()) {
-                    currentTeacherId = activeSessionSnapshot.val();
-                    const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
-                    
-                    if (teacherSnapshot.exists()) {
-                        currentTeacherData = teacherSnapshot.val();
-                        return currentTeacherData;
-                    }
-                }
-                
-                // Fallback to device identification if active session not found
-                const authUsersSnapshot = await database.ref('authUsers').once('value');
-                if (!authUsersSnapshot.exists()) {
-                    throw new Error('No auth users found');
-                }
-                
-                const authUsers = authUsersSnapshot.val();
-                const credentialsSnapshot = await database.ref('credentials').once('value');
-                const credentials = credentialsSnapshot.exists() ? credentialsSnapshot.val() : {};
-                
-                // Get current device info from browser
-                const userAgent = navigator.userAgent;
-                const screenResolution = `${window.screen.width}x${window.screen.height}`;
-                const language = navigator.language;
-                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                
-                // Find matching teacher based on device info
-                for (const [authId, authUser] of Object.entries(authUsers)) {
-                    if (authUser.userType === 'teacher') {
-                        const teacherCredential = credentials[authUser.userId];
-                        if (teacherCredential && teacherCredential.deviceInfo) {
-                            const deviceInfo = teacherCredential.deviceInfo;
-                            
-                            // Check for matching device characteristics
-                            if (deviceInfo.userAgent === userAgent && 
-                                deviceInfo.screenResolution === screenResolution &&
-                                deviceInfo.language === language && 
-                                deviceInfo.timezone === timezone) {
-                                
-                                // This is likely the current teacher
-                                currentTeacherId = authUser.userId;
-                                
-                                // Get teacher details from teachers collection
-                                const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
-                                
-                                if (teacherSnapshot.exists()) {
-                                    currentTeacherData = teacherSnapshot.val();
-                                    return currentTeacherData;
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                throw new Error('No matching teacher found');
-            } catch (error) {
-                console.error('Error identifying teacher:', error);
-                showNotification('Failed to identify teacher: ' + error.message, false);
-                return null;
+                    // Default case
             }
         }
 
@@ -1155,27 +1436,42 @@
             auth.onAuthStateChanged(async user => {
                 if (user) {
                     try {
-                        const teacher = await identifyCurrentTeacher();
-                        if (teacher) {
-                            loadTeacherData(teacher);
-                            loadTeacherSubjects();
-                            loadClasses();
-                            loadStudents();
-                            loadHomework();
+                        // Get the active teacher session
+                        const activeSessionSnapshot = await database.ref('activeSessions/teacher').once('value');
+                        if (activeSessionSnapshot.exists()) {
+                            currentTeacherId = activeSessionSnapshot.val();
                             
-                            // Set up real-time listener for homework submissions
-                            setupHomeworkSubmissionsListener();
-                            
-                            // Hide loading screen and show main content
-                            loadingScreen.style.display = 'none';
-                            mainContent.style.display = 'block';
+                            // Load teacher data
+                            const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
+                            if (teacherSnapshot.exists()) {
+                                currentTeacherData = teacherSnapshot.val();
+                                loadTeacherData(currentTeacherData);
+                                loadTeacherSubjects();
+                                loadClasses();
+                                loadStudents();
+                                loadHomework();
+                                
+                                // Set up real-time listener for homework submissions
+                                setupHomeworkSubmissionsListener();
+                                
+                                // Hide loading screen and show main content
+                                loadingScreen.style.display = 'none';
+                                dashboard.style.display = 'block';
+                                
+                                // Show welcome notification
+                                showNotification(`Welcome back, ${currentTeacherData.name}!`, 'success', 'Welcome');
+                            } else {
+                                throw new Error('Teacher data not found');
+                            }
                         } else {
-                            // If teacher not found, redirect to login
-                            window.location.href = 'login.html';
+                            throw new Error('No active session found');
                         }
                     } catch (error) {
                         console.error('Error checking active session:', error);
-                        window.location.href = 'login.html';
+                        showNotification('Authentication error. Redirecting to login...', 'error');
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
                     }
                 } else {
                     // No user is signed in, redirect to login
@@ -1189,15 +1485,42 @@
             
             if (currentTeacherData) {
                 // Update UI with teacher data
-                headerTeacherName.textContent = currentTeacherData.name;
+                teacherName.textContent = currentTeacherData.name;
                 
+                // Set greeting based on time of day
+                const hour = new Date().getHours();
+                let greeting = 'Good Morning';
+                if (hour >= 12 && hour < 17) greeting = 'Good Afternoon';
+                if (hour >= 17) greeting = 'Good Evening';
+                
+                greetingTitle.textContent = `${greeting}, ${currentTeacherData.name}!`;
+                
+                // Set profile image if available
                 if (currentTeacherData.profileImage) {
-                    headerTeacherAvatar.src = currentTeacherData.profileImage;
+                    profileImg.src = currentTeacherData.profileImage;
+                }
+                
+                // Update greeting subtitle based on day
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                const today = new Date();
+                const dayName = days[today.getDay()];
+                const monthName = months[today.getMonth()];
+                const date = today.getDate();
+                
+                greetingSubtitle.textContent = `${dayName}, ${monthName} ${date}`;
+                
+                // Show/hide navigation items based on role
+                if (currentTeacherData.role === 'admin' || currentTeacherData.role === 'principal') {
+                    financeNav.style.display = 'flex';
+                    adminNav.style.display = 'flex';
                 }
             }
         }
 
         function loadTeacherSubjects() {
+            const subjectsRef = database.ref('subjects');
+            
             subjectsRef.once('value').then(snapshot => {
                 allSubjects = snapshot.val() || {};
                 teacherSubjects = [];
@@ -1305,10 +1628,13 @@
         }
 
         function loadClasses() {
+            const classesRef = database.ref('classes');
+            
             classesRef.once('value').then(snapshot => {
                 allClasses = snapshot.val() || {};
                 
                 // Also load graduated classes
+                const graduatedClassesRef = database.ref('graduatedClasses');
                 graduatedClassesRef.once('value').then(gSnapshot => {
                     const graduatedClasses = gSnapshot.val() || {};
                     allClasses = { ...allClasses, ...graduatedClasses };
@@ -1328,6 +1654,9 @@
         }
 
         function loadStudents() {
+            const studentsRef = database.ref('students');
+            const oldStudentsRef = database.ref('oldStudents');
+            
             Promise.all([
                 studentsRef.once('value'),
                 oldStudentsRef.once('value')
@@ -1433,7 +1762,7 @@
                 
                 // Check file size (max 10MB)
                 if (file.size > 10 * 1024 * 1024) {
-                    showNotification(`File ${file.name} is too large (max 10MB)`, false);
+                    showNotification(`File ${file.name} is too large (max 10MB)`, 'error');
                     continue;
                 }
                 
@@ -1445,7 +1774,7 @@
                                    'image/jpeg', 'image/png'];
                 
                 if (!validTypes.includes(file.type)) {
-                    showNotification(`File type not supported for ${file.name}`, false);
+                    showNotification(`File type not supported for ${file.name}`, 'error');
                     continue;
                 }
                 
@@ -1497,7 +1826,7 @@
                 
                 // Check file size (max 10MB)
                 if (file.size > 10 * 1024 * 1024) {
-                    showNotification(`File ${file.name} is too large (max 10MB)`, false);
+                    showNotification(`File ${file.name} is too large (max 10MB)`, 'error');
                     continue;
                 }
                 
@@ -1509,7 +1838,7 @@
                                    'image/jpeg', 'image/png'];
                 
                 if (!validTypes.includes(file.type)) {
-                    showNotification(`File type not supported for ${file.name}`, false);
+                    showNotification(`File type not supported for ${file.name}`, 'error');
                     continue;
                 }
                 
@@ -1607,7 +1936,7 @@
             newFilesToUpload.splice(index, 1);
             editFilePreviewContainer.innerHTML = '';
             
-            newFilesToUpload.forEach((file, i) {
+            newFilesToUpload.forEach((file, i) => {
                 const filePreview = document.createElement('div');
                 filePreview.className = 'file-preview';
                 
@@ -1687,7 +2016,7 @@
             const dueDate = homeworkDueDateInput.value;
             
             if (!subjectId || !classId || !title || !description || !dueDate) {
-                showNotification('Please fill in all fields', false);
+                showNotification('Please fill in all fields', 'error');
                 return;
             }
             
@@ -1741,11 +2070,13 @@
                 loadHomework();
             } catch (error) {
                 console.error('Error creating homework:', error);
-                showNotification('Failed to create homework. Please try again.', false);
+                showNotification('Failed to create homework. Please try again.', 'error');
             }
         }
 
         function loadHomework() {
+            const homeworkRef = database.ref('homework');
+            
             homeworkRef.orderByChild('assignedBy').equalTo(currentTeacherId).once('value').then(snapshot => {
                 const homeworkData = snapshot.val() || {};
                 homeworkList.innerHTML = '';
@@ -1806,7 +2137,7 @@
                 const homework = snapshot.val();
                 
                 if (!homework) {
-                    showNotification('Homework not found', false);
+                    showNotification('Homework not found', 'error');
                     return;
                 }
                 
@@ -1916,7 +2247,7 @@
             const feedback = feedbackInput.value.trim();
             
             if (isNaN(score)) {
-                showNotification('Please enter a valid score', false);
+                showNotification('Please enter a valid score', 'error');
                 return;
             }
             
@@ -1940,15 +2271,17 @@
                 })
                 .catch(error => {
                     console.error('Error saving grade:', error);
-                    showNotification('Failed to save grade', false);
+                    showNotification('Failed to save grade', 'error');
                 });
         }
 
         function setupHomeworkSubmissionsListener() {
+            const homeworkRef = database.ref('homework');
+            
             homeworkRef.orderByChild('assignedBy').equalTo(currentTeacherId).on('child_changed', snapshot => {
                 const homework = snapshot.val();
                 const notificationMessage = `New submission for ${homework.title} from ${homework.className}`;
-                showNotification(notificationMessage);
+                showNotification(notificationMessage, 'info', 'New Submission');
                 
                 // Update the homework list if we're on that tab
                 if (document.getElementById('homework-tab').classList.contains('active')) {
@@ -1975,7 +2308,7 @@
                     })
                     .catch(error => {
                         console.error('Error deleting homework:', error);
-                        showNotification('Failed to delete homework. Please try again.', false);
+                        showNotification('Failed to delete homework. Please try again.', 'error');
                     });
             }
         }
@@ -2008,7 +2341,7 @@
                 const homework = snapshot.val();
                 
                 if (!homework) {
-                    showNotification('Homework not found', false);
+                    showNotification('Homework not found', 'error');
                     return;
                 }
                 
@@ -2089,7 +2422,7 @@
                 openEditHomeworkModal(); // Refresh the edit modal
             } catch (error) {
                 console.error('Error removing file:', error);
-                showNotification('Failed to remove file', false);
+                showNotification('Failed to remove file', 'error');
             }
         }
 
@@ -2100,7 +2433,7 @@
             const dueDate = editHomeworkDueDate.value;
             
             if (!homeworkId || !title || !description || !dueDate) {
-                showNotification('Please fill in all fields', false);
+                showNotification('Please fill in all fields', 'error');
                 return;
             }
             
@@ -2135,7 +2468,7 @@
                 loadHomework();
             } catch (error) {
                 console.error('Error updating homework:', error);
-                showNotification('Failed to update homework. Please try again.', false);
+                showNotification('Failed to update homework. Please try again.', 'error');
             }
         }
 
@@ -2147,7 +2480,7 @@
             const term = gradeTermSelect.value;
             
             if (!subjectId || !classId || !term) {
-                showNotification('Please select a subject, class, and term', false);
+                showNotification('Please select a subject, class, and term', 'error');
                 return;
             }
             
@@ -2183,6 +2516,8 @@
             }
             
             // Get existing grades for this subject, class, and term
+            const gradesRef = database.ref('grades');
+            
             gradesRef.orderByChild('class').equalTo(classInfo.name).once('value').then(snapshot => {
                 const allGrades = snapshot.val() || {};
                 currentGrades = {};
@@ -2363,13 +2698,13 @@
                 })
                 .catch(error => {
                     console.error('Error saving grade:', error);
-                    showNotification(`Failed to save grade for ${student.name}. Please try again.`, false);
+                    showNotification(`Failed to save grade for ${student.name}. Please try again.`, 'error');
                 });
         }
 
         function saveAllGrades() {
             if (!currentGradingContext.classId || !currentGradingContext.subjectId || !currentGradingContext.term) {
-                showNotification('Please filter students first', false);
+                showNotification('Please filter students first', 'error');
                 return;
             }
             
@@ -2377,7 +2712,7 @@
             const studentRows = gradeStudentsTable.querySelectorAll('tr[data-student-id]');
             
             if (studentRows.length === 0) {
-                showNotification('No students to save', false);
+                showNotification('No students to save', 'error');
                 return;
             }
             
@@ -2396,7 +2731,7 @@
 
         // Initialize the app
         loadingScreen.style.display = 'flex';
-        mainContent.style.display = 'none';
+        dashboard.style.display = 'none';
         checkAuthState();
     </script>
 </body>
