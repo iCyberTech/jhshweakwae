@@ -288,6 +288,10 @@
             background: linear-gradient(135deg, #fab1a0 0%, #e17055 100%);
         }
 
+        .card-icon.red {
+            background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
+        }
+
         .card-title {
             font-size: 0.85rem;
             font-weight: 600;
@@ -489,6 +493,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            transition: all 0.3s ease;
         }
 
         .frame-control-btn {
@@ -1037,6 +1042,32 @@
             </div>
         </div>
 
+        <!-- Account frame for accountants -->
+        <div class="content-frame" id="account-frame">
+            <div class="frame-header">
+                <h2>Accounts</h2>
+                <div class="frame-controls">
+                    <div class="frame-controls-expanded" style="display: none;">
+                        <button class="frame-control-btn back" data-frame="account-frame" title="Back">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <button class="frame-control-btn refresh" data-frame="account-frame" title="Refresh">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button class="frame-control-btn exit" data-frame="account-frame" title="Exit">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <button class="frame-control-btn expand" data-frame="account-frame" title="Show Controls">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="frame-content">
+                <iframe src="account.html" loading="lazy"></iframe>
+            </div>
+        </div>
+
         <nav class="bottom-nav" id="bottom-nav">
             <a href="#" class="nav-item active" id="dashboard-nav">
                 <div class="nav-icon">
@@ -1067,6 +1098,12 @@
                     <i class="fas fa-cog"></i>
                 </div>
                 <span>Admin</span>
+            </a>
+            <a href="#" class="nav-item" id="account-nav" style="display: none;">
+                <div class="nav-icon">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <span>Accounts</span>
             </a>
         </nav>
     </div>
@@ -1118,6 +1155,7 @@
         // Navigation elements
         const financeNav = document.getElementById('finance-nav');
         const adminNav = document.getElementById('admin-nav');
+        const accountNav = document.getElementById('account-nav');
         
         // Frame control elements
         const expandButtons = document.querySelectorAll('.frame-control-btn.expand');
@@ -1128,6 +1166,7 @@
         // Firebase references
         const authUsersRef = database.ref('authUsers');
         const teachersRef = database.ref('teachers');
+        const accountantsRef = database.ref('accountants');
         const locationSettingsRef = database.ref('locationSettings');
         const teacherAttendanceRef = database.ref('teacherAttendance');
         const classesRef = database.ref('classes');
@@ -1140,6 +1179,7 @@
         let today = getCurrentDate(); // Get current date in YYYY-MM-DD format
         let isInRange = false;
         let isClassTeacher = false;
+        let isAccountant = false;
         
         // Get current date in YYYY-MM-DD format based on local time
         function getCurrentDate() {
@@ -1263,6 +1303,40 @@
             });
         }
         
+        // Check if the teacher is also an accountant
+        async function checkIfTeacherIsAccountant(teacherId) {
+            try {
+                const accountantsSnapshot = await accountantsRef.once('value');
+                if (accountantsSnapshot.exists()) {
+                    const accountants = accountantsSnapshot.val();
+                    
+                    // Check if this teacher ID exists in the accountants collection
+                    for (const accountantId in accountants) {
+                        if (accountants[accountantId].id === teacherId) {
+                            isAccountant = true;
+                            accountNav.style.display = 'flex';
+                            showNotification({
+                                title: 'Accountant Access',
+                                message: 'Account management features enabled',
+                                type: 'info',
+                                duration: 3000
+                            });
+                            return true;
+                        }
+                    }
+                }
+                
+                isAccountant = false;
+                accountNav.style.display = 'none';
+                return false;
+            } catch (error) {
+                console.error('Error checking accountant status:', error);
+                isAccountant = false;
+                accountNav.style.display = 'none';
+                return false;
+            }
+        }
+        
         // Check for active teacher session
         async function checkActiveSession() {
             try {
@@ -1278,6 +1352,9 @@
                     
                     // Update greeting based on time of day
                     updateGreeting();
+                    
+                    // Check if teacher is also an accountant
+                    await checkIfTeacherIsAccountant(teacher.id);
                     
                     // Load location settings
                     loadLocationSettings();
