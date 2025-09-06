@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Church Financial Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --text-color: #2d3436;
+            --light-text: #636e72;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --success-color: #00b894;
+            --danger-color: #d63031;
+            --warning-color: #fdcb6e;
+            --info-color: #0984e3;
+            --positive-amount: #00b894;
+            --negative-amount: #d63031;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .container {
+            max-width: 100%;
+            padding: 15px;
+            margin-bottom: 70px;
+        }
+
+        .header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .header p {
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+
+        /* Connection Status */
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .connection-good {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .connection-bad {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Stats Container */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--light-text);
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .positive-amount {
+            color: var(--positive-amount);
+        }
+
+        .negative-amount {
+            color: var(--negative-amount);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            font-weight: 600;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 0;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            height: 250px;
+            position: relative;
+        }
+
+        /* Form Elements */
+        .form-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.5);
+            font-size: 16px; /* Prevents zoom on iOS */
+            margin-bottom: 15px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+            width: 100%;
+            touch-action: manipulation;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 8px rgba(108, 92, 231, 0.4);
+        }
+
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 0.85rem;
+        }
+
+        .btn-outline-secondary {
+            background: transparent;
+            border: 1px solid var(--light-text);
+            color: var(--light-text);
+        }
+
+        /* Fee Icons */
+        .fee-icons-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .fee-icon {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px 10px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border: 1px solid var(--glass-border);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .fee-icon.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+
+        .fee-icon:active {
+            transform: translateY(2px);
+        }
+
+        .fee-icon i {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .fee-icon div {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Fee Forms */
+        .fee-form {
+            display: none;
+        }
+
+        .fee-form.active {
+            display: block;
+        }
+
+        /* Back Button */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Class and Student Elements */
+        .class-group {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .class-header {
+            background: rgba(108, 92, 231, 0.1);
+            padding: 12px 15px;
+            font-weight: 600;
+        }
+
+        .class-body {
+            padding: 12px 15px;
+        }
+
+        .student-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .student-row:last-child {
+            border-bottom: none;
+        }
+
+        .payment-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .payment-status.paid {
+            background-color: rgba(0, 184, 148, 0.2);
+            color: var(--success-color);
+        }
+
+        .payment-status.unpaid {
+            background-color: rgba(214, 48, 49, 0.2);
+            color: var(--danger-color);
+        }
+
+        /* Recent Items */
+        .recent-title {
+            display: inline-block;
+            background: rgba(108, 92, 231, 0.1);
+            padding: 4px 10px;
+            border-radius: 15px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            color: var(--primary-color);
+        }
+
+        /* History Items */
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Bottom Navigation */
+        .nav-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--light-text);
+            text-decoration: none;
+            font-size: 0.7rem;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 5px;
+            min-width: 60px;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .nav-item.active .nav-icon {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+        }
+
+        .nav-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 480px) {
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .stat-card {
+                padding: 12px;
+            }
+            
+            .stat-value {
+                font-size: 1.1rem;
+            }
+            
+            .fee-icons-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .fee-icon {
+                padding: 12px 8px;
+            }
+            
+            .fee-icon i {
+                font-size: 1.3rem;
+            }
+            
+            .nav-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            .nav-item {
+                font-size: 0.65rem;
+                min-width: 55px;
+            }
+            
+            .chart-container {
+                height: 200px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .header p {
+                font-size: 0.8rem;
+            }
+            
+            .fee-icons-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Orientation handling */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .container {
+                padding: 10px;
+            }
+            
+            .stats-container {
+                grid-template-columns: repeat(4, 1fr);
+                margin-bottom: 15px;
+            }
+            
+            .stat-card {
+                min-height: 90px;
+                padding: 8px;
+            }
+            
+            .stat-value {
+                font-size: 1rem;
+            }
+            
+            .chart-container {
+                height: 180px;
+            }
+        }
+
+        /* Prevent zoom on input focus for iOS */
+        @media screen and (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+
+        /* Loading state for buttons */
+        .btn.loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin: -10px 0 0 -10px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s ease infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header text-center">
+            <h1>Church Finances</h1>
+            <p class="mb-0">Manage offerings, PTA, vendors & more</p>
+        </div>
+        
+        <div id="connection-status" class="connection-status connection-bad">Disconnected</div>
+        
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="section active">
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-label">Total Offerings</div>
+                    <div class="stat-value positive-amount" id="total-offerings">₵0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total PTA</div>
+                    <div class="stat-value positive-amount" id="total-pta">₵0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Food Vendors</div>
+                    <div class="stat-value positive-amount" id="total-food">₵0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Other Fees</div>
+                    <div class="stat-value positive-amount" id="total-other">₵0.00</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Financial Overview</div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="financialChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Recent Transactions</div>
+                <div class="card-body">
+                    <div id="recent-transactions"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Data Entry Section -->
+        <div id="entry-section" class="section">
+            <div class="fee-icons-container">
+                <div class="fee-icon active" data-fee-type="offering">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <div>Offerings</div>
+                </div>
+                <div class="fee-icon" data-fee-type="pta">
+                    <i class="fas fa-user-graduate"></i>
+                    <div>PTA Fees</div>
+                </div>
+                <div class="fee-icon" data-fee-type="food">
+                    <i class="fas fa-utensils"></i>
+                    <div>Food Vendors</div>
+                </div>
+                <div class="fee-icon" data-fee-type="other">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <div>Other Fees</div>
+                </div>
+            </div>
+            
+            <!-- Offering Form -->
+            <div id="offering-form" class="fee-form active">
+                <div class="card">
+                    <div class="card-header">Add Church Offering</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Amount (₵)</label>
+                            <input type="number" class="form-control" id="offering-amount" placeholder="Enter amount">
+                        </div>
+                        <button class="btn btn-primary w-100" id="add-offering">
+                            <i class="fas fa-plus-circle me-2"></i>Add Offering
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PTA Form -->
+            <div id="pta-form" class="fee-form">
+                <div class="back-button" id="back-to-pta-list">
+                    <i class="fas fa-arrow-left me-2"></i> Back to Class List
+                </div>
+                
+                <div id="pta-class-list">
+                    <div class="card">
+                        <div class="card-header">Select Class</div>
+                        <div class="card-body">
+                            <div id="classes-container"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="pta-student-list" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">PTA Fees for <span id="selected-class-name"></span></div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Amount (₵)</label>
+                                <input type="number" class="form-control" id="pta-amount" placeholder="Enter amount">
+                            </div>
+                            <div id="students-container"></div>
+                            <button class="btn btn-primary w-100 mt-3" id="add-pta">
+                                <i class="fas fa-plus-circle me-2"></i>Add PTA Fee
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Food Vendor Form -->
+            <div id="food-form" class="fee-form">
+                <div class="card">
+                    <div class="card-header">Add Food Vendor Payment</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Vendor Name</label>
+                            <input type="text" class="form-control" id="vendor-name" placeholder="Enter vendor name">
+                            <div class="mt-2" id="recent-vendors"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Amount (₵)</label>
+                            <input type="number" class="form-control" id="food-amount" placeholder="Enter amount">
+                        </div>
+                        <button class="btn btn-primary w-100" id="add-food">
+                            <i class="fas fa-plus-circle me-2"></i>Add Vendor Payment
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Other Fees Form -->
+            <div id="other-form" class="fee-form">
+                <div class="card">
+                    <div class="card-header">Add Other Fee</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Fee Title</label>
+                            <input type="text" class="form-control" id="other-title" placeholder="Enter fee title">
+                            <div class="mt-2" id="recent-titles"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Amount (₵)</label>
+                            <input type="number" class="form-control" id="other-amount" placeholder="Enter amount">
+                        </div>
+                        <button class="btn btn-primary w-100" id="add-other">
+                            <i class="fas fa-plus-circle me-2"></i>Add Other Fee
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Withdrawal Section -->
+        <div id="withdrawal-section" class="section">
+            <div class="card">
+                <div class="card-header">Request Withdrawal</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Amount (₵)</label>
+                        <input type="number" class="form-control" id="withdraw-amount" placeholder="Enter amount">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Source</label>
+                        <select class="form-control" id="withdraw-source">
+                            <option value="">Select source</option>
+                            <option value="offerings">Church Offerings</option>
+                            <option value="pta">PTA Funds</option>
+                            <option value="food_vendors">Food Vendors</option>
+                            <option value="other_fees">Other Fees</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Reason</label>
+                        <textarea class="form-control" id="withdraw-reason" placeholder="Enter reason for withdrawal"></textarea>
+                    </div>
+                    <button class="btn btn-primary w-100" id="request-withdrawal">
+                        <i class="fas fa-paper-plane me-2"></i>Submit Request
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Pending Requests</div>
+                <div class="card-body">
+                    <div id="pending-requests"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- History Section -->
+        <div id="history-section" class="section">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Transaction History</span>
+                    <select class="form-control form-control-sm w-auto" id="history-filter">
+                        <option value="all">All</option>
+                        <option value="offerings">Offerings</option>
+                        <option value="pta">PTA</option>
+                        <option value="food_vendors">Food Vendors</option>
+                        <option value="other_fees">Other Fees</option>
+                        <option value="withdrawals">Withdrawals</option>
+                    </select>
+                </div>
+                <div class="card-body">
+                    <div id="transaction-history"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <div class="nav-bottom">
+        <div class="nav-item active" data-target="dashboard-section">
+            <i class="fas fa-chart-pie nav-icon"></i>
+            <span>Dashboard</span>
+        </div>
+        <div class="nav-item" data-target="entry-section">
+            <i class="fas fa-plus-circle nav-icon"></i>
+            <span>Add Data</span>
+        </div>
+        <div class="nav-item" data-target="withdrawal-section">
+            <i class="fas fa-money-bill-wave nav-icon"></i>
+            <span>Withdraw</span>
+        </div>
+        <div class="nav-item" data-target="history-section">
+            <i class="fas fa-history nav-icon"></i>
+            <span>History</span>
+        </div>
+    </div>
+
+    <script>
+        // Debugging flag
+        const DEBUG_MODE = true;
+        
+        function logDebug(message, data = null) {
+            if (DEBUG_MODE) {
+                console.log("[DEBUG] " + message, data || "");
+            }
+        }
+
+        // Update connection status indicator
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connection-status');
+            if (connected) {
+                statusElement.textContent = "Connected";
+                statusElement.className = "connection-status connection-good";
+                logDebug("Database connection established");
+            } else {
+                statusElement.textContent = "Disconnected";
+                statusElement.className = "connection-status connection-bad";
+                logDebug("Database connection lost");
+            }
+        }
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
+            authDomain: "sms-single.firebaseapp.com",
+            projectId: "sms-single",
+            storageBucket: "sms-single.appspot.com",
+            messagingSenderId: "140188895278",
+            appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
+            measurementId: "G-7ER348P6VZ"
+        };
+
+        // Initialize Firebase
+        logDebug("Initializing Firebase...");
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Monitor connection state
+        const connectedRef = database.ref(".info/connected");
+        connectedRef.on("value", (snap) => {
+            updateConnectionStatus(snap.val() === true);
+        });
+
+        // DOM Elements
+        const navItems = document.querySelectorAll('.nav-item');
+        const sections = document.querySelectorAll('.section');
+        const recentVendorsContainer = document.getElementById('recent-vendors');
+        const recentTitlesContainer = document.getElementById('recent-titles');
+        const recentTransactionsContainer = document.getElementById('recent-transactions');
+        const transactionHistoryContainer = document.getElementById('transaction-history');
+        const pendingRequestsContainer = document.getElementById('pending-requests');
+        
+        // Stats elements
+        const totalOfferingsElement = document.getElementById('total-offerings');
+        const totalPTAElement = document.getElementById('total-pta');
+        const totalFoodElement = document.getElementById('total-food');
+        const totalOtherElement = document.getElementById('total-other');
+        
+        // Buttons
+        const addOfferingBtn = document.getElementById('add-offering');
+        const addPTABtn = document.getElementById('add-pta');
+        const addFoodBtn = document.getElementById('add-food');
+        const addOtherBtn = document.getElementById('add-other');
+        const requestWithdrawalBtn = document.getElementById('request-withdrawal');
+        
+        // Form inputs
+        const offeringAmountInput = document.getElementById('offering-amount');
+        const ptaAmountInput = document.getElementById('pta-amount');
+        const vendorNameInput = document.getElementById('vendor-name');
+        const foodAmountInput = document.getElementById('food-amount');
+        const otherTitleInput = document.getElementById('other-title');
+        const otherAmountInput = document.getElementById('other-amount');
+        const withdrawAmountInput = document.getElementById('withdraw-amount');
+        const withdrawSourceSelect = document.getElementById('withdraw-source');
+        const withdrawReasonInput = document.getElementById('withdraw-reason');
+        const historyFilterSelect = document.getElementById('history-filter');
+        
+        // New elements for icon-based fee system
+        const feeIcons = document.querySelectorAll('.fee-icon');
+        const feeForms = document.querySelectorAll('.fee-form');
+        const ptaClassList = document.getElementById('pta-class-list');
+        const ptaStudentList = document.getElementById('pta-student-list');
+        const backToPtaListBtn = document.getElementById('back-to-pta-list');
+        const classesContainer = document.getElementById('classes-container');
+        const studentsContainer = document.getElementById('students-container');
+        const selectedClassName = document.getElementById('selected-class-name');
+        
+        // Global variables
+        let financialChart = null;
+        let students = [];
+        let classes = [];
+        let recentVendors = JSON.parse(localStorage.getItem('recentVendors')) || [];
+        let recentTitles = JSON.parse(localStorage.getItem('recentTitles')) || [];
+        let categoryTotals = {
+            offerings: 0,
+            pta: 0,
+            food_vendors: 0,
+            other_fees: 0
+        };
+        let selectedClassId = null;
+        let selectedStudents = [];
+
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(amount);
+        }
+
+        // Format date
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Navigation
+        navItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const target = this.getAttribute('data-target');
+                
+                // Update active nav item
+                navItems.forEach(navItem => navItem.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show target section
+                sections.forEach(section => section.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+            });
+        });
+
+        // Fee icon selection
+        feeIcons.forEach(icon => {
+            icon.addEventListener('click', function() {
+                const feeType = this.getAttribute('data-fee-type');
+                
+                // Update active fee icon
+                feeIcons.forEach(icon => icon.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show corresponding form
+                feeForms.forEach(form => form.classList.remove('active'));
+                document.getElementById(`${feeType}-form`).classList.add('active');
+                
+                // If PTA is selected, load classes
+                if (feeType === 'pta') {
+                    loadClasses();
+                }
+            });
+        });
+
+        // Load classes from database
+        function loadClasses() {
+            logDebug("Loading classes from database...");
+            ptaClassList.style.display = 'block';
+            ptaStudentList.style.display = 'none';
+            
+            database.ref('classes').once('value').then((snapshot) => {
+                classes = [];
+                snapshot.forEach((childSnapshot) => {
+                    const cls = childSnapshot.val();
+                    cls.id = childSnapshot.key;
+                    classes.push(cls);
+                });
+                
+                // Update classes container
+                classesContainer.innerHTML = '';
+                
+                if (classes.length === 0) {
+                    classesContainer.innerHTML = '<div class="text-center text-muted py-3">No classes found</div>';
+                    return;
+                }
+                
+                classes.forEach(cls => {
+                    const classElement = document.createElement('div');
+                    classElement.className = 'class-group';
+                    
+                    classElement.innerHTML = `
+                        <div class="class-header">${cls.name} - ${cls.room}</div>
+                        <div class="class-body p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>Schedule: ${cls.schedule}</div>
+                                <button class="btn btn-primary btn-sm view-students" data-class-id="${cls.id}">
+                                    View Students
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    classesContainer.appendChild(classElement);
+                });
+                
+                // Add event listeners to view students buttons
+                document.querySelectorAll('.view-students').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const classId = this.getAttribute('data-class-id');
+                        showStudentsForClass(classId);
+                    });
+                });
+                
+            }).catch((error) => {
+                logDebug("Error loading classes:", error);
+                classesContainer.innerHTML = '<div class="text-center text-muted py-3">Error loading classes</div>';
+            });
+        }
+
+        // Show students for a specific class
+        function showStudentsForClass(classId) {
+            selectedClassId = classId;
+            const cls = classes.find(c => c.id === classId);
+            
+            if (!cls) {
+                alert('Class not found');
+                return;
+            }
+            
+            selectedClassName.textContent = cls.name;
+            ptaClassList.style.display = 'none';
+            ptaStudentList.style.display = 'block';
+            
+            // Load students for this class
+            loadStudentsForClass(classId);
+        }
+
+        // Back to class list
+        backToPtaListBtn.addEventListener('click', function() {
+            ptaStudentList.style.display = 'none';
+            ptaClassList.style.display = 'block';
+        });
+
+        // Load students for a specific class
+        function loadStudentsForClass(classId) {
+            logDebug(`Loading students for class ${classId}...`);
+            studentsContainer.innerHTML = '';
+            
+            const cls = classes.find(c => c.id === classId);
+            if (!cls || !cls.students) {
+                studentsContainer.innerHTML = '<div class="text-center text-muted py-3">No students in this class</div>';
+                return;
+            }
+            
+            // Get all students
+            database.ref('students').once('value').then((snapshot) => {
+                const allStudents = [];
+                snapshot.forEach((childSnapshot) => {
+                    const student = childSnapshot.val();
+                    student.id = childSnapshot.key;
+                    allStudents.push(student);
+                });
+                
+                // Filter students for this class
+                const classStudents = allStudents.filter(student => 
+                    cls.students.includes(student.id)
+                );
+                
+                if (classStudents.length === 0) {
+                    studentsContainer.innerHTML = '<div class="text-center text-muted py-3">No students found</div>';
+                    return;
+                }
+                
+                // Get PTA payments for these students
+                database.ref('ptaFees').once('value').then((ptaSnapshot) => {
+                    const paidStudents = new Set();
+                    
+                    ptaSnapshot.forEach((childSnapshot) => {
+                        const fee = childSnapshot.val();
+                        if (!fee.deleted && classStudents.some(s => s.id === fee.studentId)) {
+                            paidStudents.add(fee.studentId);
+                        }
+                    });
+                    
+                    // Display students with payment status
+                    classStudents.forEach(student => {
+                        const isPaid = paidStudents.has(student.id);
+                        
+                        const studentElement = document.createElement('div');
+                        studentElement.className = 'student-row';
+                        
+                        studentElement.innerHTML = `
+                            <div>
+                                <div class="fw-bold">${student.name}</div>
+                                <div class="small text-muted">ID: ${student.id}</div>
+                            </div>
+                            <div>
+                                <span class="payment-status ${isPaid ? 'paid' : 'unpaid'}">
+                                    ${isPaid ? 'Paid' : 'Unpaid'}
+                                </span>
+                                <button class="btn btn-sm ${isPaid ? 'btn-outline-secondary' : 'btn-primary'} ms-2 select-student" 
+                                        data-student-id="${student.id}" 
+                                        data-student-name="${student.name}">
+                                    ${isPaid ? 'Remove' : 'Mark Paid'}
+                                </button>
+                            </div>
+                        `;
+                        
+                        studentsContainer.appendChild(studentElement);
+                    });
+                    
+                    // Add event listeners to select student buttons
+                    document.querySelectorAll('.select-student').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const studentId = this.getAttribute('data-student-id');
+                            const studentName = this.getAttribute('data-student-name');
+                            const isPaid = this.classList.contains('btn-outline-secondary');
+                            
+                            if (isPaid) {
+                                // Remove student from selection
+                                selectedStudents = selectedStudents.filter(s => s.id !== studentId);
+                                this.classList.remove('btn-outline-secondary');
+                                this.classList.add('btn-primary');
+                                this.textContent = 'Mark Paid';
+                                
+                                // Update payment status
+                                const statusElement = this.previousElementSibling;
+                                statusElement.className = 'payment-status unpaid';
+                                statusElement.textContent = 'Unpaid';
+                            } else {
+                                // Add student to selection
+                                selectedStudents.push({
+                                    id: studentId,
+                                    name: studentName
+                                });
+                                this.classList.remove('btn-primary');
+                                this.classList.add('btn-outline-secondary');
+                                this.textContent = 'Remove';
+                                
+                                // Update payment status
+                                const statusElement = this.previousElementSibling;
+                                statusElement.className = 'payment-status paid';
+                                statusElement.textContent = 'Paid';
+                            }
+                        });
+                    });
+                    
+                }).catch((error) => {
+                    logDebug("Error loading PTA fees:", error);
+                });
+                
+            }).catch((error) => {
+                logDebug("Error loading students:", error);
+                studentsContainer.innerHTML = '<div class="text-center text-muted py-3">Error loading students</div>';
+            });
+        }
+
+        // Update recent vendors display
+        function updateRecentVendorsDisplay() {
+            recentVendorsContainer.innerHTML = '';
+            
+            if (recentVendors.length > 0) {
+                const titleElement = document.createElement('div');
+                titleElement.className = 'text-muted small mb-1';
+                titleElement.textContent = 'Recent vendors:';
+                recentVendorsContainer.appendChild(titleElement);
+                
+                recentVendors.forEach((vendor, index) => {
+                    const vendorTag = document.createElement('span');
+                    vendorTag.className = 'recent-title';
+                    vendorTag.textContent = vendor;
+                    vendorTag.style.cursor = 'pointer';
+                    
+                    vendorTag.addEventListener('click', () => {
+                        vendorNameInput.value = vendor;
+                    });
+                    
+                    recentVendorsContainer.appendChild(vendorTag);
+                });
+            }
+        }
+
+        // Add vendor to recent vendors
+        function addRecentVendor(vendor) {
+            // Remove if already exists to avoid duplicates
+            recentVendors = recentVendors.filter(v => v !== vendor);
+            
+            // Add to beginning of array
+            recentVendors.unshift(vendor);
+            
+            // Keep only the last 5 vendors
+            if (recentVendors.length > 5) {
+                recentVendors = recentVendors.slice(0, 5);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('recentVendors', JSON.stringify(recentVendors));
+            
+            // Update display
+            updateRecentVendorsDisplay();
+        }
+
+        // Update recent titles display
+        function updateRecentTitlesDisplay() {
+            recentTitlesContainer.innerHTML = '';
+            
+            if (recentTitles.length > 0) {
+                const titleElement = document.createElement('div');
+                titleElement.className = 'text-muted small mb-1';
+                titleElement.textContent = 'Recent titles:';
+                recentTitlesContainer.appendChild(titleElement);
+                
+                recentTitles.forEach((title, index) => {
+                    const titleTag = document.createElement('span');
+                    titleTag.className = 'recent-title';
+                    titleTag.textContent = title;
+                    titleTag.style.cursor = 'pointer';
+                    
+                    titleTag.addEventListener('click', () => {
+                        otherTitleInput.value = title;
+                    });
+                    
+                    recentTitlesContainer.appendChild(titleTag);
+                });
+            }
+        }
+
+        // Add title to recent titles
+        function addRecentTitle(title) {
+            // Remove if already exists to avoid duplicates
+            recentTitles = recentTitles.filter(t => t !== title);
+            
+            // Add to beginning of array
+            recentTitles.unshift(title);
+            
+            // Keep only the last 5 titles
+            if (recentTitles.length > 5) {
+                recentTitles = recentTitles.slice(0, 5);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('recentTitles', JSON.stringify(recentTitles));
+            
+            // Update display
+            updateRecentTitlesDisplay();
+        }
+
+        // Calculate totals from database
+        function calculateTotals() {
+            logDebug("Calculating totals...");
+            
+            // Reset category totals
+            categoryTotals = {
+                offerings: 0,
+                pta: 0,
+                food_vendors: 0,
+                other_fees: 0
+            };
+            
+            // Calculate offerings total
+            database.ref('offerings').once('value').then((snapshot) => {
+                snapshot.forEach((childSnapshot) => {
+                    const offering = childSnapshot.val();
+                    if (!offering.deleted) {
+                        categoryTotals.offerings += parseFloat(offering.amount) || 0;
+                    }
+                });
+                
+                // Calculate PTA total
+                database.ref('ptaFees').once('value').then((snapshot) => {
+                    snapshot.forEach((childSnapshot) => {
+                        const fee = childSnapshot.val();
+                        if (!fee.deleted) {
+                            categoryTotals.pta += parseFloat(fee.amount) || 0;
+                        }
+                    });
+                    
+                    // Calculate food vendors total
+                    database.ref('foodVendors').once('value').then((snapshot) => {
+                        snapshot.forEach((childSnapshot) => {
+                            const vendor = childSnapshot.val();
+                            if (!vendor.deleted) {
+                                categoryTotals.food_vendors += parseFloat(vendor.amount) || 0;
+                            }
+                        });
+                        
+                        // Calculate other fees total
+                        database.ref('otherFees').once('value').then((snapshot) => {
+                            snapshot.forEach((childSnapshot) => {
+                                const other = childSnapshot.val();
+                                if (!other.deleted) {
+                                    categoryTotals.other_fees += parseFloat(other.amount) || 0;
+                                }
+                            });
+                            
+                            // Update UI with calculated totals
+                            updateTotalsDisplay();
+                        }).catch((error) => {
+                            logDebug("Error getting other fees:", error);
+                        });
+                    }).catch((error) => {
+                        logDebug("Error getting food vendors:", error);
+                    });
+                }).catch((error) => {
+                    logDebug("Error getting PTA fees:", error);
+                });
+            }).catch((error) => {
+                logDebug("Error getting offerings:", error);
+            });
+        }
+
+        // Update totals display
+        function updateTotalsDisplay() {
+            totalOfferingsElement.textContent = formatCurrency(categoryTotals.offerings);
+            totalPTAElement.textContent = formatCurrency(categoryTotals.pta);
+            totalFoodElement.textContent = formatCurrency(categoryTotals.food_vendors);
+            totalOtherElement.textContent = formatCurrency(categoryTotals.other_fees);
+            
+            logDebug("Totals updated:", categoryTotals);
+        }
+
+        // Add church offering
+        addOfferingBtn.addEventListener('click', () => {
+            const amount = parseFloat(offeringAmountInput.value);
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            const newOffering = {
+                amount: amount,
+                date: Date.now(),
+                deleted: false
+            };
+            
+            logDebug("Adding new offering:", newOffering);
+            database.ref('offerings').push(newOffering)
+                .then(() => {
+                    logDebug("Offering added successfully");
+                    offeringAmountInput.value = '';
+                    calculateTotals();
+                    loadRecentTransactions();
+                    alert('Offering added successfully!');
+                })
+                .catch((error) => {
+                    logDebug('Error adding offering:', error);
+                    alert('Error adding offering. Please try again.');
+                });
+        });
+
+        // Add PTA fee
+        addPTABtn.addEventListener('click', () => {
+            const amount = parseFloat(ptaAmountInput.value);
+            
+            if (selectedStudents.length === 0) {
+                alert('Please select at least one student');
+                return;
+            }
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            // Add PTA fee for each selected student
+            const promises = selectedStudents.map(student => {
+                const newPTAFee = {
+                    studentId: student.id,
+                    studentName: student.name,
+                    amount: amount,
+                    date: Date.now(),
+                    deleted: false
+                };
+                
+                return database.ref('ptaFees').push(newPTAFee);
+            });
+            
+            Promise.all(promises)
+                .then(() => {
+                    logDebug("PTA fees added successfully");
+                    ptaAmountInput.value = '';
+                    selectedStudents = [];
+                    calculateTotals();
+                    loadRecentTransactions();
+                    loadStudentsForClass(selectedClassId); // Refresh student list
+                    alert('PTA fees added successfully!');
+                })
+                .catch((error) => {
+                    logDebug('Error adding PTA fees:', error);
+                    alert('Error adding PTA fees. Please try again.');
+                });
+        });
+
+        // Add food vendor payment
+        addFoodBtn.addEventListener('click', () => {
+            const vendorName = vendorNameInput.value.trim();
+            const amount = parseFloat(foodAmountInput.value);
+            
+            if (!vendorName) {
+                alert('Please enter vendor name');
+                return;
+            }
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            const newFoodVendor = {
+                vendorName: vendorName,
+                amount: amount,
+                date: Date.now(),
+                deleted: false
+            };
+            
+            logDebug("Adding new food vendor payment:", newFoodVendor);
+            database.ref('foodVendors').push(newFoodVendor)
+                .then(() => {
+                    logDebug("Food vendor payment added successfully");
+                    
+                    // Add to recent vendors
+                    addRecentVendor(vendorName);
+                    
+                    vendorNameInput.value = '';
+                    foodAmountInput.value = '';
+                    calculateTotals();
+                    loadRecentTransactions();
+                    alert('Food vendor payment added successfully!');
+                })
+                .catch((error) => {
+                    logDebug('Error adding food vendor payment:', error);
+                    alert('Error adding food vendor payment. Please try again.');
+                });
+        });
+
+        // Add other fee
+        addOtherBtn.addEventListener('click', () => {
+            const title = otherTitleInput.value.trim();
+            const amount = parseFloat(otherAmountInput.value);
+            
+            if (!title) {
+                alert('Please enter fee title');
+                return;
+            }
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            const newOtherFee = {
+                title: title,
+                amount: amount,
+                date: Date.now(),
+                deleted: false
+            };
+            
+            logDebug("Adding new other fee:", newOtherFee);
+            database.ref('otherFees').push(newOtherFee)
+                .then(() => {
+                    logDebug("Other fee added successfully");
+                    
+                    // Add to recent titles
+                    addRecentTitle(title);
+                    
+                    otherTitleInput.value = '';
+                    otherAmountInput.value = '';
+                    calculateTotals();
+                    loadRecentTransactions();
+                    alert('Other fee added successfully!');
+                })
+                .catch((error) => {
+                    logDebug('Error adding other fee:', error);
+                    alert('Error adding other fee. Please try again.');
+                });
+        });
+
+        // Request withdrawal
+        requestWithdrawalBtn.addEventListener('click', () => {
+            const amount = parseFloat(withdrawAmountInput.value);
+            const source = withdrawSourceSelect.value;
+            const reason = withdrawReasonInput.value.trim();
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            if (!source) {
+                alert('Please select a source');
+                return;
+            }
+            
+            if (!reason) {
+                alert('Please enter a reason for withdrawal');
+                return;
+            }
+            
+            // Check if amount exceeds available balance
+            if (amount > categoryTotals[source]) {
+                alert(`Withdrawal amount exceeds available balance for this source. Available: ${formatCurrency(categoryTotals[source])}`);
+                return;
+            }
+            
+            const withdrawalRequest = {
+                amount: amount,
+                source: source,
+                reason: reason,
+                date: Date.now(),
+                status: 'pending' // pending, approved, rejected
+            };
+            
+            logDebug("Submitting withdrawal request:", withdrawalRequest);
+            database.ref('requests').push(withdrawalRequest)
+                .then(() => {
+                    logDebug("Withdrawal request submitted successfully");
+                    
+                    withdrawAmountInput.value = '';
+                    withdrawSourceSelect.value = '';
+                    withdrawReasonInput.value = '';
+                    
+                    loadPendingRequests();
+                    alert('Withdrawal request submitted successfully! It will be processed after approval.');
+                })
+                .catch((error) => {
+                    logDebug('Error submitting withdrawal request:', error);
+                    alert('Error submitting withdrawal request. Please try again.');
+                });
+        });
+
+        // Load recent transactions
+        function loadRecentTransactions() {
+            logDebug("Loading recent transactions...");
+            recentTransactionsContainer.innerHTML = '';
+            
+            // We'll get the 5 most recent transactions from each category
+            Promise.all([
+                database.ref('offerings').orderByChild('date').limitToLast(5).once('value'),
+                database.ref('ptaFees').orderByChild('date').limitToLast(5).once('value'),
+                database.ref('foodVendors').orderByChild('date').limitToLast(5).once('value'),
+                database.ref('otherFees').orderByChild('date').limitToLast(5).once('value')
+            ]).then(([offeringsSnapshot, ptaSnapshot, foodSnapshot, otherSnapshot]) => {
+                const transactions = [];
+                
+                // Process offerings
+                offeringsSnapshot.forEach((childSnapshot) => {
+                    const offering = childSnapshot.val();
+                    if (!offering.deleted) {
+                        transactions.push({
+                            type: 'Offering',
+                            amount: offering.amount,
+                            date: offering.date,
+                            details: 'Church Offering'
+                        });
+                    }
+                });
+                
+                // Process PTA fees
+                ptaSnapshot.forEach((childSnapshot) => {
+                    const fee = childSnapshot.val();
+                    if (!fee.deleted) {
+                        transactions.push({
+                            type: 'PTA',
+                            amount: fee.amount,
+                            date: fee.date,
+                            details: `PTA - ${fee.studentName}`
+                        });
+                    }
+                });
+                
+                // Process food vendors
+                foodSnapshot.forEach((childSnapshot) => {
+                    const vendor = childSnapshot.val();
+                    if (!vendor.deleted) {
+                        transactions.push({
+                            type: 'Food Vendor',
+                            amount: vendor.amount,
+                            date: vendor.date,
+                            details: `Food - ${vendor.vendorName}`
+                        });
+                    }
+                });
+                
+                // Process other fees
+                otherSnapshot.forEach((childSnapshot) => {
+                    const other = childSnapshot.val();
+                    if (!other.deleted) {
+                        transactions.push({
+                            type: 'Other Fee',
+                            amount: other.amount,
+                            date: other.date,
+                            details: `Other - ${other.title}`
+                        });
+                    }
+                });
+                
+                // Sort by date (newest first)
+                transactions.sort((a, b) => b.date - a.date);
+                
+                // Display only the 10 most recent
+                const recentTransactions = transactions.slice(0, 10);
+                
+                if (recentTransactions.length === 0) {
+                    recentTransactionsContainer.innerHTML = '<div class="text-center text-muted py-3">No transactions found</div>';
+                    return;
+                }
+                
+                recentTransactions.forEach(transaction => {
+                    const transactionElement = document.createElement('div');
+                    transactionElement.className = 'history-item';
+                    
+                    transactionElement.innerHTML = `
+                        <div>
+                            <div class="fw-bold">${transaction.details}</div>
+                            <div class="small text-muted">${formatDate(transaction.date)}</div>
+                        </div>
+                        <div class="positive-amount">+${formatCurrency(transaction.amount)}</div>
+                    `;
+                    
+                    recentTransactionsContainer.appendChild(transactionElement);
+                });
+                
+            }).catch(error => {
+                logDebug("Error loading recent transactions:", error);
+                recentTransactionsContainer.innerHTML = '<div class="text-center text-muted py-3">Error loading transactions</div>';
+            });
+        }
+
+        // Load pending withdrawal requests
+        function loadPendingRequests() {
+            logDebug("Loading pending requests...");
+            pendingRequestsContainer.innerHTML = '';
+            
+            database.ref('requests').orderByChild('date').once('value').then((snapshot) => {
+                let hasPending = false;
+                
+                snapshot.forEach((childSnapshot) => {
+                    const request = childSnapshot.val();
+                    request.id = childSnapshot.key;
+                    
+                    if (request.status === 'pending') {
+                        hasPending = true;
+                        
+                        const requestElement = document.createElement('div');
+                        requestElement.className = 'history-item';
+                        
+                        requestElement.innerHTML = `
+                            <div>
+                                <div class="fw-bold">Withdrawal Request</div>
+                                <div class="small">From: ${request.source}</div>
+                                <div class="small">Reason: ${request.reason}</div>
+                                <div class="small text-muted">${formatDate(request.date)}</div>
+                            </div>
+                            <div class="negative-amount">-${formatCurrency(request.amount)}</div>
+                        `;
+                        
+                        pendingRequestsContainer.appendChild(requestElement);
+                    }
+                });
+                
+                if (!hasPending) {
+                    pendingRequestsContainer.innerHTML = '<div class="text-center text-muted py-3">No pending requests</div>';
+                }
+            }).catch(error => {
+                logDebug("Error loading pending requests:", error);
+                pendingRequestsContainer.innerHTML = '<div class="text-center text-muted py-3">Error loading requests</div>';
+            });
+        }
+
+        // Load transaction history
+        function loadTransactionHistory(filter = 'all') {
+            logDebug("Loading transaction history with filter:", filter);
+            transactionHistoryContainer.innerHTML = '';
+            
+            // Get all transactions based on filter
+            const promises = [];
+            
+            if (filter === 'all' || filter === 'offerings') {
+                promises.push(database.ref('offerings').orderByChild('date').once('value'));
+            }
+            
+            if (filter === 'all' || filter === 'pta') {
+                promises.push(database.ref('ptaFees').orderByChild('date').once('value'));
+            }
+            
+            if (filter === 'all' || filter === 'food_vendors') {
+                promises.push(database.ref('foodVendors').orderByChild('date').once('value'));
+            }
+            
+            if (filter === 'all' || filter === 'other_fees') {
+                promises.push(database.ref('otherFees').orderByChild('date').once('value'));
+            }
+            
+            if (filter === 'all' || filter === 'withdrawals') {
+                promises.push(database.ref('requests').orderByChild('date').once('value'));
+            }
+            
+            Promise.all(promises).then((snapshots) => {
+                const transactions = [];
+                
+                snapshots.forEach(snapshot => {
+                    snapshot.forEach((childSnapshot) => {
+                        const item = childSnapshot.val();
+                        item.id = childSnapshot.key;
+                        
+                        if (item.deleted) return;
+                        
+                        if (snapshot.key === 'offerings') {
+                            transactions.push({
+                                type: 'Offering',
+                                amount: item.amount,
+                                date: item.date,
+                                details: 'Church Offering',
+                                isWithdrawal: false
+                            });
+                        } else if (snapshot.key === 'ptaFees') {
+                            transactions.push({
+                                type: 'PTA',
+                                amount: item.amount,
+                                date: item.date,
+                                details: `PTA - ${item.studentName}`,
+                                isWithdrawal: false
+                            });
+                        } else if (snapshot.key === 'foodVendors') {
+                            transactions.push({
+                                type: 'Food Vendor',
+                                amount: item.amount,
+                                date: item.date,
+                                details: `Food - ${item.vendorName}`,
+                                isWithdrawal: false
+                            });
+                        } else if (snapshot.key === 'otherFees') {
+                            transactions.push({
+                                type: 'Other Fee',
+                                amount: item.amount,
+                                date: item.date,
+                                details: `Other - ${item.title}`,
+                                isWithdrawal: false
+                            });
+                        } else if (snapshot.key === 'requests' && item.status === 'approved') {
+                            transactions.push({
+                                type: 'Withdrawal',
+                                amount: item.amount,
+                                date: item.date,
+                                details: `Withdrawal from ${item.source}`,
+                                isWithdrawal: true
+                            });
+                        }
+                    });
+                });
+                
+                // Sort by date (newest first)
+                transactions.sort((a, b) => b.date - a.date);
+                
+                if (transactions.length === 0) {
+                    transactionHistoryContainer.innerHTML = '<div class="text-center text-muted py-3">No transactions found</div>';
+                    return;
+                }
+                
+                transactions.forEach(transaction => {
+                    const transactionElement = document.createElement('div');
+                    transactionElement.className = 'history-item';
+                    
+                    transactionElement.innerHTML = `
+                        <div>
+                            <div class="fw-bold">${transaction.details}</div>
+                            <div class="small text-muted">${formatDate(transaction.date)}</div>
+                        </div>
+                        <div class="${transaction.isWithdrawal ? 'negative-amount' : 'positive-amount'}">
+                            ${transaction.isWithdrawal ? '-' : '+'}${formatCurrency(transaction.amount)}
+                        </div>
+                    `;
+                    
+                    transactionHistoryContainer.appendChild(transactionElement);
+                });
+                
+            }).catch(error => {
+                logDebug("Error loading transaction history:", error);
+                transactionHistoryContainer.innerHTML = '<div class="text-center text-muted py-3">Error loading history</div>';
+            });
+        }
+
+        // Update financial chart
+        function updateChart() {
+            logDebug("Updating financial chart...");
+            
+            // Fetch data for chart
+            Promise.all([
+                database.ref('offerings').once('value'),
+                database.ref('ptaFees').once('value'),
+                database.ref('foodVendors').once('value'),
+                database.ref('otherFees').once('value'),
+                database.ref('requests').once('value')
+            ]).then(([offeringsSnapshot, ptaSnapshot, foodSnapshot, otherSnapshot, requestsSnapshot]) => {
+                const categories = ['Offerings', 'PTA', 'Food Vendors', 'Other Fees'];
+                const incomeData = [0, 0, 0, 0];
+                const expenseData = [0, 0, 0, 0];
+                
+                // Process offerings
+                offeringsSnapshot.forEach((childSnapshot) => {
+                    const offering = childSnapshot.val();
+                    if (!offering.deleted) {
+                        incomeData[0] += parseFloat(offering.amount) || 0;
+                    }
+                });
+                
+                // Process PTA fees
+                ptaSnapshot.forEach((childSnapshot) => {
+                    const fee = childSnapshot.val();
+                    if (!fee.deleted) {
+                        incomeData[1] += parseFloat(fee.amount) || 0;
+                    }
+                });
+                
+                // Process food vendors
+                foodSnapshot.forEach((childSnapshot) => {
+                    const vendor = childSnapshot.val();
+                    if (!vendor.deleted) {
+                        incomeData[2] += parseFloat(vendor.amount) || 0;
+                    }
+                });
+                
+                // Process other fees
+                otherSnapshot.forEach((childSnapshot) => {
+                    const other = childSnapshot.val();
+                    if (!other.deleted) {
+                        incomeData[3] += parseFloat(other.amount) || 0;
+                    }
+                });
+                
+                // Process approved withdrawal requests
+                requestsSnapshot.forEach((childSnapshot) => {
+                    const request = childSnapshot.val();
+                    if (request.status === 'approved') {
+                        const sourceIndex = categories.findIndex(cat => 
+                            cat.toLowerCase().replace(' ', '_') === request.source
+                        );
+                        
+                        if (sourceIndex !== -1) {
+                            expenseData[sourceIndex] += parseFloat(request.amount) || 0;
+                        }
+                    }
+                });
+                
+                // Calculate net values
+                const netData = incomeData.map((income, index) => income - expenseData[index]);
+                
+                // Destroy previous chart if it exists
+                if (financialChart) {
+                    financialChart.destroy();
+                }
+                
+                // Create new chart
+                const ctx = document.getElementById('financialChart').getContext('2d');
+                financialChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: categories,
+                        datasets: [
+                            {
+                                label: 'Income',
+                                data: incomeData,
+                                backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                                borderColor: 'rgba(40, 167, 69, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Expenses',
+                                data: expenseData,
+                                backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                                borderColor: 'rgba(220, 53, 69, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Net',
+                                data: netData,
+                                backgroundColor: 'rgba(23, 162, 184, 0.7)',
+                                borderColor: 'rgba(23, 162, 184, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '₵' + value;
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += '₵' + context.raw;
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+            }).catch(error => {
+                logDebug("Error fetching data for chart:", error);
+            });
+        }
+
+        // Initialize the application
+        function initApp() {
+            logDebug("Initializing application...");
+            
+            // Load initial data
+            calculateTotals();
+            loadRecentTransactions();
+            loadPendingRequests();
+            loadTransactionHistory();
+            updateChart();
+            
+            // Set up event listeners
+            historyFilterSelect.addEventListener('change', function() {
+                loadTransactionHistory(this.value);
+            });
+            
+            // Update recent vendors and titles displays
+            updateRecentVendorsDisplay();
+            updateRecentTitlesDisplay();
+            
+            logDebug("Application initialized successfully");
+        }
+
+        // Start the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
