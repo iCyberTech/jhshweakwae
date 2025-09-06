@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CramNerd SMS - Sign In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <style>:root {
+    --primary-color: #6c5ce7;
+    --secondary-color: #a29bfe;
+    --accent-color: #fd79a8;
+    --dark-color: #2d3436;
+    --light-color: #f5f6fa;
+    --success-color: #00b894;
+    --warning-color: #fdcb6e;
+    --danger-color: #d63031;
+    --info-color: #0984e3;
+    --shadow: 8px 8px 16px #d1d9e6, -8px -8px 16px #ffffff;
+    --shadow-inset: inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff;
+    --border-radius: 15px;
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    color: var(--dark-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 500px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius);
+    padding: 40px;
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+
+.logo {
+    margin-bottom: 30px;
+}
+
+.logo h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.logo p {
+    color: var(--dark-color);
+    opacity: 0.8;
+    font-weight: 400;
+}
+
+.user-type-selector {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 25px;
+    gap: 10px;
+}
+
+.user-type {
+    padding: 10px 20px;
+    border-radius: 20px;
+    background: var(--light-color);
+    color: var(--dark-color);
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 500;
+    box-shadow: var(--shadow-inset);
+}
+
+.user-type.active {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: var(--shadow);
+}
+
+.user-type:hover {
+    transform: translateY(-2px);
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--dark-color);
+}
+
+input {
+    width: 100%;
+    padding: 12px 15px;
+    border: none;
+    border-radius: var(--border-radius);
+    background: var(--light-color);
+    box-shadow: var(--shadow-inset);
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+input:focus {
+    outline: none;
+    box-shadow: inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff, 0 0 0 2px var(--secondary-color);
+}
+
+.password-field {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #7f8c8d;
+    transition: var(--transition);
+}
+
+.toggle-password:hover {
+    color: var(--primary-color);
+}
+
+.btn {
+    padding: 12px 25px;
+    border-radius: var(--border-radius);
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    font-size: 16px;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: var(--shadow);
+}
+
+.btn-primary:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.btn-primary:disabled {
+    background: var(--secondary-color);
+    opacity: 0.8;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.forgot-password {
+    margin-top: 20px;
+}
+
+.forgot-password a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: var(--transition);
+    font-size: 14px;
+}
+
+.forgot-password a:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    padding: 12px 20px;
+    border-radius: var(--border-radius);
+    color: white;
+    font-weight: 500;
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    max-width: 90%;
+    text-align: center;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast.info {
+    background-color: var(--info-color);
+}
+
+.toast.success {
+    background-color: var(--success-color);
+}
+
+.toast.error {
+    background-color: var(--danger-color);
+}
+
+.toast.warning {
+    background-color: var(--warning-color);
+    color: var(--dark-color);
+}
+
+.spinner {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 2px solid white;
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 30px;
+    }
+    
+    .logo h1 {
+        font-size: 28px;
+    }
+    
+    .user-type-selector {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .user-type {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 25px 20px;
+    }
+    
+    .logo h1 {
+        font-size: 24px;
+    }
+    
+    .logo p {
+        font-size: 14px;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+}</style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>CramNerd SMS</h1>
+            <p>Sign in to your account</p>
+        </div>
+        
+        <div class="user-type-selector">
+            <div class="user-type active" data-type="student">Student</div>
+            <div class="user-type" data-type="oldStudent">Old Student</div>
+            <div class="user-type" data-type="teacher">Teacher</div>
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="userId">User ID</label>
+                <input type="text" id="userId" placeholder="Enter your ID" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-field">
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">
+                        <span id="passwordToggleIcon">👁️</span>
+                    </button>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" id="loginBtn">Sign In</button>
+        </form>
+        
+        <div class="forgot-password">
+            <a href="#" onclick="showForgotPassword()">Forgot your password?</a>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
+            authDomain: "sms-single.firebaseapp.com",
+            projectId: "sms-single",
+            storageBucket: "sms-single.appspot.com",
+            messagingSenderId: "140188895278",
+            appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
+            measurementId: "G-7ER348P6VZ",
+            databaseURL: "https://sms-single-default-rtdb.firebaseio.com/"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+        
+        // DOM elements
+        const loginForm = document.getElementById('loginForm');
+        const userIdInput = document.getElementById('userId');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const toast = document.getElementById('toast');
+        const userTypes = document.querySelectorAll('.user-type');
+        
+        // Current user type
+        let currentUserType = 'student';
+        
+        // Show toast message
+        function showToast(message, type = 'info') {
+            toast.textContent = message;
+            toast.className = 'toast';
+            toast.classList.add(type);
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Toggle password visibility
+        function togglePasswordVisibility() {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                document.getElementById('passwordToggleIcon').textContent = '🔒';
+            } else {
+                passwordInput.type = 'password';
+                document.getElementById('passwordToggleIcon').textContent = '👁️';
+            }
+        }
+        
+        // Handle user type selection
+        userTypes.forEach(type => {
+            type.addEventListener('click', () => {
+                userTypes.forEach(t => t.classList.remove('active'));
+                type.classList.add('active');
+                currentUserType = type.getAttribute('data-type');
+            });
+        });
+        
+        // Handle form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userId = userIdInput.value.trim();
+            const password = passwordInput.value;
+            
+            if (!userId || !password) {
+                showToast('Please enter both ID and password', 'error');
+                return;
+            }
+            
+            // Show loading state
+            loginBtn.innerHTML = '<div class="spinner"></div>';
+            loginBtn.disabled = true;
+            
+            try {
+                // Construct email based on user type
+                let email;
+                if (currentUserType === 'oldStudent') {
+                    email = `${userId}@cramnerd.sms`;
+                } else {
+                    email = `${userId}@cramnerd.sms`;
+                }
+                
+                // Sign in with Firebase Auth
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                
+                // Get user data from appropriate collection
+                let userRef;
+                if (currentUserType === 'student') {
+                    userRef = database.ref(`students/${userId}`);
+                } else if (currentUserType === 'oldStudent') {
+                    userRef = database.ref(`oldStudents/${userId}`);
+                } else {
+                    userRef = database.ref(`teachers/${userId}`);
+                }
+                
+                const userSnapshot = await userRef.once('value');
+                
+                if (userSnapshot.exists()) {
+                    const userData = userSnapshot.val();
+                    showToast(`Welcome back, ${userData.name}!`, 'success');
+                    
+                    // Redirect based on user type
+                    setTimeout(() => {
+                        if (currentUserType === 'student') {
+                            window.location.href = 'student.html';
+                        } else if (currentUserType === 'oldStudent') {
+                            window.location.href = 'alumni-dashboard.html';
+                        } else {
+                            window.location.href = 'teacher.html';
+                        }
+                    }, 1500);
+                } else {
+                    // User not found in database
+                    await auth.signOut();
+                    showToast('User account not found in our system', 'error');
+                    loginBtn.innerHTML = 'Sign In';
+                    loginBtn.disabled = false;
+                }
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                
+                // Handle specific error cases
+                if (error.code === 'auth/user-not-found') {
+                    showToast('No account found with this ID', 'error');
+                } else if (error.code === 'auth/wrong-password') {
+                    showToast('Incorrect password', 'error');
+                } else {
+                    showToast('Login failed: ' + error.message, 'error');
+                }
+                
+                loginBtn.innerHTML = 'Sign In';
+                loginBtn.disabled = false;
+            }
+        });
+        
+        // Forgot password functionality
+        function showForgotPassword() {
+            const userId = prompt("Please enter your User ID:");
+            if (userId) {
+                const email = `${userId}@cramnerd.sms`;
+                
+                auth.sendPasswordResetEmail(email)
+                    .then(() => {
+                        showToast('Password reset email sent. Check your inbox.', 'success');
+                    })
+                    .catch(error => {
+                        console.error('Password reset error:', error);
+                        showToast('Error sending reset email: ' + error.message, 'error');
+                    });
+            }
+        }
+        
+        // Check if user is already logged in
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                // Extract user ID from email
+                const email = user.email;
+                const userId = email.split('@')[0];
+                
+                // Try to determine user type by checking collections
+                try {
+                    const studentSnapshot = await database.ref(`students/${userId}`).once('value');
+                    if (studentSnapshot.exists()) {
+                        window.location.href = 'student-dashboard.html';
+                        return;
+                    }
+                    
+                    const oldStudentSnapshot = await database.ref(`oldStudents/${userId}`).once('value');
+                    if (oldStudentSnapshot.exists()) {
+                        window.location.href = 'alumni-dashboard.html';
+                        return;
+                    }
+                    
+                    const teacherSnapshot = await database.ref(`teachers/${userId}`).once('value');
+                    if (teacherSnapshot.exists()) {
+                        window.location.href = 'teacher-dashboard.html';
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error checking user type:', error);
+                }
+            }
+        });
+    </script>
+</body>
