@@ -7,119 +7,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
-        /* Enhanced Notification Styles */
-        .notification {
-            padding: 18px 20px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-            border-left: 5px solid rgba(255, 255, 255, 0.3);
-            align-items: flex-start;
-        }
-
-        .notification.success {
-            background: linear-gradient(135deg, rgba(0, 184, 148, 0.9) 0%, rgba(0, 184, 148, 1) 100%);
-        }
-
-        .notification.error {
-            background: linear-gradient(135deg, rgba(214, 48, 49, 0.9) 0%, rgba(214, 48, 49, 1) 100%);
-        }
-
-        .notification.warning {
-            background: linear-gradient(135deg, rgba(253, 203, 110, 0.9) 0%, rgba(253, 203, 110, 1) 100%);
-            color: #2d3436;
-        }
-
-        .notification.info {
-            background: linear-gradient(135deg, rgba(9, 132, 227, 0.9) 0%, rgba(9, 132, 227, 1) 100%);
-        }
-
-        .notification-icon {
-            font-size: 22px;
-            margin-right: 15px;
-            margin-top: 2px;
-            flex-shrink: 0;
-        }
-
-        .notification-content {
-            line-height: 1.4;
-        }
-
-        .notification-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 6px;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-
-        .notification-message {
-            font-size: 0.9rem;
-            opacity: 0.95;
-            line-height: 1.5;
-        }
-
-        .notification-close {
-            opacity: 0.7;
-            transition: opacity 0.2s ease;
-            margin-left: 15px;
-            margin-top: 2px;
-        }
-
-        .notification-close:hover {
-            opacity: 1;
-        }
-
-        /* Animation enhancements */
-        @keyframes slideIn {
-            from {
-                transform: translateX(120%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideOut {
-            to {
-                transform: translateX(120%);
-                opacity: 0;
-            }
-        }
-
-        .notification.show {
-            animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        .notification.hide {
-            animation: slideOut 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 480px) {
-            .notification-container {
-                width: 95%;
-                right: 10px;
-            }
-            
-            .notification {
-                padding: 15px;
-            }
-            
-            .notification-icon {
-                font-size: 20px;
-                margin-right: 12px;
-            }
-            
-            .notification-title {
-                font-size: 0.95rem;
-            }
-            
-            .notification-message {
-                font-size: 0.85rem;
-            }
-        }
         :root {
             --primary-color: #6c5ce7;
             --secondary-color: #a29bfe;
@@ -230,34 +117,59 @@
             border: 2px solid var(--glass-bg);
         }
 
-        .cards-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .user-profile span {
+            font-weight: 500;
         }
 
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 15px;
+            border-radius: 15px;
+            padding: 20px;
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
             border: 1px solid var(--glass-border);
-            transition: transform 0.3s ease;
-            min-height: 120px;
-        }
-
-        .card:active {
-            transform: translateY(2px);
+            margin-bottom: 20px;
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             padding-bottom: 10px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
@@ -608,6 +520,7 @@
             font-size: 2rem;
             color: var(--primary-color);
             margin-bottom: 10px;
+            display: block;
         }
 
         .file-upload-container p {
@@ -803,6 +716,90 @@
             transition: all 0.3s ease;
         }
 
+        /* Notification styles */
+        .notification-container {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            width: 90%;
+            max-width: 350px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification {
+            position: relative;
+            padding: 16px 20px;
+            border-radius: 10px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            transform: translateX(120%);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            opacity: 0;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification.hide {
+            transform: translateX(120%);
+            opacity: 0;
+        }
+
+        .notification.success {
+            background-color: var(--success-color);
+        }
+
+        .notification.error {
+            background-color: var(--danger-color);
+        }
+
+        .notification.warning {
+            background-color: var(--warning-color);
+            color: var(--text-color);
+        }
+
+        .notification.info {
+            background-color: var(--info-color);
+        }
+
+        .notification-icon {
+            margin-right: 12px;
+            font-size: 20px;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+        }
+
+        .notification-message {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            margin-left: 15px;
+            font-size: 18px;
+            opacity: 0.8;
+        }
+
+        /* Responsive styles */
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 1.4rem;
@@ -810,6 +807,62 @@
 
             .user-profile span {
                 display: none;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            header {
+                margin-bottom: 15px;
+            }
+            
+            .greeting h1 {
+                font-size: 1.2rem;
+            }
+            
+            .main-content {
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .nav-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            .nav-item {
+                font-size: 0.65rem;
+                min-width: 55px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.2rem;
+            }
+            
+            .card-title {
+                font-size: 1.1rem;
+            }
+            
+            .tab {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+            
+            .btn {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+            
+            .notification-container {
+                width: 95%;
+                right: 10px;
             }
         }
 
@@ -857,182 +910,190 @@
                 </div>
             </header>
 
-            <!-- Tab Container -->
-            <div class="tab-container">
-                <div class="tabs">
-                    <div class="tab active" data-tab="homework">Homework</div>
-                    <div class="tab" data-tab="grading">Grading</div>
-                    <div class="tab" data-tab="classes">My Classes</div>
+            <!-- Main Content -->
+            <div class="main-content" id="main-content">
+                <div class="header">
+                    <h1 id="page-title">Homework Management</h1>
+                    <div class="user-profile">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Teacher" id="header-teacher-avatar">
+                        <span id="header-teacher-name">Loading...</span>
+                    </div>
                 </div>
 
-                <!-- Homework Tab Content -->
-                <div class="tab-content active" id="homework-tab">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Create New Homework</div>
-                        </div>
-                        <div class="card-body">
-                            <form id="homework-form">
-                                <div class="form-group">
-                                    <label for="homework-subject" class="form-label">Subject</label>
-                                    <select id="homework-subject" class="form-control" required>
-                                        <option value="">Select Subject</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="homework-class" class="form-label">Class</label>
-                                    <select id="homework-class" class="form-control" required>
-                                        <option value="">Select Class</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="homework-title" class="form-label">Title</label>
-                                    <input type="text" id="homework-title" class="form-control" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="homework-description" class="form-label">Description</label>
-                                    <textarea id="homework-description" class="form-control" required></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label for="homework-due-date" class="form-label">Due Date</label>
-                                    <input type="date" id="homework-due-date" class="form-control" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Attachments (Optional)</label>
-                                    <div class="file-upload-container" id="file-upload-container">
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                        <p>Click to upload files</p>
-                                        <small>PDF, DOCX, PPTX, JPG, PNG (Max 10MB)</small>
-                                        <input type="file" id="file-input" multiple>
+                <!-- Tab Container -->
+                <div class="tab-container">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="homework">Homework</div>
+                        <div class="tab" data-tab="grading">Grading</div>
+                        <div class="tab" data-tab="classes">My Classes</div>
+                    </div>
+
+                    <!-- Homework Tab Content -->
+                    <div class="tab-content active" id="homework-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Create New Homework</div>
+                            </div>
+                            <div class="card-body">
+                                <form id="homework-form">
+                                    <div class="form-group">
+                                        <label for="homework-subject" class="form-label">Subject</label>
+                                        <select id="homework-subject" class="form-control" required>
+                                            <option value="">Select Subject</option>
+                                        </select>
                                     </div>
-                                    <div id="file-preview-container"></div>
-                                </div>
-                                <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Create Homework</button>
-                            </form>
+                                    <div class="form-group">
+                                        <label for="homework-class" class="form-label">Class</label>
+                                        <select id="homework-class" class="form-control" required>
+                                            <option value="">Select Class</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="homework-title" class="form-label">Title</label>
+                                        <input type="text" id="homework-title" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="homework-description" class="form-label">Description</label>
+                                        <textarea id="homework-description" class="form-control" required></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="homework-due-date" class="form-label">Due Date</label>
+                                        <input type="date" id="homework-due-date" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Attachments (Optional)</label>
+                                        <div class="file-upload-container" id="file-upload-container">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <p>Click to upload files</p>
+                                            <small>PDF, DOCX, PPTX, JPG, PNG (Max 10MB)</small>
+                                            <input type="file" id="file-input" multiple>
+                                        </div>
+                                        <div id="file-preview-container"></div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Create Homework</button>
+                                </form>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Assigned Homework</div>
-                        </div>
-                        <div class="card-body">
-                            <div id="homework-list">
-                                <!-- Homework items will be loaded here -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Assigned Homework</div>
+                            </div>
+                            <div class="card-body">
+                                <div id="homework-list">
+                                    <!-- Homework items will be loaded here -->
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Grading Tab Content -->
-                <div class="tab-content" id="grading-tab">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Grade Students</div>
-                        </div>
-                        <div class="card-body">
-                            <form id="grade-filter-form">
-                                <div class="form-group">
-                                    <label for="grade-subject" class="form-label">Subject</label>
-                                    <select id="grade-subject" class="form-control" required>
-                                        <option value="">Select Subject</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="grade-class" class="form-label">Class</label>
-                                    <select id="grade-class" class="form-control" required>
-                                        <option value="">Select Class</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="grade-term" class="form-label">Term</label>
-                                    <select id="grade-term" class="form-control" required>
-                                        <option value="Term 1">Term 1</option>
-                                        <option value="Term 2">Term 2</option>
-                                        <option value="Term 3">Term 3</option>
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filter Students</button>
-                            </form>
+                    <!-- Grading Tab Content -->
+                    <div class="tab-content" id="grading-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Grade Students</div>
+                            </div>
+                            <div class="card-body">
+                                <form id="grade-filter-form">
+                                    <div class="form-group">
+                                        <label for="grade-subject" class="form-label">Subject</label>
+                                        <select id="grade-subject" class="form-control" required>
+                                            <option value="">Select Subject</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="grade-class" class="form-label">Class</label>
+                                        <select id="grade-class" class="form-control" required>
+                                            <option value="">Select Class</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="grade-term" class="form-label">Term</label>
+                                        <select id="grade-term" class="form-control" required>
+                                            <option value="Term 1">Term 1</option>
+                                            <option value="Term 2">Term 2</option>
+                                            <option value="Term 3">Term 3</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filter Students</button>
+                                </form>
 
-                            <div id="students-to-grade" style="margin-top: 20px; display: none;">
-                                <h3>Students in <span id="selected-class-name"></span> - <span id="selected-subject-name"></span></h3>
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Student</th>
-                                            <th>Assignments</th>
-                                            <th>Projects</th>
-                                            <th>Class Score</th>
-                                            <th>Final Exam</th>
-                                            <th>Total</th>
-                                            <th>Grade</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="grade-students-table">
-                                        <!-- Students will be loaded here -->
-                                    </tbody>
-                                </table>
-                                <button id="save-grades-btn" class="btn btn-success" style="margin-top: 15px;"><i class="fas fa-save"></i> Save All Grades</button>
+                                <div id="students-to-grade" style="margin-top: 20px; display: none;">
+                                    <h3>Students in <span id="selected-class-name"></span> - <span id="selected-subject-name"></span></h3>
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Student</th>
+                                                <th>Assignments</th>
+                                                <th>Projects</th>
+                                                <th>Class Score</th>
+                                                <th>Final Exam</th>
+                                                <th>Total</th>
+                                                <th>Grade</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="grade-students-table">
+                                            <!-- Students will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                    <button id="save-grades-btn" class="btn btn-success" style="margin-top: 15px;"><i class="fas fa-save"></i> Save All Grades</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Classes Tab Content -->
-                <div class="tab-content" id="classes-tab">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">My Classes & Subjects</div>
-                        </div>
-                        <div class="card-body">
-                            <div id="teacher-classes-list">
-                                <!-- Classes and subjects will be loaded here -->
+                    <!-- Classes Tab Content -->
+                    <div class="tab-content" id="classes-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">My Classes & Subjects</div>
+                            </div>
+                            <div class="card-body">
+                                <div id="teacher-classes-list">
+                                    <!-- Classes and subjects will be loaded here -->
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav" id="bottom-nav">
+            <a href="teacher.html" class="nav-item">
+                <div class="nav-icon">
+                    <i class="fas fa-tachometer-alt"></i>
+                </div>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item active">
+                <div class="nav-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <span>Academics</span>
+            </a>
+            <a href="#" class="nav-item" id="finance-nav" style="display: none;">
+                <div class="nav-icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <span>Finance</span>
+            </a>
+            <a href="#" class="nav-item" id="connect-nav">
+                <div class="nav-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <span>Connect</span>
+            </a>
+            <a href="#" class="nav-item" id="admin-nav" style="display: none;">
+                <div class="nav-icon">
+                    <i class="fas fa-cog"></i>
+                </div>
+                <span>Admin</span>
+            </a>
+        </nav>
     </div>
-
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav" id="bottom-nav">
-        <a href="#" class="nav-item active" id="dashboard-nav">
-            <div class="nav-icon">
-                <i class="fas fa-tachometer-alt"></i>
-            </div>
-            <span>Dashboard</span>
-        </a>
-        <a href="#" class="nav-item" id="academics-nav">
-            <div class="nav-icon">
-                <i class="fas fa-graduation-cap"></i>
-            </div>
-            <span>Academics</span>
-        </a>
-        <a href="#" class="nav-item" id="finance-nav" style="display: none;">
-            <div class="nav-icon">
-                <i class="fas fa-money-bill-wave"></i>
-            </div>
-            <span>Finance</span>
-        </a>
-        <a href="#" class="nav-item" id="connect-nav">
-            <div class="nav-icon">
-                <i class="fas fa-users"></i>
-            </div>
-            <span>Connect</span>
-        </a>
-        <a href="#" class="nav-item" id="admin-nav" style="display: none;">
-            <div class="nav-icon">
-                <i class="fas fa-cog"></i>
-            </div>
-            <span>Admin</span>
-        </a>
-    </nav>
-
-    <!-- Notification Container -->
-    <div class="notification-container" id="notification-container"></div>
 
     <!-- Homework Detail Modal -->
     <div class="modal" id="homework-detail-modal">
@@ -1128,6 +1189,9 @@
         </div>
     </div>
 
+    <!-- Notification Container -->
+    <div class="notification-container" id="notification-container"></div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -1157,13 +1221,18 @@
         // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
         const dashboard = document.getElementById('dashboard');
-        const greetingTitle = document.getElementById('greeting-title');
-        const greetingSubtitle = document.getElementById('greeting-subtitle');
-        const teacherName = document.getElementById('teacher-name');
-        const profileImg = document.getElementById('profile-img');
+        const mainContent = document.getElementById('main-content');
+        const headerTeacherName = document.getElementById('header-teacher-name');
+        const headerTeacherAvatar = document.getElementById('header-teacher-avatar');
+        const pageTitle = document.getElementById('page-title');
         const tabs = document.querySelectorAll('.tab');
         const tabContents = document.querySelectorAll('.tab-content');
-        const notificationContainer = document.getElementById('notification-container');
+        
+        // Teacher dashboard elements
+        const profileImg = document.getElementById('profile-img');
+        const teacherName = document.getElementById('teacher-name');
+        const greetingTitle = document.getElementById('greeting-title');
+        const greetingSubtitle = document.getElementById('greeting-subtitle');
         
         // Homework elements
         const homeworkForm = document.getElementById('homework-form');
@@ -1218,14 +1287,6 @@
         const editFileInput = document.getElementById('edit-file-input');
         const editFilePreviewContainer = document.getElementById('edit-file-preview-container');
         const saveHomeworkBtn = document.getElementById('save-homework-btn');
-        
-        // Bottom navigation
-        const bottomNav = document.getElementById('bottom-nav');
-        const dashboardNav = document.getElementById('dashboard-nav');
-        const academicsNav = document.getElementById('academics-nav');
-        const financeNav = document.getElementById('finance-nav');
-        const connectNav = document.getElementById('connect-nav');
-        const adminNav = document.getElementById('admin-nav');
         
         // Global variables
         let currentTeacherId = null;
@@ -1292,107 +1353,57 @@
             }
         });
 
-        // Bottom navigation events
-        dashboardNav.addEventListener('click', (e) => {
-            e.preventDefault();
-            setActiveNav('dashboard');
-        });
-
-        academicsNav.addEventListener('click', (e) => {
-            e.preventDefault();
-            setActiveNav('academics');
-        });
-
-        connectNav.addEventListener('click', (e) => {
-            e.preventDefault();
-            setActiveNav('connect');
-        });
-
         // Functions
-        function setActiveNav(navId) {
-            // Remove active class from all nav items
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Add active class to clicked nav item
-            document.getElementById(`${navId}-nav`).classList.add('active');
-            
-            // Handle navigation based on navId
-            switch(navId) {
-                case 'dashboard':
-                    // Already on dashboard
-                    break;
-                case 'academics':
-                    // Switch to homework tab
-                    switchTab('homework');
-                    break;
-                case 'connect':
-                    // Show notification about this feature
-                    showNotification('Connect feature coming soon!', 'info');
-                    break;
-            }
-        }
-
-        function showNotification(message, type = 'success', title = null) {
+        function showNotification(message, type = 'info', title = '') {
+            const notificationContainer = document.getElementById('notification-container');
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             
-            // Set icon based on type
-            let icon = 'fas fa-check-circle';
-            if (type === 'error') icon = 'fas fa-exclamation-circle';
-            if (type === 'warning') icon = 'fas fa-exclamation-triangle';
-            if (type === 'info') icon = 'fas fa-info-circle';
-            
-            // Set title based on type if not provided
-            if (!title) {
-                if (type === 'success') title = 'Success';
-                if (type === 'error') title = 'Error';
-                if (type === 'warning') title = 'Warning';
-                if (type === 'info') title = 'Information';
-            }
+            let iconClass = 'fas fa-info-circle';
+            if (type === 'success') iconClass = 'fas fa-check-circle';
+            if (type === 'error') iconClass = 'fas fa-exclamation-circle';
+            if (type === 'warning') iconClass = 'fas fa-exclamation-triangle';
             
             notification.innerHTML = `
                 <div class="notification-icon">
-                    <i class="${icon}"></i>
+                    <i class="${iconClass}"></i>
                 </div>
                 <div class="notification-content">
-                    <div class="notification-title">${title}</div>
+                    ${title ? `<div class="notification-title">${title}</div>` : ''}
                     <div class="notification-message">${message}</div>
                 </div>
-                <div class="notification-close">
+                <button class="notification-close">
                     <i class="fas fa-times"></i>
-                </div>
+                </button>
             `;
             
-            // Add close functionality
-            const closeBtn = notification.querySelector('.notification-close');
-            closeBtn.addEventListener('click', () => {
-                notification.classList.add('hide');
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.parentNode.removeChild(notification);
-                    }
-                }, 400);
-            });
-            
-            // Add to container
             notificationContainer.appendChild(notification);
             
-            // Animate in
+            // Show notification
             setTimeout(() => {
                 notification.classList.add('show');
             }, 10);
             
+            // Close button event
+            const closeBtn = notification.querySelector('.notification-close');
+            closeBtn.addEventListener('click', () => {
+                notification.classList.remove('show');
+                notification.classList.add('hide');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            });
+            
             // Auto remove after 5 seconds
             setTimeout(() => {
                 if (notification.parentNode) {
+                    notification.classList.remove('show');
                     notification.classList.add('hide');
                     setTimeout(() => {
                         if (notification.parentNode) {
-                            notification.parentNode.removeChild(notification);
+                            notification.remove();
                         }
-                    }, 400);
+                    }, 300);
                 }
             }, 5000);
         }
@@ -1419,16 +1430,82 @@
             // Update page title
             switch(tabId) {
                 case 'homework':
-                    // Already set
+                    pageTitle.textContent = 'Homework Management';
                     break;
                 case 'grading':
-                    // Already set
+                    pageTitle.textContent = 'Student Grading';
                     break;
                 case 'classes':
-                    // Already set
+                    pageTitle.textContent = 'My Classes & Subjects';
                     break;
                 default:
-                    // Default case
+                    pageTitle.textContent = 'Teacher Dashboard';
+            }
+        }
+
+        async function identifyCurrentTeacher() {
+            try {
+                // First try to get from activeSessions
+                const activeSessionSnapshot = await database.ref('activeSessions/teacher').once('value');
+                if (activeSessionSnapshot.exists()) {
+                    currentTeacherId = activeSessionSnapshot.val();
+                    const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
+                    
+                    if (teacherSnapshot.exists()) {
+                        currentTeacherData = teacherSnapshot.val();
+                        return currentTeacherData;
+                    }
+                }
+                
+                // Fallback to device identification if active session not found
+                const authUsersSnapshot = await database.ref('authUsers').once('value');
+                if (!authUsersSnapshot.exists()) {
+                    throw new Error('No auth users found');
+                }
+                
+                const authUsers = authUsersSnapshot.val();
+                const credentialsSnapshot = await database.ref('credentials').once('value');
+                const credentials = credentialsSnapshot.exists() ? credentialsSnapshot.val() : {};
+                
+                // Get current device info from browser
+                const userAgent = navigator.userAgent;
+                const screenResolution = `${window.screen.width}x${window.screen.height}`;
+                const language = navigator.language;
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                
+                // Find matching teacher based on device info
+                for (const [authId, authUser] of Object.entries(authUsers)) {
+                    if (authUser.userType === 'teacher') {
+                        const teacherCredential = credentials[authUser.userId];
+                        if (teacherCredential && teacherCredential.deviceInfo) {
+                            const deviceInfo = teacherCredential.deviceInfo;
+                            
+                            // Check for matching device characteristics
+                            if (deviceInfo.userAgent === userAgent && 
+                                deviceInfo.screenResolution === screenResolution &&
+                                deviceInfo.language === language && 
+                                deviceInfo.timezone === timezone) {
+                                
+                                // This is likely the current teacher
+                                currentTeacherId = authUser.userId;
+                                
+                                // Get teacher details from teachers collection
+                                const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
+                                
+                                if (teacherSnapshot.exists()) {
+                                    currentTeacherData = teacherSnapshot.val();
+                                    return currentTeacherData;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                throw new Error('No matching teacher found');
+            } catch (error) {
+                console.error('Error identifying teacher:', error);
+                showNotification('Failed to identify teacher: ' + error.message, 'error');
+                return null;
             }
         }
 
@@ -1436,42 +1513,27 @@
             auth.onAuthStateChanged(async user => {
                 if (user) {
                     try {
-                        // Get the active teacher session
-                        const activeSessionSnapshot = await database.ref('activeSessions/teacher').once('value');
-                        if (activeSessionSnapshot.exists()) {
-                            currentTeacherId = activeSessionSnapshot.val();
+                        const teacher = await identifyCurrentTeacher();
+                        if (teacher) {
+                            loadTeacherData(teacher);
+                            loadTeacherSubjects();
+                            loadClasses();
+                            loadStudents();
+                            loadHomework();
                             
-                            // Load teacher data
-                            const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
-                            if (teacherSnapshot.exists()) {
-                                currentTeacherData = teacherSnapshot.val();
-                                loadTeacherData(currentTeacherData);
-                                loadTeacherSubjects();
-                                loadClasses();
-                                loadStudents();
-                                loadHomework();
-                                
-                                // Set up real-time listener for homework submissions
-                                setupHomeworkSubmissionsListener();
-                                
-                                // Hide loading screen and show main content
-                                loadingScreen.style.display = 'none';
-                                dashboard.style.display = 'block';
-                                
-                                // Show welcome notification
-                                showNotification(`Welcome back, ${currentTeacherData.name}!`, 'success', 'Welcome');
-                            } else {
-                                throw new Error('Teacher data not found');
-                            }
+                            // Set up real-time listener for homework submissions
+                            setupHomeworkSubmissionsListener();
+                            
+                            // Hide loading screen and show main content
+                            loadingScreen.style.display = 'none';
+                            dashboard.style.display = 'block';
                         } else {
-                            throw new Error('No active session found');
+                            // If teacher not found, redirect to login
+                            window.location.href = 'login.html';
                         }
                     } catch (error) {
                         console.error('Error checking active session:', error);
-                        showNotification('Authentication error. Redirecting to login...', 'error');
-                        setTimeout(() => {
-                            window.location.href = 'login.html';
-                        }, 2000);
+                        window.location.href = 'login.html';
                     }
                 } else {
                     // No user is signed in, redirect to login
@@ -1485,35 +1547,45 @@
             
             if (currentTeacherData) {
                 // Update UI with teacher data
+                headerTeacherName.textContent = currentTeacherData.name;
                 teacherName.textContent = currentTeacherData.name;
+                
+                if (currentTeacherData.profileImage) {
+                    headerTeacherAvatar.src = currentTeacherData.profileImage;
+                    profileImg.src = currentTeacherData.profileImage;
+                }
                 
                 // Set greeting based on time of day
                 const hour = new Date().getHours();
                 let greeting = 'Good Morning';
-                if (hour >= 12 && hour < 17) greeting = 'Good Afternoon';
-                if (hour >= 17) greeting = 'Good Evening';
                 
-                greetingTitle.textContent = `${greeting}, ${currentTeacherData.name}!`;
-                
-                // Set profile image if available
-                if (currentTeacherData.profileImage) {
-                    profileImg.src = currentTeacherData.profileImage;
+                if (hour >= 12 && hour < 17) {
+                    greeting = 'Good Afternoon';
+                } else if (hour >= 17) {
+                    greeting = 'Good Evening';
                 }
                 
-                // Update greeting subtitle based on day
-                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                const today = new Date();
-                const dayName = days[today.getDay()];
-                const monthName = months[today.getMonth()];
-                const date = today.getDate();
+                greetingTitle.textContent = `${greeting}, ${currentTeacherData.name.split(' ')[0]}!`;
                 
-                greetingSubtitle.textContent = `${dayName}, ${monthName} ${date}`;
+                // Set random greeting subtitle
+                const subtitles = [
+                    "Let's make today productive",
+                    "Ready to inspire some minds?",
+                    "Education is the most powerful weapon",
+                    "Teaching is a work of heart",
+                    "Making a difference, one student at a time"
+                ];
+                
+                const randomSubtitle = subtitles[Math.floor(Math.random() * subtitles.length)];
+                greetingSubtitle.textContent = randomSubtitle;
                 
                 // Show/hide navigation items based on role
-                if (currentTeacherData.role === 'admin' || currentTeacherData.role === 'principal') {
-                    financeNav.style.display = 'flex';
-                    adminNav.style.display = 'flex';
+                if (currentTeacherData.role === 'admin' || currentTeacherData.role === 'finance') {
+                    document.getElementById('finance-nav').style.display = 'flex';
+                }
+                
+                if (currentTeacherData.role === 'admin') {
+                    document.getElementById('admin-nav').style.display = 'flex';
                 }
             }
         }
@@ -2060,7 +2132,7 @@
                     await homeworkRef.set(homework);
                 }
                 
-                showNotification('Homework created successfully!');
+                showNotification('Homework created successfully!', 'success');
                 homeworkForm.reset();
                 $(homeworkSubjectSelect).val('').trigger('change');
                 $(homeworkClassSelect).val('').trigger('change');
@@ -2266,7 +2338,7 @@
             
             database.ref().update(update)
                 .then(() => {
-                    showNotification('Grade saved successfully');
+                    showNotification('Grade saved successfully', 'success');
                     viewHomeworkDetails(homeworkId); // Refresh the view
                 })
                 .catch(error => {
@@ -2302,7 +2374,7 @@
                         return homeworkRef.remove();
                     })
                     .then(() => {
-                        showNotification('Homework deleted successfully!');
+                        showNotification('Homework deleted successfully!', 'success');
                         homeworkDetailModal.style.display = 'none';
                         loadHomework();
                     })
@@ -2418,7 +2490,7 @@
                 const updatedFiles = files.filter(f => f.path !== file.path);
                 await homeworkRef.set(updatedFiles);
                 
-                showNotification('File removed successfully');
+                showNotification('File removed successfully', 'success');
                 openEditHomeworkModal(); // Refresh the edit modal
             } catch (error) {
                 console.error('Error removing file:', error);
@@ -2463,7 +2535,7 @@
                 // Save updates
                 await database.ref(`homework/${homeworkId}`).update(updates);
                 
-                showNotification('Homework updated successfully!');
+                showNotification('Homework updated successfully!', 'success');
                 editHomeworkModal.style.display = 'none';
                 loadHomework();
             } catch (error) {
@@ -2692,7 +2764,7 @@
             
             savePromise
                 .then(() => {
-                    showNotification(`Grade saved for ${student.name}`);
+                    showNotification(`Grade saved for ${student.name}`, 'success');
                     // Reload grades to update currentGrades
                     loadStudentsForGrading(currentGradingContext.classId, currentGradingContext.subjectId, currentGradingContext.term);
                 })
@@ -2726,7 +2798,7 @@
                 saveCount++;
             });
             
-            showNotification(`Grades for ${saveCount} students are being saved.`);
+            showNotification(`Grades for ${saveCount} students are being saved.`, 'info');
         }
 
         // Initialize the app
