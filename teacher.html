@@ -485,12 +485,51 @@
             z-index: 95;
         }
 
-        .frame-close {
+        .frame-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .frame-control-btn {
             background: none;
             border: none;
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .frame-control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .frame-control-btn.expand {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .frame-control-btn.expand:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .frame-controls-expanded {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .frame-controls-expanded .frame-control-btn {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .frame-controls-expanded .frame-control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .frame-content {
@@ -682,6 +721,12 @@
                 font-size: 0.65rem;
                 min-width: 55px;
             }
+
+            .frame-control-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 1.1rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -715,6 +760,16 @@
                 width: 95%;
                 right: 10px;
             }
+
+            .frame-controls-expanded {
+                gap: 3px;
+            }
+
+            .frame-control-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 1rem;
+            }
         }
 
         @media (max-width: 360px) {
@@ -736,6 +791,20 @@
             
             .attendance-status {
                 font-size: 1.1rem;
+            }
+
+            .frame-header {
+                padding: 12px;
+            }
+
+            .frame-header h2 {
+                font-size: 1.1rem;
+            }
+
+            .frame-control-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
             }
         }
 
@@ -871,7 +940,22 @@
         <div class="content-frame" id="academics-frame">
             <div class="frame-header">
                 <h2>Academics</h2>
-                <button class="frame-close" data-frame="academics-frame">&times;</button>
+                <div class="frame-controls">
+                    <div class="frame-controls-expanded" style="display: none;">
+                        <button class="frame-control-btn back" data-frame="academics-frame" title="Back">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <button class="frame-control-btn refresh" data-frame="academics-frame" title="Refresh">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button class="frame-control-btn exit" data-frame="academics-frame" title="Exit">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <button class="frame-control-btn expand" data-frame="academics-frame" title="Show Controls">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                </div>
             </div>
             <div class="frame-content">
                 <iframe src="between.html" loading="lazy"></iframe>
@@ -881,7 +965,22 @@
         <div class="content-frame" id="finance-frame">
             <div class="frame-header">
                 <h2>Finance</h2>
-                <button class="frame-close" data-frame="finance-frame">&times;</button>
+                <div class="frame-controls">
+                    <div class="frame-controls-expanded" style="display: none;">
+                        <button class="frame-control-btn back" data-frame="finance-frame" title="Back">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <button class="frame-control-btn refresh" data-frame="finance-frame" title="Refresh">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button class="frame-control-btn exit" data-frame="finance-frame" title="Exit">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <button class="frame-control-btn expand" data-frame="finance-frame" title="Show Controls">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                </div>
             </div>
             <div class="frame-content">
                 <iframe src="feespay.html" loading="lazy"></iframe>
@@ -891,7 +990,22 @@
         <div class="content-frame" id="connect-frame">
             <div class="frame-header">
                 <h2>Connect</h2>
-                <button class="frame-close" data-frame="connect-frame">&times;</button>
+                <div class="frame-controls">
+                    <div class="frame-controls-expanded" style="display: none;">
+                        <button class="frame-control-btn back" data-frame="connect-frame" title="Back">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <button class="frame-control-btn refresh" data-frame="connect-frame" title="Refresh">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button class="frame-control-btn exit" data-frame="connect-frame" title="Exit">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <button class="frame-control-btn expand" data-frame="connect-frame" title="Show Controls">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                </div>
             </div>
             <div class="frame-content">
                 <iframe src="connect.html" loading="lazy"></iframe>
@@ -901,7 +1015,22 @@
         <div class="content-frame" id="admin-frame">
             <div class="frame-header">
                 <h2>Administration</h2>
-                <button class="frame-close" data-frame="admin-frame">&times;</button>
+                <div class="frame-controls">
+                    <div class="frame-controls-expanded" style="display: none;">
+                        <button class="frame-control-btn back" data-frame="admin-frame" title="Back">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <button class="frame-control-btn refresh" data-frame="admin-frame" title="Refresh">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button class="frame-control-btn exit" data-frame="admin-frame" title="Exit">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <button class="frame-control-btn expand" data-frame="admin-frame" title="Show Controls">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                </div>
             </div>
             <div class="frame-content">
                 <iframe src="attens.html" loading="lazy"></iframe>
@@ -990,8 +1119,11 @@
         const financeNav = document.getElementById('finance-nav');
         const adminNav = document.getElementById('admin-nav');
         
-        // Frame close buttons
-        const frameCloseButtons = document.querySelectorAll('.frame-close');
+        // Frame control elements
+        const expandButtons = document.querySelectorAll('.frame-control-btn.expand');
+        const backButtons = document.querySelectorAll('.frame-control-btn.back');
+        const refreshButtons = document.querySelectorAll('.frame-control-btn.refresh');
+        const exitButtons = document.querySelectorAll('.frame-control-btn.exit');
         
         // Firebase references
         const authUsersRef = database.ref('authUsers');
@@ -1574,8 +1706,53 @@
             });
         });
         
-        // Frame close functionality
-        frameCloseButtons.forEach(button => {
+        // Frame control functionality
+        expandButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const frameId = this.getAttribute('data-frame');
+                const controlsExpanded = document.querySelector(`#${frameId} .frame-controls-expanded`);
+                const expandBtn = document.querySelector(`#${frameId} .frame-control-btn.expand`);
+                
+                if (controlsExpanded.style.display === 'none') {
+                    controlsExpanded.style.display = 'flex';
+                    expandBtn.style.display = 'none';
+                } else {
+                    controlsExpanded.style.display = 'none';
+                    expandBtn.style.display = 'flex';
+                }
+            });
+        });
+        
+        // Back button functionality
+        backButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const frameId = this.getAttribute('data-frame');
+                const iframe = document.querySelector(`#${frameId} iframe`);
+                
+                try {
+                    iframe.contentWindow.history.back();
+                } catch (e) {
+                    console.log('Cannot navigate back in iframe:', e);
+                }
+            });
+        });
+        
+        // Refresh button functionality
+        refreshButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const frameId = this.getAttribute('data-frame');
+                const iframe = document.querySelector(`#${frameId} iframe`);
+                const currentSrc = iframe.src;
+                
+                iframe.src = '';
+                setTimeout(() => {
+                    iframe.src = currentSrc;
+                }, 100);
+            });
+        });
+        
+        // Exit button functionality
+        exitButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const frameId = this.getAttribute('data-frame');
                 document.getElementById(frameId).style.display = 'none';
