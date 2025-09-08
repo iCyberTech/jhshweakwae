@@ -41,7 +41,8 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: var(--text-color);
             min-height: 100vh;
-            padding: 20px 20px 80px; /* Added bottom padding for navigation */
+            padding: 20px;
+            padding-bottom: 80px; /* Space for bottom navigation */
         }
 
         .container {
@@ -924,61 +925,44 @@
             padding: 5px 10px;
             cursor: pointer;
             transition: all 0.3s ease;
-            border-radius: 10px;
             min-width: 60px;
         }
 
         .nav-item.active {
-            background: rgba(108, 92, 231, 0.1);
+            color: var(--primary-color);
         }
 
         .nav-icon {
             font-size: 1.2rem;
             margin-bottom: 3px;
-            color: var(--light-text);
-        }
-
-        .nav-item.active .nav-icon {
-            color: var(--primary-color);
         }
 
         .nav-label {
             font-size: 0.7rem;
-            color: var(--light-text);
+            text-align: center;
         }
 
-        .nav-item.active .nav-label {
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        .nav-item.daily.active .nav-icon,
-        .nav-item.daily.active .nav-label {
+        .nav-item.daily.active {
             color: var(--primary-color);
         }
 
-        .nav-item.exam.active .nav-icon,
-        .nav-item.exam.active .nav-label {
+        .nav-item.exam.active {
             color: var(--exam-color);
         }
 
-        .nav-item.weekly-exam.active .nav-icon,
-        .nav-item.weekly-exam.active .nav-label {
+        .nav-item.weekly-exam.active {
             color: var(--weekly-exam-color);
         }
 
-        .nav-item.pta-utility.active .nav-icon,
-        .nav-item.pta-utility.active .nav-label {
+        .nav-item.pta-utility.active {
             color: var(--pta-utility-color);
         }
 
-        .nav-item.broom.active .nav-icon,
-        .nav-item.broom.active .nav-label {
+        .nav-item.broom.active {
             color: var(--broom-color);
         }
 
-        .nav-item.others.active .nav-icon,
-        .nav-item.others.active .nav-label {
+        .nav-item.others.active {
             color: var(--others-color);
         }
 
@@ -1003,22 +987,22 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
-
+            
             .bottom-nav {
                 padding: 8px 0;
             }
-
+            
             .nav-item {
                 min-width: 50px;
                 padding: 5px;
             }
-
+            
             .nav-icon {
-                font-size: 1.1rem;
+                font-size: 1rem;
             }
-
+            
             .nav-label {
-                font-size: 0.65rem;
+                font-size: 0.6rem;
             }
         }
     </style>
@@ -2683,7 +2667,7 @@
                                 case 'daily':
                                     // Prepare the data to be saved for daily fees
                                     for (const studentId in feePaymentsData) {
-                                        updates[`feePayments/${date}/${studentId}`] = {
+                                        updates[`feePayments/${date}/${studentId`] = {
                                             ...feePaymentsData[studentId],
                                             timestamp: timestamp
                                         };
@@ -3431,7 +3415,7 @@
                 },
                 options: {
                     responsive: true;
-                    maintainAspectRatio: false;
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -3882,7 +3866,7 @@
             feeModalTitle.textContent = "Set Default Weekly Exam Fee Amount";
             feeAmountInput.value = weeklyExamFeeAmount;
             feeDescriptionInput.value = '';
-            feeModal.classList.add('active');
+            feeModal.classList.add('active';
             
             // Set up save handler for weekly exam fees
             saveFeeBtn.onclick = async () => {
