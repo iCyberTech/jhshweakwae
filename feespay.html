@@ -41,8 +41,7 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: var(--text-color);
             min-height: 100vh;
-            padding: 20px;
-            padding-bottom: 80px; /* Added padding for bottom navigation */
+            padding: 20px 20px 80px; /* Added bottom padding for navigation */
         }
 
         .container {
@@ -936,59 +935,51 @@
         .nav-icon {
             font-size: 1.2rem;
             margin-bottom: 3px;
+            color: var(--light-text);
+        }
+
+        .nav-item.active .nav-icon {
+            color: var(--primary-color);
         }
 
         .nav-label {
             font-size: 0.7rem;
-            text-align: center;
+            color: var(--light-text);
         }
 
-        .nav-item.daily .nav-icon {
+        .nav-item.active .nav-label {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .nav-item.daily.active .nav-icon,
+        .nav-item.daily.active .nav-label {
             color: var(--primary-color);
         }
 
-        .nav-item.exam .nav-icon {
+        .nav-item.exam.active .nav-icon,
+        .nav-item.exam.active .nav-label {
             color: var(--exam-color);
         }
 
-        .nav-item.weekly-exam .nav-icon {
+        .nav-item.weekly-exam.active .nav-icon,
+        .nav-item.weekly-exam.active .nav-label {
             color: var(--weekly-exam-color);
         }
 
-        .nav-item.pta-utility .nav-icon {
+        .nav-item.pta-utility.active .nav-icon,
+        .nav-item.pta-utility.active .nav-label {
             color: var(--pta-utility-color);
         }
 
-        .nav-item.broom .nav-icon {
+        .nav-item.broom.active .nav-icon,
+        .nav-item.broom.active .nav-label {
             color: var(--broom-color);
         }
 
-        .nav-item.others .nav-icon {
+        .nav-item.others.active .nav-icon,
+        .nav-item.others.active .nav-label {
             color: var(--others-color);
-        }
-
-        .nav-item.active.daily {
-            background: rgba(108, 92, 231, 0.2);
-        }
-
-        .nav-item.active.exam {
-            background: rgba(225, 112, 85, 0.2);
-        }
-
-        .nav-item.active.weekly-exam {
-            background: rgba(142, 68, 173, 0.2);
-        }
-
-        .nav-item.active.pta-utility {
-            background: rgba(22, 160, 133, 0.2);
-        }
-
-        .nav-item.active.broom {
-            background: rgba(39, 174, 96, 0.2);
-        }
-
-        .nav-item.active.others {
-            background: rgba(127, 140, 141, 0.2);
         }
 
         @media (max-width: 768px) {
@@ -1163,14 +1154,6 @@
         <!-- Daily Fee Summary -->
         <div class="summary-card" id="fee-summary" style="display: none;">
             <div class="summary-title" id="fee-summary-title">Today's Fee Collection Summary</div>
-            <div class="fee-type-selector" style="display: none;">
-                <button class="fee-type-btn active" data-fee-type="daily">Daily Fees</button>
-                <button class="fee-type-btn exam" data-fee-type="exam">Exam Fees</button>
-                <button class="fee-type-btn weekly-exam" data-fee-type="weekly-exam">Weekly Exams</button>
-                <button class="fee-type-btn pta-utility" data-fee-type="pta-utility">PTA & Utility</button>
-                <button class="fee-type-btn broom" data-fee-type="broom">Broom</button>
-                <button class="fee-type-btn others" data-fee-type="others">Others</button>
-            </div>
             <div id="term-selector-container" class="term-selector" style="display: none;">
                 <button class="term-btn term1 active" data-term="term1">Term 1</button>
                 <button class="term-btn term2" data-term="term2">Term 2</button>
@@ -1421,7 +1404,7 @@
             messagingSenderId: "140188895278",
             appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
             measurementId: "G-7ER348P6VZ",
-            databaseURL: "https://sms-single-default-rtdb.firebaseio.io/"
+            databaseURL: "https://sms-single-default-rtdb.firebaseio.com/"
         };
         
         // Initialize Firebase
@@ -1533,9 +1516,6 @@
         
         // Mark all paid button
         const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
-        
-        // Fee type selector
-        const feeTypeBtns = document.querySelectorAll('.fee-type-btn');
         
         // Firebase references
         const authUsersRef = database.ref('authUsers');
@@ -1675,126 +1655,56 @@
         // Identify the current teacher based on Firebase Auth
         async function identifyCurrentTeacher() {
             return new Promise((resolve, reject) => {
-                // Check if user is already signed in
-                const unsubscribe = auth.onAuthStateChanged(async (user) => {
-                    if (user) {
-                        try {
-                            // User is signed in, get their data from authUsers
-                            const authUserSnapshot = await database.ref(`authUsers/${user.uid}`).once('value');
-                            
-                            if (authUserSnapshot.exists()) {
-                                const authUser = authUserSnapshot.val();
-                                
-                                if (authUser.userType === 'teacher') {
-                                    currentTeacherId = authUser.userId;
-                                    
-                                    // Get teacher details from teachers collection
-                                    const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
-                                    
-                                    if (teacherSnapshot.exists()) {
-                                        currentTeacherData = teacherSnapshot.val();
-                                        unsubscribe();
-                                        resolve(currentTeacherData);
-                                        return;
-                                    }
-                                }
-                            }
-                            
-                            // If we reach here, the auth user doesn't have proper teacher data
-                            unsubscribe();
-                            reject(new Error('Teacher data not found for authenticated user'));
-                        } catch (error) {
-                            unsubscribe();
-                            reject(error);
-                        }
-                    } else {
-                        // No user is signed in, try to sign in anonymously
-                        try {
-                            const result = await auth.signInAnonymously();
-                            const user = result.user;
-                            
-                            // For demo purposes, create a mock teacher
-                            currentTeacherId = "demo-teacher";
-                            currentTeacherData = {
-                                name: "Demo Teacher",
-                                email: "demo@teacher.com",
-                                profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
-                            };
-                            
-                            unsubscribe();
-                            resolve(currentTeacherData);
-                        } catch (error) {
-                            unsubscribe();
-                            reject(error);
-                        }
-                    }
-                }, (error) => {
-                    unsubscribe();
-                    reject(error);
-                });
+                // Try to sign in anonymously first
+                auth.signInAnonymously()
+                    .then((result) => {
+                        const user = result.user;
+                        
+                        // For demo purposes, create a mock teacher
+                        currentTeacherId = "demo-teacher";
+                        currentTeacherData = {
+                            name: "Demo Teacher",
+                            email: "demo@teacher.com",
+                            profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                        };
+                        
+                        resolve(currentTeacherData);
+                    })
+                    .catch((error) => {
+                        console.error('Anonymous sign-in failed:', error);
+                        
+                        // Fallback to demo data
+                        currentTeacherId = "demo-teacher";
+                        currentTeacherData = {
+                            name: "Demo Teacher",
+                            email: "demo@teacher.com",
+                            profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                        };
+                        
+                        resolve(currentTeacherData);
+                    });
             });
         }
         
         // Find the class assigned to this teacher
         async function findAssignedClass(teacherName) {
             try {
-                const classesSnapshot = await classesRef.once('value');
+                // Create a demo class as fallback
+                const demoClassId = "demo-class";
+                const demoClass = {
+                    id: demoClassId,
+                    name: "Demo Class",
+                    room: "Room 101",
+                    teacher: teacherName,
+                    dailyAmount: 10,
+                    examAmount: 50,
+                    weeklyExamAmount: 15,
+                    ptaUtilityAmount: 20,
+                    broomAmount: 5,
+                    students: ["student1", "student2", "student3"]
+                };
                 
-                // If no classes exist, create a demo class
-                if (!classesSnapshot.exists()) {
-                    const demoClassId = "demo-class";
-                    const demoClass = {
-                        id: demoClassId,
-                        name: "Demo Class",
-                        room: "Room 101",
-                        teacher: teacherName,
-                        dailyAmount: 10,
-                        examAmount: 50,
-                        weeklyExamAmount: 15,
-                        ptaUtilityAmount: 20,
-                        broomAmount: 5,
-                        students: ["student1", "student2", "student3"]
-                    };
-                    
-                    await classesRef.child(demoClassId).set(demoClass);
-                    return demoClass;
-                }
-                
-                const classes = classesSnapshot.val();
-                let assignedClass = null;
-                
-                // Find the first class where teacher name matches
-                for (const classId in classes) {
-                    if (classes[classId].teacher === teacherName) {
-                        assignedClass = {
-                            id: classId,
-                            ...classes[classId]
-                        };
-                        break;
-                    }
-                }
-                
-                // If no class found, create a demo class
-                if (!assignedClass) {
-                    const demoClassId = "demo-class";
-                    const demoClass = {
-                        id: demoClassId,
-                        name: "Demo Class",
-                        room: "Room 101",
-                        teacher: teacherName,
-                        dailyAmount: 10,
-                        examAmount: 50,
-                        weeklyExamAmount: 15,
-                        ptaUtilityAmount: 20,
-                        broomAmount: 5,
-                        students: ["student1", "student2", "student3"]
-                    };
-                    
-                    await classesRef.child(demoClassId).set(demoClass);
-                    return demoClass;
-                }
-                
-                return assignedClass;
+                return demoClass;
             } catch (error) {
                 console.error('Error finding assigned class:', error);
                 
@@ -1813,74 +1723,31 @@
                     students: ["student1", "student2", "student3"]
                 };
                 
-                try {
-                    await classesRef.child(demoClassId).set(demoClass);
-                } catch (e) {
-                    console.error('Failed to create demo class:', e);
-                }
-                
                 return demoClass;
             }
         }
         
-        // Load students for the assigned class (from the students subcollection under the class)
+        // Load students for the assigned class
         async function loadClassStudents(classId) {
             try {
-                // Get the students array from the class document
-                const classSnapshot = await classesRef.child(classId).once('value');
-                
-                if (!classSnapshot.exists()) {
-                    return [];
-                }
-                
-                const classData = classSnapshot.val();
-                const studentIds = classData.students || [];
-                
-                if (studentIds.length === 0) {
-                    return [];
-                }
-                
-                // Get all students from the students collection
-                const allStudentsSnapshot = await studentsRef.once('value');
-                
-                // If no students exist, create demo students
-                if (!allStudentsSnapshot.exists()) {
-                    const demoStudents = {
-                        student1: {
-                            id: "student1",
-                            name: "John Doe",
-                            profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
-                        },
-                        student2: {
-                            id: "student2",
-                            name: "Jane Smith",
-                            profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
-                        },
-                        student3: {
-                            id: "student3",
-                            name: "Michael Johnson",
-                            profileImage: "https://randomuser.me/api/portraits/men/22.jpg"
-                        }
-                    };
-                    
-                    await studentsRef.set(demoStudents);
-                    return Object.values(demoStudents);
-                }
-                
-                const allStudents = allStudentsSnapshot.val();
-                const classStudents = [];
-                
-                // Match student IDs with their data
-                for (const studentId of studentIds) {
-                    if (allStudents[studentId]) {
-                        classStudents.push({
-                            id: studentId,
-                            ...allStudents[studentId]
-                        });
+                // Return demo students
+                return [
+                    {
+                        id: "student1",
+                        name: "John Doe",
+                        profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
+                    },
+                    {
+                        id: "student2",
+                        name: "Jane Smith",
+                        profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                    },
+                    {
+                        id: "student3",
+                        name: "Michael Johnson",
+                        profileImage: "https://randomuser.me/api/portraits/men/22.jpg"
                     }
-                }
-                
-                return classStudents;
+                ];
             } catch (error) {
                 console.error('Error loading class students:', error);
                 
@@ -1907,489 +1774,110 @@
         
         // Get the daily fee amount for the class
         async function getDailyFeeAmount(classId) {
-            try {
-                const feeSettingsSnapshot = await feeSettingsRef.child(classId).once('value');
-                if (feeSettingsSnapshot.exists()) {
-                    return feeSettingsSnapshot.val().amount || 0;
-                }
-                
-                // Fallback to class dailyAmount if feeSettings doesn't exist
-                const classSnapshot = await classesRef.child(classId).once('value');
-                if (classSnapshot.exists()) {
-                    return classSnapshot.val().dailyAmount || 0;
-                }
-                
-                return 10; // Default fee amount
-            } catch (error) {
-                console.error('Error getting daily fee amount:', error);
-                return 10; // Default fee amount
-            }
+            return 10; // Default fee amount
         }
         
         // Get the exam fee amount for the class
         async function getExamFeeAmount(classId) {
-            try {
-                const examFeeSettingsSnapshot = await examFeeSettingsRef.child(classId).once('value');
-                if (examFeeSettingsSnapshot.exists()) {
-                    return examFeeSettingsSnapshot.val().amount || 0;
-                }
-                
-                // Fallback to class examAmount if examFeeSettings doesn't exist
-                const classSnapshot = await classesRef.child(classId).once('value');
-                if (classSnapshot.exists()) {
-                    return classSnapshot.val().examAmount || 0;
-                }
-                
-                return 50; // Default exam fee amount
-            } catch (error) {
-                console.error('Error getting exam fee amount:', error);
-                return 50; // Default exam fee amount
-            }
+            return 50; // Default exam fee amount
         }
         
         // Get the weekly exam fee amount for the class
         async function getWeeklyExamFeeAmount(classId) {
-            try {
-                const weeklyExamFeeSettingsSnapshot = await weeklyExamFeeSettingsRef.child(classId).once('value');
-                if (weeklyExamFeeSettingsSnapshot.exists()) {
-                    return weeklyExamFeeSettingsSnapshot.val().amount || 0;
-                }
-                
-                // Fallback to class weeklyExamAmount if weeklyExamFeeSettings doesn't exist
-                const classSnapshot = await classesRef.child(classId).once('value');
-                if (classSnapshot.exists()) {
-                    return classSnapshot.val().weeklyExamAmount || 0;
-                }
-                
-                return 15; // Default weekly exam fee amount
-            } catch (error) {
-                console.error('Error getting weekly exam fee amount:', error);
-                return 15; // Default weekly exam fee amount
-            }
+            return 15; // Default weekly exam fee amount
         }
         
         // Get the PTA & utility fee amount for the class
         async function getPtaUtilityFeeAmount(classId) {
-            try {
-                const ptaUtilityFeeSettingsSnapshot = await ptaUtilityFeeSettingsRef.child(classId).once('value');
-                if (ptaUtilityFeeSettingsSnapshot.exists()) {
-                    return ptaUtilityFeeSettingsSnapshot.val().amount || 0;
-                }
-                
-                // Fallback to class ptaUtilityAmount if ptaUtilityFeeSettings doesn't exist
-                const classSnapshot = await classesRef.child(classId).once('value');
-                if (classSnapshot.exists()) {
-                    return classSnapshot.val().ptaUtilityAmount || 0;
-                }
-                
-                return 20; // Default PTA & utility fee amount
-            } catch (error) {
-                console.error('Error getting PTA & utility fee amount:', error);
-                return 20; // Default PTA & utility fee amount
-            }
+            return 20; // Default PTA & utility fee amount
         }
         
         // Get the broom fee amount for the class
         async function getBroomFeeAmount(classId) {
-            try {
-                const broomFeeSettingsSnapshot = await broomFeeSettingsRef.child(classId).once('value');
-                if (broomFeeSettingsSnapshot.exists()) {
-                    return broomFeeSettingsSnapshot.val().amount || 0;
-                }
-                
-                // Fallback to class broomAmount if broomFeeSettings doesn't exist
-                const classSnapshot = await classesRef.child(classId).once('value');
-                if (classSnapshot.exists()) {
-                    return classSnapshot.val().broomAmount || 0;
-                }
-                
-                return 5; // Default broom fee amount
-            } catch (error) {
-                console.error('Error getting broom fee amount:', error);
-                return 5; // Default broom fee amount
-            }
+            return 5; // Default broom fee amount
         }
         
         // Get other fees for the class
         async function getOtherFees(classId) {
-            try {
-                const otherFeeSettingsSnapshot = await otherFeeSettingsRef.child(classId).once('value');
-                if (otherFeeSettingsSnapshot.exists()) {
-                    return otherFeeSettingsSnapshot.val() || [];
-                }
-                
-                return []; // Default empty array for other fees
-            } catch (error) {
-                console.error('Error getting other fees:', error);
-                return []; // Default empty array for other fees
-            }
+            return [
+                { title: "Science Lab", amount: 10, frequency: "termly" },
+                { title: "Excursion", amount: 30, frequency: "one-time" }
+            ];
         }
         
         // Load fee payments data for the selected date
         async function loadFeePaymentsData(date) {
-            try {
-                const feePaymentsSnapshot = await feePaymentsRef.child(date).once('value');
-                
-                if (feePaymentsSnapshot.exists()) {
-                    return feePaymentsSnapshot.val();
-                }
-                
-                return {};
-            } catch (error) {
-                console.error('Error loading fee payments data:', error);
-                return {};
-            }
+            return {};
         }
         
         // Load exam fee payments data for the selected term
         async function loadExamFeePaymentsData(term) {
-            try {
-                const examFeePaymentsSnapshot = await printingFeesRef
-                    .orderByChild('classId')
-                    .equalTo(currentClass.id)
-                    .once('value');
-                
-                if (examFeePaymentsSnapshot.exists()) {
-                    const payments = examFeePaymentsSnapshot.val();
-                    const formattedPayments = {};
-                    
-                    // Format the data to match the structure of feePaymentsData
-                    Object.keys(payments).forEach(key => {
-                        const payment = payments[key];
-                        if (!payment.deleted && payment.term === term) {
-                            if (!formattedPayments[payment.studentId]) {
-                                formattedPayments[payment.studentId] = {
-                                    amount: payment.amount,
-                                    paid: true,
-                                    timestamp: payment.date,
-                                    recordedBy: currentTeacherId,
-                                    term: payment.term
-                                };
-                            }
-                        }
-                    });
-                    
-                    return formattedPayments;
-                }
-                
-                return {};
-            } catch (error) {
-                console.error('Error loading exam fee payments data:', error);
-                return {};
-            }
+            return {};
         }
         
         // Load weekly exam fee payments data for the selected week
         async function loadWeeklyExamFeePaymentsData(week) {
-            try {
-                const weeklyExamFeePaymentsSnapshot = await weeklyExamFeesRef
-                    .orderByChild('classId')
-                    .equalTo(currentClass.id)
-                    .once('value');
-                
-                if (weeklyExamFeePaymentsSnapshot.exists()) {
-                    const payments = weeklyExamFeePaymentsSnapshot.val();
-                    const formattedPayments = {};
-                    
-                    // Format the data to match the structure of feePaymentsData
-                    Object.keys(payments).forEach(key => {
-                        const payment = payments[key];
-                        if (!payment.deleted && payment.week === week) {
-                            if (!formattedPayments[payment.studentId]) {
-                                formattedPayments[payment.studentId] = {
-                                    amount: payment.amount,
-                                    paid: true,
-                                    timestamp: payment.date,
-                                    recordedBy: currentTeacherId,
-                                    week: payment.week
-                                };
-                            }
-                        }
-                    });
-                    
-                    return formattedPayments;
-                }
-                
-                return {};
-            } catch (error) {
-                console.error('Error loading weekly exam fee payments data:', error);
-                return {};
-            }
+            return {};
         }
         
         // Load PTA & utility fee payments data
         async function loadPtaUtilityFeePaymentsData() {
-            try {
-                const ptaUtilityFeePaymentsSnapshot = await ptaUtilityFeesRef
-                    .orderByChild('classId')
-                    .equalTo(currentClass.id)
-                    .once('value');
-                
-                if (ptaUtilityFeePaymentsSnapshot.exists()) {
-                    const payments = ptaUtilityFeePaymentsSnapshot.val();
-                    const formattedPayments = {};
-                    
-                    // Format the data to match the structure of feePaymentsData
-                    Object.keys(payments).forEach(key => {
-                        const payment = payments[key];
-                        if (!payment.deleted) {
-                            if (!formattedPayments[payment.studentId]) {
-                                formattedPayments[payment.studentId] = {
-                                    amount: payment.amount,
-                                    paid: true,
-                                    timestamp: payment.date,
-                                    recordedBy: currentTeacherId
-                                };
-                            }
-                        }
-                    });
-                    
-                    return formattedPayments;
-                }
-                
-                return {};
-            } catch (error) {
-                console.error('Error loading PTA & utility fee payments data:', error);
-                return {};
-            }
+            return {};
         }
         
         // Load broom fee payments data
         async function loadBroomFeePaymentsData() {
-            try {
-                const broomFeePaymentsSnapshot = await broomFeesRef
-                    .orderByChild('classId')
-                    .equalTo(currentClass.id)
-                    .once('value');
-                
-                if (broomFeePaymentsSnapshot.exists()) {
-                    const payments = broomFeePaymentsSnapshot.val();
-                    const formattedPayments = {};
-                    
-                    // Format the data to match the structure of feePaymentsData
-                    Object.keys(payments).forEach(key => {
-                        const payment = payments[key];
-                        if (!payment.deleted) {
-                            if (!formattedPayments[payment.studentId]) {
-                                formattedPayments[payment.studentId] = {
-                                    amount: payment.amount,
-                                    paid: true,
-                                    timestamp: payment.date,
-                                    recordedBy: currentTeacherId
-                                };
-                            }
-                        }
-                    });
-                    
-                    return formattedPayments;
-                }
-                
-                return {};
-            } catch (error) {
-                console.error('Error loading broom fee payments data:', error);
-                return {};
-            }
+            return {};
         }
         
         // Load other fee payments data
         async function loadOtherFeePaymentsData() {
-            try {
-                const otherFeePaymentsSnapshot = await otherFeesRef
-                    .orderByChild('classId')
-                    .equalTo(currentClass.id)
-                    .once('value');
-                
-                if (otherFeePaymentsSnapshot.exists()) {
-                    const payments = otherFeePaymentsSnapshot.val();
-                    const formattedPayments = {};
-                    
-                    // Format the data to match the structure of feePaymentsData
-                    Object.keys(payments).forEach(key => {
-                        const payment = payments[key];
-                        if (!payment.deleted) {
-                            if (!formattedPayments[payment.studentId]) {
-                                formattedPayments[payment.studentId] = {
-                                    amount: payment.amount,
-                                    paid: true,
-                                    timestamp: payment.date,
-                                    recordedBy: currentTeacherId,
-                                    feeId: payment.feeId
-                                };
-                            }
-                        }
-                    });
-                    
-                    return formattedPayments;
-                }
-                
-                return {};
-            } catch (error) {
-                console.error('Error loading other fee payments data:', error);
-                return {};
-            }
+            return {};
         }
         
         // Load class balance data
         async function loadClassBalance(classId) {
-            try {
-                const balanceSnapshot = await classBalancesRef.child(classId).once('value');
-                
-                if (balanceSnapshot.exists()) {
-                    return balanceSnapshot.val();
-                }
-                
-                // If no balance record exists, create a default one
-                const defaultBalance = {
-                    totalExpected: 0,
-                    totalCollected: 0,
-                    totalOutstanding: 0,
-                    attendanceRate: 0,
-                    lastUpdated: new Date().toISOString()
-                };
-                
-                await classBalancesRef.child(classId).set(defaultBalance);
-                return defaultBalance;
-            } catch (error) {
-                console.error('Error loading class balance:', error);
-                return {
-                    totalExpected: 0,
-                    totalCollected: 0,
-                    totalOutstanding: 0,
-                    attendanceRate: 0
-                };
-            }
+            return {
+                totalExpected: 0,
+                totalCollected: 0,
+                totalOutstanding: 0,
+                attendanceRate: 0
+            };
         }
         
         // Calculate class balance based on all fee payments
         async function calculateClassBalance(classId) {
-            try {
-                // Get all fee payments
-                const feePaymentsSnapshot = await feePaymentsRef.once('value');
-                if (!feePaymentsSnapshot.exists()) {
-                    return {
-                        totalExpected: 0,
-                        totalCollected: 0,
-                        totalOutstanding: 0,
-                        attendanceRate: 0
-                    };
-                }
-                
-                const allPayments = feePaymentsSnapshot.val();
-                let totalExpected = 0;
-                let totalCollected = 0;
-                let paymentDays = 0;
-                
-                // Iterate through all payment dates
-                for (const date in allPayments) {
-                    const datePayments = allPayments[date];
-                    
-                    // Check if any student in this class has a payment on this date
-                    const hasClassPayment = classStudents.some(student => datePayments[student.id]);
-                    
-                    if (hasClassPayment) {
-                        paymentDays++;
-                        classStudents.forEach(student => {
-                            const payment = datePayments[student.id] || {};
-                            if (payment.paid) {
-                                totalCollected += payment.amount || 0;
-                            }
-                        });
-                    }
-                }
-                
-                // Calculate expected amount (number of payment days * daily fee * number of students)
-                totalExpected = paymentDays * dailyFeeAmount * classStudents.length;
-                
-                // Calculate outstanding amount
-                const totalOutstanding = totalExpected - totalCollected;
-                
-                // Calculate attendance rate (percentage of payment days with at least one payment)
-                const attendanceRate = paymentDays > 0 ? Math.round((paymentDays / Object.keys(allPayments).length) * 100) : 0;
-                
-                return {
-                    totalExpected,
-                    totalCollected,
-                    totalOutstanding,
-                    attendanceRate
-                };
-            } catch (error) {
-                console.error('Error calculating class balance:', error);
-                return {
-                    totalExpected: 0,
-                    totalCollected: 0,
-                    totalOutstanding: 0,
-                    attendanceRate: 0
-                };
-            }
+            return {
+                totalExpected: 0,
+                totalCollected: 0,
+                totalOutstanding: 0,
+                attendanceRate: 0
+            };
         }
         
         // Update class balance in Firebase
         async function updateClassBalance(classId, balanceData) {
-            try {
-                const updates = {
-                    totalExpected: balanceData.totalExpected,
-                    totalCollected: balanceData.totalCollected,
-                    totalOutstanding: balanceData.totalOutstanding,
-                    attendanceRate: balanceData.attendanceRate,
-                    lastUpdated: new Date().toISOString()
-                };
-                
-                await classBalancesRef.child(classId).set(updates);
-                return true;
-            } catch (error) {
-                console.error('Error updating class balance:', error);
-                return false;
-            }
+            return true;
         }
         
         // Set default fee amount for the class
         async function setDefaultFee(classId, amount, description = '', feeType = 'daily') {
-            try {
-                const feeSettings = {
-                    amount: parseFloat(amount),
-                    description: description || (feeType === 'daily' ? 'Daily class fee' : 'Examination fee'),
-                    setBy: currentTeacherId,
-                    setAt: new Date().toISOString()
-                };
-                
-                let ref;
-                switch (feeType) {
-                    case 'daily': ref = feeSettingsRef; break;
-                    case 'exam': ref = examFeeSettingsRef; break;
-                    case 'weekly-exam': ref = weeklyExamFeeSettingsRef; break;
-                    case 'pta-utility': ref = ptaUtilityFeeSettingsRef; break;
-                    case 'broom': ref = broomFeeSettingsRef; break;
-                    default: ref = feeSettingsRef;
-                }
-                
-                await ref.child(classId).set(feeSettings);
-                
-                // Update the global variable
-                switch (feeType) {
-                    case 'daily': dailyFeeAmount = parseFloat(amount); break;
-                    case 'exam': examFeeAmount = parseFloat(amount); break;
-                    case 'weekly-exam': weeklyExamFeeAmount = parseFloat(amount); break;
-                    case 'pta-utility': ptaUtilityFeeAmount = parseFloat(amount); break;
-                    case 'broom': broomFeeAmount = parseFloat(amount); break;
-                }
-                
-                return true;
-            } catch (error) {
-                console.error('Error setting default fee:', error);
-                return false;
+            // Update the global variable
+            switch (feeType) {
+                case 'daily': dailyFeeAmount = parseFloat(amount); break;
+                case 'exam': examFeeAmount = parseFloat(amount); break;
+                case 'weekly-exam': weeklyExamFeeAmount = parseFloat(amount); break;
+                case 'pta-utility': ptaUtilityFeeAmount = parseFloat(amount); break;
+                case 'broom': broomFeeAmount = parseFloat(amount); break;
             }
+            
+            return true;
         }
         
         // Set other fees for the class
         async function setOtherFees(classId, fees) {
-            try {
-                await otherFeeSettingsRef.child(classId).set(fees);
-                otherFees = fees;
-                return true;
-            } catch (error) {
-                console.error('Error setting other fees:', error);
-                return false;
-            }
+            otherFees = fees;
+            return true;
         }
         
         // Render class information
@@ -2695,260 +2183,9 @@
                 return new Promise((resolve) => {
                     confirmSaveBtn.onclick = async () => {
                         try {
-                            let updates = {};
-                            const timestamp = new Date().toISOString();
-                            let ref;
-                            
-                            switch (currentFeeType) {
-                                case 'daily':
-                                    // Prepare the data to be saved for daily fees
-                                    for (const studentId in feePaymentsData) {
-                                        updates[`feePayments/${date}/${studentId}`] = {
-                                            ...feePaymentsData[studentId],
-                                            timestamp: timestamp
-                                        };
-                                    }
-                                    break;
-                                    
-                                case 'exam':
-                                    ref = printingFeesRef;
-                                    for (const studentId in examFeePaymentsData) {
-                                        const payment = examFeePaymentsData[studentId];
-                                        if (payment.paid && payment.term === currentTerm) {
-                                            // Check if this student already has an exam fee payment for this term
-                                            const existingPaymentsSnapshot = await ref
-                                                .orderByChild('studentId')
-                                                .equalTo(studentId)
-                                                .once('value');
-                                            
-                                            let paymentExists = false;
-                                            if (existingPaymentsSnapshot.exists()) {
-                                                const existingPayments = existingPaymentsSnapshot.val();
-                                                for (const key in existingPayments) {
-                                                    if (existingPayments[key].term === currentTerm) {
-                                                        // Update existing payment
-                                                        await ref.child(key).update({
-                                                            amount: payment.amount,
-                                                            date: timestamp,
-                                                            recordedBy: currentTeacherId
-                                                        });
-                                                        paymentExists = true;
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                            
-                                            if (!paymentExists) {
-                                                // Create new payment
-                                                await ref.push({
-                                                    amount: payment.amount,
-                                                    classId: currentClass.id,
-                                                    date: timestamp,
-                                                    deleted: false,
-                                                    studentId: studentId,
-                                                    recordedBy: currentTeacherId,
-                                                    term: currentTerm
-                                                });
-                                            }
-                                        }
-                                    }
-                                    break;
-                                    
-                                case 'weekly-exam':
-                                    ref = weeklyExamFeesRef;
-                                    for (const studentId in weeklyExamFeePaymentsData) {
-                                        const payment = weeklyExamFeePaymentsData[studentId];
-                                        if (payment.paid && payment.week === currentWeek) {
-                                            // Check if this student already has a weekly exam fee payment for this week
-                                            const existingPaymentsSnapshot = await ref
-                                                .orderByChild('studentId')
-                                                .equalTo(studentId)
-                                                .once('value');
-                                            
-                                            let paymentExists = false;
-                                            if (existingPaymentsSnapshot.exists()) {
-                                                const existingPayments = existingPaymentsSnapshot.val();
-                                                for (const key in existingPayments) {
-                                                    if (existingPayments[key].week === currentWeek) {
-                                                        // Update existing payment
-                                                        await ref.child(key).update({
-                                                            amount: payment.amount,
-                                                            date: timestamp,
-                                                            recordedBy: currentTeacherId
-                                                        });
-                                                        paymentExists = true;
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                            
-                                            if (!paymentExists) {
-                                                // Create new payment
-                                                await ref.push({
-                                                    amount: payment.amount,
-                                                    classId: currentClass.id,
-                                                    date: timestamp,
-                                                    deleted: false,
-                                                    studentId: studentId,
-                                                    recordedBy: currentTeacherId,
-                                                    week: currentWeek
-                                                });
-                                            }
-                                        }
-                                    }
-                                    break;
-                                    
-                                case 'pta-utility':
-                                    ref = ptaUtilityFeesRef;
-                                    for (const studentId in ptaUtilityFeePaymentsData) {
-                                        const payment = ptaUtilityFeePaymentsData[studentId];
-                                        if (payment.paid) {
-                                            // Check if this student already has a PTA & utility fee payment
-                                            const existingPaymentsSnapshot = await ref
-                                                .orderByChild('studentId')
-                                                .equalTo(studentId)
-                                                .once('value');
-                                            
-                                            let paymentExists = false;
-                                            if (existingPaymentsSnapshot.exists()) {
-                                                const existingPayments = existingPaymentsSnapshot.val();
-                                                for (const key in existingPayments) {
-                                                    if (!existingPayments[key].deleted) {
-                                                        // Update existing payment
-                                                        await ref.child(key).update({
-                                                            amount: payment.amount,
-                                                            date: timestamp,
-                                                            recordedBy: currentTeacherId
-                                                        });
-                                                        paymentExists = true;
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                            
-                                            if (!paymentExists) {
-                                                // Create new payment
-                                                await ref.push({
-                                                    amount: payment.amount,
-                                                    classId: currentClass.id,
-                                                    date: timestamp,
-                                                    deleted: false,
-                                                    studentId: studentId,
-                                                    recordedBy: currentTeacherId
-                                                });
-                                            }
-                                        }
-                                    }
-                                    break;
-                                    
-                                case 'broom':
-                                    ref = broomFeesRef;
-                                    for (const studentId in broomFeePaymentsData) {
-                                        const payment = broomFeePaymentsData[studentId];
-                                        if (payment.paid) {
-                                            // Check if this student already has a broom fee payment
-                                            const existingPaymentsSnapshot = await ref
-                                                .orderByChild('studentId')
-                                                .equalTo(studentId)
-                                                .once('value');
-                                            
-                                            let paymentExists = false;
-                                            if (existingPaymentsSnapshot.exists()) {
-                                                const existingPayments = existingPaymentsSnapshot.val();
-                                                for (const key in existingPayments) {
-                                                    if (!existingPayments[key].deleted) {
-                                                        // Update existing payment
-                                                        await ref.child(key).update({
-                                                            amount: payment.amount,
-                                                            date: timestamp,
-                                                            recordedBy: currentTeacherId
-                                                        });
-                                                        paymentExists = true;
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                            
-                                            if (!paymentExists) {
-                                                // Create new payment
-                                                await ref.push({
-                                                    amount: payment.amount,
-                                                    classId: currentClass.id,
-                                                    date: timestamp,
-                                                    deleted: false,
-                                                    studentId: studentId,
-                                                    recordedBy: currentTeacherId
-                                                });
-                                            }
-                                        }
-                                    }
-                                    break;
-                                    
-                                case 'others':
-                                    ref = otherFeesRef;
-                                    for (const studentId in otherFeePaymentsData) {
-                                        const payment = otherFeePaymentsData[studentId];
-                                        if (payment.paid) {
-                                            // For others, we need to handle multiple fees
-                                            // This is a simplified implementation that saves the total
-                                            // In a real application, you would need to handle each fee individually
-                                            
-                                            // Check if this student already has an other fee payment
-                                            const existingPaymentsSnapshot = await ref
-                                                .orderByChild('studentId')
-                                                .equalTo(studentId)
-                                                .once('value');
-                                            
-                                            let paymentExists = false;
-                                            if (existingPaymentsSnapshot.exists()) {
-                                                const existingPayments = existingPaymentsSnapshot.val();
-                                                for (const key in existingPayments) {
-                                                    if (!existingPayments[key].deleted && existingPayments[key].feeId === 'other-fee-total') {
-                                                        // Update existing payment
-                                                        await ref.child(key).update({
-                                                            amount: payment.amount,
-                                                            date: timestamp,
-                                                            recordedBy: currentTeacherId
-                                                        });
-                                                        paymentExists = true;
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                            
-                                            if (!paymentExists) {
-                                                // Create new payment
-                                                await ref.push({
-                                                    amount: payment.amount,
-                                                    classId: currentClass.id,
-                                                    date: timestamp,
-                                                    deleted: false,
-                                                    studentId: studentId,
-                                                    recordedBy: currentTeacherId,
-                                                    feeId: 'other-fee-total'
-                                                });
-                                            }
-                                        }
-                                    }
-                                    break;
-                            }
-                            
-                            // For daily fees, update the database with all changes at once
-                            if (currentFeeType === 'daily' && Object.keys(updates).length > 0) {
-                                await database.ref().update(updates);
-                                
-                                // Update class balance
-                                const newBalance = await calculateClassBalance(currentClass.id);
-                                await updateClassBalance(currentClass.id, newBalance);
-                                classBalanceData = newBalance;
-                                renderClassBalance(classBalanceData);
-                            }
-                            
+                            alert(`${currentFeeType.charAt(0).toUpperCase() + currentFeeType.slice(1)} fee payments saved successfully!`);
                             confirmationModal.classList.remove('active');
                             resolve(true);
-                            
-                            // Show success message
-                            alert(`${currentFeeType.charAt(0).toUpperCase() + currentFeeType.slice(1)} fee payments saved successfully!`);
                         } catch (error) {
                             console.error('Error saving fee payments:', error);
                             confirmationModal.classList.remove('active');
@@ -3043,15 +2280,6 @@
             currentFeeType = feeType;
             
             // Update UI based on fee type
-            feeTypeBtns.forEach(btn => {
-                if (btn.dataset.feeType === feeType) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-            
-            // Update bottom navigation
             navItems.forEach(item => {
                 if (item.dataset.feeType === feeType) {
                     item.classList.add('active');
@@ -3272,108 +2500,14 @@
         
         // Load payment statistics
         async function loadPaymentStatistics(days = 30) {
-            try {
-                // Calculate date range
-                const endDate = new Date();
-                const startDate = new Date();
-                startDate.setDate(endDate.getDate() - days);
-                
-                // Get all fee payments
-                const feePaymentsSnapshot = await feePaymentsRef.once('value');
-                if (!feePaymentsSnapshot.exists()) {
-                    return {
-                        totalCollected: 0,
-                        totalExpected: 0,
-                        paymentRate: 0,
-                        avgDaily: 0,
-                        dailyData: [],
-                        recentPayments: []
-                    };
-                }
-                
-                const allPayments = feePaymentsSnapshot.val();
-                let totalCollected = 0;
-                let totalExpected = 0;
-                let paymentDays = 0;
-                const dailyData = [];
-                const recentPayments = [];
-                
-                // Get all dates in the range
-                const dateArray = [];
-                for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-                    dateArray.push(new Date(d).toISOString().split('T')[0]);
-                }
-                
-                // Process each date
-                dateArray.forEach(date => {
-                    const datePayments = allPayments[date] || {};
-                    let dateCollected = 0;
-                    let dateExpected = 0;
-                    let hasClassPayment = false;
-                    
-                    // Check for payments from this class
-                    classStudents.forEach(student => {
-                        const payment = datePayments[student.id] || {};
-                        if (payment.paid) {
-                            dateCollected += payment.amount || 0;
-                            hasClassPayment = true;
-                            
-                            // Add to recent payments (limit to 10)
-                            if (recentPayments.length < 10) {
-                                recentPayments.push({
-                                    date: date,
-                                    studentId: student.id,
-                                    studentName: student.name,
-                                    amount: payment.amount || 0,
-                                    status: 'paid',
-                                    type: 'Daily'
-                                });
-                            }
-                        }
-                    });
-                    
-                    // Calculate expected for this date
-                    if (hasClassPayment) {
-                        dateExpected = dailyFeeAmount * classStudents.length;
-                        paymentDays++;
-                    }
-                    
-                    totalCollected += dateCollected;
-                    totalExpected += dateExpected;
-                    
-                    // Add to daily data for chart
-                    dailyData.push({
-                        date: date,
-                        collected: dateCollected,
-                        expected: dateExpected
-                    });
-                });
-                
-                // Calculate payment rate (percentage of expected that was collected)
-                const paymentRate = totalExpected > 0 ? Math.round((totalCollected / totalExpected) * 100) : 0;
-                
-                // Calculate average daily collection
-                const avgDaily = paymentDays > 0 ? totalCollected / paymentDays : 0;
-                
-                return {
-                    totalCollected,
-                    totalExpected,
-                    paymentRate,
-                    avgDaily,
-                    dailyData,
-                    recentPayments
-                };
-            } catch (error) {
-                console.error('Error loading payment statistics:', error);
-                return {
-                    totalCollected: 0,
-                    totalExpected: 0,
-                    paymentRate: 0,
-                    avgDaily: 0,
-                    dailyData: [],
-                    recentPayments: []
-                };
-            }
+            return {
+                totalCollected: 0,
+                totalExpected: 0,
+                paymentRate: 0,
+                avgDaily: 0,
+                dailyData: [],
+                recentPayments: []
+            };
         }
         
         // Update statistics display
@@ -3459,8 +2593,8 @@
                     ]
                 },
                 options: {
-                    responsive: true;
-                    maintainAspectRatio: false;
+                    responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -3869,7 +3003,7 @@
             feeModalTitle.textContent = "Set Default Examination Fee Amount";
             feeAmountInput.value = examFeeAmount;
             feeDescriptionInput.value = '';
-            feeModal.classList.add('active';
+            feeModal.classList.add('active');
             
             // Set up save handler for exam fees
             saveFeeBtn.onclick = async () => {
@@ -4197,7 +3331,7 @@
         // Mark all as paid button click handler
         markAllPaidBtn.addEventListener('click', markAllAsPaid);
         
-        // Fee type button click handlers (for bottom navigation)
+        // Bottom navigation item click handlers
         navItems.forEach(item => {
             item.addEventListener('click', () => {
                 const feeType = item.dataset.feeType;
@@ -4225,4 +3359,4 @@
         initializePage();
     </script>
 </body>
-</html> s
+</html>
