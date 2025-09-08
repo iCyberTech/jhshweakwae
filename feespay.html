@@ -42,6 +42,7 @@
             color: var(--text-color);
             min-height: 100vh;
             padding: 20px;
+            padding-bottom: 80px; /* Added padding for bottom navigation */
         }
 
         .container {
@@ -902,6 +903,94 @@
             justify-content: center;
         }
 
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            min-width: 60px;
+        }
+
+        .nav-item.active {
+            background: rgba(108, 92, 231, 0.1);
+        }
+
+        .nav-icon {
+            font-size: 1.2rem;
+            margin-bottom: 3px;
+        }
+
+        .nav-label {
+            font-size: 0.7rem;
+            text-align: center;
+        }
+
+        .nav-item.daily .nav-icon {
+            color: var(--primary-color);
+        }
+
+        .nav-item.exam .nav-icon {
+            color: var(--exam-color);
+        }
+
+        .nav-item.weekly-exam .nav-icon {
+            color: var(--weekly-exam-color);
+        }
+
+        .nav-item.pta-utility .nav-icon {
+            color: var(--pta-utility-color);
+        }
+
+        .nav-item.broom .nav-icon {
+            color: var(--broom-color);
+        }
+
+        .nav-item.others .nav-icon {
+            color: var(--others-color);
+        }
+
+        .nav-item.active.daily {
+            background: rgba(108, 92, 231, 0.2);
+        }
+
+        .nav-item.active.exam {
+            background: rgba(225, 112, 85, 0.2);
+        }
+
+        .nav-item.active.weekly-exam {
+            background: rgba(142, 68, 173, 0.2);
+        }
+
+        .nav-item.active.pta-utility {
+            background: rgba(22, 160, 133, 0.2);
+        }
+
+        .nav-item.active.broom {
+            background: rgba(39, 174, 96, 0.2);
+        }
+
+        .nav-item.active.others {
+            background: rgba(127, 140, 141, 0.2);
+        }
+
         @media (max-width: 768px) {
             .fees-header {
                 flex-direction: column;
@@ -922,6 +1011,23 @@
             .term-selector {
                 flex-direction: column;
                 align-items: flex-start;
+            }
+
+            .bottom-nav {
+                padding: 8px 0;
+            }
+
+            .nav-item {
+                min-width: 50px;
+                padding: 5px;
+            }
+
+            .nav-icon {
+                font-size: 1.1rem;
+            }
+
+            .nav-label {
+                font-size: 0.65rem;
             }
         }
     </style>
@@ -1057,7 +1163,7 @@
         <!-- Daily Fee Summary -->
         <div class="summary-card" id="fee-summary" style="display: none;">
             <div class="summary-title" id="fee-summary-title">Today's Fee Collection Summary</div>
-            <div class="fee-type-selector">
+            <div class="fee-type-selector" style="display: none;">
                 <button class="fee-type-btn active" data-fee-type="daily">Daily Fees</button>
                 <button class="fee-type-btn exam" data-fee-type="exam">Exam Fees</button>
                 <button class="fee-type-btn weekly-exam" data-fee-type="weekly-exam">Weekly Exams</button>
@@ -1126,6 +1232,34 @@
                     <p>No students found in this class</p>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav" id="bottom-nav">
+        <div class="nav-item daily active" data-fee-type="daily">
+            <div class="nav-icon"><i class="fas fa-calendar-day"></i></div>
+            <div class="nav-label">Daily</div>
+        </div>
+        <div class="nav-item exam" data-fee-type="exam">
+            <div class="nav-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="nav-label">Exam</div>
+        </div>
+        <div class="nav-item weekly-exam" data-fee-type="weekly-exam">
+            <div class="nav-icon"><i class="fas fa-tasks"></i></div>
+            <div class="nav-label">Weekly</div>
+        </div>
+        <div class="nav-item pta-utility" data-fee-type="pta-utility">
+            <div class="nav-icon"><i class="fas fa-hand-holding-usd"></i></div>
+            <div class="nav-label">PTA</div>
+        </div>
+        <div class="nav-item broom" data-fee-type="broom">
+            <div class="nav-icon"><i class="fas fa-broom"></i></div>
+            <div class="nav-label">Broom</div>
+        </div>
+        <div class="nav-item others" data-fee-type="others">
+            <div class="nav-icon"><i class="fas fa-ellipsis-h"></i></div>
+            <div class="nav-label">Others</div>
         </div>
     </div>
 
@@ -1287,7 +1421,7 @@
             messagingSenderId: "140188895278",
             appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
             measurementId: "G-7ER348P6VZ",
-            databaseURL: "https://sms-single-default-rtdb.firebaseio.com/"
+            databaseURL: "https://sms-single-default-rtdb.firebaseio.io/"
         };
         
         // Initialize Firebase
@@ -1337,6 +1471,10 @@
         const weekSelectorContainer = document.getElementById('week-selector-container');
         const termBtns = document.querySelectorAll('.term-btn');
         const weekBtns = document.querySelectorAll('[data-week]');
+        
+        // Bottom navigation elements
+        const bottomNav = document.getElementById('bottom-nav');
+        const navItems = document.querySelectorAll('.nav-item');
         
         // Modal elements
         const confirmationModal = document.getElementById('confirmation-modal');
@@ -1571,24 +1709,25 @@
                         }
                     } else {
                         // No user is signed in, try to sign in anonymously
-                        try {
-                            const result = await auth.signInAnonymously();
-                            const user = result.user;
-                            
-                            // For demo purposes, create a mock teacher
-                            currentTeacherId = "demo-teacher";
-                            currentTeacherData = {
-                                name: "Demo Teacher",
-                                email: "demo@teacher.com",
-                                profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
-                            };
-                            
-                            unsubscribe();
-                            resolve(currentTeacherData);
-                        } catch (error) {
-                            unsubscribe();
-                            reject(error);
-                        }
+                        auth.signInAnonymously()
+                            .then((result) => {
+                                const user = result.user;
+                                
+                                // For demo purposes, create a mock teacher
+                                currentTeacherId = "demo-teacher";
+                                currentTeacherData = {
+                                    name: "Demo Teacher",
+                                    email: "demo@teacher.com",
+                                    profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                                };
+                                
+                                unsubscribe();
+                                resolve(currentTeacherData);
+                            })
+                            .catch((error) => {
+                                unsubscribe();
+                                reject(error);
+                            });
                     }
                 }, (error) => {
                     unsubscribe();
@@ -2913,6 +3052,15 @@
                 }
             });
             
+            // Update bottom navigation
+            navItems.forEach(item => {
+                if (item.dataset.feeType === feeType) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
             let feeTitle = '';
             switch (feeType) {
                 case 'daily': feeTitle = "Today's Fee Collection Summary"; break;
@@ -4050,10 +4198,10 @@
         // Mark all as paid button click handler
         markAllPaidBtn.addEventListener('click', markAllAsPaid);
         
-        // Fee type button click handlers
-        feeTypeBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const feeType = btn.dataset.feeType;
+        // Fee type button click handlers (for bottom navigation)
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const feeType = item.dataset.feeType;
                 handleFeeTypeChange(feeType);
             });
         });
