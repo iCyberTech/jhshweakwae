@@ -1242,17 +1242,17 @@ header {
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
-            authDomain: "sms-single.firebaseapp.com",
-            projectId: "sms-single",
-            storageBucket: "sms-single.appspot.com",
-            messagingSenderId: "140188895278",
-            appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
-            measurementId: "G-7ER348P6VZ",
-            databaseURL: "https://sms-single-default-rtdb.firebaseio.com/"
-        };
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
+  authDomain: "sms-single.firebaseapp.com",
+  databaseURL: "https://sms-single-default-rtdb.firebaseio.com",
+  projectId: "sms-single",
+  storageBucket: "sms-single.firebasestorage.app",
+  messagingSenderId: "140188895278",
+  appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
+  measurementId: "G-7ER348P6VZ"
+};
         
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
