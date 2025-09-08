@@ -1,0 +1,1960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTA & Utility Fees Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --text-color: #2d3436;
+            --light-text: #636e72;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --success-color: #00b894;
+            --danger-color: #d63031;
+            --warning-color: #fdcb6e;
+            --info-color: #0984e3;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding-bottom: 20px;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        .greeting h1 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .greeting p {
+            font-size: 0.85rem;
+            color: var(--light-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .fees-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .action-btn.success {
+            background: var(--success-color);
+            color: white;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .action-btn.success:hover {
+            background: #00a882;
+        }
+
+        .action-btn.secondary {
+            background: var(--glass-bg);
+            color: var(--text-color);
+        }
+
+        .currency-selector {
+            position: relative;
+        }
+
+        .currency-btn {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 70px;
+            justify-content: space-between;
+        }
+
+        .currency-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 10px 0;
+            z-index: 100;
+            display: none;
+            min-width: 180px;
+        }
+
+        .currency-dropdown.show {
+            display: block;
+        }
+
+        .currency-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .currency-option:hover {
+            background-color: #f5f7fa;
+        }
+
+        .currency-flag {
+            width: 20px;
+            height: 15px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+
+        /* Class Information */
+        .class-info {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+        }
+
+        .class-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .class-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: var(--light-text);
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        /* Term Selector */
+        .term-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .term-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .term-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Balance Card */
+        .balance-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+        }
+
+        .balance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .balance-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .balance-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .balance-amount.balance-positive {
+            color: var(--success-color);
+        }
+
+        .balance-amount.balance-negative {
+            color: var(--danger-color);
+        }
+
+        .balance-amount.balance-neutral {
+            color: var(--info-color);
+        }
+
+        .balance-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .balance-detail {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .balance-label {
+            font-size: 0.8rem;
+            color: var(--light-text);
+            margin-bottom: 5px;
+        }
+
+        .balance-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Summary Card */
+        .summary-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+        }
+
+        .summary-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--light-text);
+        }
+
+        .total-amount {
+            text-align: center;
+            font-weight: 600;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+        }
+
+        /* Fees Container */
+        .fees-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+        }
+
+        .fees-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .fees-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .fees-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mark-all-paid-btn {
+            background: var(--info-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .mark-all-paid-btn:hover {
+            background: #0877d1;
+        }
+
+        /* Students List */
+        .students-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .student-card {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            gap: 15px;
+        }
+
+        .student-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .student-info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .student-name {
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .student-id {
+            font-size: 0.8rem;
+            color: var(--light-text);
+        }
+
+        .fee-status {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .fee-amount {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .status-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .status-btn {
+            border: none;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .status-btn.active {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .status-btn.inactive {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .status-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .no-students {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--light-text);
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--light-text);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            color: var(--text-color);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .fees-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .class-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .balance-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .summary-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .fees-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .student-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .fee-status {
+                align-items: center;
+                flex-direction: row;
+                justify-content: space-between;
+                width: 100%;
+            }
+            
+            .status-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .term-selector {
+                justify-content: center;
+            }
+            
+            .term-btn {
+                flex: 1;
+                text-align: center;
+                min-width: 80px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .balance-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .fees-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .mark-all-paid-btn, .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Prevent zoom on input focus for iOS */
+        @media screen and (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading PTA & Utility Fees Information...</div>
+    </div>
+
+    <!-- Main Content (initially hidden) -->
+    <div id="main-content" style="display: none;">
+        <div class="container">
+            <header>
+                <div class="profile">
+                    <img id="profile-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="profile-img">
+                    <div class="greeting">
+                        <h1 id="greeting-title">PTA & Utility Fees</h1>
+                        <p id="greeting-subtitle">Term-based fee collection for your class</p>
+                    </div>
+                </div>
+                <div class="fees-actions">
+                    <button class="action-btn secondary" id="stats-btn">
+                        <i class="fas fa-chart-bar"></i> Statistics
+                    </button>
+                    <div class="currency-selector">
+                        <button class="currency-btn" id="currency-btn">
+                            <span id="current-currency">GHS</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="currency-dropdown" id="currency-dropdown">
+                            <div class="currency-option" data-currency="GHS" data-symbol="₵" data-rate="1">
+                                <img src="https://flagcdn.com/w20/gh.png" class="currency-flag"> Ghana Cedi (₵)
+                            </div>
+                            <div class="currency-option" data-currency="USD" data-symbol="$" data-rate="12.5">
+                                <img src="https://flagcdn.com/w20/us.png" class="currency-flag"> US Dollar ($)
+                            </div>
+                            <div class="currency-option" data-currency="EUR" data-symbol="€" data-rate="13.8">
+                                <img src="https://flagcdn.com/w20/eu.png" class="currency-flag"> Euro (€)
+                            </div>
+                            <div class="currency-option" data-currency="NGN" data-symbol="₦" data-rate="0.03">
+                                <img src="https://flagcdn.com/w20/ng.png" class="currency-flag"> Nigerian Naira (₦)
+                            </div>
+                            <div class="currency-option" data-currency="ZAR" data-symbol="R" data-rate="0.68">
+                                <img src="https://flagcdn.com/w20/za.png" class="currency-flag"> South African Rand (R)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Class Information -->
+            <div class="class-info" id="class-info">
+                <h2 class="class-title" id="class-name">Loading class...</h2>
+                <div class="class-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Class ID</div>
+                        <div class="detail-value" id="class-id">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Room</div>
+                        <div class="detail-value" id="class-room">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">PTA Fee</div>
+                        <div class="detail-value" id="class-pta-fee">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Utility Fee</div>
+                        <div class="detail-value" id="class-utility-fee">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Term Selector -->
+            <div class="term-selector">
+                <button class="term-btn active" data-term="1">Term 1</button>
+                <button class="term-btn" data-term="2">Term 2</button>
+                <button class="term-btn" data-term="3">Term 3</button>
+            </div>
+
+            <!-- Class Balance Summary -->
+            <div class="balance-card" id="class-balance" style="display: none;">
+                <div class="balance-header">
+                    <h3 class="balance-title">Term Financial Summary</h3>
+                    <button class="action-btn secondary" id="set-fee-btn">
+                        <i class="fas fa-cog"></i> Set Fees
+                    </button>
+                </div>
+                <div class="balance-amount" id="total-balance">₵0.00</div>
+                <div class="balance-details">
+                    <div class="balance-detail">
+                        <div class="balance-label">Total Expected</div>
+                        <div class="balance-value" id="total-expected">₵0.00</div>
+                    </div>
+                    <div class="balance-detail">
+                        <div class="balance-label">Total Collected</div>
+                        <div class="balance-value" id="total-collected-balance">₵0.00</div>
+                    </div>
+                    <div class="balance-detail">
+                        <div class="balance-label">Total Outstanding</div>
+                        <div class="balance-value" id="total-outstanding">₵0.00</div>
+                    </div>
+                    <div class="balance-detail">
+                        <div class="balance-label">Payment Rate</div>
+                        <div class="balance-value" id="payment-rate">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Term Fee Summary -->
+            <div class="summary-card" id="fee-summary" style="display: none;">
+                <div class="summary-title">Term Fee Collection Summary</div>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="total-students">0</div>
+                        <div class="stat-label">Total Students</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="paid-count">0</div>
+                        <div class="stat-label">Paid</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="unpaid-count">0</div>
+                        <div class="stat-label">Unpaid</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="total-collected">₵0</div>
+                        <div class="stat-label">Total Collected</div>
+                    </div>
+                </div>
+                <div class="total-amount" id="expected-total">Expected Total: ₵0</div>
+            </div>
+
+            <!-- Fees Container -->
+            <div class="fees-container">
+                <div class="fees-header">
+                    <h3 class="fees-title">Student Fee Payments</h3>
+                    <div class="fees-actions">
+                        <button class="mark-all-paid-btn" id="mark-all-paid-btn">
+                            <i class="fas fa-check-double"></i> Mark All Paid
+                        </button>
+                        <button class="action-btn success" id="save-btn">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                        <button class="action-btn secondary" id="reset-btn">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <div class="students-list" id="students-list">
+                    <div class="no-students">
+                        <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>No students found in this class</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmation-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirm Fee Collection</h3>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmation-message">Are you sure you want to save the fee payments for this term?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" id="cancel-btn">Cancel</button>
+                <button class="action-btn success" id="confirm-save-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Set Fee Modal -->
+    <div class="modal" id="fee-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Set PTA & Utility Fees</h3>
+                <button class="close-btn" id="close-fee-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="pta-fee-amount" class="form-label">PTA Fee Amount (<span id="fee-currency-symbol">₵</span>)</label>
+                    <input type="number" id="pta-fee-amount" class="form-input" placeholder="Enter PTA fee amount" step="0.01" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="utility-fee-amount" class="form-label">Utility Fee Amount (<span id="utility-fee-currency-symbol">₵</span>)</label>
+                    <input type="number" id="utility-fee-amount" class="form-input" placeholder="Enter utility fee amount" step="0.01" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="fee-description" class="form-label">Fee Description (Optional)</label>
+                    <input type="text" id="fee-description" class="form-input" placeholder="E.g., PTA Development fee, Utility maintenance fee, etc.">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" id="cancel-fee-btn">Cancel</button>
+                <button class="action-btn success" id="save-fee-btn">Save Fees</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Modal -->
+    <div class="modal" id="stats-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Payment Statistics</h3>
+                <button class="close-btn" id="close-stats-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="stats-header">
+                    <h4>All Terms Summary</h4>
+                </div>
+
+                <div class="stats-summary">
+                    <div class="stats-summary-item">
+                        <div class="stats-summary-value" id="stats-total-collected">₵0.00</div>
+                        <div class="stats-summary-label">Total Collected</div>
+                    </div>
+                    <div class="stats-summary-item">
+                        <div class="stats-summary-value" id="stats-total-expected">₵0.00</div>
+                        <div class="stats-summary-label">Total Expected</div>
+                    </div>
+                    <div class="stats-summary-item">
+                        <div class="stats-summary-value" id="stats-payment-rate">0%</div>
+                        <div class="stats-summary-label">Payment Rate</div>
+                    </div>
+                </div>
+
+                <h4>Term-wise Breakdown</h4>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Term</th>
+                            <th>PTA Fee</th>
+                            <th>Utility Fee</th>
+                            <th>Collected</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stats-term-list">
+                        <tr>
+                            <td>Term 1</td>
+                            <td>₵0.00</td>
+                            <td>₵0.00</td>
+                            <td>₵0.00</td>
+                            <td><span class="payment-status-badge payment-status-unpaid">0%</span></td>
+                        </tr>
+                        <tr>
+                            <td>Term 2</td>
+                            <td>₵0.00</td>
+                            <td>₵0.00</td>
+                            <td>₵0.00</td>
+                            <td><span class="payment-status-badge payment-status-unpaid">0%</span></td>
+                        </tr>
+                        <tr>
+                            <td>Term 3</td>
+                            <td>₵0.00</td>
+                            <td>₵0.00</td>
+                            <td>₵0.00</td>
+                            <td><span class="payment-status-badge payment-status-unpaid">0%</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" id="close-stats-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
+            authDomain: "sms-single.firebaseapp.com",
+            databaseURL: "https://sms-single-default-rtdb.firebaseio.com",
+            projectId: "sms-single",
+            storageBucket: "sms-single.firebasestorage.app",
+            messagingSenderId: "140188895278",
+            appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
+            measurementId: "G-7ER348P6VZ"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        // DOM Elements
+        const mainContent = document.getElementById('main-content');
+        const loadingScreen = document.getElementById('loading-screen');
+        const studentsList = document.getElementById('students-list');
+        const classInfo = document.getElementById('class-info');
+        const classBalance = document.getElementById('class-balance');
+        const feeSummary = document.getElementById('fee-summary');
+        const termBtns = document.querySelectorAll('.term-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const confirmSaveBtn = document.getElementById('confirm-save-btn');
+        const feeModal = document.getElementById('fee-modal');
+        const setFeeBtn = document.getElementById('set-fee-btn');
+        const closeFeeModalBtn = document.getElementById('close-fee-modal');
+        const cancelFeeBtn = document.getElementById('cancel-fee-btn');
+        const saveFeeBtn = document.getElementById('save-fee-btn');
+        const ptaFeeAmountInput = document.getElementById('pta-fee-amount');
+        const utilityFeeAmountInput = document.getElementById('utility-fee-amount');
+        const feeDescriptionInput = document.getElementById('fee-description');
+        const currencyBtn = document.getElementById('currency-btn');
+        const currencyDropdown = document.getElementById('currency-dropdown');
+        const currentCurrency = document.getElementById('current-currency');
+        const statsBtn = document.getElementById('stats-btn');
+        const statsModal = document.getElementById('stats-modal');
+        const closeStatsModalBtn = document.getElementById('close-stats-modal');
+        const closeStatsBtn = document.getElementById('close-stats-btn');
+        const profileImg = document.getElementById('profile-img');
+        const greetingTitle = document.getElementById('greeting-title');
+        const greetingSubtitle = document.getElementById('greeting-subtitle');
+
+        // Firebase references
+        const authUsersRef = database.ref('authUsers');
+        const teachersRef = database.ref('teachers');
+        const classesRef = database.ref('classes');
+        const ptaUtilityPaymentsRef = database.ref('ptaUtilityPayments');
+        const ptaUtilitySettingsRef = database.ref('ptaUtilitySettings');
+        const studentsRef = database.ref('students');
+
+        // Global variables
+        let currentTerm = 1;
+        let currentTeacherId = null;
+        let currentTeacherData = null;
+        let currentClass = null;
+        let classStudents = [];
+        let feePaymentsData = {};
+        let currencyData = {
+            code: 'GHS',
+            symbol: '₵',
+            rate: 1
+        };
+        let ptaFeeAmount = 0;
+        let utilityFeeAmount = 0;
+
+        // Initialize the app
+        async function initApp() {
+            loadingScreen.style.display = 'flex';
+            mainContent.style.display = 'none';
+            
+            try {
+                // Identify the current teacher
+                const teacher = await identifyCurrentTeacher();
+                
+                if (!teacher) {
+                    throw new Error('Teacher not identified');
+                }
+                
+                // Update teacher profile
+                profileImg.src = teacher.profileImage || 'https://randomuser.me/api/portraits/women/44.jpg';
+                greetingTitle.textContent = `PTA & Utility Fees`;
+                greetingSubtitle.textContent = `Term-based fee collection for ${teacher.name}'s class`;
+                
+                // Find the class assigned to this teacher
+                currentClass = await findAssignedClass(teacher.name);
+                
+                if (!currentClass) {
+                    throw new Error('No class assigned to this teacher');
+                }
+                
+                // Get the PTA and Utility fee amounts for this class
+                const feeSettings = await getFeeSettings(currentClass.id);
+                ptaFeeAmount = feeSettings.pta || 0;
+                utilityFeeAmount = feeSettings.utility || 0;
+                
+                // Render class information
+                renderClassInfo(currentClass);
+                
+                // Load students for the class
+                classStudents = await loadClassStudents(currentClass.id);
+                
+                // Load fee payments data for current term
+                feePaymentsData = await loadFeePaymentsData(currentTerm);
+                
+                // Initialize empty records for students without payment data
+                classStudents.forEach(student => {
+                    if (!feePaymentsData[student.id]) {
+                        feePaymentsData[student.id] = {
+                            pta: false,
+                            utility: false,
+                            timestamp: new Date().toISOString(),
+                            recordedBy: currentTeacherId
+                        };
+                    }
+                });
+                
+                // Render students with fee payment options
+                renderStudentsList(classStudents, feePaymentsData, currentTerm);
+                
+                // Set up event listeners
+                setupEventListeners();
+                
+                // Hide loading screen and show main content
+                loadingScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Initialization error:', error);
+                loadingScreen.querySelector('.loading-text').textContent = 'Error loading class information. Using demo mode.';
+                
+                // Create demo data for testing
+                setTimeout(async () => {
+                    try {
+                        currentTeacherData = {
+                            name: "Demo Teacher",
+                            email: "demo@teacher.com",
+                            profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                        };
+                        
+                        currentClass = {
+                            id: "demo-class",
+                            name: "Demo Class",
+                            room: "Room 101",
+                            teacher: "Demo Teacher"
+                        };
+                        
+                        classStudents = [
+                            {
+                                id: "student1",
+                                name: "John Doe",
+                                profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
+                            },
+                            {
+                                id: "student2",
+                                name: "Jane Smith",
+                                profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                            },
+                            {
+                                id: "student3",
+                                name: "Michael Johnson",
+                                profileImage: "https://randomuser.me/api/portraits/men/22.jpg"
+                            }
+                        ];
+                        
+                        ptaFeeAmount = 50;
+                        utilityFeeAmount = 30;
+                        feePaymentsData = {};
+                        
+                        // Initialize empty records for students
+                        classStudents.forEach(student => {
+                            feePaymentsData[student.id] = {
+                                pta: false,
+                                utility: false,
+                                timestamp: new Date().toISOString(),
+                                recordedBy: "demo-teacher"
+                            };
+                        });
+                        
+                        // Update UI with demo data
+                        profileImg.src = currentTeacherData.profileImage;
+                        greetingTitle.textContent = `PTA & Utility Fees`;
+                        greetingSubtitle.textContent = `Term-based fee collection for ${currentTeacherData.name}'s class`;
+                        
+                        renderClassInfo(currentClass);
+                        renderStudentsList(classStudents, feePaymentsData, currentTerm);
+                        
+                        // Set up event listeners
+                        setupEventListeners();
+                        
+                        loadingScreen.style.display = 'none';
+                        mainContent.style.display = 'block';
+                    } catch (demoError) {
+                        console.error('Demo mode error:', demoError);
+                        loadingScreen.querySelector('.loading-text').textContent = 'Failed to load demo data. Please refresh the page.';
+                    }
+                }, 2000);
+            }
+        }
+
+        // Identify the current teacher based on Firebase Auth
+        async function identifyCurrentTeacher() {
+            return new Promise((resolve, reject) => {
+                // Check if user is already signed in
+                const unsubscribe = auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        try {
+                            // User is signed in, get their data from authUsers
+                            const authUserSnapshot = await database.ref(`authUsers/${user.uid}`).once('value');
+                            
+                            if (authUserSnapshot.exists()) {
+                                const authUser = authUserSnapshot.val();
+                                
+                                if (authUser.userType === 'teacher') {
+                                    currentTeacherId = authUser.userId;
+                                    
+                                    // Get teacher details from teachers collection
+                                    const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
+                                    
+                                    if (teacherSnapshot.exists()) {
+                                        currentTeacherData = teacherSnapshot.val();
+                                        unsubscribe();
+                                        resolve(currentTeacherData);
+                                        return;
+                                    }
+                                }
+                            }
+                            
+                            // If we reach here, the auth user doesn't have proper teacher data
+                            unsubscribe();
+                            reject(new Error('Teacher data not found for authenticated user'));
+                        } catch (error) {
+                            unsubscribe();
+                            reject(error);
+                        }
+                    } else {
+                        // No user is signed in, try to sign in anonymously
+                        try {
+                            const result = await auth.signInAnonymously();
+                            const user = result.user;
+                            
+                            // For demo purposes, create a mock teacher
+                            currentTeacherId = "demo-teacher";
+                            currentTeacherData = {
+                                name: "Demo Teacher",
+                                email: "demo@teacher.com",
+                                profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                            };
+                            
+                            unsubscribe();
+                            resolve(currentTeacherData);
+                        } catch (error) {
+                            unsubscribe();
+                            reject(error);
+                        }
+                    }
+                }, (error) => {
+                    unsubscribe();
+                    reject(error);
+                });
+            });
+        }
+
+        // Find the class assigned to this teacher
+        async function findAssignedClass(teacherName) {
+            try {
+                const classesSnapshot = await classesRef.once('value');
+                
+                // If no classes exist, create a demo class
+                if (!classesSnapshot.exists()) {
+                    const demoClassId = "demo-class";
+                    const demoClass = {
+                        id: demoClassId,
+                        name: "Demo Class",
+                        room: "Room 101",
+                        teacher: teacherName,
+                        students: ["student1", "student2", "student3"]
+                    };
+                    
+                    await classesRef.child(demoClassId).set(demoClass);
+                    return demoClass;
+                }
+                
+                const classes = classesSnapshot.val();
+                let assignedClass = null;
+                
+                // Find the first class where teacher name matches
+                for (const classId in classes) {
+                    if (classes[classId].teacher === teacherName) {
+                        assignedClass = {
+                            id: classId,
+                            ...classes[classId]
+                        };
+                        break;
+                    }
+                }
+                
+                // If no class found, create a demo class
+                if (!assignedClass) {
+                    const demoClassId = "demo-class";
+                    const demoClass = {
+                        id: demoClassId,
+                        name: "Demo Class",
+                        room: "Room 101",
+                        teacher: teacherName,
+                        students: ["student1", "student2", "student3"]
+                    };
+                    
+                    await classesRef.child(demoClassId).set(demoClass);
+                    return demoClass;
+                }
+                
+                return assignedClass;
+            } catch (error) {
+                console.error('Error finding assigned class:', error);
+                
+                // Create a demo class as fallback
+                const demoClassId = "demo-class";
+                const demoClass = {
+                    id: demoClassId,
+                    name: "Demo Class",
+                    room: "Room 101",
+                    teacher: teacherName,
+                    students: ["student1", "student2", "student3"]
+                };
+                
+                try {
+                    await classesRef.child(demoClassId).set(demoClass);
+                } catch (e) {
+                    console.error('Failed to create demo class:', e);
+                }
+                
+                return demoClass;
+            }
+        }
+
+        // Load students for the assigned class
+        async function loadClassStudents(classId) {
+            try {
+                // Get the students array from the class document
+                const classSnapshot = await classesRef.child(classId).once('value');
+                
+                if (!classSnapshot.exists()) {
+                    return [];
+                }
+                
+                const classData = classSnapshot.val();
+                const studentIds = classData.students || [];
+                
+                if (studentIds.length === 0) {
+                    return [];
+                }
+                
+                // Get all students from the students collection
+                const allStudentsSnapshot = await studentsRef.once('value');
+                
+                // If no students exist, create demo students
+                if (!allStudentsSnapshot.exists()) {
+                    const demoStudents = {
+                        student1: {
+                            id: "student1",
+                            name: "John Doe",
+                            profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
+                        },
+                        student2: {
+                            id: "student2",
+                            name: "Jane Smith",
+                            profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                        },
+                        student3: {
+                            id: "student3",
+                            name: "Michael Johnson",
+                            profileImage: "https://randomuser.me/api/portraits/men/22.jpg"
+                        }
+                    };
+                    
+                    await studentsRef.set(demoStudents);
+                    return Object.values(demoStudents);
+                }
+                
+                const allStudents = allStudentsSnapshot.val();
+                const classStudents = [];
+                
+                // Match student IDs with their data
+                for (const studentId of studentIds) {
+                    if (allStudents[studentId]) {
+                        classStudents.push({
+                            id: studentId,
+                            ...allStudents[studentId]
+                        });
+                    }
+                }
+                
+                return classStudents;
+            } catch (error) {
+                console.error('Error loading class students:', error);
+                
+                // Return demo students as fallback
+                return [
+                    {
+                        id: "student1",
+                        name: "John Doe",
+                        profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
+                    },
+                    {
+                        id: "student2",
+                        name: "Jane Smith",
+                        profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                    },
+                    {
+                        id: "student3",
+                        name: "Michael Johnson",
+                        profileImage: "https://randomuser.me/api/portraits/men/22.jpg"
+                    }
+                ];
+            }
+        }
+
+        // Get the PTA and Utility fee settings for the class
+        async function getFeeSettings(classId) {
+            try {
+                const feeSettingsSnapshot = await ptaUtilitySettingsRef.child(classId).once('value');
+                if (feeSettingsSnapshot.exists()) {
+                    return feeSettingsSnapshot.val();
+                }
+                
+                // Return default fees if no settings exist
+                return {
+                    pta: 50,
+                    utility: 30
+                };
+            } catch (error) {
+                console.error('Error getting fee settings:', error);
+                return {
+                    pta: 50,
+                    utility: 30
+                };
+            }
+        }
+
+        // Load fee payments data for the selected term
+        async function loadFeePaymentsData(term) {
+            try {
+                const feePaymentsSnapshot = await ptaUtilityPaymentsRef.child(term).once('value');
+                
+                if (feePaymentsSnapshot.exists()) {
+                    return feePaymentsSnapshot.val();
+                }
+                
+                return {};
+            } catch (error) {
+                console.error('Error loading fee payments data:', error);
+                return {};
+            }
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Term selection
+            termBtns.forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    termBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentTerm = parseInt(btn.dataset.term);
+                    
+                    // Load fee payments for the selected term
+                    feePaymentsData = await loadFeePaymentsData(currentTerm);
+                    
+                    // Initialize empty records for students without payment data
+                    classStudents.forEach(student => {
+                        if (!feePaymentsData[student.id]) {
+                            feePaymentsData[student.id] = {
+                                pta: false,
+                                utility: false,
+                                timestamp: new Date().toISOString(),
+                                recordedBy: currentTeacherId
+                            };
+                        }
+                    });
+                    
+                    // Update the display
+                    renderStudentsList(classStudents, feePaymentsData, currentTerm);
+                });
+            });
+
+            // Save button
+            saveBtn.addEventListener('click', () => {
+                showConfirmationModal();
+            });
+
+            // Reset button
+            resetBtn.addEventListener('click', () => {
+                resetFeePayments();
+            });
+
+            // Mark all paid button
+            markAllPaidBtn.addEventListener('click', () => {
+                markAllAsPaid();
+            });
+
+            // Modal controls
+            closeModalBtn.addEventListener('click', hideConfirmationModal);
+            cancelBtn.addEventListener('click', hideConfirmationModal);
+            confirmSaveBtn.addEventListener('click', saveFeePayments);
+
+            // Set fee button
+            setFeeBtn.addEventListener('click', () => {
+                showFeeModal();
+            });
+
+            // Fee modal controls
+            closeFeeModalBtn.addEventListener('click', hideFeeModal);
+            cancelFeeBtn.addEventListener('click', hideFeeModal);
+            saveFeeBtn.addEventListener('click', saveFees);
+
+            // Currency selector
+            currencyBtn.addEventListener('click', () => {
+                currencyDropdown.classList.toggle('show');
+            });
+
+            // Currency options
+            const currencyOptions = document.querySelectorAll('.currency-option');
+            currencyOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const code = option.dataset.currency;
+                    const symbol = option.dataset.symbol;
+                    const rate = parseFloat(option.dataset.rate);
+                    
+                    currencyData = { code, symbol, rate };
+                    currentCurrency.textContent = code;
+                    
+                    currencyDropdown.classList.remove('show');
+                    
+                    // Update all displayed amounts
+                    updateCurrencyDisplay();
+                });
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!currencyBtn.contains(e.target) && !currencyDropdown.contains(e.target)) {
+                    currencyDropdown.classList.remove('show');
+                }
+            });
+
+            // Stats button
+            statsBtn.addEventListener('click', () => {
+                showStatsModal();
+            });
+
+            // Stats modal controls
+            closeStatsModalBtn.addEventListener('click', hideStatsModal);
+            closeStatsBtn.addEventListener('click', hideStatsModal);
+        }
+
+        // Render class information
+        function renderClassInfo(classData) {
+            document.getElementById('class-name').textContent = classData.name || 'Unnamed Class';
+            document.getElementById('class-id').textContent = classData.id || '-';
+            document.getElementById('class-room').textContent = classData.room || 'Not assigned';
+            document.getElementById('class-pta-fee').textContent = formatCurrency(ptaFeeAmount);
+            document.getElementById('class-utility-fee').textContent = formatCurrency(utilityFeeAmount);
+            
+            // Show the class info, balance, and summary sections
+            classInfo.style.display = 'block';
+            classBalance.style.display = 'block';
+            feeSummary.style.display = 'block';
+        }
+
+        // Render students list with fee payment options
+        function renderStudentsList(students, feePaymentsData, term) {
+            studentsList.innerHTML = '';
+            
+            if (students.length === 0) {
+                studentsList.innerHTML = `
+                    <div class="no-students">
+                        <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>No students found in this class</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Calculate summary statistics
+            let paidCount = 0;
+            let unpaidCount = 0;
+            let totalCollected = 0;
+            
+            // Add each student to the list
+            students.forEach(student => {
+                const studentPayments = feePaymentsData[student.id] || { pta: false, utility: false };
+                
+                // Check if both fees are paid
+                const isFullyPaid = studentPayments.pta && studentPayments.utility;
+                const isPartiallyPaid = (studentPayments.pta || studentPayments.utility) && !isFullyPaid;
+                
+                // Update counts
+                if (isFullyPaid) {
+                    paidCount++;
+                    totalCollected += ptaFeeAmount + utilityFeeAmount;
+                } else if (isPartiallyPaid) {
+                    unpaidCount++;
+                    if (studentPayments.pta) totalCollected += ptaFeeAmount;
+                    if (studentPayments.utility) totalCollected += utilityFeeAmount;
+                } else {
+                    unpaidCount++;
+                }
+                
+                // Create student card
+                const studentCard = document.createElement('div');
+                studentCard.className = 'student-card';
+                studentCard.innerHTML = `
+                    <img src="${student.profileImage || student.avatar || 'https://randomuser.me/api/portraits/lego/1.jpg'}" 
+                         alt="${student.name}" 
+                         class="student-avatar">
+                    <div class="student-info">
+                        <div class="student-name">${student.name || 'Unknown Student'}</div>
+                        <div class="student-id">ID: ${student.id || 'N/A'}</div>
+                    </div>
+                    <div class="fee-status">
+                        <div class="fee-amount">${formatCurrency(ptaFeeAmount + utilityFeeAmount)}</div>
+                        <div class="status-buttons">
+                            <button class="status-btn ${studentPayments.pta ? 'active' : 'inactive'}" 
+                                    data-student="${student.id}" data-fee="pta">
+                                <i class="fas ${studentPayments.pta ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                                PTA
+                            </button>
+                            <button class="status-btn ${studentPayments.utility ? 'active' : 'inactive'}" 
+                                    data-student="${student.id}" data-fee="utility">
+                                <i class="fas ${studentPayments.utility ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                                Utility
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Add event listeners to status buttons
+                const ptaBtn = studentCard.querySelector('[data-fee="pta"]');
+                const utilityBtn = studentCard.querySelector('[data-fee="utility"]');
+                
+                ptaBtn.addEventListener('click', () => {
+                    toggleFeePayment(student.id, 'pta');
+                });
+                
+                utilityBtn.addEventListener('click', () => {
+                    toggleFeePayment(student.id, 'utility');
+                });
+                
+                studentsList.appendChild(studentCard);
+            });
+            
+            // Update summary statistics
+            const totalStudents = students.length;
+            const expectedTotal = totalStudents * (ptaFeeAmount + utilityFeeAmount);
+            const paymentRate = expectedTotal > 0 ? Math.round((totalCollected / expectedTotal) * 100) : 0;
+            
+            document.getElementById('total-students').textContent = totalStudents;
+            document.getElementById('paid-count').textContent = paidCount;
+            document.getElementById('unpaid-count').textContent = unpaidCount;
+            document.getElementById('total-collected').textContent = formatCurrency(totalCollected);
+            document.getElementById('expected-total').textContent = `Expected Total: ${formatCurrency(expectedTotal)}`;
+            
+            // Update balance card
+            document.getElementById('total-balance').textContent = formatCurrency(totalCollected);
+            document.getElementById('total-expected').textContent = formatCurrency(expectedTotal);
+            document.getElementById('total-collected-balance').textContent = formatCurrency(totalCollected);
+            document.getElementById('total-outstanding').textContent = formatCurrency(expectedTotal - totalCollected);
+            document.getElementById('payment-rate').textContent = `${paymentRate}%`;
+            
+            // Set balance color based on payment rate
+            const balanceAmount = document.getElementById('total-balance');
+            balanceAmount.classList.remove('balance-positive', 'balance-negative', 'balance-neutral');
+            
+            if (paymentRate >= 80) {
+                balanceAmount.classList.add('balance-positive');
+            } else if (paymentRate >= 50) {
+                balanceAmount.classList.add('balance-neutral');
+            } else {
+                balanceAmount.classList.add('balance-negative');
+            }
+        }
+
+        // Toggle fee payment status
+        function toggleFeePayment(studentId, feeType) {
+            // Toggle the fee payment status
+            feePaymentsData[studentId][feeType] = !feePaymentsData[studentId][feeType];
+            feePaymentsData[studentId].timestamp = new Date().toISOString();
+            feePaymentsData[studentId].recordedBy = currentTeacherId;
+            
+            // Update the display
+            renderStudentsList(classStudents, feePaymentsData, currentTerm);
+        }
+
+        // Mark all fees as paid for the current term
+        function markAllAsPaid() {
+            if (confirm('Are you sure you want to mark all students as paid for both fees?')) {
+                // Mark all students as paid for both fees
+                classStudents.forEach(student => {
+                    feePaymentsData[student.id].pta = true;
+                    feePaymentsData[student.id].utility = true;
+                    feePaymentsData[student.id].timestamp = new Date().toISOString();
+                    feePaymentsData[student.id].recordedBy = currentTeacherId;
+                });
+                
+                // Update the display
+                renderStudentsList(classStudents, feePaymentsData, currentTerm);
+            }
+        }
+
+        // Reset fee payments for the current term
+        function resetFeePayments() {
+            if (confirm('Are you sure you want to reset all fee payments for this term?')) {
+                // Reset all payments for the current term
+                classStudents.forEach(student => {
+                    feePaymentsData[student.id].pta = false;
+                    feePaymentsData[student.id].utility = false;
+                    feePaymentsData[student.id].timestamp = new Date().toISOString();
+                    feePaymentsData[student.id].recordedBy = currentTeacherId;
+                });
+                
+                // Update the display
+                renderStudentsList(classStudents, feePaymentsData, currentTerm);
+            }
+        }
+
+        // Show confirmation modal
+        function showConfirmationModal() {
+            const confirmationMessage = document.getElementById('confirmation-message');
+            confirmationMessage.textContent = `Are you sure you want to save the fee payments for Term ${currentTerm}?`;
+            
+            confirmationModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Hide confirmation modal
+        function hideConfirmationModal() {
+            confirmationModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Save fee payments to Firebase
+        async function saveFeePayments() {
+            try {
+                // Prepare the data to be saved
+                const updates = {};
+                const timestamp = new Date().toISOString();
+                
+                // Only include students with payment data
+                for (const studentId in feePaymentsData) {
+                    updates[`ptaUtilityPayments/${currentTerm}/${studentId}`] = {
+                        ...feePaymentsData[studentId],
+                        timestamp: timestamp
+                    };
+                }
+                
+                // Save to Firebase
+                await database.ref().update(updates);
+                
+                // Hide the modal
+                hideConfirmationModal();
+                
+                // Show success message
+                alert('Fee payments saved successfully!');
+            } catch (error) {
+                console.error('Error saving fee payments:', error);
+                alert('Failed to save fee payments. Please try again.');
+            }
+        }
+
+        // Show fee modal
+        function showFeeModal() {
+            // Pre-fill with current values
+            ptaFeeAmountInput.value = ptaFeeAmount;
+            utilityFeeAmountInput.value = utilityFeeAmount;
+            
+            // Show the modal
+            feeModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Hide fee modal
+        function hideFeeModal() {
+            feeModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Save fees
+        async function saveFees() {
+            // Get the new fee values
+            const newPtaFee = parseFloat(ptaFeeAmountInput.value);
+            const newUtilityFee = parseFloat(utilityFeeAmountInput.value);
+            
+            // Validate the inputs
+            if (isNaN(newPtaFee) || isNaN(newUtilityFee) || newPtaFee < 0 || newUtilityFee < 0) {
+                alert('Please enter valid fee amounts.');
+                return;
+            }
+            
+            try {
+                // Update the fee settings in Firebase
+                const feeSettings = {
+                    pta: newPtaFee,
+                    utility: newUtilityFee,
+                    description: feeDescriptionInput.value || 'PTA and Utility fees',
+                    setBy: currentTeacherId,
+                    setAt: new Date().toISOString()
+                };
+                
+                await ptaUtilitySettingsRef.child(currentClass.id).set(feeSettings);
+                
+                // Update the local values
+                ptaFeeAmount = newPtaFee;
+                utilityFeeAmount = newUtilityFee;
+                
+                // Update the UI
+                renderClassInfo(currentClass);
+                renderStudentsList(classStudents, feePaymentsData, currentTerm);
+                
+                // Hide the modal
+                hideFeeModal();
+                
+                // Show success message
+                alert('Fees updated successfully!');
+            } catch (error) {
+                console.error('Error saving fees:', error);
+                alert('An error occurred while saving the fees');
+            }
+        }
+
+        // Update currency display
+        function updateCurrencyDisplay() {
+            // Update currency symbols in the fee modal
+            document.getElementById('fee-currency-symbol').textContent = currencyData.symbol;
+            document.getElementById('utility-fee-currency-symbol').textContent = currencyData.symbol;
+            
+            // Update the class info
+            document.getElementById('class-pta-fee').textContent = formatCurrency(ptaFeeAmount);
+            document.getElementById('class-utility-fee').textContent = formatCurrency(utilityFeeAmount);
+            
+            // Update the fee display
+            renderStudentsList(classStudents, feePaymentsData, currentTerm);
+        }
+
+        // Format currency based on current selection
+        function formatCurrency(amount) {
+            const convertedAmount = amount * currencyData.rate;
+            return `${currencyData.symbol}${convertedAmount.toFixed(2)}`;
+        }
+
+        // Show stats modal
+        async function showStatsModal() {
+            try {
+                // Calculate statistics for all terms
+                let totalCollectedAllTerms = 0;
+                let totalExpectedAllTerms = 0;
+                
+                // Update term statistics
+                const statsTermList = document.getElementById('stats-term-list');
+                statsTermList.innerHTML = '';
+                
+                for (let term = 1; term <= 3; term++) {
+                    // Load fee payments for this term
+                    const termPayments = await loadFeePaymentsData(term);
+                    
+                    let termCollected = 0;
+                    
+                    // Calculate collected amount for this term
+                    classStudents.forEach(student => {
+                        const studentPayments = termPayments[student.id] || { pta: false, utility: false };
+                        
+                        if (studentPayments.pta) termCollected += ptaFeeAmount;
+                        if (studentPayments.utility) termCollected += utilityFeeAmount;
+                    });
+                    
+                    const termExpected = classStudents.length * (ptaFeeAmount + utilityFeeAmount);
+                    const termPaymentRate = termExpected > 0 ? Math.round((termCollected / termExpected) * 100) : 0;
+                    
+                    totalCollectedAllTerms += termCollected;
+                    totalExpectedAllTerms += termExpected;
+                    
+                    // Determine payment status class
+                    let statusClass = 'payment-status-unpaid';
+                    if (termPaymentRate >= 80) {
+                        statusClass = 'payment-status-paid';
+                    } else if (termPaymentRate >= 50) {
+                        statusClass = 'payment-status-partial';
+                    }
+                    
+                    // Add term row to the table
+                    const termRow = document.createElement('tr');
+                    termRow.innerHTML = `
+                        <td>Term ${term}</td>
+                        <td>${formatCurrency(ptaFeeAmount)}</td>
+                        <td>${formatCurrency(utilityFeeAmount)}</td>
+                        <td>${formatCurrency(termCollected)}</td>
+                        <td><span class="payment-status-badge ${statusClass}">${termPaymentRate}%</span></td>
+                    `;
+                    
+                    statsTermList.appendChild(termRow);
+                }
+                
+                // Update overall statistics
+                const overallPaymentRate = totalExpectedAllTerms > 0 ? Math.round((totalCollectedAllTerms / totalExpectedAllTerms) * 100) : 0;
+                
+                document.getElementById('stats-total-collected').textContent = formatCurrency(totalCollectedAllTerms);
+                document.getElementById('stats-total-expected').textContent = formatCurrency(totalExpectedAllTerms);
+                document.getElementById('stats-payment-rate').textContent = `${overallPaymentRate}%`;
+                
+                // Show the modal
+                statsModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+                alert('Failed to load statistics. Please try again.');
+            }
+        }
+
+        // Hide stats modal
+        function hideStatsModal() {
+            statsModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Initialize the app when the page loads
+        window.addEventListener('load', initApp);
+    </script>
+</body>
+</html>

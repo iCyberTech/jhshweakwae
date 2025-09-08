@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Exam Fees Collection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --text-color: #2d3436;
+            --light-text: #636e72;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --success-color: #00b894;
+            --danger-color: #d63031;
+            --warning-color: #fdcb6e;
+            --info-color: #0984e3;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding-bottom: 20px;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        .greeting h1 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .greeting p {
+            font-size: 0.85rem;
+            color: var(--light-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .fees-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .action-btn.success {
+            background: var(--success-color);
+            color: white;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .action-btn.success:hover {
+            background: #00a882;
+        }
+
+        .action-btn.secondary {
+            background: var(--glass-bg);
+            color: var(--text-color);
+        }
+
+        /* Class Information */
+        .class-info {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+        }
+
+        .class-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .class-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: var(--light-text);
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        /* Week Selector */
+        .week-selector {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .week-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .week-navigation {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .week-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .week-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .week-display {
+            font-weight: 600;
+            min-width: 180px;
+            text-align: center;
+        }
+
+        /* Summary Card */
+        .summary-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+        }
+
+        .summary-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--light-text);
+        }
+
+        .total-amount {
+            text-align: center;
+            font-weight: 600;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+        }
+
+        /* Fees Container */
+        .fees-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+        }
+
+        .fees-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .fees-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .fees-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mark-all-paid-btn {
+            background: var(--info-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .mark-all-paid-btn:hover {
+            background: #0877d1;
+        }
+
+        /* Students List */
+        .students-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .student-card {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            gap: 15px;
+        }
+
+        .student-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .student-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .student-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .student-id {
+            font-size: 0.8rem;
+            color: var(--light-text);
+        }
+
+        .fee-status {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .fee-amount {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .status-btn {
+            border: none;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .status-btn.active {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .status-btn.inactive {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .status-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .no-students {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--light-text);
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--light-text);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            color: var(--text-color);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .fees-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .class-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .week-selector {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .summary-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .fees-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .student-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .fee-status {
+                align-items: center;
+                flex-direction: row;
+                justify-content: space-between;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .summary-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .fees-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .mark-all-paid-btn, .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Prevent zoom on input focus for iOS */
+        @media screen and (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Class Information...</div>
+    </div>
+
+    <!-- Main Content (initially hidden) -->
+    <div class="container" id="main-content" style="display: none;">
+        <header>
+            <div class="profile">
+                <img id="profile-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="profile-img">
+                <div class="greeting">
+                    <h1 id="greeting-title">Weekly Exam Fees Collection</h1>
+                    <p id="greeting-subtitle">Recording weekly exam fees for your class</p>
+                </div>
+            </div>
+            <div class="fees-actions">
+                <button class="action-btn secondary" id="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button class="action-btn success" id="save-btn">
+                    <i class="fas fa-save"></i> Save
+                </button>
+            </div>
+        </header>
+
+        <!-- Class Information -->
+        <div class="class-info" id="class-info">
+            <h2 class="class-title" id="class-name">Loading class...</h2>
+            <div class="class-details">
+                <div class="detail-item">
+                    <div class="detail-label">Class ID</div>
+                    <div class="detail-value" id="class-id">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Room</div>
+                    <div class="detail-value" id="class-room">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Weekly Exam Fee</div>
+                    <div class="detail-value" id="class-exam-fee">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week Selector -->
+        <div class="week-selector">
+            <h3 class="week-title">Selected Week</h3>
+            <div class="week-navigation">
+                <button class="week-btn" id="prev-week-btn">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <div class="week-display" id="week-display">Week of Mon, Jan 1 - Fri, Jan 5</div>
+                <button class="week-btn" id="next-week-btn">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Weekly Fee Summary -->
+        <div class="summary-card" id="fee-summary" style="display: none;">
+            <div class="summary-title">Weekly Exam Fee Collection Summary</div>
+            <div class="summary-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="total-students">0</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="paid-count">0</div>
+                    <div class="stat-label">Paid</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="unpaid-count">0</div>
+                    <div class="stat-label">Unpaid</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="total-collected">₵0</div>
+                    <div class="stat-label">Total Collected</div>
+                </div>
+            </div>
+            <div class="total-amount" id="expected-total">Expected Total: ₵0</div>
+        </div>
+
+        <!-- Fees Container -->
+        <div class="fees-container">
+            <div class="fees-header">
+                <h3 class="fees-title">Student Exam Fee Payments</h3>
+                <div class="fees-actions">
+                    <button class="mark-all-paid-btn" id="mark-all-paid-btn">
+                        <i class="fas fa-check-double"></i> Mark All Paid
+                    </button>
+                    <button class="action-btn secondary" id="reset-btn">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+            <div class="students-list" id="students-list">
+                <div class="no-students">
+                    <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                    <p>No students found in this class</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmation-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirm Exam Fee Collection</h3>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmation-message">Are you sure you want to save the exam fee payments for this week?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" id="cancel-btn">Cancel</button>
+                <button class="action-btn success" id="confirm-save-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
+            authDomain: "sms-single.firebaseapp.com",
+            databaseURL: "https://sms-single-default-rtdb.firebaseio.com",
+            projectId: "sms-single",
+            storageBucket: "sms-single.firebasestorage.app",
+            messagingSenderId: "140188895278",
+            appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
+            measurementId: "G-7ER348P6VZ"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+        
+        // DOM Elements
+        const loadingScreen = document.getElementById('loading-screen');
+        const mainContent = document.getElementById('main-content');
+        const profileImg = document.getElementById('profile-img');
+        const greetingTitle = document.getElementById('greeting-title');
+        const greetingSubtitle = document.getElementById('greeting-subtitle');
+        const backBtn = document.getElementById('back-btn');
+        
+        // Class info elements
+        const classNameElement = document.getElementById('class-name');
+        const classIdElement = document.getElementById('class-id');
+        const classRoomElement = document.getElementById('class-room');
+        const classExamFeeElement = document.getElementById('class-exam-fee');
+        
+        // Week selector elements
+        const weekDisplay = document.getElementById('week-display');
+        const prevWeekBtn = document.getElementById('prev-week-btn');
+        const nextWeekBtn = document.getElementById('next-week-btn');
+        
+        // Fee elements
+        const saveBtn = document.getElementById('save-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const studentsListElement = document.getElementById('students-list');
+        const feeSummary = document.getElementById('fee-summary');
+        const totalStudentsElement = document.getElementById('total-students');
+        const paidCountElement = document.getElementById('paid-count');
+        const unpaidCountElement = document.getElementById('unpaid-count');
+        const totalCollectedElement = document.getElementById('total-collected');
+        const expectedTotalElement = document.getElementById('expected-total');
+        
+        // Modal elements
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const confirmSaveBtn = document.getElementById('confirm-save-btn');
+        const confirmationMessage = document.getElementById('confirmation-message');
+        
+        // Mark all paid button
+        const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
+        
+        // Firebase references
+        const authUsersRef = database.ref('authUsers');
+        const teachersRef = database.ref('teachers');
+        const classesRef = database.ref('classes');
+        const examFeePaymentsRef = database.ref('examFeePayments');
+        const examFeeSettingsRef = database.ref('examFeeSettings');
+        const studentsRef = database.ref('students');
+        
+        // Global variables
+        let currentTeacherId = null;
+        let currentTeacherData = null;
+        let currentClass = null;
+        let classStudents = [];
+        let examFeePaymentsData = {};
+        let weeklyExamFeeAmount = 0;
+        
+        // Current week tracking (Monday to Friday)
+        let currentWeekStart = getMonday(new Date());
+        
+        // Format currency
+        function formatCurrency(amount) {
+            return `₵${amount.toFixed(2)}`;
+        }
+        
+        // Get Monday of the current week
+        function getMonday(date) {
+            const day = date.getDay();
+            const diff = date.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
+            return new Date(date.setDate(diff));
+        }
+        
+        // Format date as "Mon, Jan 1"
+        function formatDate(date) {
+            return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+        
+        // Format week range for display
+        function formatWeekRange(startDate) {
+            const monday = new Date(startDate);
+            const friday = new Date(monday);
+            friday.setDate(monday.getDate() + 4);
+            
+            return `Week of ${formatDate(monday)} - ${formatDate(friday)}`;
+        }
+        
+        // Generate a unique key for the week (YYYY-MM-DD format of Monday)
+        function getWeekKey(date) {
+            return date.toISOString().split('T')[0];
+        }
+        
+        // Update week display
+        function updateWeekDisplay() {
+            weekDisplay.textContent = formatWeekRange(currentWeekStart);
+        }
+        
+        // Navigate to previous week
+        function goToPreviousWeek() {
+            const newDate = new Date(currentWeekStart);
+            newDate.setDate(newDate.getDate() - 7);
+            currentWeekStart = newDate;
+            updateWeekDisplay();
+            loadWeekData();
+        }
+        
+        // Navigate to next week
+        function goToNextWeek() {
+            const newDate = new Date(currentWeekStart);
+            newDate.setDate(newDate.getDate() + 7);
+            currentWeekStart = newDate;
+            updateWeekDisplay();
+            loadWeekData();
+        }
+        
+        // Get total collected for current week
+        function getTotalCollected() {
+            let total = 0;
+            classStudents.forEach(student => {
+                const payment = examFeePaymentsData[student.id] || {};
+                if (payment.paid) {
+                    total += payment.amount || 0;
+                }
+            });
+            return total;
+        }
+        
+        // Identify the current teacher based on Firebase Auth
+        async function identifyCurrentTeacher() {
+            return new Promise((resolve, reject) => {
+                // Check if user is already signed in
+                const unsubscribe = auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        try {
+                            // User is signed in, get their data from authUsers
+                            const authUserSnapshot = await database.ref(`authUsers/${user.uid}`).once('value');
+                            
+                            if (authUserSnapshot.exists()) {
+                                const authUser = authUserSnapshot.val();
+                                
+                                if (authUser.userType === 'teacher') {
+                                    currentTeacherId = authUser.userId;
+                                    
+                                    // Get teacher details from teachers collection
+                                    const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
+                                    
+                                    if (teacherSnapshot.exists()) {
+                                        currentTeacherData = teacherSnapshot.val();
+                                        unsubscribe();
+                                        resolve(currentTeacherData);
+                                        return;
+                                    }
+                                }
+                            }
+                            
+                            // If we reach here, the auth user doesn't have proper teacher data
+                            unsubscribe();
+                            reject(new Error('Teacher data not found for authenticated user'));
+                        } catch (error) {
+                            unsubscribe();
+                            reject(error);
+                        }
+                    } else {
+                        // No user is signed in, try to sign in anonymously
+                        try {
+                            const result = await auth.signInAnonymously();
+                            const user = result.user;
+                            
+                            // For demo purposes, create a mock teacher
+                            currentTeacherId = "demo-teacher";
+                            currentTeacherData = {
+                                name: "Demo Teacher",
+                                email: "demo@teacher.com",
+                                profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                            };
+                            
+                            unsubscribe();
+                            resolve(currentTeacherData);
+                        } catch (error) {
+                            unsubscribe();
+                            reject(error);
+                        }
+                    }
+                }, (error) => {
+                    unsubscribe();
+                    reject(error);
+                });
+            });
+        }
+        
+        // Find the class assigned to this teacher
+        async function findAssignedClass(teacherName) {
+            try {
+                const classesSnapshot = await classesRef.once('value');
+                
+                // If no classes exist, create a demo class
+                if (!classesSnapshot.exists()) {
+                    const demoClassId = "demo-class";
+                    const demoClass = {
+                        id: demoClassId,
+                        name: "Demo Class",
+                        room: "Room 101",
+                        teacher: teacherName,
+                        weeklyExamAmount: 20,
+                        students: ["student1", "student2", "student3"]
+                    };
+                    
+                    await classesRef.child(demoClassId).set(demoClass);
+                    return demoClass;
+                }
+                
+                const classes = classesSnapshot.val();
+                let assignedClass = null;
+                
+                // Find the first class where teacher name matches
+                for (const classId in classes) {
+                    if (classes[classId].teacher === teacherName) {
+                        assignedClass = {
+                            id: classId,
+                            ...classes[classId]
+                        };
+                        break;
+                    }
+                }
+                
+                // If no class found, create a demo class
+                if (!assignedClass) {
+                    const demoClassId = "demo-class";
+                    const demoClass = {
+                        id: demoClassId,
+                        name: "Demo Class",
+                        room: "Room 101",
+                        teacher: teacherName,
+                        weeklyExamAmount: 20,
+                        students: ["student1", "student2", "student3"]
+                    };
+                    
+                    await classesRef.child(demoClassId).set(demoClass);
+                    return demoClass;
+                }
+                
+                return assignedClass;
+            } catch (error) {
+                console.error('Error finding assigned class:', error);
+                
+                // Create a demo class as fallback
+                const demoClassId = "demo-class";
+                const demoClass = {
+                    id: demoClassId,
+                    name: "Demo Class",
+                    room: "Room 101",
+                    teacher: teacherName,
+                    weeklyExamAmount: 20,
+                    students: ["student1", "student2", "student3"]
+                };
+                
+                try {
+                    await classesRef.child(demoClassId).set(demoClass);
+                } catch (e) {
+                    console.error('Failed to create demo class:', e);
+                }
+                
+                return demoClass;
+            }
+        }
+        
+        // Load students for the assigned class
+        async function loadClassStudents(classId) {
+            try {
+                // Get the students array from the class document
+                const classSnapshot = await classesRef.child(classId).once('value');
+                
+                if (!classSnapshot.exists()) {
+                    return [];
+                }
+                
+                const classData = classSnapshot.val();
+                const studentIds = classData.students || [];
+                
+                if (studentIds.length === 0) {
+                    return [];
+                }
+                
+                // Get all students from the students collection
+                const allStudentsSnapshot = await studentsRef.once('value');
+                
+                // If no students exist, create demo students
+                if (!allStudentsSnapshot.exists()) {
+                    const demoStudents = {
+                        student1: {
+                            id: "student1",
+                            name: "John Doe",
+                            profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
+                        },
+                        student2: {
+                            id: "student2",
+                            name: "Jane Smith",
+                            profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                        },
+                        student3: {
+                            id: "student3",
+                            name: "Michael Johnson",
+                            profileImage: "https://randomuser.me/api/portraits/men/22.jpg"
+                        }
+                    };
+                    
+                    await studentsRef.set(demoStudents);
+                    return Object.values(demoStudents);
+                }
+                
+                const allStudents = allStudentsSnapshot.val();
+                const classStudents = [];
+                
+                // Match student IDs with their data
+                for (const studentId of studentIds) {
+                    if (allStudents[studentId]) {
+                        classStudents.push({
+                            id: studentId,
+                            ...allStudents[studentId]
+                        });
+                    }
+                }
+                
+                return classStudents;
+            } catch (error) {
+                console.error('Error loading class students:', error);
+                
+                // Return demo students as fallback
+                return [
+                    {
+                        id: "student1",
+                        name: "John Doe",
+                        profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
+                    },
+                    {
+                        id: "student2",
+                        name: "Jane Smith",
+                        profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                    },
+                    {
+                        id: "student3",
+                        name: "Michael Johnson",
+                        profileImage: "https://randomuser.me/api/portraits/men/22.jpg"
+                    }
+                ];
+            }
+        }
+        
+        // Get the weekly exam fee amount for the class
+        async function getWeeklyExamFeeAmount(classId) {
+            try {
+                const feeSettingsSnapshot = await examFeeSettingsRef.child(classId).once('value');
+                if (feeSettingsSnapshot.exists()) {
+                    return feeSettingsSnapshot.val().amount || 0;
+                }
+                
+                // Fallback to class weeklyExamAmount if feeSettings doesn't exist
+                const classSnapshot = await classesRef.child(classId).once('value');
+                if (classSnapshot.exists()) {
+                    return classSnapshot.val().weeklyExamAmount || 0;
+                }
+                
+                return 20; // Default fee amount
+            } catch (error) {
+                console.error('Error getting weekly exam fee amount:', error);
+                return 20; // Default fee amount
+            }
+        }
+        
+        // Load exam fee payments data for the selected week
+        async function loadExamFeePaymentsData(weekKey) {
+            try {
+                const feePaymentsSnapshot = await examFeePaymentsRef.child(weekKey).once('value');
+                
+                if (feePaymentsSnapshot.exists()) {
+                    return feePaymentsSnapshot.val();
+                }
+                
+                return {};
+            } catch (error) {
+                console.error('Error loading exam fee payments data:', error);
+                return {};
+            }
+        }
+        
+        // Load data for the current week
+        async function loadWeekData() {
+            const weekKey = getWeekKey(currentWeekStart);
+            examFeePaymentsData = await loadExamFeePaymentsData(weekKey);
+            
+            // Initialize empty records for students without payment data
+            classStudents.forEach(student => {
+                if (!examFeePaymentsData[student.id]) {
+                    examFeePaymentsData[student.id] = {
+                        amount: 0,
+                        paid: false,
+                        timestamp: new Date().toISOString(),
+                        recordedBy: currentTeacherId
+                    };
+                }
+            });
+            
+            renderStudentsList();
+            updateFeeSummary();
+        }
+        
+        // Render the students list with payment status
+        function renderStudentsList() {
+            studentsListElement.innerHTML = '';
+            
+            if (classStudents.length === 0) {
+                studentsListElement.innerHTML = `
+                    <div class="no-students">
+                        <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>No students found in this class</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            classStudents.forEach(student => {
+                const payment = examFeePaymentsData[student.id] || {};
+                const isPaid = payment.paid || false;
+                const amount = payment.amount || weeklyExamFeeAmount;
+                
+                const studentCard = document.createElement('div');
+                studentCard.className = 'student-card';
+                studentCard.innerHTML = `
+                    <img src="${student.profileImage || 'https://via.placeholder.com/50'}" alt="${student.name}" class="student-avatar">
+                    <div class="student-info">
+                        <div class="student-name">${student.name}</div>
+                        <div class="student-id">ID: ${student.id}</div>
+                    </div>
+                    <div class="fee-status">
+                        <div class="fee-amount">${formatCurrency(amount)}</div>
+                        <button class="status-btn ${isPaid ? 'active' : 'inactive'}" data-student-id="${student.id}">
+                            <i class="fas ${isPaid ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                            ${isPaid ? 'Paid' : 'Unpaid'}
+                        </button>
+                    </div>
+                `;
+                
+                studentsListElement.appendChild(studentCard);
+            });
+            
+            // Add event listeners to the payment buttons
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const studentId = this.getAttribute('data-student-id');
+                    togglePaymentStatus(studentId);
+                });
+            });
+        }
+        
+        // Toggle payment status for a student
+        function togglePaymentStatus(studentId) {
+            if (!examFeePaymentsData[studentId]) {
+                examFeePaymentsData[studentId] = {
+                    amount: weeklyExamFeeAmount,
+                    paid: false,
+                    timestamp: new Date().toISOString(),
+                    recordedBy: currentTeacherId
+                };
+            }
+            
+            examFeePaymentsData[studentId].paid = !examFeePaymentsData[studentId].paid;
+            examFeePaymentsData[studentId].amount = weeklyExamFeeAmount;
+            examFeePaymentsData[studentId].timestamp = new Date().toISOString();
+            examFeePaymentsData[studentId].recordedBy = currentTeacherId;
+            
+            renderStudentsList();
+            updateFeeSummary();
+        }
+        
+        // Update the fee summary section
+        function updateFeeSummary() {
+            const totalStudents = classStudents.length;
+            let paidCount = 0;
+            
+            classStudents.forEach(student => {
+                if (examFeePaymentsData[student.id] && examFeePaymentsData[student.id].paid) {
+                    paidCount++;
+                }
+            });
+            
+            const unpaidCount = totalStudents - paidCount;
+            const totalCollected = getTotalCollected();
+            const expectedTotal = totalStudents * weeklyExamFeeAmount;
+            
+            totalStudentsElement.textContent = totalStudents;
+            paidCountElement.textContent = paidCount;
+            unpaidCountElement.textContent = unpaidCount;
+            totalCollectedElement.textContent = formatCurrency(totalCollected);
+            expectedTotalElement.textContent = `Expected Total: ${formatCurrency(expectedTotal)}`;
+            
+            // Show the fee summary if there are students
+            if (totalStudents > 0) {
+                feeSummary.style.display = 'block';
+            } else {
+                feeSummary.style.display = 'none';
+            }
+        }
+        
+        // Save exam fee payments for the current week
+        async function saveExamFeePayments() {
+            const weekKey = getWeekKey(currentWeekStart);
+            
+            try {
+                await examFeePaymentsRef.child(weekKey).set(examFeePaymentsData);
+                showNotification('Exam fee payments saved successfully!', 'success');
+            } catch (error) {
+                console.error('Error saving exam fee payments:', error);
+                showNotification('Failed to save exam fee payments. Please try again.', 'error');
+            }
+        }
+        
+        // Show a notification
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            // Style the notification
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.padding = '12px 20px';
+            notification.style.borderRadius = '8px';
+            notification.style.color = 'white';
+            notification.style.fontWeight = '500';
+            notification.style.zIndex = '10000';
+            notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+            notification.style.transform = 'translateX(100%)';
+            notification.style.transition = 'transform 0.3s ease';
+            
+            // Set background color based on type
+            if (type === 'success') {
+                notification.style.backgroundColor = '#00b894';
+            } else if (type === 'error') {
+                notification.style.backgroundColor = '#d63031';
+            } else {
+                notification.style.backgroundColor = '#0984e3';
+            }
+            
+            // Add to the document
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        // Initialize the application
+        async function initApp() {
+            try {
+                // Identify the current teacher
+                const teacherData = await identifyCurrentTeacher();
+                
+                // Update UI with teacher info
+                profileImg.src = teacherData.profileImage || 'https://randomuser.me/api/portraits/women/44.jpg';
+                greetingTitle.textContent = `Hello, ${teacherData.name || 'Teacher'}`;
+                greetingSubtitle.textContent = 'Recording weekly exam fees for your class';
+                
+                // Find the class assigned to this teacher
+                currentClass = await findAssignedClass(teacherData.name || 'Demo Teacher');
+                
+                // Update class info in UI
+                classNameElement.textContent = currentClass.name;
+                classIdElement.textContent = currentClass.id;
+                classRoomElement.textContent = currentClass.room;
+                
+                // Get weekly exam fee amount
+                weeklyExamFeeAmount = await getWeeklyExamFeeAmount(currentClass.id);
+                classExamFeeElement.textContent = formatCurrency(weeklyExamFeeAmount);
+                
+                // Load students for this class
+                classStudents = await loadClassStudents(currentClass.id);
+                
+                // Set up week navigation
+                updateWeekDisplay();
+                
+                // Load data for the current week
+                await loadWeekData();
+                
+                // Hide loading screen and show main content
+                loadingScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                
+                // Show error state but still display the UI
+                loadingScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+                
+                classNameElement.textContent = 'Error loading class';
+                showNotification('Failed to load class data. Using demo data.', 'error');
+                
+                // Set up demo data
+                weeklyExamFeeAmount = 20;
+                classExamFeeElement.textContent = formatCurrency(weeklyExamFeeAmount);
+                
+                classStudents = [
+                    {
+                        id: "student1",
+                        name: "John Doe",
+                        profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
+                    },
+                    {
+                        id: "student2",
+                        name: "Jane Smith",
+                        profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                    },
+                    {
+                        id: "student3",
+                        name: "Michael Johnson",
+                        profileImage: "https://randomuser.me/api/portraits/men/22.jpg"
+                    }
+                ];
+                
+                // Initialize empty payment data
+                examFeePaymentsData = {};
+                classStudents.forEach(student => {
+                    examFeePaymentsData[student.id] = {
+                        amount: weeklyExamFeeAmount,
+                        paid: false,
+                        timestamp: new Date().toISOString(),
+                        recordedBy: "demo-teacher"
+                    };
+                });
+                
+                updateWeekDisplay();
+                renderStudentsList();
+                updateFeeSummary();
+            }
+        }
+        
+        // Event Listeners
+        prevWeekBtn.addEventListener('click', goToPreviousWeek);
+        nextWeekBtn.addEventListener('click', goToNextWeek);
+        
+        saveBtn.addEventListener('click', function() {
+            // Show confirmation modal
+            const paidCount = document.getElementById('paid-count').textContent;
+            const totalStudents = document.getElementById('total-students').textContent;
+            const totalCollected = document.getElementById('total-collected').textContent;
+            
+            confirmationMessage.textContent = `Are you sure you want to save the exam fee payments for this week? ${paidCount} of ${totalStudents} students paid, total collected: ${totalCollected}.`;
+            confirmationModal.classList.add('active');
+        });
+        
+        closeModalBtn.addEventListener('click', function() {
+            confirmationModal.classList.remove('active');
+        });
+        
+        cancelBtn.addEventListener('click', function() {
+            confirmationModal.classList.remove('active');
+        });
+        
+        confirmSaveBtn.addEventListener('click', function() {
+            confirmationModal.classList.remove('active');
+            saveExamFeePayments();
+        });
+        
+        resetBtn.addEventListener('click', function() {
+            // Reset all payments to unpaid
+            for (const studentId in examFeePaymentsData) {
+                examFeePaymentsData[studentId].paid = false;
+                examFeePaymentsData[studentId].amount = weeklyExamFeeAmount;
+                examFeePaymentsData[studentId].timestamp = new Date().toISOString();
+            }
+            
+            renderStudentsList();
+            updateFeeSummary();
+            showNotification('All payments have been reset to unpaid.', 'info');
+        });
+        
+        markAllPaidBtn.addEventListener('click', function() {
+            // Mark all students as paid
+            for (const studentId in examFeePaymentsData) {
+                examFeePaymentsData[studentId].paid = true;
+                examFeePaymentsData[studentId].amount = weeklyExamFeeAmount;
+                examFeePaymentsData[studentId].timestamp = new Date().toISOString();
+            }
+            
+            renderStudentsList();
+            updateFeeSummary();
+            showNotification('All students have been marked as paid.', 'success');
+        });
+        
+        backBtn.addEventListener('click', function() {
+            // Go back to the previous page or dashboard
+            window.history.back();
+        });
+        
+        // Initialize the app when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
