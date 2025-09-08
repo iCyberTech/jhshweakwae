@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <style>
+    <style> 
         :root {
     --primary-color: #6c5ce7;
     --secondary-color: #a29bfe;
@@ -1093,10 +1093,6 @@ header {
     </div>
 
     <!-- Iframe containers for navigation items -->
-    <div class="iframe-container" id="daily-fees-frame">
-        <iframe src="daily_fees.html"></iframe>
-    </div>
-    
     <div class="iframe-container" id="weekly-exams-frame">
         <iframe src="weekly_exams.html"></iframe>
     </div>
@@ -1114,28 +1110,28 @@ header {
     </div>
 
     <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-        <a href="#" class="nav-item active" data-target="daily-fees-frame">
-            <i class="fas fa-money-bill-wave nav-icon"></i>
+    <div class="bottom-nav">
+        <div class="nav-item active" id="nav-fees">
+            <i class="fas fa-money-bill-wave"></i>
             <span>Daily Fees</span>
-        </a>
-        <a href="#" class="nav-item" data-target="weekly-exams-frame">
-            <i class="fas fa-file-alt nav-icon"></i>
+        </div>
+        <div class="nav-item" id="nav-weekly-exams">
+            <i class="fas fa-file-alt"></i>
             <span>Weekly Exams</span>
-        </a>
-        <a href="#" class="nav-item" data-target="pta-utility-frame">
-            <i class="fas fa-users nav-icon"></i>
+        </div>
+        <div class="nav-item" id="nav-pta-utility">
+            <i class="fas fa-users"></i>
             <span>PTA & Utility</span>
-        </a>
-        <a href="#" class="nav-item" data-target="broom-frame">
-            <i class="fas fa-broom nav-icon"></i>
+        </div>
+        <div class="nav-item" id="nav-broom">
+            <i class="fas fa-broom"></i>
             <span>Broom</span>
-        </a>
-        <a href="#" class="nav-item" data-target="others-frame">
-            <i class="fas fa-ellipsis-h nav-icon"></i>
+        </div>
+        <div class="nav-item" id="nav-others">
+            <i class="fas fa-ellipsis-h"></i>
             <span>Others</span>
-        </a>
-    </nav>
+        </div>
+    </div>
 
     <!-- Confirmation Modal -->
     <div class="modal" id="confirmation-modal">
@@ -1333,8 +1329,17 @@ header {
         const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
         
         // Bottom navigation elements
-        const navItems = document.querySelectorAll('.nav-item');
-        const iframeContainers = document.querySelectorAll('.iframe-container');
+        const navFees = document.getElementById('nav-fees');
+        const navWeeklyExams = document.getElementById('nav-weekly-exams');
+        const navPtaUtility = document.getElementById('nav-pta-utility');
+        const navBroom = document.getElementById('nav-broom');
+        const navOthers = document.getElementById('nav-others');
+        
+        // Iframe containers
+        const weeklyExamsFrame = document.getElementById('weekly-exams-frame');
+        const ptaUtilityFrame = document.getElementById('pta-utility-frame');
+        const broomFrame = document.getElementById('broom-frame');
+        const othersFrame = document.getElementById('others-frame');
         
         // Firebase references
         const authUsersRef = database.ref('authUsers');
@@ -2308,34 +2313,55 @@ header {
         
         // Handle navigation between different sections
         function setupNavigation() {
-            navItems.forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Remove active class from all items
-                    navItems.forEach(navItem => navItem.classList.remove('active'));
-                    
-                    // Add active class to clicked item
-                    this.classList.add('active');
-                    
-                    // Hide all iframe containers
-                    iframeContainers.forEach(container => container.classList.remove('active'));
-                    
-                    // Show the selected iframe container
-                    const targetId = this.dataset.target;
-                    const targetContainer = document.getElementById(targetId);
-                    
-                    if (targetContainer) {
-                        targetContainer.classList.add('active');
-                        
-                        // Show/hide main content based on selection
-                        if (targetId === 'daily-fees-frame') {
-                            mainContent.style.display = 'block';
-                        } else {
-                            mainContent.style.display = 'none';
-                        }
-                    }
+            // Hide all iframes and show only the fees content
+            function showFeesContent() {
+                weeklyExamsFrame.classList.remove('active');
+                ptaUtilityFrame.classList.remove('active');
+                broomFrame.classList.remove('active');
+                othersFrame.classList.remove('active');
+                mainContent.style.display = 'block';
+                
+                // Update active nav item
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
                 });
+                navFees.classList.add('active');
+            }
+            
+            // Show iframe content
+            function showIframeContent(iframe, navItem) {
+                mainContent.style.display = 'none';
+                weeklyExamsFrame.classList.remove('active');
+                ptaUtilityFrame.classList.remove('active');
+                broomFrame.classList.remove('active');
+                othersFrame.classList.remove('active');
+                
+                iframe.classList.add('active');
+                
+                // Update active nav item
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                navItem.classList.add('active');
+            }
+            
+            // Set up event listeners for navigation items
+            navFees.addEventListener('click', showFeesContent);
+            
+            navWeeklyExams.addEventListener('click', () => {
+                showIframeContent(weeklyExamsFrame, navWeeklyExams);
+            });
+            
+            navPtaUtility.addEventListener('click', () => {
+                showIframeContent(ptaUtilityFrame, navPtaUtility);
+            });
+            
+            navBroom.addEventListener('click', () => {
+                showIframeContent(broomFrame, navBroom);
+            });
+            
+            navOthers.addEventListener('click', () => {
+                showIframeContent(othersFrame, navOthers);
             });
         }
         
@@ -2395,7 +2421,7 @@ header {
                 // Render students with fee payment options
                 renderStudentsList(classStudents, feePaymentsData, currentDate);
                 
-                // Setup navigation
+                // Set up navigation
                 setupNavigation();
                 
                 // Hide loading screen and show main content
@@ -2470,7 +2496,7 @@ header {
                         };
                         renderClassBalance(classBalanceData);
                         
-                        // Setup navigation
+                        // Set up navigation
                         setupNavigation();
                         
                         loadingScreen.style.display = 'none';
