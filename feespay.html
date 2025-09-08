@@ -41,7 +41,8 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: var(--text-color);
             min-height: 100vh;
-            padding: 20px 20px 80px; /* Added bottom padding for navigation */
+            padding: 20px;
+            padding-bottom: 80px; /* Added padding for bottom navigation */
         }
 
         .container {
@@ -872,6 +873,7 @@
             padding: 10px;
             background: #f9f9f9;
             border-radius: 5px;
+            justify-content: space-between;
         }
 
         .others-fee-name {
@@ -882,11 +884,13 @@
         .others-fee-amount {
             font-weight: 600;
             color: var(--primary-color);
+            margin-right: 10px;
         }
 
         .others-fee-frequency {
             font-size: 0.8rem;
             color: var(--light-text);
+            margin-right: 10px;
         }
 
         .remove-others-fee {
@@ -935,51 +939,59 @@
         .nav-icon {
             font-size: 1.2rem;
             margin-bottom: 3px;
-            color: var(--light-text);
-        }
-
-        .nav-item.active .nav-icon {
-            color: var(--primary-color);
         }
 
         .nav-label {
             font-size: 0.7rem;
-            color: var(--light-text);
+            text-align: center;
         }
 
-        .nav-item.active .nav-label {
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        .nav-item.daily.active .nav-icon,
-        .nav-item.daily.active .nav-label {
+        .nav-item.daily .nav-icon {
             color: var(--primary-color);
         }
 
-        .nav-item.exam.active .nav-icon,
-        .nav-item.exam.active .nav-label {
+        .nav-item.exam .nav-icon {
             color: var(--exam-color);
         }
 
-        .nav-item.weekly-exam.active .nav-icon,
-        .nav-item.weekly-exam.active .nav-label {
+        .nav-item.weekly-exam .nav-icon {
             color: var(--weekly-exam-color);
         }
 
-        .nav-item.pta-utility.active .nav-icon,
-        .nav-item.pta-utility.active .nav-label {
+        .nav-item.pta-utility .nav-icon {
             color: var(--pta-utility-color);
         }
 
-        .nav-item.broom.active .nav-icon,
-        .nav-item.broom.active .nav-label {
+        .nav-item.broom .nav-icon {
             color: var(--broom-color);
         }
 
-        .nav-item.others.active .nav-icon,
-        .nav-item.others.active .nav-label {
+        .nav-item.others .nav-icon {
             color: var(--others-color);
+        }
+
+        .nav-item.active.daily {
+            background: rgba(108, 92, 231, 0.2);
+        }
+
+        .nav-item.active.exam {
+            background: rgba(225, 112, 85, 0.2);
+        }
+
+        .nav-item.active.weekly-exam {
+            background: rgba(142, 68, 173, 0.2);
+        }
+
+        .nav-item.active.pta-utility {
+            background: rgba(22, 160, 133, 0.2);
+        }
+
+        .nav-item.active.broom {
+            background: rgba(39, 174, 96, 0.2);
+        }
+
+        .nav-item.active.others {
+            background: rgba(127, 140, 141, 0.2);
         }
 
         @media (max-width: 768px) {
@@ -1154,6 +1166,14 @@
         <!-- Daily Fee Summary -->
         <div class="summary-card" id="fee-summary" style="display: none;">
             <div class="summary-title" id="fee-summary-title">Today's Fee Collection Summary</div>
+            <div class="fee-type-selector" style="display: none;">
+                <button class="fee-type-btn active" data-fee-type="daily">Daily Fees</button>
+                <button class="fee-type-btn exam" data-fee-type="exam">Exam Fees</button>
+                <button class="fee-type-btn weekly-exam" data-fee-type="weekly-exam">Weekly Exams</button>
+                <button class="fee-type-btn pta-utility" data-fee-type="pta-utility">PTA & Utility</button>
+                <button class="fee-type-btn broom" data-fee-type="broom">Broom</button>
+                <button class="fee-type-btn others" data-fee-type="others">Others</button>
+            </div>
             <div id="term-selector-container" class="term-selector" style="display: none;">
                 <button class="term-btn term1 active" data-term="term1">Term 1</button>
                 <button class="term-btn term2" data-term="term2">Term 2</button>
@@ -1404,7 +1424,7 @@
             messagingSenderId: "140188895278",
             appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
             measurementId: "G-7ER348P6VZ",
-            databaseURL: "https://sms-single-default-rtdb.firebaseio.com/"
+            databaseURL: "https://sms-single-default-rtdb.firebaseio.io/"
         };
         
         // Initialize Firebase
@@ -1516,6 +1536,9 @@
         
         // Mark all paid button
         const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
+        
+        // Fee type selector
+        const feeTypeBtns = document.querySelectorAll('.fee-type-btn');
         
         // Firebase references
         const authUsersRef = database.ref('authUsers');
@@ -1655,41 +1678,22 @@
         // Identify the current teacher based on Firebase Auth
         async function identifyCurrentTeacher() {
             return new Promise((resolve, reject) => {
-                // Try to sign in anonymously first
-                auth.signInAnonymously()
-                    .then((result) => {
-                        const user = result.user;
-                        
-                        // For demo purposes, create a mock teacher
-                        currentTeacherId = "demo-teacher";
-                        currentTeacherData = {
-                            name: "Demo Teacher",
-                            email: "demo@teacher.com",
-                            profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
-                        };
-                        
-                        resolve(currentTeacherData);
-                    })
-                    .catch((error) => {
-                        console.error('Anonymous sign-in failed:', error);
-                        
-                        // Fallback to demo data
-                        currentTeacherId = "demo-teacher";
-                        currentTeacherData = {
-                            name: "Demo Teacher",
-                            email: "demo@teacher.com",
-                            profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
-                        };
-                        
-                        resolve(currentTeacherData);
-                    });
+                // For demo purposes, create a mock teacher
+                currentTeacherId = "demo-teacher";
+                currentTeacherData = {
+                    name: "Demo Teacher",
+                    email: "demo@teacher.com",
+                    profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                };
+                
+                resolve(currentTeacherData);
             });
         }
         
         // Find the class assigned to this teacher
         async function findAssignedClass(teacherName) {
             try {
-                // Create a demo class as fallback
+                // Create a demo class
                 const demoClassId = "demo-class";
                 const demoClass = {
                     id: demoClassId,
@@ -1862,22 +1866,32 @@
         
         // Set default fee amount for the class
         async function setDefaultFee(classId, amount, description = '', feeType = 'daily') {
-            // Update the global variable
-            switch (feeType) {
-                case 'daily': dailyFeeAmount = parseFloat(amount); break;
-                case 'exam': examFeeAmount = parseFloat(amount); break;
-                case 'weekly-exam': weeklyExamFeeAmount = parseFloat(amount); break;
-                case 'pta-utility': ptaUtilityFeeAmount = parseFloat(amount); break;
-                case 'broom': broomFeeAmount = parseFloat(amount); break;
+            try {
+                // Update the global variable
+                switch (feeType) {
+                    case 'daily': dailyFeeAmount = parseFloat(amount); break;
+                    case 'exam': examFeeAmount = parseFloat(amount); break;
+                    case 'weekly-exam': weeklyExamFeeAmount = parseFloat(amount); break;
+                    case 'pta-utility': ptaUtilityFeeAmount = parseFloat(amount); break;
+                    case 'broom': broomFeeAmount = parseFloat(amount); break;
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error setting default fee:', error);
+                return false;
             }
-            
-            return true;
         }
         
         // Set other fees for the class
         async function setOtherFees(classId, fees) {
-            otherFees = fees;
-            return true;
+            try {
+                otherFees = fees;
+                return true;
+            } catch (error) {
+                console.error('Error setting other fees:', error);
+                return false;
+            }
         }
         
         // Render class information
@@ -2183,6 +2197,7 @@
                 return new Promise((resolve) => {
                     confirmSaveBtn.onclick = async () => {
                         try {
+                            // Show success message
                             alert(`${currentFeeType.charAt(0).toUpperCase() + currentFeeType.slice(1)} fee payments saved successfully!`);
                             confirmationModal.classList.remove('active');
                             resolve(true);
@@ -2280,6 +2295,15 @@
             currentFeeType = feeType;
             
             // Update UI based on fee type
+            feeTypeBtns.forEach(btn => {
+                if (btn.dataset.feeType === feeType) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Update bottom navigation
             navItems.forEach(item => {
                 if (item.dataset.feeType === feeType) {
                     item.classList.add('active');
@@ -3331,7 +3355,7 @@
         // Mark all as paid button click handler
         markAllPaidBtn.addEventListener('click', markAllAsPaid);
         
-        // Bottom navigation item click handlers
+        // Fee type button click handlers (for bottom navigation)
         navItems.forEach(item => {
             item.addEventListener('click', () => {
                 const feeType = item.dataset.feeType;
