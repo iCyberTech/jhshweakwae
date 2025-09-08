@@ -21,7 +21,6 @@
             --warning-color: #fdcb6e;
             --info-color: #0984e3;
             --exam-color: #e17055;
-            --weekly-exam-color: #00cec9;
             --term1-color: #e17055;
             --term2-color: #00b894;
             --term3-color: #0984e3;
@@ -39,7 +38,6 @@
             color: var(--text-color);
             min-height: 100vh;
             padding: 20px;
-            padding-bottom: 80px; /* Space for bottom navigation */
         }
 
         .container {
@@ -229,11 +227,6 @@
             color: white;
         }
 
-        .action-btn.weekly-exam {
-            background: var(--weekly-exam-color);
-            color: white;
-        }
-
         .action-btn:hover {
             opacity: 0.9;
             transform: translateY(-2px);
@@ -311,10 +304,6 @@
             color: var(--exam-color);
         }
 
-        .fee-amount.weekly-exam {
-            color: var(--weekly-exam-color);
-        }
-
         .fee-amount-input {
             width: 80px;
             padding: 5px;
@@ -347,11 +336,6 @@
 
         .status-btn.exam {
             background: var(--exam-color);
-            color: white;
-        }
-
-        .status-btn.weekly-exam {
-            background: var(--weekly-exam-color);
             color: white;
         }
 
@@ -740,11 +724,6 @@
             border-color: var(--exam-color);
         }
 
-        .fee-type-btn.weekly-exam.active {
-            background: var(--weekly-exam-color);
-            border-color: var(--weekly-exam-color);
-        }
-
         .term-selector {
             display: flex;
             gap: 10px;
@@ -780,76 +759,6 @@
             border-color: var(--term3-color);
         }
 
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: white;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-item.active {
-            background: rgba(108, 92, 231, 0.1);
-        }
-
-        .nav-icon {
-            font-size: 1.2rem;
-            margin-bottom: 3px;
-            color: var(--light-text);
-        }
-
-        .nav-item.active .nav-icon {
-            color: var(--primary-color);
-        }
-
-        .nav-label {
-            font-size: 0.7rem;
-            color: var(--light-text);
-        }
-
-        .nav-item.active .nav-label {
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        .week-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            align-items: center;
-        }
-
-        .week-btn {
-            padding: 8px 15px;
-            border: 1px solid var(--secondary-color);
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .week-btn.active {
-            background: var(--weekly-exam-color);
-            color: white;
-            border-color: var(--weekly-exam-color);
-        }
-
         @media (max-width: 768px) {
             .fees-header {
                 flex-direction: column;
@@ -864,10 +773,6 @@
             
             .students-list {
                 grid-template-columns: 1fr;
-            }
-
-            .fee-type-selector {
-                flex-wrap: wrap;
             }
         }
     </style>
@@ -936,11 +841,7 @@
                     <div class="detail-value" id="class-daily-fee">-</div>
                 </div>
                 <div class="detail-item">
-                    <div class="detail-label">Weekly Exam Fee</div>
-                    <div class="detail-value" id="class-weekly-exam-fee">-</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Term Exam Fee</div>
+                    <div class="detail-label">Exam Fee</div>
                     <div class="detail-value" id="class-exam-fee">-</div>
                 </div>
             </div>
@@ -954,11 +855,8 @@
                     <button class="action-btn secondary" id="set-fee-btn">
                         <i class="fas fa-cog"></i> Set Daily Fee
                     </button>
-                    <button class="action-btn weekly-exam" id="set-weekly-exam-fee-btn">
-                        <i class="fas fa-cog"></i> Set Weekly Exam Fee
-                    </button>
                     <button class="action-btn exam" id="set-exam-fee-btn">
-                        <i class="fas fa-cog"></i> Set Term Exam Fee
+                        <i class="fas fa-cog"></i> Set Exam Fee
                     </button>
                 </div>
             </div>
@@ -988,20 +886,12 @@
             <div class="summary-title" id="fee-summary-title">Today's Fee Collection Summary</div>
             <div class="fee-type-selector">
                 <button class="fee-type-btn active" data-fee-type="daily">Daily Fees</button>
-                <button class="fee-type-btn weekly-exam" data-fee-type="weekly-exam">Weekly Exams</button>
-                <button class="fee-type-btn exam" data-fee-type="exam">Term Exams</button>
+                <button class="fee-type-btn exam" data-fee-type="exam">Exam Fees</button>
             </div>
             <div id="term-selector-container" class="term-selector" style="display: none;">
                 <button class="term-btn term1 active" data-term="term1">Term 1</button>
                 <button class="term-btn term2" data-term="term2">Term 2</button>
                 <button class="term-btn term3" data-term="term3">Term 3</button>
-            </div>
-            <div id="week-selector-container" class="week-selector" style="display: none;">
-                <span>Week:</span>
-                <button class="week-btn active" data-week="1">Week 1</button>
-                <button class="week-btn" data-week="2">Week 2</button>
-                <button class="week-btn" data-week="3">Week 3</button>
-                <button class="week-btn" data-week="4">Week 4</button>
             </div>
             <div class="summary-stats">
                 <div class="stat-item">
@@ -1051,30 +941,6 @@
                     <p>No students found in this class</p>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <div class="nav-item active" data-fee-type="daily">
-            <i class="fas fa-calendar-day nav-icon"></i>
-            <span class="nav-label">Daily</span>
-        </div>
-        <div class="nav-item" data-fee-type="weekly-exam">
-            <i class="fas fa-calendar-week nav-icon"></i>
-            <span class="nav-label">Weekly Exams</span>
-        </div>
-        <div class="nav-item" data-fee-type="exam">
-            <i class="fas fa-file-alt nav-icon"></i>
-            <span class="nav-label">Term Exams</span>
-        </div>
-        <div class="nav-item" id="stats-nav-btn">
-            <i class="fas fa-chart-bar nav-icon"></i>
-            <span class="nav-label">Statistics</span>
-        </div>
-        <div class="nav-item" id="settings-nav-btn">
-            <i class="fas fa-cog nav-icon"></i>
-            <span class="nav-label">Settings</span>
         </div>
     </div>
 
@@ -1212,7 +1078,6 @@
         const classIdElement = document.getElementById('class-id');
         const classRoomElement = document.getElementById('class-room');
         const classDailyFeeElement = document.getElementById('class-daily-fee');
-        const classWeeklyExamFeeElement = document.getElementById('class-weekly-exam-fee');
         const classExamFeeElement = document.getElementById('class-exam-fee');
         
         // Balance elements
@@ -1237,9 +1102,7 @@
         const totalCollectedElement = document.getElementById('total-collected');
         const expectedTotalElement = document.getElementById('expected-total');
         const termSelectorContainer = document.getElementById('term-selector-container');
-        const weekSelectorContainer = document.getElementById('week-selector-container');
         const termBtns = document.querySelectorAll('.term-btn');
-        const weekBtns = document.querySelectorAll('.week-btn');
         
         // Modal elements
         const confirmationModal = document.getElementById('confirmation-modal');
@@ -1257,7 +1120,6 @@
         const feeAmountInput = document.getElementById('fee-amount');
         const feeDescriptionInput = document.getElementById('fee-description');
         const setFeeBtn = document.getElementById('set-fee-btn');
-        const setWeeklyExamFeeBtn = document.getElementById('set-weekly-exam-fee-btn');
         const setExamFeeBtn = document.getElementById('set-exam-fee-btn');
         const feeCurrencySymbol = document.getElementById('fee-currency-symbol');
         
@@ -1287,20 +1149,13 @@
         // Fee type selector
         const feeTypeBtns = document.querySelectorAll('.fee-type-btn');
         
-        // Bottom navigation elements
-        const navItems = document.querySelectorAll('.nav-item');
-        const statsNavBtn = document.getElementById('stats-nav-btn');
-        const settingsNavBtn = document.getElementById('settings-nav-btn');
-        
         // Firebase references
         const authUsersRef = database.ref('authUsers');
         const teachersRef = database.ref('teachers');
         const classesRef = database.ref('classes');
         const feePaymentsRef = database.ref('feePayments');
-        const weeklyExamPaymentsRef = database.ref('weeklyExamPayments');
         const printingFeesRef = database.ref('printingFees');
         const feeSettingsRef = database.ref('feeSettings');
-        const weeklyExamFeeSettingsRef = database.ref('weeklyExamFeeSettings');
         const examFeeSettingsRef = database.ref('examFeeSettings');
         const classBalancesRef = database.ref('classBalances');
         const studentsRef = database.ref('students');
@@ -1311,11 +1166,9 @@
         let currentClass = null;
         let classStudents = [];
         let feePaymentsData = {};
-        let weeklyExamPaymentsData = {};
         let examFeePaymentsData = {};
         let currentDate = new Date().toISOString().split('T')[0];
         let dailyFeeAmount = 0;
-        let weeklyExamFeeAmount = 0;
         let examFeeAmount = 0;
         let classBalanceData = {
             totalExpected: 0,
@@ -1323,9 +1176,8 @@
             totalOutstanding: 0,
             attendanceRate: 0
         };
-        let currentFeeType = 'daily'; // 'daily', 'weekly-exam', or 'exam'
+        let currentFeeType = 'daily'; // 'daily' or 'exam'
         let currentTerm = 'term1'; // 'term1', 'term2', or 'term3'
-        let currentWeek = 1; // 1, 2, 3, or 4
         
         // Currency settings
         let currentCurrencySettings = {
@@ -1349,7 +1201,6 @@
         function updateCurrencyDisplays() {
             // Update class info
             classDailyFeeElement.textContent = formatCurrency(dailyFeeAmount);
-            classWeeklyExamFeeElement.textContent = formatCurrency(weeklyExamFeeAmount);
             classExamFeeElement.textContent = formatCurrency(examFeeAmount);
             
             // Update balance elements
@@ -1360,17 +1211,13 @@
             attendanceRateElement.textContent = `${classBalanceData.attendanceRate}%`;
             
             // Update fee summary based on current fee type
-            let feeAmount = 0;
             if (currentFeeType === 'daily') {
-                feeAmount = dailyFeeAmount;
-            } else if (currentFeeType === 'weekly-exam') {
-                feeAmount = weeklyExamFeeAmount;
+                totalCollectedElement.textContent = formatCurrency(getTotalCollected('daily'));
+                expectedTotalElement.textContent = `Expected Total: ${formatCurrency(dailyFeeAmount * classStudents.length)}`;
             } else {
-                feeAmount = examFeeAmount;
+                totalCollectedElement.textContent = formatCurrency(getTotalCollected('exam'));
+                expectedTotalElement.textContent = `Expected Total: ${formatCurrency(examFeeAmount * classStudents.length)}`;
             }
-            
-            totalCollectedElement.textContent = formatCurrency(getTotalCollected(currentFeeType));
-            expectedTotalElement.textContent = `Expected Total: ${formatCurrency(feeAmount * classStudents.length)}`;
             
             // Update fee modal currency symbol
             feeCurrencySymbol.textContent = currentCurrencySettings.symbol;
@@ -1384,15 +1231,7 @@
         // Get total collected for current date and fee type
         function getTotalCollected(feeType) {
             let total = 0;
-            let paymentsData = {};
-            
-            if (feeType === 'daily') {
-                paymentsData = feePaymentsData;
-            } else if (feeType === 'weekly-exam') {
-                paymentsData = weeklyExamPaymentsData;
-            } else {
-                paymentsData = examFeePaymentsData;
-            }
+            const paymentsData = feeType === 'daily' ? feePaymentsData : examFeePaymentsData;
             
             classStudents.forEach(student => {
                 const payment = paymentsData[student.id] || {};
@@ -1480,7 +1319,6 @@
                         room: "Room 101",
                         teacher: teacherName,
                         dailyAmount: 10,
-                        weeklyExamAmount: 15,
                         examAmount: 50,
                         students: ["student1", "student2", "student3"]
                     };
@@ -1512,7 +1350,6 @@
                         room: "Room 101",
                         teacher: teacherName,
                         dailyAmount: 10,
-                        weeklyExamAmount: 15,
                         examAmount: 50,
                         students: ["student1", "student2", "student3"]
                     };
@@ -1533,7 +1370,6 @@
                     room: "Room 101",
                     teacher: teacherName,
                     dailyAmount: 10,
-                    weeklyExamAmount: 15,
                     examAmount: 50,
                     students: ["student1", "student2", "student3"]
                 };
@@ -1651,27 +1487,6 @@
             }
         }
         
-        // Get the weekly exam fee amount for the class
-        async function getWeeklyExamFeeAmount(classId) {
-            try {
-                const weeklyExamFeeSettingsSnapshot = await weeklyExamFeeSettingsRef.child(classId).once('value');
-                if (weeklyExamFeeSettingsSnapshot.exists()) {
-                    return weeklyExamFeeSettingsSnapshot.val().amount || 0;
-                }
-                
-                // Fallback to class weeklyExamAmount if weeklyExamFeeSettings doesn't exist
-                const classSnapshot = await classesRef.child(classId).once('value');
-                if (classSnapshot.exists()) {
-                    return classSnapshot.val().weeklyExamAmount || 0;
-                }
-                
-                return 15; // Default weekly exam fee amount
-            } catch (error) {
-                console.error('Error getting weekly exam fee amount:', error);
-                return 15; // Default weekly exam fee amount
-            }
-        }
-        
         // Get the exam fee amount for the class
         async function getExamFeeAmount(classId) {
             try {
@@ -1705,44 +1520,6 @@
                 return {};
             } catch (error) {
                 console.error('Error loading fee payments data:', error);
-                return {};
-            }
-        }
-        
-        // Load weekly exam payments data for the selected week
-        async function loadWeeklyExamPaymentsData(week) {
-            try {
-                const weeklyExamPaymentsSnapshot = await weeklyExamPaymentsRef
-                    .orderByChild('classId')
-                    .equalTo(currentClass.id)
-                    .once('value');
-                
-                if (weeklyExamPaymentsSnapshot.exists()) {
-                    const payments = weeklyExamPaymentsSnapshot.val();
-                    const formattedPayments = {};
-                    
-                    // Format the data to match the structure of feePaymentsData
-                    Object.keys(payments).forEach(key => {
-                        const payment = payments[key];
-                        if (!payment.deleted && payment.week === week) {
-                            if (!formattedPayments[payment.studentId]) {
-                                formattedPayments[payment.studentId] = {
-                                    amount: payment.amount,
-                                    paid: true,
-                                    timestamp: payment.date,
-                                    recordedBy: currentTeacherId,
-                                    week: payment.week
-                                };
-                            }
-                        }
-                    });
-                    
-                    return formattedPayments;
-                }
-                
-                return {};
-            } catch (error) {
-                console.error('Error loading weekly exam payments data:', error);
                 return {};
             }
         }
@@ -1903,7 +1680,7 @@
             try {
                 const feeSettings = {
                     amount: parseFloat(amount),
-                    description: description || (feeType === 'daily' ? 'Daily class fee' : (feeType === 'weekly-exam' ? 'Weekly exam fee' : 'Examination fee')),
+                    description: description || (feeType === 'daily' ? 'Daily class fee' : 'Examination fee'),
                     setBy: currentTeacherId,
                     setAt: new Date().toISOString()
                 };
@@ -1911,9 +1688,6 @@
                 if (feeType === 'daily') {
                     await feeSettingsRef.child(classId).set(feeSettings);
                     dailyFeeAmount = parseFloat(amount);
-                } else if (feeType === 'weekly-exam') {
-                    await weeklyExamFeeSettingsRef.child(classId).set(feeSettings);
-                    weeklyExamFeeAmount = parseFloat(amount);
                 } else {
                     await examFeeSettingsRef.child(classId).set(feeSettings);
                     examFeeAmount = parseFloat(amount);
@@ -1932,7 +1706,6 @@
             classIdElement.textContent = classData.id || '-';
             classRoomElement.textContent = classData.room || 'Not assigned';
             classDailyFeeElement.textContent = formatCurrency(dailyFeeAmount);
-            classWeeklyExamFeeElement.textContent = formatCurrency(weeklyExamFeeAmount);
             classExamFeeElement.textContent = formatCurrency(examFeeAmount);
         }
         
@@ -1960,7 +1733,7 @@
         }
         
         // Render students list with fee payment options
-        function renderStudentsList(students, paymentsData, selectedDate, feeType, term, week) {
+        function renderStudentsList(students, paymentsData, selectedDate, feeType, term) {
             studentsListElement.innerHTML = '';
             
             if (students.length === 0) {
@@ -1981,15 +1754,7 @@
             let paidCount = 0;
             let unpaidCount = 0;
             let totalCollected = 0;
-            let feeAmount = 0;
-            
-            if (feeType === 'daily') {
-                feeAmount = dailyFeeAmount;
-            } else if (feeType === 'weekly-exam') {
-                feeAmount = weeklyExamFeeAmount;
-            } else {
-                feeAmount = examFeeAmount;
-            }
+            const feeAmount = feeType === 'daily' ? dailyFeeAmount : examFeeAmount;
             
             students.forEach(student => {
                 const studentId = student.id;
@@ -2019,7 +1784,7 @@
                     </div>
                     <div class="fee-status">
                         <input type="number" class="fee-amount-input" value="${amountPaid > 0 ? amountPaid : feeAmount}" step="0.01" min="0">
-                        <button class="status-btn ${isPaid ? 'active' : 'inactive'} ${feeType === 'exam' ? 'exam' : (feeType === 'weekly-exam' ? 'weekly-exam' : '')}" 
+                        <button class="status-btn ${isPaid ? 'active' : 'inactive'} ${feeType === 'exam' ? 'exam' : ''}" 
                                 data-status="${isPaid ? 'paid' : 'unpaid'}" 
                                 title="${isPaid ? 'Paid' : 'Unpaid'}">
                             ${isPaid ? '<i class="fas fa-check-circle"></i> Paid' : '<i class="fas fa-times-circle"></i> Unpaid'}
@@ -2075,22 +1840,6 @@
                         feePaymentsData[studentId].amount = newStatus === 'paid' ? amount : 0;
                         feePaymentsData[studentId].timestamp = new Date().toISOString();
                         feePaymentsData[studentId].recordedBy = currentTeacherId;
-                    } else if (currentFeeType === 'weekly-exam') {
-                        if (!weeklyExamPaymentsData[studentId]) {
-                            weeklyExamPaymentsData[studentId] = {
-                                amount: 0,
-                                paid: false,
-                                timestamp: new Date().toISOString(),
-                                recordedBy: currentTeacherId,
-                                week: currentWeek
-                            };
-                        }
-                        
-                        weeklyExamPaymentsData[studentId].paid = newStatus === 'paid';
-                        weeklyExamPaymentsData[studentId].amount = newStatus === 'paid' ? amount : 0;
-                        weeklyExamPaymentsData[studentId].timestamp = new Date().toISOString();
-                        weeklyExamPaymentsData[studentId].recordedBy = currentTeacherId;
-                        weeklyExamPaymentsData[studentId].week = currentWeek;
                     } else {
                         if (!examFeePaymentsData[studentId]) {
                             examFeePaymentsData[studentId] = {
@@ -2135,18 +1884,6 @@
                         }
                         
                         feePaymentsData[studentId].amount = isPaid ? amount : 0;
-                    } else if (currentFeeType === 'weekly-exam') {
-                        if (!weeklyExamPaymentsData[studentId]) {
-                            weeklyExamPaymentsData[studentId] = {
-                                amount: 0,
-                                paid: false,
-                                timestamp: new Date().toISOString(),
-                                recordedBy: currentTeacherId,
-                                week: currentWeek
-                            };
-                        }
-                        
-                        weeklyExamPaymentsData[studentId].amount = isPaid ? amount : 0;
                     } else {
                         if (!examFeePaymentsData[studentId]) {
                             examFeePaymentsData[studentId] = {
@@ -2172,24 +1909,8 @@
             let paidCount = 0;
             let unpaidCount = 0;
             let totalCollected = 0;
-            let paymentsData = {};
-            
-            if (currentFeeType === 'daily') {
-                paymentsData = feePaymentsData;
-            } else if (currentFeeType === 'weekly-exam') {
-                paymentsData = weeklyExamPaymentsData;
-            } else {
-                paymentsData = examFeePaymentsData;
-            }
-            
-            let feeAmount = 0;
-            if (currentFeeType === 'daily') {
-                feeAmount = dailyFeeAmount;
-            } else if (currentFeeType === 'weekly-exam') {
-                feeAmount = weeklyExamFeeAmount;
-            } else {
-                feeAmount = examFeeAmount;
-            }
+            const paymentsData = currentFeeType === 'daily' ? feePaymentsData : examFeePaymentsData;
+            const feeAmount = currentFeeType === 'daily' ? dailyFeeAmount : examFeeAmount;
             
             classStudents.forEach(student => {
                 const studentId = student.id;
@@ -2211,20 +1932,9 @@
         
         // Mark all students as paid
         function markAllAsPaid() {
-            if (confirm(`Are you sure you want to mark all students as paid for ${currentFeeType === 'daily' ? 'daily fees' : (currentFeeType === 'weekly-exam' ? 'weekly exam fees' : 'exam fees')}?`)) {
-                let paymentsData = {};
-                let feeAmount = 0;
-                
-                if (currentFeeType === 'daily') {
-                    paymentsData = feePaymentsData;
-                    feeAmount = dailyFeeAmount;
-                } else if (currentFeeType === 'weekly-exam') {
-                    paymentsData = weeklyExamPaymentsData;
-                    feeAmount = weeklyExamFeeAmount;
-                } else {
-                    paymentsData = examFeePaymentsData;
-                    feeAmount = examFeeAmount;
-                }
+            if (confirm(`Are you sure you want to mark all students as paid for ${currentFeeType === 'daily' ? 'daily fees' : 'exam fees'}?`)) {
+                const paymentsData = currentFeeType === 'daily' ? feePaymentsData : examFeePaymentsData;
+                const feeAmount = currentFeeType === 'daily' ? dailyFeeAmount : examFeeAmount;
                 
                 classStudents.forEach(student => {
                     const studentId = student.id;
@@ -2238,9 +1948,7 @@
                         };
                     }
                     
-                    if (currentFeeType === 'weekly-exam') {
-                        paymentsData[studentId].week = currentWeek;
-                    } else if (currentFeeType === 'exam') {
+                    if (currentFeeType === 'exam') {
                         paymentsData[studentId].term = currentTerm;
                     }
                     
@@ -2251,7 +1959,7 @@
                 });
                 
                 // Re-render the students list
-                renderStudentsList(classStudents, paymentsData, currentDate, currentFeeType, currentTerm, currentWeek);
+                renderStudentsList(classStudents, paymentsData, currentDate, currentFeeType, currentTerm);
             }
         }
         
@@ -2259,7 +1967,7 @@
         async function saveFeePaymentsData(date) {
             try {
                 // Show confirmation modal
-                confirmationMessage.textContent = `Are you sure you want to save ${currentFeeType === 'daily' ? 'daily' : (currentFeeType === 'weekly-exam' ? 'weekly exam' : 'exam')} fee payments for ${date}?`;
+                confirmationMessage.textContent = `Are you sure you want to save ${currentFeeType === 'daily' ? 'daily' : 'exam'} fee payments for ${date}?`;
                 confirmationModal.classList.add('active');
                 
                 // Wait for user confirmation
@@ -2287,50 +1995,6 @@
                                 await updateClassBalance(currentClass.id, newBalance);
                                 classBalanceData = newBalance;
                                 renderClassBalance(classBalanceData);
-                            } else if (currentFeeType === 'weekly-exam') {
-                                // Save weekly exam fees to weeklyExamPayments collection
-                                const timestamp = Date.now();
-                                
-                                for (const studentId in weeklyExamPaymentsData) {
-                                    const payment = weeklyExamPaymentsData[studentId];
-                                    if (payment.paid && payment.week === currentWeek) {
-                                        // Check if this student already has a weekly exam fee payment for this week
-                                        const existingPaymentsSnapshot = await weeklyExamPaymentsRef
-                                            .orderByChild('studentId')
-                                            .equalTo(studentId)
-                                            .once('value');
-                                        
-                                        let paymentExists = false;
-                                        if (existingPaymentsSnapshot.exists()) {
-                                            const existingPayments = existingPaymentsSnapshot.val();
-                                            for (const key in existingPayments) {
-                                                if (existingPayments[key].week === currentWeek) {
-                                                    // Update existing payment
-                                                    await weeklyExamPaymentsRef.child(key).update({
-                                                        amount: payment.amount,
-                                                        date: timestamp,
-                                                        recordedBy: currentTeacherId
-                                                    });
-                                                    paymentExists = true;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                        
-                                        if (!paymentExists) {
-                                            // Create new payment
-                                            await weeklyExamPaymentsRef.push({
-                                                amount: payment.amount,
-                                                classId: currentClass.id,
-                                                date: timestamp,
-                                                deleted: false,
-                                                studentId: studentId,
-                                                recordedBy: currentTeacherId,
-                                                week: currentWeek
-                                            });
-                                        }
-                                    }
-                                }
                             } else {
                                 // Save exam fees to printingFees collection
                                 const timestamp = Date.now();
@@ -2381,7 +2045,7 @@
                             resolve(true);
                             
                             // Show success message
-                            alert(`${currentFeeType === 'daily' ? 'Daily' : (currentFeeType === 'weekly-exam' ? 'Weekly exam' : 'Exam')} fee payments saved successfully!`);
+                            alert(`${currentFeeType === 'daily' ? 'Daily' : 'Exam'} fee payments saved successfully!`);
                         } catch (error) {
                             console.error('Error saving fee payments:', error);
                             confirmationModal.classList.remove('active');
@@ -2403,7 +2067,7 @@
         
         // Reset fee payments data for the current date
         function resetFeePaymentsData() {
-            if (confirm(`Are you sure you want to reset all ${currentFeeType === 'daily' ? 'daily' : (currentFeeType === 'weekly-exam' ? 'weekly exam' : 'exam')} fee payments?`)) {
+            if (confirm(`Are you sure you want to reset all ${currentFeeType === 'daily' ? 'daily' : 'exam'} fee payments?`)) {
                 if (currentFeeType === 'daily') {
                     feePaymentsData = {};
                     classStudents.forEach(student => {
@@ -2412,17 +2076,6 @@
                             paid: false,
                             timestamp: new Date().toISOString(),
                             recordedBy: currentTeacherId
-                        };
-                    });
-                } else if (currentFeeType === 'weekly-exam') {
-                    weeklyExamPaymentsData = {};
-                    classStudents.forEach(student => {
-                        weeklyExamPaymentsData[student.id] = {
-                            amount: weeklyExamFeeAmount,
-                            paid: false,
-                            timestamp: new Date().toISOString(),
-                            recordedBy: currentTeacherId,
-                            week: currentWeek
                         };
                     });
                 } else {
@@ -2439,12 +2092,10 @@
                 }
                 
                 renderStudentsList(classStudents, 
-                    currentFeeType === 'daily' ? feePaymentsData : 
-                    (currentFeeType === 'weekly-exam' ? weeklyExamPaymentsData : examFeePaymentsData), 
+                    currentFeeType === 'daily' ? feePaymentsData : examFeePaymentsData, 
                     currentDate, 
                     currentFeeType,
-                    currentTerm,
-                    currentWeek
+                    currentTerm
                 );
             }
         }
@@ -2467,7 +2118,7 @@
                     }
                 });
                 
-                renderStudentsList(classStudents, feePaymentsData, currentDate, currentFeeType, currentTerm, currentWeek);
+                renderStudentsList(classStudents, feePaymentsData, currentDate, currentFeeType, currentTerm);
             }
         }
         
@@ -2484,35 +2135,19 @@
                 }
             });
             
-            // Update bottom navigation
-            navItems.forEach(item => {
-                if (item.dataset.feeType === feeType) {
-                    item.classList.add('active');
-                } else if (item.dataset.feeType) {
-                    item.classList.remove('active');
-                }
-            });
-            
             feeSummaryTitle.textContent = feeType === 'daily' 
                 ? "Today's Fee Collection Summary" 
-                : (feeType === 'weekly-exam' ? "Weekly Exam Fee Collection" : "Term Examination Fee Collection");
+                : "Examination Fee Collection";
                 
             feesTitle.textContent = feeType === 'daily' 
                 ? "Student Fee Payments" 
-                : (feeType === 'weekly-exam' ? "Student Weekly Exam Fee Payments" : "Student Examination Fee Payments");
+                : "Student Examination Fee Payments";
             
             // Show/hide term selector
             if (feeType === 'exam') {
                 termSelectorContainer.style.display = 'flex';
             } else {
                 termSelectorContainer.style.display = 'none';
-            }
-            
-            // Show/hide week selector
-            if (feeType === 'weekly-exam') {
-                weekSelectorContainer.style.display = 'flex';
-            } else {
-                weekSelectorContainer.style.display = 'none';
             }
             
             if (feeType === 'daily') {
@@ -2531,25 +2166,7 @@
                     }
                 });
                 
-                renderStudentsList(classStudents, feePaymentsData, currentDate, feeType, currentTerm, currentWeek);
-            } else if (feeType === 'weekly-exam') {
-                // Load weekly exam fee payments for the current week
-                weeklyExamPaymentsData = await loadWeeklyExamPaymentsData(currentWeek);
-                
-                // Initialize empty records for students without payment data
-                classStudents.forEach(student => {
-                    if (!weeklyExamPaymentsData[student.id]) {
-                        weeklyExamPaymentsData[student.id] = {
-                            amount: weeklyExamFeeAmount,
-                            paid: false,
-                            timestamp: new Date().toISOString(),
-                            recordedBy: currentTeacherId,
-                            week: currentWeek
-                        };
-                    }
-                });
-                
-                renderStudentsList(classStudents, weeklyExamPaymentsData, currentDate, feeType, currentTerm, currentWeek);
+                renderStudentsList(classStudents, feePaymentsData, currentDate, feeType, currentTerm);
             } else {
                 // Load exam fee payments for the current term
                 examFeePaymentsData = await loadExamFeePaymentsData(currentTerm);
@@ -2567,7 +2184,7 @@
                     }
                 });
                 
-                renderStudentsList(classStudents, examFeePaymentsData, currentDate, feeType, currentTerm, currentWeek);
+                renderStudentsList(classStudents, examFeePaymentsData, currentDate, feeType, currentTerm);
             }
         }
         
@@ -2601,41 +2218,7 @@
                     }
                 });
                 
-                renderStudentsList(classStudents, examFeePaymentsData, currentDate, currentFeeType, currentTerm, currentWeek);
-            }
-        }
-        
-        // Handle week change
-        async function handleWeekChange(week) {
-            currentWeek = week;
-            
-            // Update UI based on week
-            weekBtns.forEach(btn => {
-                if (btn.dataset.week === week.toString()) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-            
-            if (currentFeeType === 'weekly-exam') {
-                // Load weekly exam fee payments for the selected week
-                weeklyExamPaymentsData = await loadWeeklyExamPaymentsData(currentWeek);
-                
-                // Initialize empty records for students without payment data
-                classStudents.forEach(student => {
-                    if (!weeklyExamPaymentsData[student.id]) {
-                        weeklyExamPaymentsData[student.id] = {
-                            amount: weeklyExamFeeAmount,
-                            paid: false,
-                            timestamp: new Date().toISOString(),
-                            recordedBy: currentTeacherId,
-                            week: currentWeek
-                        };
-                    }
-                });
-                
-                renderStudentsList(classStudents, weeklyExamPaymentsData, currentDate, currentFeeType, currentTerm, currentWeek);
+                renderStudentsList(classStudents, examFeePaymentsData, currentDate, currentFeeType, currentTerm);
             }
         }
         
@@ -2886,9 +2469,6 @@
                 // Get the daily fee amount for this class
                 dailyFeeAmount = await getDailyFeeAmount(currentClass.id);
                 
-                // Get the weekly exam fee amount for this class
-                weeklyExamFeeAmount = await getWeeklyExamFeeAmount(currentClass.id);
-                
                 // Get the exam fee amount for this class
                 examFeeAmount = await getExamFeeAmount(currentClass.id);
                 
@@ -2901,9 +2481,6 @@
                 // Load fee payments data for today
                 feePaymentsData = await loadFeePaymentsData(currentDate);
                 
-                // Load weekly exam payments data for week 1
-                weeklyExamPaymentsData = await loadWeeklyExamPaymentsData(currentWeek);
-                
                 // Load exam fee payments data for term 1
                 examFeePaymentsData = await loadExamFeePaymentsData(currentTerm);
                 
@@ -2915,16 +2492,6 @@
                             paid: false,
                             timestamp: new Date().toISOString(),
                             recordedBy: currentTeacherId
-                        };
-                    }
-                    
-                    if (!weeklyExamPaymentsData[student.id]) {
-                        weeklyExamPaymentsData[student.id] = {
-                            amount: weeklyExamFeeAmount,
-                            paid: false,
-                            timestamp: new Date().toISOString(),
-                            recordedBy: currentTeacherId,
-                            week: currentWeek
                         };
                     }
                     
@@ -2944,7 +2511,7 @@
                 renderClassBalance(classBalanceData);
                 
                 // Render students with fee payment options (default to daily fees)
-                renderStudentsList(classStudents, feePaymentsData, currentDate, 'daily', currentTerm, currentWeek);
+                renderStudentsList(classStudents, feePaymentsData, currentDate, 'daily', currentTerm);
                 
                 // Hide loading screen and show main content
                 loadingScreen.style.display = 'none';
@@ -2969,7 +2536,6 @@
                             room: "Room 101",
                             teacher: "Demo Teacher",
                             dailyAmount: 10,
-                            weeklyExamAmount: 15,
                             examAmount: 50
                         };
                         
@@ -2992,10 +2558,8 @@
                         ];
                         
                         dailyFeeAmount = 10;
-                        weeklyExamFeeAmount = 15;
                         examFeeAmount = 50;
                         feePaymentsData = {};
-                        weeklyExamPaymentsData = {};
                         examFeePaymentsData = {};
                         
                         // Initialize empty records for students
@@ -3005,14 +2569,6 @@
                                 paid: false,
                                 timestamp: new Date().toISOString(),
                                 recordedBy: "demo-teacher"
-                            };
-                            
-                            weeklyExamPaymentsData[student.id] = {
-                                amount: weeklyExamFeeAmount,
-                                paid: false,
-                                timestamp: new Date().toISOString(),
-                                recordedBy: "demo-teacher",
-                                week: currentWeek
                             };
                             
                             examFeePaymentsData[student.id] = {
@@ -3030,7 +2586,7 @@
                         greetingSubtitle.textContent = `Recording daily fees for ${currentTeacherData.name}'s class`;
                         
                         renderClassInfo(currentClass);
-                        renderStudentsList(classStudents, feePaymentsData, currentDate, 'daily', currentTerm, currentWeek);
+                        renderStudentsList(classStudents, feePaymentsData, currentDate, 'daily', currentTerm);
                         
                         classBalanceData = {
                             totalExpected: 0,
@@ -3104,7 +2660,7 @@
                         });
                         
                         // Re-render the students list
-                        renderStudentsList(classStudents, feePaymentsData, currentDate, currentFeeType, currentTerm, currentWeek);
+                        renderStudentsList(classStudents, feePaymentsData, currentDate, currentFeeType, currentTerm);
                         
                         // Recalculate and update class balance
                         const newBalance = await calculateClassBalance(currentClass.id);
@@ -3121,52 +2677,9 @@
             };
         });
         
-        // Set weekly exam fee button click handler
-        setWeeklyExamFeeBtn.addEventListener('click', () => {
-            feeModalTitle.textContent = "Set Default Weekly Exam Fee Amount";
-            feeAmountInput.value = weeklyExamFeeAmount;
-            feeDescriptionInput.value = '';
-            feeModal.classList.add('active');
-            
-            // Set up save handler for weekly exam fees
-            saveFeeBtn.onclick = async () => {
-                const amount = parseFloat(feeAmountInput.value);
-                const description = feeDescriptionInput.value;
-                
-                if (isNaN(amount) || amount <= 0) {
-                    alert('Please enter a valid fee amount');
-                    return;
-                }
-                
-                try {
-                    const success = await setDefaultFee(currentClass.id, amount, description, 'weekly-exam');
-                    if (success) {
-                        alert('Default weekly exam fee amount updated successfully!');
-                        classWeeklyExamFeeElement.textContent = formatCurrency(amount);
-                        feeModal.classList.remove('active');
-                        
-                        // Update all current payments to use the new amount
-                        classStudents.forEach(student => {
-                            if (weeklyExamPaymentsData[student.id]) {
-                                weeklyExamPaymentsData[student.id].amount = amount;
-                            }
-                        });
-                        
-                        // Re-render the students list
-                        renderStudentsList(classStudents, weeklyExamPaymentsData, currentDate, currentFeeType, currentTerm, currentWeek);
-                    } else {
-                        alert('Failed to update weekly exam fee amount. Please try again.');
-                    }
-                } catch (error) {
-                    console.error('Error saving weekly exam fee amount:', error);
-                    alert('An error occurred while saving the weekly exam fee amount');
-                }
-            };
-        });
-        
         // Set exam fee button click handler
         setExamFeeBtn.addEventListener('click', () => {
-            feeModalTitle.textContent = "Set Default Term Exam Fee Amount";
+            feeModalTitle.textContent = "Set Default Examination Fee Amount";
             feeAmountInput.value = examFeeAmount;
             feeDescriptionInput.value = '';
             feeModal.classList.add('active');
@@ -3184,7 +2697,7 @@
                 try {
                     const success = await setDefaultFee(currentClass.id, amount, description, 'exam');
                     if (success) {
-                        alert('Default term exam fee amount updated successfully!');
+                        alert('Default examination fee amount updated successfully!');
                         classExamFeeElement.textContent = formatCurrency(amount);
                         feeModal.classList.remove('active');
                         
@@ -3196,7 +2709,7 @@
                         });
                         
                         // Re-render the students list
-                        renderStudentsList(classStudents, examFeePaymentsData, currentDate, currentFeeType, currentTerm, currentWeek);
+                        renderStudentsList(classStudents, examFeePaymentsData, currentDate, currentFeeType, currentTerm);
                     } else {
                         alert('Failed to update exam fee amount. Please try again.');
                     }
@@ -3308,34 +2821,6 @@
                 const term = btn.dataset.term;
                 handleTermChange(term);
             });
-        });
-        
-        // Week button click handlers
-        weekBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const week = parseInt(btn.dataset.week);
-                handleWeekChange(week);
-            });
-        });
-        
-        // Bottom navigation click handlers
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const feeType = item.dataset.feeType;
-                if (feeType) {
-                    handleFeeTypeChange(feeType);
-                }
-            });
-        });
-        
-        statsNavBtn.addEventListener('click', () => {
-            statsModal.classList.add('active');
-            updateStatistics(30);
-        });
-        
-        settingsNavBtn.addEventListener('click', () => {
-            // For now, just open the daily fee settings
-            setFeeBtn.click();
         });
         
         // Start the application
