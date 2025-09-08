@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <style> 
+    <style>
         :root {
     --primary-color: #6c5ce7;
     --secondary-color: #a29bfe;
@@ -20,7 +20,7 @@
     --danger-color: #d63031;
     --warning-color: #fdcb6e;
     --info-color: #0984e3;
-    --card-bg: rgba(255, 255, 255, 0.85);
+    --card-bg: rgba(255, 255, 255, 0.7);
     --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
 }
 
@@ -107,21 +107,24 @@ header {
     font-weight: 500;
     color: var(--text-color);
     cursor: pointer;
-    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     gap: 5px;
-    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
 }
 
 .action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.4);
 }
 
 .action-btn.success {
-    background: linear-gradient(135deg, var(--success-color) 0%, #00a382 100%);
+    background: var(--success-color);
     color: white;
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.action-btn.success:hover {
+    background: #00a882;
 }
 
 .action-btn.secondary {
@@ -147,24 +150,21 @@ header {
     display: flex;
     align-items: center;
     gap: 5px;
-    box-shadow: var(--shadow);
+    min-width: 70px;
+    justify-content: space-between;
 }
 
 .currency-dropdown {
     position: absolute;
     top: 100%;
     right: 0;
-    background: var(--card-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid var(--glass-border);
+    background: white;
     border-radius: 8px;
-    padding: 10px;
-    margin-top: 5px;
-    box-shadow: var(--shadow);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 10px 0;
     z-index: 100;
     display: none;
-    min-width: 150px;
+    min-width: 180px;
 }
 
 .currency-dropdown.show {
@@ -172,18 +172,16 @@ header {
 }
 
 .currency-option {
-    padding: 8px 10px;
-    border-radius: 6px;
+    padding: 10px 15px;
     cursor: pointer;
-    transition: background 0.2s ease;
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
+    gap: 10px;
+    transition: background-color 0.2s;
 }
 
 .currency-option:hover {
-    background: rgba(108, 92, 231, 0.1);
+    background-color: #f5f7fa;
 }
 
 .currency-flag {
@@ -264,8 +262,8 @@ header {
     font-weight: 700;
     text-align: center;
     margin: 15px 0;
-    padding: 15px;
-    border-radius: 10px;
+    padding: 10px;
+    border-radius: 8px;
     background: rgba(255, 255, 255, 0.3);
 }
 
@@ -332,13 +330,10 @@ header {
 }
 
 .stat-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     text-align: center;
     padding: 10px;
-    border-radius: 8px;
     background: rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
 }
 
 .stat-value {
@@ -356,8 +351,8 @@ header {
     text-align: center;
     font-weight: 600;
     padding: 10px;
+    background: rgba(255, 255, 255, 0.5);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.3);
 }
 
 /* Fees Container */
@@ -394,16 +389,11 @@ header {
     background: rgba(255, 255, 255, 0.3);
     padding: 8px 12px;
     border-radius: 8px;
-    border: 1px solid var(--glass-border);
-}
-
-.date-selector i {
-    color: var(--primary-color);
 }
 
 .date-selector input {
-    background: transparent;
     border: none;
+    background: transparent;
     color: var(--text-color);
     font-size: 0.9rem;
     outline: none;
@@ -416,26 +406,22 @@ header {
 }
 
 .mark-all-paid-btn {
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid var(--glass-border);
+    background: var(--info-color);
+    color: white;
+    border: none;
     border-radius: 8px;
     padding: 8px 12px;
     font-size: 0.85rem;
     font-weight: 500;
-    color: var(--text-color);
     cursor: pointer;
-    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     gap: 5px;
-    box-shadow: var(--shadow);
+    transition: background-color 0.3s;
 }
 
 .mark-all-paid-btn:hover {
-    background: rgba(0, 184, 148, 0.2);
-    color: var(--success-color);
+    background: #0877d1;
 }
 
 /* Students List */
@@ -451,12 +437,8 @@ header {
     padding: 15px;
     background: var(--card-bg);
     border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease;
-}
-
-.student-card:active {
-    transform: translateY(2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    gap: 15px;
 }
 
 .student-avatar {
@@ -464,9 +446,8 @@ header {
     height: 50px;
     border-radius: 50%;
     object-fit: cover;
-    margin-right: 15px;
     border: 2px solid white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .student-info {
@@ -476,7 +457,7 @@ header {
 
 .student-name {
     font-weight: 600;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -500,16 +481,16 @@ header {
 }
 
 .status-btn {
-    padding: 6px 12px;
-    border-radius: 20px;
     border: none;
+    border-radius: 20px;
+    padding: 6px 12px;
     font-size: 0.8rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     gap: 5px;
+    transition: all 0.3s;
 }
 
 .status-btn.active {
@@ -518,38 +499,19 @@ header {
 }
 
 .status-btn.inactive {
-    background: rgba(214, 48, 49, 0.1);
-    color: var(--danger-color);
+    background: var(--danger-color);
+    color: white;
+}
+
+.status-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
 }
 
 .no-students {
     text-align: center;
     padding: 40px 20px;
     color: var(--light-text);
-}
-
-/* Iframe Containers */
-.iframe-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: white;
-    z-index: 90;
-    display: none;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-.iframe-container.active {
-    display: block;
-}
-
-.iframe-container iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
 }
 
 /* Bottom Navigation */
@@ -579,20 +541,19 @@ header {
     position: relative;
     padding: 5px;
     min-width: 60px;
-    cursor: pointer;
 }
 
 .nav-item.active {
     color: var(--primary-color);
 }
 
-.nav-item.active i {
+.nav-item.active .nav-icon {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
     color: white;
     box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
 }
 
-.nav-item i {
+.nav-icon {
     width: 45px;
     height: 45px;
     border-radius: 50%;
@@ -603,6 +564,30 @@ header {
     font-size: 1.1rem;
     background: rgba(255, 255, 255, 0.3);
     transition: all 0.3s ease;
+}
+
+/* Iframe containers */
+.iframe-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    z-index: 90;
+    display: none;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.iframe-container.active {
+    display: block;
+}
+
+.iframe-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
 }
 
 /* Modal Styles */
@@ -629,21 +614,24 @@ header {
 }
 
 .modal-content {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: white;
     border-radius: 12px;
     width: 90%;
     max-width: 500px;
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--glass-border);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.modal.active .modal-content {
+    transform: translateY(0);
 }
 
 .modal-header {
     padding: 15px 20px;
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 1px solid #eee;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -669,7 +657,7 @@ header {
 
 .modal-footer {
     padding: 15px 20px;
-    border-top: 1px solid var(--glass-border);
+    border-top: 1px solid #eee;
     display: flex;
     justify-content: flex-end;
     gap: 10px;
@@ -684,21 +672,19 @@ header {
     display: block;
     margin-bottom: 5px;
     font-weight: 500;
-    font-size: 0.9rem;
 }
 
 .form-input {
     width: 100%;
     padding: 10px 12px;
+    border: 1px solid #ddd;
     border-radius: 8px;
-    border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.3);
-    font-size: 0.9rem;
-    outline: none;
-    transition: border-color 0.3s ease;
+    font-size: 1rem;
+    transition: border-color 0.3s;
 }
 
 .form-input:focus {
+    outline: none;
     border-color: var(--primary-color);
 }
 
@@ -722,12 +708,11 @@ header {
 
 .stats-period-btn {
     padding: 5px 10px;
+    border: 1px solid #ddd;
+    background: white;
     border-radius: 5px;
-    border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.3);
-    font-size: 0.8rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    font-size: 0.8rem;
 }
 
 .stats-period-btn.active {
@@ -744,14 +729,14 @@ header {
 }
 
 .stats-summary-item {
-    background: rgba(255, 255, 255, 0.3);
-    padding: 15px;
-    border-radius: 8px;
     text-align: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
 }
 
 .stats-summary-value {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: 700;
     margin-bottom: 5px;
 }
@@ -776,21 +761,17 @@ header {
 .stats-table td {
     padding: 10px;
     text-align: left;
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 1px solid #eee;
 }
 
 .stats-table th {
     font-weight: 600;
-    font-size: 0.9rem;
-}
-
-.stats-table td {
-    font-size: 0.85rem;
+    background: #f8f9fa;
 }
 
 .payment-status-badge {
     padding: 3px 8px;
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 0.75rem;
     font-weight: 500;
 }
@@ -800,9 +781,9 @@ header {
     color: var(--success-color);
 }
 
-.payment-status-pending {
-    background: rgba(253, 203, 110, 0.2);
-    color: var(--warning-color);
+.payment-status-unpaid {
+    background: rgba(214, 48, 49, 0.2);
+    color: var(--danger-color);
 }
 
 /* Loading Screen */
@@ -876,38 +857,33 @@ header {
     .student-card {
         flex-direction: column;
         text-align: center;
-        gap: 10px;
-    }
-    
-    .student-avatar {
-        margin-right: 0;
     }
     
     .fee-status {
         align-items: center;
-    }
-    
-    .modal-content {
-        width: 95%;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
     }
     
     .stats-summary {
         grid-template-columns: 1fr;
     }
     
-    .stats-table {
-        font-size: 0.8rem;
+    .stats-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
     }
     
-    .nav-item {
-        min-width: 55px;
-        font-size: 0.65rem;
+    .stats-period-selector {
+        width: 100%;
+        justify-content: space-between;
     }
     
-    .nav-item i {
-        width: 40px;
-        height: 40px;
-        font-size: 1rem;
+    .stats-period-btn {
+        flex: 1;
+        text-align: center;
     }
 }
 
@@ -922,26 +898,47 @@ header {
     
     .fees-actions {
         flex-direction: column;
-        align-items: stretch;
+        width: 100%;
     }
     
-    .action-btn, .mark-all-paid-btn {
+    .mark-all-paid-btn, .action-btn {
+        width: 100%;
         justify-content: center;
-    }
-    
-    .stats-table th,
-    .stats-table td {
-        padding: 5px;
-        font-size: 0.75rem;
     }
     
     .nav-item {
         min-width: 50px;
-        padding: 3px;
     }
     
-    .nav-item span {
-        font-size: 0.6rem;
+    .nav-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+}
+
+/* Orientation change handling */
+@media (max-height: 500px) and (orientation: landscape) {
+    .container {
+        padding: 8px;
+    }
+    
+    .student-card {
+        flex-direction: row;
+        text-align: left;
+    }
+    
+    .fee-status {
+        flex-direction: column;
+        align-items: flex-end;
+        width: auto;
+    }
+}
+
+/* Prevent zoom on input focus for iOS */
+@media screen and (max-width: 768px) {
+    input, select, textarea {
+        font-size: 16px !important;
     }
 }
     </style>
@@ -1096,6 +1093,10 @@ header {
     </div>
 
     <!-- Iframe containers for navigation items -->
+    <div class="iframe-container" id="daily-fees-frame">
+        <iframe src="daily_fees.html"></iframe>
+    </div>
+    
     <div class="iframe-container" id="weekly-exams-frame">
         <iframe src="weekly_exams.html"></iframe>
     </div>
@@ -1113,28 +1114,28 @@ header {
     </div>
 
     <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <div class="nav-item active" id="nav-fees">
-            <i class="fas fa-money-bill-wave"></i>
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" data-target="daily-fees-frame">
+            <i class="fas fa-money-bill-wave nav-icon"></i>
             <span>Daily Fees</span>
-        </div>
-        <div class="nav-item" id="nav-weekly-exams">
-            <i class="fas fa-file-alt"></i>
+        </a>
+        <a href="#" class="nav-item" data-target="weekly-exams-frame">
+            <i class="fas fa-file-alt nav-icon"></i>
             <span>Weekly Exams</span>
-        </div>
-        <div class="nav-item" id="nav-pta-utility">
-            <i class="fas fa-users"></i>
+        </a>
+        <a href="#" class="nav-item" data-target="pta-utility-frame">
+            <i class="fas fa-users nav-icon"></i>
             <span>PTA & Utility</span>
-        </div>
-        <div class="nav-item" id="nav-broom">
-            <i class="fas fa-broom"></i>
+        </a>
+        <a href="#" class="nav-item" data-target="broom-frame">
+            <i class="fas fa-broom nav-icon"></i>
             <span>Broom</span>
-        </div>
-        <div class="nav-item" id="nav-others">
-            <i class="fas fa-ellipsis-h"></i>
+        </a>
+        <a href="#" class="nav-item" data-target="others-frame">
+            <i class="fas fa-ellipsis-h nav-icon"></i>
             <span>Others</span>
-        </div>
-    </div>
+        </a>
+    </nav>
 
     <!-- Confirmation Modal -->
     <div class="modal" id="confirmation-modal">
@@ -1332,17 +1333,8 @@ header {
         const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
         
         // Bottom navigation elements
-        const navFees = document.getElementById('nav-fees');
-        const navWeeklyExams = document.getElementById('nav-weekly-exams');
-        const navPtaUtility = document.getElementById('nav-pta-utility');
-        const navBroom = document.getElementById('nav-broom');
-        const navOthers = document.getElementById('nav-others');
-        
-        // Iframe containers
-        const weeklyExamsFrame = document.getElementById('weekly-exams-frame');
-        const ptaUtilityFrame = document.getElementById('pta-utility-frame');
-        const broomFrame = document.getElementById('broom-frame');
-        const othersFrame = document.getElementById('others-frame');
+        const navItems = document.querySelectorAll('.nav-item');
+        const iframeContainers = document.querySelectorAll('.iframe-container');
         
         // Firebase references
         const authUsersRef = database.ref('authUsers');
@@ -2316,55 +2308,33 @@ header {
         
         // Handle navigation between different sections
         function setupNavigation() {
-            // Hide all iframes and show only the fees content
-            function showFeesContent() {
-                weeklyExamsFrame.classList.remove('active');
-                ptaUtilityFrame.classList.remove('active');
-                broomFrame.classList.remove('active');
-                othersFrame.classList.remove('active');
-                mainContent.style.display = 'block';
-                
-                // Update active nav item
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    item.classList.remove('active');
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all items
+                    navItems.forEach(navItem => navItem.classList.remove('active'));
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Hide all iframe containers
+                    iframeContainers.forEach(container => container.classList.remove('active'));
+                    
+                    // Show the selected iframe container
+                    const targetId = this.dataset.target;
+                    
+                    // Special handling for Daily Fees - show main content instead of iframe
+                    if (targetId === 'daily-fees-frame') {
+                        mainContent.style.display = 'block';
+                    } else {
+                        mainContent.style.display = 'none';
+                        const targetContainer = document.getElementById(targetId);
+                        if (targetContainer) {
+                            targetContainer.classList.add('active');
+                        }
+                    }
                 });
-                navFees.classList.add('active');
-            }
-            
-            // Show iframe content
-            function showIframeContent(iframe, navItem) {
-                mainContent.style.display = 'none';
-                weeklyExamsFrame.classList.remove('active');
-                ptaUtilityFrame.classList.remove('active');
-                broomFrame.classList.remove('active');
-                othersFrame.classList.remove('active');
-                
-                iframe.classList.add('active');
-                
-                // Update active nav item
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                navItem.classList.add('active');
-            }
-            
-            // Set up event listeners for navigation items
-            navFees.addEventListener('click', showFeesContent);
-            
-            navWeeklyExams.addEventListener('click', () => {
-                showIframeContent(weeklyExamsFrame, navWeeklyExams);
-            });
-            
-            navPtaUtility.addEventListener('click', () => {
-                showIframeContent(ptaUtilityFrame, navPtaUtility);
-            });
-            
-            navBroom.addEventListener('click', () => {
-                showIframeContent(broomFrame, navBroom);
-            });
-            
-            navOthers.addEventListener('click', () => {
-                showIframeContent(othersFrame, navOthers);
             });
         }
         
@@ -2424,7 +2394,7 @@ header {
                 // Render students with fee payment options
                 renderStudentsList(classStudents, feePaymentsData, currentDate);
                 
-                // Set up navigation
+                // Setup navigation
                 setupNavigation();
                 
                 // Hide loading screen and show main content
@@ -2499,7 +2469,7 @@ header {
                         };
                         renderClassBalance(classBalanceData);
                         
-                        // Set up navigation
+                        // Setup navigation
                         setupNavigation();
                         
                         loadingScreen.style.display = 'none';
