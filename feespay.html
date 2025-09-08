@@ -38,6 +38,7 @@
             color: var(--text-color);
             min-height: 100vh;
             padding: 20px;
+            padding-bottom: 80px; /* Space for bottom navigation */
         }
 
         .container {
@@ -759,6 +760,63 @@
             border-color: var(--term3-color);
         }
 
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active {
+            background: rgba(108, 92, 231, 0.1);
+        }
+
+        .nav-icon {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: var(--light-text);
+        }
+
+        .nav-item.active .nav-icon {
+            color: var(--primary-color);
+        }
+
+        .nav-label {
+            font-size: 0.7rem;
+            color: var(--light-text);
+        }
+
+        .nav-item.active .nav-label {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* Content sections */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
         @media (max-width: 768px) {
             .fees-header {
                 flex-direction: column;
@@ -824,123 +882,235 @@
             </div>
         </header>
 
-        <!-- Class Information -->
-        <div class="class-info" id="class-info">
-            <h2 class="class-title" id="class-name">Loading class...</h2>
-            <div class="class-details">
-                <div class="detail-item">
-                    <div class="detail-label">Class ID</div>
-                    <div class="detail-value" id="class-id">-</div>
+        <!-- Content Sections -->
+        <div class="content-section active" id="daily-fees-section">
+            <!-- Class Information -->
+            <div class="class-info" id="class-info">
+                <h2 class="class-title" id="class-name">Loading class...</h2>
+                <div class="class-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Class ID</div>
+                        <div class="detail-value" id="class-id">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Room</div>
+                        <div class="detail-value" id="class-room">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Daily Fee</div>
+                        <div class="detail-value" id="class-daily-fee">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Exam Fee</div>
+                        <div class="detail-value" id="class-exam-fee">-</div>
+                    </div>
                 </div>
-                <div class="detail-item">
-                    <div class="detail-label">Room</div>
-                    <div class="detail-value" id="class-room">-</div>
+            </div>
+
+            <!-- Class Balance Summary -->
+            <div class="balance-card" id="class-balance" style="display: none;">
+                <div class="balance-header">
+                    <h3 class="balance-title">Class Financial Summary</h3>
+                    <div>
+                        <button class="action-btn secondary" id="set-fee-btn">
+                            <i class="fas fa-cog"></i> Set Daily Fee
+                        </button>
+                        <button class="action-btn exam" id="set-exam-fee-btn">
+                            <i class="fas fa-cog"></i> Set Exam Fee
+                        </button>
+                    </div>
                 </div>
-                <div class="detail-item">
-                    <div class="detail-label">Daily Fee</div>
-                    <div class="detail-value" id="class-daily-fee">-</div>
+                <div class="balance-amount" id="total-balance">₵0.00</div>
+                <div class="balance-details">
+                    <div class="balance-detail">
+                        <div class="balance-label">Total Expected</div>
+                        <div class="balance-value" id="total-expected">₵0.00</div>
+                    </div>
+                    <div class="balance-detail">
+                        <div class="balance-label">Total Collected</div>
+                        <div class="balance-value" id="total-collected-balance">₵0.00</div>
+                    </div>
+                    <div class="balance-detail">
+                        <div class="balance-label">Total Outstanding</div>
+                        <div class="balance-value" id="total-outstanding">₵0.00</div>
+                    </div>
+                    <div class="balance-detail">
+                        <div class="balance-label">Attendance Rate</div>
+                        <div class="balance-value" id="attendance-rate">0%</div>
+                    </div>
                 </div>
-                <div class="detail-item">
-                    <div class="detail-label">Exam Fee</div>
-                    <div class="detail-value" id="class-exam-fee">-</div>
+            </div>
+
+            <!-- Daily Fee Summary -->
+            <div class="summary-card" id="fee-summary" style="display: none;">
+                <div class="summary-title" id="fee-summary-title">Today's Fee Collection Summary</div>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="total-students">0</div>
+                        <div class="stat-label">Total Students</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="paid-count">0</div>
+                        <div class="stat-label">Paid</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="unpaid-count">0</div>
+                        <div class="stat-label">Unpaid</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="total-collected">₵0</div>
+                        <div class="stat-label">Total Collected</div>
+                    </div>
+                </div>
+                <div class="total-amount" id="expected-total">Expected Total: ₵0</div>
+            </div>
+
+            <!-- Fees Container -->
+            <div class="fees-container">
+                <div class="fees-header">
+                    <h3 class="fees-title" id="fees-title">Student Fee Payments</h3>
+                    <div class="date-selector">
+                        <i class="fas fa-calendar-alt"></i>
+                        <input type="date" id="fees-date" value="">
+                    </div>
+                    <div class="fees-actions">
+                        <button class="mark-all-paid-btn" id="mark-all-paid-btn">
+                            <i class="fas fa-check-double"></i> Mark All Paid
+                        </button>
+                        <button class="action-btn success" id="save-btn">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                        <button class="action-btn secondary" id="reset-btn">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <div class="students-list" id="students-list">
+                    <div class="no-students">
+                        <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>No students found in this class</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Class Balance Summary -->
-        <div class="balance-card" id="class-balance" style="display: none;">
-            <div class="balance-header">
-                <h3 class="balance-title">Class Financial Summary</h3>
-                <div>
-                    <button class="action-btn secondary" id="set-fee-btn">
-                        <i class="fas fa-cog"></i> Set Daily Fee
-                    </button>
-                    <button class="action-btn exam" id="set-exam-fee-btn">
-                        <i class="fas fa-cog"></i> Set Exam Fee
-                    </button>
+        <!-- Exam Fees Section -->
+        <div class="content-section" id="exam-fees-section">
+            <div class="summary-card">
+                <div class="summary-title">Examination Fee Collection</div>
+                <div id="term-selector-container" class="term-selector">
+                    <button class="term-btn term1 active" data-term="term1">Term 1</button>
+                    <button class="term-btn term2" data-term="term2">Term 2</button>
+                    <button class="term-btn term3" data-term="term3">Term 3</button>
                 </div>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="exam-total-students">0</div>
+                        <div class="stat-label">Total Students</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="exam-paid-count">0</div>
+                        <div class="stat-label">Paid</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="exam-unpaid-count">0</div>
+                        <div class="stat-label">Unpaid</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="exam-total-collected">₵0</div>
+                        <div class="stat-label">Total Collected</div>
+                    </div>
+                </div>
+                <div class="total-amount" id="exam-expected-total">Expected Total: ₵0</div>
             </div>
-            <div class="balance-amount" id="total-balance">₵0.00</div>
-            <div class="balance-details">
-                <div class="balance-detail">
-                    <div class="balance-label">Total Expected</div>
-                    <div class="balance-value" id="total-expected">₵0.00</div>
+
+            <div class="fees-container">
+                <div class="fees-header">
+                    <h3 class="fees-title">Student Examination Fee Payments</h3>
+                    <div class="fees-actions">
+                        <button class="mark-all-paid-btn" id="exam-mark-all-paid-btn">
+                            <i class="fas fa-check-double"></i> Mark All Paid
+                        </button>
+                        <button class="action-btn success" id="exam-save-btn">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                        <button class="action-btn secondary" id="exam-reset-btn">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
                 </div>
-                <div class="balance-detail">
-                    <div class="balance-label">Total Collected</div>
-                    <div class="balance-value" id="total-collected-balance">₵0.00</div>
-                </div>
-                <div class="balance-detail">
-                    <div class="balance-label">Total Outstanding</div>
-                    <div class="balance-value" id="total-outstanding">₵0.00</div>
-                </div>
-                <div class="balance-detail">
-                    <div class="balance-label">Attendance Rate</div>
-                    <div class="balance-value" id="attendance-rate">0%</div>
+
+                <div class="students-list" id="exam-students-list">
+                    <div class="no-students">
+                        <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>No students found in this class</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Daily Fee Summary -->
-        <div class="summary-card" id="fee-summary" style="display: none;">
-            <div class="summary-title" id="fee-summary-title">Today's Fee Collection Summary</div>
-            <div class="fee-type-selector">
-                <button class="fee-type-btn active" data-fee-type="daily">Daily Fees</button>
-                <button class="fee-type-btn exam" data-fee-type="exam">Exam Fees</button>
-            </div>
-            <div id="term-selector-container" class="term-selector" style="display: none;">
-                <button class="term-btn term1 active" data-term="term1">Term 1</button>
-                <button class="term-btn term2" data-term="term2">Term 2</button>
-                <button class="term-btn term3" data-term="term3">Term 3</button>
-            </div>
-            <div class="summary-stats">
-                <div class="stat-item">
-                    <div class="stat-value" id="total-students">0</div>
-                    <div class="stat-label">Total Students</div>
+        <!-- Settings Section -->
+        <div class="content-section" id="settings-section">
+            <div class="balance-card">
+                <div class="balance-header">
+                    <h3 class="balance-title">Fee Settings</h3>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="paid-count">0</div>
-                    <div class="stat-label">Paid</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="unpaid-count">0</div>
-                    <div class="stat-label">Unpaid</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="total-collected">₵0</div>
-                    <div class="stat-label">Total Collected</div>
+                <div class="balance-details">
+                    <div class="balance-detail">
+                        <div class="balance-label">Daily Fee Amount</div>
+                        <div class="balance-value" id="settings-daily-fee">₵0.00</div>
+                        <button class="action-btn secondary" id="settings-set-daily-fee-btn" style="margin-top: 10px; width: 100%;">
+                            <i class="fas fa-cog"></i> Set Daily Fee
+                        </button>
+                    </div>
+                    <div class="balance-detail">
+                        <div class="balance-label">Exam Fee Amount</div>
+                        <div class="balance-value" id="settings-exam-fee">₵0.00</div>
+                        <button class="action-btn exam" id="settings-set-exam-fee-btn" style="margin-top: 10px; width: 100%;">
+                            <i class="fas fa-cog"></i> Set Exam Fee
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="total-amount" id="expected-total">Expected Total: ₵0</div>
+
+            <div class="summary-card">
+                <div class="summary-title">Class Information</div>
+                <div class="class-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Class Name</div>
+                        <div class="detail-value" id="settings-class-name">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Class ID</div>
+                        <div class="detail-value" id="settings-class-id">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Room</div>
+                        <div class="detail-value" id="settings-class-room">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Number of Students</div>
+                        <div class="detail-value" id="settings-student-count">0</div>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <!-- Fees Container -->
-        <div class="fees-container">
-            <div class="fees-header">
-                <h3 class="fees-title" id="fees-title">Student Fee Payments</h3>
-                <div class="date-selector">
-                    <i class="fas fa-calendar-alt"></i>
-                    <input type="date" id="fees-date" value="">
-                </div>
-                <div class="fees-actions">
-                    <button class="mark-all-paid-btn" id="mark-all-paid-btn">
-                        <i class="fas fa-check-double"></i> Mark All Paid
-                    </button>
-                    <button class="action-btn success" id="save-btn">
-                        <i class="fas fa-save"></i> Save
-                    </button>
-                    <button class="action-btn secondary" id="reset-btn">
-                        <i class="fas fa-redo"></i> Reset
-                    </button>
-                </div>
-            </div>
-
-            <div class="students-list" id="students-list">
-                <div class="no-students">
-                    <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                    <p>No students found in this class</p>
-                </div>
-            </div>
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" data-section="daily-fees-section">
+            <div class="nav-icon"><i class="fas fa-calendar-day"></i></div>
+            <div class="nav-label">Daily Fees</div>
+        </div>
+        <div class="nav-item" data-section="exam-fees-section">
+            <div class="nav-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="nav-label">Exam Fees</div>
+        </div>
+        <div class="nav-item" data-section="settings-section">
+            <div class="nav-icon"><i class="fas fa-cog"></i></div>
+            <div class="nav-label">Settings</div>
         </div>
     </div>
 
@@ -1104,6 +1274,31 @@
         const termSelectorContainer = document.getElementById('term-selector-container');
         const termBtns = document.querySelectorAll('.term-btn');
         
+        // Exam fee elements
+        const examStudentsListElement = document.getElementById('exam-students-list');
+        const examTotalStudentsElement = document.getElementById('exam-total-students');
+        const examPaidCountElement = document.getElementById('exam-paid-count');
+        const examUnpaidCountElement = document.getElementById('exam-unpaid-count');
+        const examTotalCollectedElement = document.getElementById('exam-total-collected');
+        const examExpectedTotalElement = document.getElementById('exam-expected-total');
+        const examSaveBtn = document.getElementById('exam-save-btn');
+        const examResetBtn = document.getElementById('exam-reset-btn');
+        const examMarkAllPaidBtn = document.getElementById('exam-mark-all-paid-btn');
+        
+        // Settings elements
+        const settingsDailyFeeElement = document.getElementById('settings-daily-fee');
+        const settingsExamFeeElement = document.getElementById('settings-exam-fee');
+        const settingsClassNameElement = document.getElementById('settings-class-name');
+        const settingsClassIdElement = document.getElementById('settings-class-id');
+        const settingsClassRoomElement = document.getElementById('settings-class-room');
+        const settingsStudentCountElement = document.getElementById('settings-student-count');
+        const settingsSetDailyFeeBtn = document.getElementById('settings-set-daily-fee-btn');
+        const settingsSetExamFeeBtn = document.getElementById('settings-set-exam-fee-btn');
+        
+        // Navigation elements
+        const navItems = document.querySelectorAll('.nav-item');
+        const contentSections = document.querySelectorAll('.content-section');
+        
         // Modal elements
         const confirmationModal = document.getElementById('confirmation-modal');
         const closeModalBtn = document.getElementById('close-modal');
@@ -1145,9 +1340,6 @@
         
         // Mark all paid button
         const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
-        
-        // Fee type selector
-        const feeTypeBtns = document.querySelectorAll('.fee-type-btn');
         
         // Firebase references
         const authUsersRef = database.ref('authUsers');
@@ -1218,6 +1410,14 @@
                 totalCollectedElement.textContent = formatCurrency(getTotalCollected('exam'));
                 expectedTotalElement.textContent = `Expected Total: ${formatCurrency(examFeeAmount * classStudents.length)}`;
             }
+            
+            // Update exam fee summary
+            examTotalCollectedElement.textContent = formatCurrency(getTotalCollected('exam'));
+            examExpectedTotalElement.textContent = `Expected Total: ${formatCurrency(examFeeAmount * classStudents.length)}`;
+            
+            // Update settings
+            settingsDailyFeeElement.textContent = formatCurrency(dailyFeeAmount);
+            settingsExamFeeElement.textContent = formatCurrency(examFeeAmount);
             
             // Update fee modal currency symbol
             feeCurrencySymbol.textContent = currentCurrencySettings.symbol;
@@ -1707,6 +1907,12 @@
             classRoomElement.textContent = classData.room || 'Not assigned';
             classDailyFeeElement.textContent = formatCurrency(dailyFeeAmount);
             classExamFeeElement.textContent = formatCurrency(examFeeAmount);
+            
+            // Update settings section
+            settingsClassNameElement.textContent = classData.name || 'Unnamed Class';
+            settingsClassIdElement.textContent = classData.id || '-';
+            settingsClassRoomElement.textContent = classData.room || 'Not assigned';
+            settingsStudentCountElement.textContent = classStudents.length;
         }
         
         // Render class balance information
@@ -1733,23 +1939,28 @@
         }
         
         // Render students list with fee payment options
-        function renderStudentsList(students, paymentsData, selectedDate, feeType, term) {
-            studentsListElement.innerHTML = '';
+        function renderStudentsList(students, paymentsData, selectedDate, feeType, term, isExamSection = false) {
+            const targetElement = isExamSection ? examStudentsListElement : studentsListElement;
+            targetElement.innerHTML = '';
             
             if (students.length === 0) {
-                studentsListElement.innerHTML = `
+                targetElement.innerHTML = `
                     <div class="no-students">
                         <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
                         <p>No students found in this class</p>
                     </div>
                 `;
-                feeSummary.style.display = 'none';
+                
+                if (!isExamSection) {
+                    feeSummary.style.display = 'none';
+                }
                 return;
             }
             
-            // Show fee summary
-            feeSummary.style.display = 'block';
-            totalStudentsElement.textContent = students.length;
+            // Show fee summary if not exam section
+            if (!isExamSection) {
+                feeSummary.style.display = 'block';
+            }
             
             let paidCount = 0;
             let unpaidCount = 0;
@@ -1792,17 +2003,26 @@
                     </div>
                 `;
                 
-                studentsListElement.appendChild(studentCard);
+                targetElement.appendChild(studentCard);
             });
             
             // Update summary counts
-            paidCountElement.textContent = paidCount;
-            unpaidCountElement.textContent = unpaidCount;
-            totalCollectedElement.textContent = formatCurrency(totalCollected);
-            expectedTotalElement.textContent = `Expected Total: ${formatCurrency(feeAmount * students.length)}`;
+            if (isExamSection) {
+                examTotalStudentsElement.textContent = students.length;
+                examPaidCountElement.textContent = paidCount;
+                examUnpaidCountElement.textContent = unpaidCount;
+                examTotalCollectedElement.textContent = formatCurrency(totalCollected);
+                examExpectedTotalElement.textContent = `Expected Total: ${formatCurrency(feeAmount * students.length)}`;
+            } else {
+                totalStudentsElement.textContent = students.length;
+                paidCountElement.textContent = paidCount;
+                unpaidCountElement.textContent = unpaidCount;
+                totalCollectedElement.textContent = formatCurrency(totalCollected);
+                expectedTotalElement.textContent = `Expected Total: ${formatCurrency(feeAmount * students.length)}`;
+            }
             
             // Add event listeners to status buttons
-            document.querySelectorAll('.status-btn').forEach(btn => {
+            targetElement.querySelectorAll('.status-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const card = this.closest('.student-card');
                     const studentId = card.dataset.studentId;
@@ -1826,7 +2046,7 @@
                     }
                     
                     // Update payments data based on fee type
-                    if (currentFeeType === 'daily') {
+                    if (feeType === 'daily') {
                         if (!feePaymentsData[studentId]) {
                             feePaymentsData[studentId] = {
                                 amount: 0,
@@ -1859,12 +2079,12 @@
                     }
                     
                     // Update summary counts
-                    updateSummaryCounts();
+                    updateSummaryCounts(feeType, isExamSection);
                 });
             });
             
             // Add event listeners to amount inputs
-            document.querySelectorAll('.fee-amount-input').forEach(input => {
+            targetElement.querySelectorAll('.fee-amount-input').forEach(input => {
                 input.addEventListener('change', function() {
                     const card = this.closest('.student-card');
                     const studentId = card.dataset.studentId;
@@ -1873,7 +2093,7 @@
                     const isPaid = statusBtn.dataset.status === 'paid';
                     
                     // Update payments data based on fee type
-                    if (currentFeeType === 'daily') {
+                    if (feeType === 'daily') {
                         if (!feePaymentsData[studentId]) {
                             feePaymentsData[studentId] = {
                                 amount: 0,
@@ -1899,18 +2119,18 @@
                     }
                     
                     // Update summary counts
-                    updateSummaryCounts();
+                    updateSummaryCounts(feeType, isExamSection);
                 });
             });
         }
         
         // Update summary counts based on current fee payments data
-        function updateSummaryCounts() {
+        function updateSummaryCounts(feeType, isExamSection = false) {
             let paidCount = 0;
             let unpaidCount = 0;
             let totalCollected = 0;
-            const paymentsData = currentFeeType === 'daily' ? feePaymentsData : examFeePaymentsData;
-            const feeAmount = currentFeeType === 'daily' ? dailyFeeAmount : examFeeAmount;
+            const paymentsData = feeType === 'daily' ? feePaymentsData : examFeePaymentsData;
+            const feeAmount = feeType === 'daily' ? dailyFeeAmount : examFeeAmount;
             
             classStudents.forEach(student => {
                 const studentId = student.id;
@@ -1924,17 +2144,24 @@
                 }
             });
             
-            paidCountElement.textContent = paidCount;
-            unpaidCountElement.textContent = unpaidCount;
-            totalCollectedElement.textContent = formatCurrency(totalCollected);
-            expectedTotalElement.textContent = `Expected Total: ${formatCurrency(feeAmount * classStudents.length)}`;
+            if (isExamSection || feeType === 'exam') {
+                examPaidCountElement.textContent = paidCount;
+                examUnpaidCountElement.textContent = unpaidCount;
+                examTotalCollectedElement.textContent = formatCurrency(totalCollected);
+                examExpectedTotalElement.textContent = `Expected Total: ${formatCurrency(feeAmount * classStudents.length)}`;
+            } else {
+                paidCountElement.textContent = paidCount;
+                unpaidCountElement.textContent = unpaidCount;
+                totalCollectedElement.textContent = formatCurrency(totalCollected);
+                expectedTotalElement.textContent = `Expected Total: ${formatCurrency(feeAmount * classStudents.length)}`;
+            }
         }
         
         // Mark all students as paid
-        function markAllAsPaid() {
-            if (confirm(`Are you sure you want to mark all students as paid for ${currentFeeType === 'daily' ? 'daily fees' : 'exam fees'}?`)) {
-                const paymentsData = currentFeeType === 'daily' ? feePaymentsData : examFeePaymentsData;
-                const feeAmount = currentFeeType === 'daily' ? dailyFeeAmount : examFeeAmount;
+        function markAllAsPaid(feeType, isExamSection = false) {
+            if (confirm(`Are you sure you want to mark all students as paid for ${feeType === 'daily' ? 'daily fees' : 'exam fees'}?`)) {
+                const paymentsData = feeType === 'daily' ? feePaymentsData : examFeePaymentsData;
+                const feeAmount = feeType === 'daily' ? dailyFeeAmount : examFeeAmount;
                 
                 classStudents.forEach(student => {
                     const studentId = student.id;
@@ -1948,7 +2175,7 @@
                         };
                     }
                     
-                    if (currentFeeType === 'exam') {
+                    if (feeType === 'exam') {
                         paymentsData[studentId].term = currentTerm;
                     }
                     
@@ -1959,22 +2186,22 @@
                 });
                 
                 // Re-render the students list
-                renderStudentsList(classStudents, paymentsData, currentDate, currentFeeType, currentTerm);
+                renderStudentsList(classStudents, paymentsData, currentDate, feeType, currentTerm, isExamSection);
             }
         }
         
         // Save fee payments data to Firebase
-        async function saveFeePaymentsData(date) {
+        async function saveFeePaymentsData(date, feeType) {
             try {
                 // Show confirmation modal
-                confirmationMessage.textContent = `Are you sure you want to save ${currentFeeType === 'daily' ? 'daily' : 'exam'} fee payments for ${date}?`;
+                confirmationMessage.textContent = `Are you sure you want to save ${feeType === 'daily' ? 'daily' : 'exam'} fee payments for ${date}?`;
                 confirmationModal.classList.add('active');
                 
                 // Wait for user confirmation
                 return new Promise((resolve) => {
                     confirmSaveBtn.onclick = async () => {
                         try {
-                            if (currentFeeType === 'daily') {
+                            if (feeType === 'daily') {
                                 // Prepare the data to be saved for daily fees
                                 const updates = {};
                                 const timestamp = new Date().toISOString();
@@ -2045,7 +2272,7 @@
                             resolve(true);
                             
                             // Show success message
-                            alert(`${currentFeeType === 'daily' ? 'Daily' : 'Exam'} fee payments saved successfully!`);
+                            alert(`${feeType === 'daily' ? 'Daily' : 'Exam'} fee payments saved successfully!`);
                         } catch (error) {
                             console.error('Error saving fee payments:', error);
                             confirmationModal.classList.remove('active');
@@ -2066,9 +2293,9 @@
         }
         
         // Reset fee payments data for the current date
-        function resetFeePaymentsData() {
-            if (confirm(`Are you sure you want to reset all ${currentFeeType === 'daily' ? 'daily' : 'exam'} fee payments?`)) {
-                if (currentFeeType === 'daily') {
+        function resetFeePaymentsData(feeType, isExamSection = false) {
+            if (confirm(`Are you sure you want to reset all ${feeType === 'daily' ? 'daily' : 'exam'} fee payments?`)) {
+                if (feeType === 'daily') {
                     feePaymentsData = {};
                     classStudents.forEach(student => {
                         feePaymentsData[student.id] = {
@@ -2092,10 +2319,11 @@
                 }
                 
                 renderStudentsList(classStudents, 
-                    currentFeeType === 'daily' ? feePaymentsData : examFeePaymentsData, 
+                    feeType === 'daily' ? feePaymentsData : examFeePaymentsData, 
                     currentDate, 
-                    currentFeeType,
-                    currentTerm
+                    feeType,
+                    currentTerm,
+                    isExamSection
                 );
             }
         }
@@ -2118,37 +2346,13 @@
                     }
                 });
                 
-                renderStudentsList(classStudents, feePaymentsData, currentDate, currentFeeType, currentTerm);
+                renderStudentsList(classStudents, feePaymentsData, currentDate, 'daily', currentTerm, false);
             }
         }
         
         // Handle fee type change
-        async function handleFeeTypeChange(feeType) {
+        async function handleFeeTypeChange(feeType, isExamSection = false) {
             currentFeeType = feeType;
-            
-            // Update UI based on fee type
-            feeTypeBtns.forEach(btn => {
-                if (btn.dataset.feeType === feeType) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-            
-            feeSummaryTitle.textContent = feeType === 'daily' 
-                ? "Today's Fee Collection Summary" 
-                : "Examination Fee Collection";
-                
-            feesTitle.textContent = feeType === 'daily' 
-                ? "Student Fee Payments" 
-                : "Student Examination Fee Payments";
-            
-            // Show/hide term selector
-            if (feeType === 'exam') {
-                termSelectorContainer.style.display = 'flex';
-            } else {
-                termSelectorContainer.style.display = 'none';
-            }
             
             if (feeType === 'daily') {
                 // Load daily fee payments for the selected date
@@ -2166,7 +2370,7 @@
                     }
                 });
                 
-                renderStudentsList(classStudents, feePaymentsData, currentDate, feeType, currentTerm);
+                renderStudentsList(classStudents, feePaymentsData, currentDate, feeType, currentTerm, isExamSection);
             } else {
                 // Load exam fee payments for the current term
                 examFeePaymentsData = await loadExamFeePaymentsData(currentTerm);
@@ -2184,7 +2388,7 @@
                     }
                 });
                 
-                renderStudentsList(classStudents, examFeePaymentsData, currentDate, feeType, currentTerm);
+                renderStudentsList(classStudents, examFeePaymentsData, currentDate, feeType, currentTerm, isExamSection);
             }
         }
         
@@ -2218,7 +2422,7 @@
                     }
                 });
                 
-                renderStudentsList(classStudents, examFeePaymentsData, currentDate, currentFeeType, currentTerm);
+                renderStudentsList(classStudents, examFeePaymentsData, currentDate, 'exam', currentTerm, true);
             }
         }
         
@@ -2441,6 +2645,36 @@
             });
         }
         
+        // Handle navigation
+        function handleNavigation(sectionId) {
+            // Update active navigation item
+            navItems.forEach(item => {
+                if (item.dataset.section === sectionId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Show active section
+            contentSections.forEach(section => {
+                if (section.id === sectionId) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+            
+            // Load data for the section if needed
+            if (sectionId === 'exam-fees-section') {
+                handleFeeTypeChange('exam', true);
+            } else if (sectionId === 'daily-fees-section') {
+                handleFeeTypeChange('daily', false);
+            } else if (sectionId === 'settings-section') {
+                // Settings section is already populated with data
+            }
+        }
+        
         // Initialize the page
         async function initializePage() {
             loadingScreen.style.display = 'flex';
@@ -2511,7 +2745,10 @@
                 renderClassBalance(classBalanceData);
                 
                 // Render students with fee payment options (default to daily fees)
-                renderStudentsList(classStudents, feePaymentsData, currentDate, 'daily', currentTerm);
+                renderStudentsList(classStudents, feePaymentsData, currentDate, 'daily', currentTerm, false);
+                
+                // Render exam students list
+                renderStudentsList(classStudents, examFeePaymentsData, currentDate, 'exam', currentTerm, true);
                 
                 // Hide loading screen and show main content
                 loadingScreen.style.display = 'none';
@@ -2586,7 +2823,8 @@
                         greetingSubtitle.textContent = `Recording daily fees for ${currentTeacherData.name}'s class`;
                         
                         renderClassInfo(currentClass);
-                        renderStudentsList(classStudents, feePaymentsData, currentDate, 'daily', currentTerm);
+                        renderStudentsList(classStudents, feePaymentsData, currentDate, 'daily', currentTerm, false);
+                        renderStudentsList(classStudents, examFeePaymentsData, currentDate, 'exam', currentTerm, true);
                         
                         classBalanceData = {
                             totalExpected: 0,
@@ -2608,10 +2846,20 @@
         
         // Event listeners
         saveBtn.addEventListener('click', async () => {
-            await saveFeePaymentsData(currentDate);
+            await saveFeePaymentsData(currentDate, 'daily');
         });
         
-        resetBtn.addEventListener('click', resetFeePaymentsData);
+        examSaveBtn.addEventListener('click', async () => {
+            await saveFeePaymentsData(currentDate, 'exam');
+        });
+        
+        resetBtn.addEventListener('click', () => {
+            resetFeePaymentsData('daily', false);
+        });
+        
+        examResetBtn.addEventListener('click', () => {
+            resetFeePaymentsData('exam', true);
+        });
         
         feesDate.addEventListener('change', (e) => {
             handleDateChange(e.target.value);
@@ -2650,6 +2898,7 @@
                     if (success) {
                         alert('Default daily fee amount updated successfully!');
                         classDailyFeeElement.textContent = formatCurrency(amount);
+                        settingsDailyFeeElement.textContent = formatCurrency(amount);
                         feeModal.classList.remove('active');
                         
                         // Update all current payments to use the new amount
@@ -2660,7 +2909,7 @@
                         });
                         
                         // Re-render the students list
-                        renderStudentsList(classStudents, feePaymentsData, currentDate, currentFeeType, currentTerm);
+                        renderStudentsList(classStudents, feePaymentsData, currentDate, 'daily', currentTerm, false);
                         
                         // Recalculate and update class balance
                         const newBalance = await calculateClassBalance(currentClass.id);
@@ -2699,6 +2948,7 @@
                     if (success) {
                         alert('Default examination fee amount updated successfully!');
                         classExamFeeElement.textContent = formatCurrency(amount);
+                        settingsExamFeeElement.textContent = formatCurrency(amount);
                         feeModal.classList.remove('active');
                         
                         // Update all current payments to use the new amount
@@ -2709,7 +2959,100 @@
                         });
                         
                         // Re-render the students list
-                        renderStudentsList(classStudents, examFeePaymentsData, currentDate, currentFeeType, currentTerm);
+                        renderStudentsList(classStudents, examFeePaymentsData, currentDate, 'exam', currentTerm, true);
+                    } else {
+                        alert('Failed to update exam fee amount. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error saving exam fee amount:', error);
+                    alert('An error occurred while saving the exam fee amount');
+                }
+            };
+        });
+        
+        // Settings set fee buttons
+        settingsSetDailyFeeBtn.addEventListener('click', () => {
+            feeModalTitle.textContent = "Set Default Daily Fee Amount";
+            feeAmountInput.value = dailyFeeAmount;
+            feeDescriptionInput.value = '';
+            feeModal.classList.add('active');
+            
+            // Set up save handler for daily fees
+            saveFeeBtn.onclick = async () => {
+                const amount = parseFloat(feeAmountInput.value);
+                const description = feeDescriptionInput.value;
+                
+                if (isNaN(amount) || amount <= 0) {
+                    alert('Please enter a valid fee amount');
+                    return;
+                }
+                
+                try {
+                    const success = await setDefaultFee(currentClass.id, amount, description, 'daily');
+                    if (success) {
+                        alert('Default daily fee amount updated successfully!');
+                        classDailyFeeElement.textContent = formatCurrency(amount);
+                        settingsDailyFeeElement.textContent = formatCurrency(amount);
+                        feeModal.classList.remove('active');
+                        
+                        // Update all current payments to use the new amount
+                        classStudents.forEach(student => {
+                            if (feePaymentsData[student.id]) {
+                                feePaymentsData[student.id].amount = amount;
+                            }
+                        });
+                        
+                        // Re-render the students list
+                        renderStudentsList(classStudents, feePaymentsData, currentDate, 'daily', currentTerm, false);
+                        
+                        // Recalculate and update class balance
+                        const newBalance = await calculateClassBalance(currentClass.id);
+                        await updateClassBalance(currentClass.id, newBalance);
+                        classBalanceData = newBalance;
+                        renderClassBalance(classBalanceData);
+                    } else {
+                        alert('Failed to update fee amount. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error saving fee amount:', error);
+                    alert('An error occurred while saving the fee amount');
+                }
+            };
+        });
+        
+        settingsSetExamFeeBtn.addEventListener('click', () => {
+            feeModalTitle.textContent = "Set Default Examination Fee Amount";
+            feeAmountInput.value = examFeeAmount;
+            feeDescriptionInput.value = '';
+            feeModal.classList.add('active');
+            
+            // Set up save handler for exam fees
+            saveFeeBtn.onclick = async () => {
+                const amount = parseFloat(feeAmountInput.value);
+                const description = feeDescriptionInput.value;
+                
+                if (isNaN(amount) || amount <= 0) {
+                    alert('Please enter a valid fee amount');
+                    return;
+                }
+                
+                try {
+                    const success = await setDefaultFee(currentClass.id, amount, description, 'exam');
+                    if (success) {
+                        alert('Default examination fee amount updated successfully!');
+                        classExamFeeElement.textContent = formatCurrency(amount);
+                        settingsExamFeeElement.textContent = formatCurrency(amount);
+                        feeModal.classList.remove('active');
+                        
+                        // Update all current payments to use the new amount
+                        classStudents.forEach(student => {
+                            if (examFeePaymentsData[student.id]) {
+                                examFeePaymentsData[student.id].amount = amount;
+                            }
+                        });
+                        
+                        // Re-render the students list
+                        renderStudentsList(classStudents, examFeePaymentsData, currentDate, 'exam', currentTerm, true);
                     } else {
                         alert('Failed to update exam fee amount. Please try again.');
                     }
@@ -2805,14 +3148,12 @@
         });
         
         // Mark all as paid button click handler
-        markAllPaidBtn.addEventListener('click', markAllAsPaid);
+        markAllPaidBtn.addEventListener('click', () => {
+            markAllAsPaid('daily', false);
+        });
         
-        // Fee type button click handlers
-        feeTypeBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const feeType = btn.dataset.feeType;
-                handleFeeTypeChange(feeType);
-            });
+        examMarkAllPaidBtn.addEventListener('click', () => {
+            markAllAsPaid('exam', true);
         });
         
         // Term button click handlers
@@ -2820,6 +3161,14 @@
             btn.addEventListener('click', () => {
                 const term = btn.dataset.term;
                 handleTermChange(term);
+            });
+        });
+        
+        // Navigation item click handlers
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const sectionId = item.dataset.section;
+                handleNavigation(sectionId);
             });
         });
         
