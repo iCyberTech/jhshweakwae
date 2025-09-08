@@ -42,7 +42,7 @@
             color: var(--text-color);
             min-height: 100vh;
             padding: 20px;
-            padding-bottom: 80px; /* Space for bottom navigation */
+            padding-bottom: 80px; /* Added padding for bottom navigation */
         }
 
         .container {
@@ -925,11 +925,12 @@
             padding: 5px 10px;
             cursor: pointer;
             transition: all 0.3s ease;
+            border-radius: 10px;
             min-width: 60px;
         }
 
         .nav-item.active {
-            color: var(--primary-color);
+            background: rgba(108, 92, 231, 0.1);
         }
 
         .nav-icon {
@@ -942,28 +943,52 @@
             text-align: center;
         }
 
-        .nav-item.daily.active {
+        .nav-item.daily .nav-icon {
             color: var(--primary-color);
         }
 
-        .nav-item.exam.active {
+        .nav-item.exam .nav-icon {
             color: var(--exam-color);
         }
 
-        .nav-item.weekly-exam.active {
+        .nav-item.weekly-exam .nav-icon {
             color: var(--weekly-exam-color);
         }
 
-        .nav-item.pta-utility.active {
+        .nav-item.pta-utility .nav-icon {
             color: var(--pta-utility-color);
         }
 
-        .nav-item.broom.active {
+        .nav-item.broom .nav-icon {
             color: var(--broom-color);
         }
 
-        .nav-item.others.active {
+        .nav-item.others .nav-icon {
             color: var(--others-color);
+        }
+
+        .nav-item.active.daily {
+            background: rgba(108, 92, 231, 0.2);
+        }
+
+        .nav-item.active.exam {
+            background: rgba(225, 112, 85, 0.2);
+        }
+
+        .nav-item.active.weekly-exam {
+            background: rgba(142, 68, 173, 0.2);
+        }
+
+        .nav-item.active.pta-utility {
+            background: rgba(22, 160, 133, 0.2);
+        }
+
+        .nav-item.active.broom {
+            background: rgba(39, 174, 96, 0.2);
+        }
+
+        .nav-item.active.others {
+            background: rgba(127, 140, 141, 0.2);
         }
 
         @media (max-width: 768px) {
@@ -987,22 +1012,22 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
-            
+
             .bottom-nav {
                 padding: 8px 0;
             }
-            
+
             .nav-item {
                 min-width: 50px;
                 padding: 5px;
             }
-            
+
             .nav-icon {
-                font-size: 1rem;
+                font-size: 1.1rem;
             }
-            
+
             .nav-label {
-                font-size: 0.6rem;
+                font-size: 0.65rem;
             }
         }
     </style>
@@ -1138,6 +1163,14 @@
         <!-- Daily Fee Summary -->
         <div class="summary-card" id="fee-summary" style="display: none;">
             <div class="summary-title" id="fee-summary-title">Today's Fee Collection Summary</div>
+            <div class="fee-type-selector" style="display: none;">
+                <button class="fee-type-btn active" data-fee-type="daily">Daily Fees</button>
+                <button class="fee-type-btn exam" data-fee-type="exam">Exam Fees</button>
+                <button class="fee-type-btn weekly-exam" data-fee-type="weekly-exam">Weekly Exams</button>
+                <button class="fee-type-btn pta-utility" data-fee-type="pta-utility">PTA & Utility</button>
+                <button class="fee-type-btn broom" data-fee-type="broom">Broom</button>
+                <button class="fee-type-btn others" data-fee-type="others">Others</button>
+            </div>
             <div id="term-selector-container" class="term-selector" style="display: none;">
                 <button class="term-btn term1 active" data-term="term1">Term 1</button>
                 <button class="term-btn term2" data-term="term2">Term 2</button>
@@ -1388,7 +1421,7 @@
             messagingSenderId: "140188895278",
             appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
             measurementId: "G-7ER348P6VZ",
-            databaseURL: "https://sms-single-default-rtdb.firebaseio.com/"
+            databaseURL: "https://sms-single-default-rtdb.firebaseio.io/"
         };
         
         // Initialize Firebase
@@ -1500,6 +1533,9 @@
         
         // Mark all paid button
         const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
+        
+        // Fee type selector
+        const feeTypeBtns = document.querySelectorAll('.fee-type-btn');
         
         // Firebase references
         const authUsersRef = database.ref('authUsers');
@@ -2667,7 +2703,7 @@
                                 case 'daily':
                                     // Prepare the data to be saved for daily fees
                                     for (const studentId in feePaymentsData) {
-                                        updates[`feePayments/${date}/${studentId`] = {
+                                        updates[`feePayments/${date}/${studentId}`] = {
                                             ...feePaymentsData[studentId],
                                             timestamp: timestamp
                                         };
@@ -3007,6 +3043,15 @@
             currentFeeType = feeType;
             
             // Update UI based on fee type
+            feeTypeBtns.forEach(btn => {
+                if (btn.dataset.feeType === feeType) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Update bottom navigation
             navItems.forEach(item => {
                 if (item.dataset.feeType === feeType) {
                     item.classList.add('active');
@@ -3415,7 +3460,7 @@
                 },
                 options: {
                     responsive: true;
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: false;
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -3824,7 +3869,7 @@
             feeModalTitle.textContent = "Set Default Examination Fee Amount";
             feeAmountInput.value = examFeeAmount;
             feeDescriptionInput.value = '';
-            feeModal.classList.add('active');
+            feeModal.classList.add('active';
             
             // Set up save handler for exam fees
             saveFeeBtn.onclick = async () => {
@@ -3866,7 +3911,7 @@
             feeModalTitle.textContent = "Set Default Weekly Exam Fee Amount";
             feeAmountInput.value = weeklyExamFeeAmount;
             feeDescriptionInput.value = '';
-            feeModal.classList.add('active';
+            feeModal.classList.add('active');
             
             // Set up save handler for weekly exam fees
             saveFeeBtn.onclick = async () => {
@@ -4152,7 +4197,7 @@
         // Mark all as paid button click handler
         markAllPaidBtn.addEventListener('click', markAllAsPaid);
         
-        // Bottom navigation item click handlers
+        // Fee type button click handlers (for bottom navigation)
         navItems.forEach(item => {
             item.addEventListener('click', () => {
                 const feeType = item.dataset.feeType;
@@ -4180,4 +4225,4 @@
         initializePage();
     </script>
 </body>
-</html>
+</html> s
