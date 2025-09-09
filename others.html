@@ -173,8 +173,8 @@
             font-weight: 600;
         }
 
-        /* Fee Type Creation Form */
-        .fee-type-form {
+        /* Form Styles */
+        .form-container {
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
@@ -202,55 +202,41 @@
             font-weight: 500;
         }
 
-        .form-input {
+        .form-input, .form-select {
             width: 100%;
             padding: 12px 15px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--glass-border);
             border-radius: 8px;
             font-size: 1rem;
-            transition: border-color 0.3s;
+            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s;
         }
 
-        .form-input:focus {
+        .form-input:focus, .form-select:focus {
             outline: none;
             border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
         }
 
-        .form-select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            background-color: white;
-            cursor: pointer;
-        }
-
-        .form-select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        .form-actions {
-            display: flex;
-            justify-content: flex-end;
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 15px;
-            margin-top: 30px;
         }
 
-        /* Fee Types List */
-        .fee-types-container {
+        /* Fees Container */
+        .fees-container {
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: var(--shadow);
             border: 1px solid var(--glass-border);
             margin-bottom: 80px;
         }
 
-        .fee-types-header {
+        .fees-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -259,96 +245,177 @@
             gap: 15px;
         }
 
-        .fee-types-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        .fee-types-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .fee-type-card {
-            background: var(--card-bg);
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease;
-        }
-
-        .fee-type-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .fee-type-name {
+        .fees-title {
             font-size: 1.1rem;
             font-weight: 600;
-            margin-bottom: 10px;
             color: var(--primary-color);
         }
 
-        .fee-type-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+        .fees-actions {
+            display: flex;
+            align-items: center;
             gap: 10px;
-            margin-bottom: 15px;
         }
 
-        .fee-type-detail {
+        .mark-all-paid-btn {
+            background: var(--info-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .mark-all-paid-btn:hover {
+            background: #0877d1;
+        }
+
+        /* Students List */
+        .students-list {
             display: flex;
             flex-direction: column;
+            gap: 15px;
         }
 
-        .fee-type-label {
+        .student-card {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            gap: 15px;
+        }
+
+        .student-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .student-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .student-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .student-id {
             font-size: 0.8rem;
             color: var(--light-text);
-            margin-bottom: 3px;
         }
 
-        .fee-type-value {
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .fee-type-actions {
+        .fee-status {
             display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 15px;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
         }
 
-        .edit-btn, .delete-btn {
-            padding: 6px 12px;
+        .fee-amount {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .status-btn {
             border: none;
-            border-radius: 5px;
+            border-radius: 20px;
+            padding: 6px 12px;
             font-size: 0.8rem;
+            font-weight: 500;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
             transition: all 0.3s;
         }
 
-        .edit-btn {
-            background-color: var(--info-color);
+        .status-btn.active {
+            background: var(--success-color);
             color: white;
         }
 
-        .delete-btn {
-            background-color: var(--danger-color);
+        .status-btn.inactive {
+            background: var(--danger-color);
             color: white;
         }
 
-        .edit-btn:hover, .delete-btn:hover {
+        .status-btn:hover {
             opacity: 0.9;
+            transform: translateY(-2px);
         }
 
-        /* No fee types message */
-        .no-fee-types {
+        .no-students {
             text-align: center;
             padding: 40px 20px;
             color: var(--light-text);
-            grid-column: 1 / -1;
+        }
+
+        /* Summary Card */
+        .summary-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+        }
+
+        .summary-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--light-text);
+        }
+
+        .total-amount {
+            text-align: center;
+            font-weight: 600;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
         }
 
         /* Modal Styles */
@@ -459,6 +526,40 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Custom Amount Input */
+        .amount-input-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .amount-input {
+            width: 80px;
+            padding: 5px 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+
+        .amount-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .edit-amount-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 2px 5px;
+        }
+
+        .edit-amount-btn:hover {
+            color: var(--secondary-color);
+        }
+
         /* Responsive Styles */
         @media (max-width: 768px) {
             .container {
@@ -475,22 +576,47 @@
                 justify-content: space-between;
             }
             
-            .class-details {
+            .form-row {
                 grid-template-columns: 1fr;
             }
             
-            .fee-types-list {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-actions {
+            .student-card {
                 flex-direction: column;
+                text-align: center;
+            }
+            
+            .fee-status {
+                align-items: center;
+                flex-direction: row;
+                justify-content: space-between;
+                width: 100%;
+            }
+            
+            .summary-stats {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
         @media (max-width: 480px) {
-            .fee-type-details {
+            .fees-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .mark-all-paid-btn, .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .summary-stats {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        /* Prevent zoom on input focus for iOS */
+        @media screen and (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px !important;
             }
         }
     </style>
@@ -499,7 +625,7 @@
     <!-- Loading Screen -->
     <div class="loading-screen" id="loading-screen">
         <div class="loading-spinner"></div>
-        <div class="loading-text">Loading Fee Management...</div>
+        <div class="loading-text">Loading Class Information...</div>
     </div>
 
     <!-- Main Content (initially hidden) -->
@@ -509,13 +635,13 @@
                 <div class="profile">
                     <img id="profile-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="profile-img">
                     <div class="greeting">
-                        <h1 id="greeting-title">Fee Type Management</h1>
-                        <p id="greeting-subtitle">Create and manage fee types for your class</p>
+                        <h1 id="greeting-title">Create New Fee Type</h1>
+                        <p id="greeting-subtitle">Define and collect special fees</p>
                     </div>
                 </div>
                 <div class="fees-actions">
                     <button class="action-btn secondary" id="back-btn">
-                        <i class="fas fa-arrow-left"></i> Back to Fees
+                        <i class="fas fa-arrow-left"></i> Back
                     </button>
                 </div>
             </header>
@@ -533,61 +659,114 @@
                         <div class="detail-value" id="class-room">-</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-label">Daily Fee</div>
-                        <div class="detail-value" id="class-daily-fee">-</div>
+                        <div class="detail-label">Total Students</div>
+                        <div class="detail-value" id="total-students-count">-</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Fee Type Creation Form -->
-            <div class="fee-type-form">
+            <!-- Fee Creation Form -->
+            <div class="form-container">
                 <h3 class="form-title">Create New Fee Type</h3>
-                <div class="form-group">
-                    <label for="fee-type-name" class="form-label">Fee Type Name</label>
-                    <input type="text" id="fee-type-name" class="form-input" placeholder="Enter fee type name (e.g., Tuition, PTA, Exam)">
-                </div>
-                <div class="form-group">
-                    <label for="fee-amount" class="form-label">Fee Amount</label>
-                    <input type="number" id="fee-amount" class="form-input" placeholder="Enter fee amount" step="0.01" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="fee-duration" class="form-label">Fee Duration</label>
-                    <select id="fee-duration" class="form-select">
-                        <option value="">Select duration</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="termly">Termly (3 terms)</option>
-                        <option value="one-time">One-time</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="fee-description" class="form-label">Description (Optional)</label>
-                    <textarea id="fee-description" class="form-input" placeholder="Enter fee description" rows="3"></textarea>
-                </div>
-                <div class="form-actions">
-                    <button class="action-btn secondary" id="reset-form-btn">
-                        <i class="fas fa-redo"></i> Reset
-                    </button>
-                    <button class="action-btn success" id="create-fee-type-btn">
-                        <i class="fas fa-plus"></i> Create Fee Type
-                    </button>
-                </div>
-            </div>
-
-            <!-- Existing Fee Types -->
-            <div class="fee-types-container">
-                <div class="fee-types-header">
-                    <h3 class="fee-types-title">Existing Fee Types</h3>
-                    <button class="action-btn secondary" id="refresh-btn">
-                        <i class="fas fa-sync"></i> Refresh
-                    </button>
-                </div>
-                <div class="fee-types-list" id="fee-types-list">
-                    <div class="no-fee-types">
-                        <i class="fas fa-money-bill-wave" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                        <p>No fee types created yet</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fee-title" class="form-label">Fee Title</label>
+                        <input type="text" id="fee-title" class="form-input" placeholder="e.g., Examination Fee, PTA Levy">
+                    </div>
+                    <div class="form-group">
+                        <label for="fee-duration" class="form-label">Duration</label>
+                        <select id="fee-duration" class="form-select">
+                            <option value="">Select Duration</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="term">Per Term (3 terms)</option>
+                            <option value="one-time">One-time</option>
+                        </select>
                     </div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fee-amount" class="form-label">Default Amount (₵)</label>
+                        <input type="number" id="fee-amount" class="form-input" placeholder="0.00" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="fee-description" class="form-label">Description (Optional)</label>
+                        <input type="text" id="fee-description" class="form-input" placeholder="Brief description of this fee">
+                    </div>
+                </div>
+                <button class="action-btn success" id="create-fee-btn">
+                    <i class="fas fa-plus"></i> Create Fee Type
+                </button>
+            </div>
+
+            <!-- Fee Summary -->
+            <div class="summary-card" id="fee-summary" style="display: none;">
+                <div class="summary-title" id="current-fee-title">Fee Collection Summary</div>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="total-students">0</div>
+                        <div class="stat-label">Total Students</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="paid-count">0</div>
+                        <div class="stat-label">Paid</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="unpaid-count">0</div>
+                        <div class="stat-label">Unpaid</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="total-collected">₵0</div>
+                        <div class="stat-label">Total Collected</div>
+                    </div>
+                </div>
+                <div class="total-amount" id="expected-total">Expected Total: ₵0</div>
+            </div>
+
+            <!-- Fees Container -->
+            <div class="fees-container" id="fees-collection-container" style="display: none;">
+                <div class="fees-header">
+                    <h3 class="fees-title">Student Fee Payments</h3>
+                    <div class="fees-actions">
+                        <button class="mark-all-paid-btn" id="mark-all-paid-btn">
+                            <i class="fas fa-check-double"></i> Mark All Paid
+                        </button>
+                        <button class="action-btn success" id="save-btn">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                        <button class="action-btn secondary" id="reset-btn">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <div class="students-list" id="students-list">
+                    <div class="no-students">
+                        <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>No students found in this class</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Amount Modal -->
+    <div class="modal" id="amount-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Fee Amount</h3>
+                <button class="close-btn" id="close-amount-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="custom-amount" class="form-label">Fee Amount (₵)</label>
+                    <input type="number" id="custom-amount" class="form-input" step="0.01" min="0">
+                </div>
+                <p class="form-label">Default amount: <span id="default-amount-display">₵0.00</span></p>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" id="cancel-amount-btn">Cancel</button>
+                <button class="action-btn success" id="save-amount-btn">Save Amount</button>
             </div>
         </div>
     </div>
@@ -596,52 +775,15 @@
     <div class="modal" id="confirmation-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Confirm Fee Type Creation</h3>
+                <h3 class="modal-title">Confirm Fee Collection</h3>
                 <button class="close-btn" id="close-modal">&times;</button>
             </div>
             <div class="modal-body">
-                <p id="confirmation-message">Are you sure you want to create this fee type?</p>
+                <p id="confirmation-message">Are you sure you want to save the fee payments?</p>
             </div>
             <div class="modal-footer">
                 <button class="action-btn secondary" id="cancel-btn">Cancel</button>
-                <button class="action-btn success" id="confirm-create-btn">Confirm</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Fee Type Modal -->
-    <div class="modal" id="edit-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Edit Fee Type</h3>
-                <button class="close-btn" id="close-edit-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="edit-fee-type-name" class="form-label">Fee Type Name</label>
-                    <input type="text" id="edit-fee-type-name" class="form-input">
-                </div>
-                <div class="form-group">
-                    <label for="edit-fee-amount" class="form-label">Fee Amount</label>
-                    <input type="number" id="edit-fee-amount" class="form-input" step="0.01" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="edit-fee-duration" class="form-label">Fee Duration</label>
-                    <select id="edit-fee-duration" class="form-select">
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="termly">Termly (3 terms)</option>
-                        <option value="one-time">One-time</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="edit-fee-description" class="form-label">Description</label>
-                    <textarea id="edit-fee-description" class="form-input" rows="3"></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="action-btn secondary" id="cancel-edit-btn">Cancel</button>
-                <button class="action-btn success" id="save-edit-btn">Save Changes</button>
+                <button class="action-btn success" id="confirm-save-btn">Confirm</button>
             </div>
         </div>
     </div>
@@ -669,55 +811,74 @@
         const profileImg = document.getElementById('profile-img');
         const greetingTitle = document.getElementById('greeting-title');
         const greetingSubtitle = document.getElementById('greeting-subtitle');
+        const backBtn = document.getElementById('back-btn');
         
         // Class info elements
         const classNameElement = document.getElementById('class-name');
         const classIdElement = document.getElementById('class-id');
         const classRoomElement = document.getElementById('class-room');
-        const classDailyFeeElement = document.getElementById('class-daily-fee');
+        const totalStudentsCountElement = document.getElementById('total-students-count');
         
         // Form elements
-        const feeTypeNameInput = document.getElementById('fee-type-name');
-        const feeAmountInput = document.getElementById('fee-amount');
+        const feeTitleInput = document.getElementById('fee-title');
         const feeDurationSelect = document.getElementById('fee-duration');
+        const feeAmountInput = document.getElementById('fee-amount');
         const feeDescriptionInput = document.getElementById('fee-description');
-        const createFeeTypeBtn = document.getElementById('create-fee-type-btn');
-        const resetFormBtn = document.getElementById('reset-form-btn');
-        const refreshBtn = document.getElementById('refresh-btn');
-        const backBtn = document.getElementById('back-btn');
+        const createFeeBtn = document.getElementById('create-fee-btn');
         
-        // Fee types list
-        const feeTypesList = document.getElementById('fee-types-list');
+        // Fee elements
+        const feeSummary = document.getElementById('fee-summary');
+        const feesCollectionContainer = document.getElementById('fees-collection-container');
+        const currentFeeTitleElement = document.getElementById('current-fee-title');
+        const totalStudentsElement = document.getElementById('total-students');
+        const paidCountElement = document.getElementById('paid-count');
+        const unpaidCountElement = document.getElementById('unpaid-count');
+        const totalCollectedElement = document.getElementById('total-collected');
+        const expectedTotalElement = document.getElementById('expected-total');
+        const saveBtn = document.getElementById('save-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const studentsListElement = document.getElementById('students-list');
+        const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
         
         // Modal elements
         const confirmationModal = document.getElementById('confirmation-modal');
         const closeModalBtn = document.getElementById('close-modal');
         const cancelBtn = document.getElementById('cancel-btn');
-        const confirmCreateBtn = document.getElementById('confirm-create-btn');
+        const confirmSaveBtn = document.getElementById('confirm-save-btn');
         const confirmationMessage = document.getElementById('confirmation-message');
         
-        const editModal = document.getElementById('edit-modal');
-        const closeEditModalBtn = document.getElementById('close-edit-modal');
-        const cancelEditBtn = document.getElementById('cancel-edit-btn');
-        const saveEditBtn = document.getElementById('save-edit-btn');
-        const editFeeTypeNameInput = document.getElementById('edit-fee-type-name');
-        const editFeeAmountInput = document.getElementById('edit-fee-amount');
-        const editFeeDurationSelect = document.getElementById('edit-fee-duration');
-        const editFeeDescriptionInput = document.getElementById('edit-fee-description');
+        // Amount modal elements
+        const amountModal = document.getElementById('amount-modal');
+        const closeAmountModalBtn = document.getElementById('close-amount-modal');
+        const cancelAmountBtn = document.getElementById('cancel-amount-btn');
+        const saveAmountBtn = document.getElementById('save-amount-btn');
+        const customAmountInput = document.getElementById('custom-amount');
+        const defaultAmountDisplay = document.getElementById('default-amount-display');
         
         // Firebase references
         const authUsersRef = database.ref('authUsers');
         const teachersRef = database.ref('teachers');
         const classesRef = database.ref('classes');
+        const feePaymentsRef = database.ref('specialFeePayments');
         const feeTypesRef = database.ref('feeTypes');
-        const feeSettingsRef = database.ref('feeSettings');
+        const studentsRef = database.ref('students');
         
         // Global variables
         let currentTeacherId = null;
         let currentTeacherData = null;
         let currentClass = null;
-        let dailyFeeAmount = 0;
-        let currentEditingFeeTypeId = null;
+        let classStudents = [];
+        let feePaymentsData = {};
+        let currentFeeType = null;
+        let currentFeeAmount = 0;
+        
+        // Current student being edited
+        let currentEditingStudentId = null;
+        
+        // Format currency
+        function formatCurrency(amount) {
+            return `₵${parseFloat(amount).toFixed(2)}`;
+        }
         
         // Identify the current teacher based on Firebase Auth
         async function identifyCurrentTeacher() {
@@ -795,7 +956,7 @@
                         name: "Demo Class",
                         room: "Room 101",
                         teacher: teacherName,
-                        dailyAmount: 10
+                        students: ["student1", "student2", "student3"]
                     };
                     
                     await classesRef.child(demoClassId).set(demoClass);
@@ -824,7 +985,7 @@
                         name: "Demo Class",
                         room: "Room 101",
                         teacher: teacherName,
-                        dailyAmount: 10
+                        students: ["student1", "student2", "student3"]
                     };
                     
                     await classesRef.child(demoClassId).set(demoClass);
@@ -842,7 +1003,7 @@
                     name: "Demo Class",
                     room: "Room 101",
                     teacher: teacherName,
-                    dailyAmount: 10
+                    students: ["student1", "student2", "student3"]
                 };
                 
                 try {
@@ -855,257 +1016,466 @@
             }
         }
         
-        // Get the daily fee amount for the class
-        async function getDailyFeeAmount(classId) {
+        // Load students for the assigned class
+        async function loadClassStudents(classId) {
             try {
-                const feeSettingsSnapshot = await feeSettingsRef.child(classId).once('value');
-                if (feeSettingsSnapshot.exists()) {
-                    return feeSettingsSnapshot.val().amount || 0;
-                }
-                
-                // Fallback to class dailyAmount if feeSettings doesn't exist
+                // Get the students array from the class document
                 const classSnapshot = await classesRef.child(classId).once('value');
-                if (classSnapshot.exists()) {
-                    return classSnapshot.val().dailyAmount || 0;
+                
+                if (!classSnapshot.exists()) {
+                    return [];
                 }
                 
-                return 10; // Default fee amount
-            } catch (error) {
-                console.error('Error getting daily fee amount:', error);
-                return 10; // Default fee amount
-            }
-        }
-        
-        // Load fee types for the class
-        async function loadFeeTypes(classId) {
-            try {
-                const feeTypesSnapshot = await feeTypesRef.orderByChild('classId').equalTo(classId).once('value');
+                const classData = classSnapshot.val();
+                const studentIds = classData.students || [];
                 
-                if (feeTypesSnapshot.exists()) {
-                    return feeTypesSnapshot.val();
+                if (studentIds.length === 0) {
+                    return [];
                 }
                 
-                return {};
+                // Get all students from the students collection
+                const allStudentsSnapshot = await studentsRef.once('value');
+                
+                // If no students exist, create demo students
+                if (!allStudentsSnapshot.exists()) {
+                    const demoStudents = {
+                        student1: {
+                            id: "student1",
+                            name: "John Doe",
+                            profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
+                        },
+                        student2: {
+                            id: "student2",
+                            name: "Jane Smith",
+                            profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                        },
+                        student3: {
+                            id: "student3",
+                            name: "Michael Johnson",
+                            profileImage: "https://randomuser.me/api/portraits/men/22.jpg"
+                        }
+                    };
+                    
+                    await studentsRef.set(demoStudents);
+                    return Object.values(demoStudents);
+                }
+                
+                const allStudents = allStudentsSnapshot.val();
+                const classStudents = [];
+                
+                // Match student IDs with their data
+                for (const studentId of studentIds) {
+                    if (allStudents[studentId]) {
+                        classStudents.push({
+                            id: studentId,
+                            ...allStudents[studentId]
+                        });
+                    }
+                }
+                
+                return classStudents;
             } catch (error) {
-                console.error('Error loading fee types:', error);
-                return {};
+                console.error('Error loading class students:', error);
+                
+                // Return demo students as fallback
+                return [
+                    {
+                        id: "student1",
+                        name: "John Doe",
+                        profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
+                    },
+                    {
+                        id: "student2",
+                        name: "Jane Smith",
+                        profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                    },
+                    {
+                        id: "student3",
+                        name: "Michael Johnson",
+                        profileImage: "https://randomuser.me/api/portraits/men/22.jpg"
+                    }
+                ];
             }
         }
         
         // Create a new fee type
-        async function createFeeType(feeTypeData) {
+        async function createFeeType() {
+            const title = feeTitleInput.value.trim();
+            const duration = feeDurationSelect.value;
+            const amount = parseFloat(feeAmountInput.value);
+            const description = feeDescriptionInput.value.trim();
+            
+            if (!title) {
+                alert('Please enter a fee title');
+                return;
+            }
+            
+            if (!duration) {
+                alert('Please select a duration');
+                return;
+            }
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid fee amount');
+                return;
+            }
+            
             try {
                 // Generate a unique ID for the fee type
-                const feeTypeId = feeTypesRef.push().key;
+                const feeId = `fee_${Date.now()}`;
                 
-                // Add metadata to the fee type
-                const feeTypeWithMeta = {
-                    id: feeTypeId,
-                    ...feeTypeData,
-                    createdBy: currentTeacherId,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
+                const feeType = {
+                    id: feeId,
+                    title: title,
+                    duration: duration,
+                    defaultAmount: amount,
+                    description: description,
+                    classId: currentClass.id,
+                    createdAt: new Date().toISOString()
                 };
                 
                 // Save to Firebase
-                await feeTypesRef.child(feeTypeId).set(feeTypeWithMeta);
-                return true;
+                await feeTypesRef.child(feeId).set(feeType);
+                
+                // Set the current fee type
+                currentFeeType = feeType;
+                currentFeeAmount = amount;
+                
+                // Show the fee collection section
+                currentFeeTitleElement.textContent = `${title} Collection`;
+                feeSummary.style.display = 'block';
+                feesCollectionContainer.style.display = 'block';
+                
+                // Initialize fee payments for students
+                initializeFeePayments();
+                
+                // Render students with fee status
+                renderStudentsList();
+                
+                // Update summary
+                updateSummary();
+                
+                // Show success message
+                alert(`Fee type "${title}" created successfully!`);
+                
             } catch (error) {
                 console.error('Error creating fee type:', error);
-                return false;
+                alert('Failed to create fee type. Please try again.');
             }
         }
         
-        // Update an existing fee type
-        async function updateFeeType(feeTypeId, feeTypeData) {
-            try {
-                // Add update metadata to the fee type
-                const updates = {
-                    ...feeTypeData,
-                    updatedAt: new Date().toISOString()
-                };
-                
-                // Update in Firebase
-                await feeTypesRef.child(feeTypeId).update(updates);
-                return true;
-            } catch (error) {
-                console.error('Error updating fee type:', error);
-                return false;
-            }
-        }
-        
-        // Delete a fee type
-        async function deleteFeeType(feeTypeId) {
-            try {
-                await feeTypesRef.child(feeTypeId).remove();
-                return true;
-            } catch (error) {
-                console.error('Error deleting fee type:', error);
-                return false;
-            }
-        }
-        
-        // Render class information
-        function renderClassInfo(classData) {
-            classNameElement.textContent = classData.name || 'Unnamed Class';
-            classIdElement.textContent = classData.id || '-';
-            classRoomElement.textContent = classData.room || 'Not assigned';
-            classDailyFeeElement.textContent = `₵${dailyFeeAmount.toFixed(2)}`;
-        }
-        
-        // Render fee types list
-        function renderFeeTypes(feeTypes) {
-            feeTypesList.innerHTML = '';
+        // Initialize fee payments for all students
+        function initializeFeePayments() {
+            feePaymentsData = {};
             
-            if (Object.keys(feeTypes).length === 0) {
-                feeTypesList.innerHTML = `
-                    <div class="no-fee-types">
-                        <i class="fas fa-money-bill-wave" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                        <p>No fee types created yet</p>
+            classStudents.forEach(student => {
+                feePaymentsData[student.id] = {
+                    studentId: student.id,
+                    feeId: currentFeeType.id,
+                    amount: currentFeeAmount,
+                    paid: false,
+                    paidAt: null
+                };
+            });
+        }
+        
+        // Render the list of students with fee status
+        function renderStudentsList() {
+            if (classStudents.length === 0) {
+                studentsListElement.innerHTML = `
+                    <div class="no-students">
+                        <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>No students found in this class</p>
                     </div>
                 `;
                 return;
             }
             
-            // Convert object to array and sort by creation date (newest first)
-            const feeTypesArray = Object.values(feeTypes).sort((a, b) => 
-                new Date(b.createdAt) - new Date(a.createdAt)
-            );
+            studentsListElement.innerHTML = '';
             
-            feeTypesArray.forEach(feeType => {
-                const feeTypeCard = document.createElement('div');
-                feeTypeCard.className = 'fee-type-card';
-                feeTypeCard.dataset.feeTypeId = feeType.id;
+            classStudents.forEach(student => {
+                const payment = feePaymentsData[student.id] || {
+                    studentId: student.id,
+                    feeId: currentFeeType.id,
+                    amount: currentFeeAmount,
+                    paid: false,
+                    paidAt: null
+                };
                 
-                // Format duration for display
-                let durationDisplay = '';
-                switch (feeType.duration) {
-                    case 'weekly':
-                        durationDisplay = 'Weekly';
-                        break;
-                    case 'monthly':
-                        durationDisplay = 'Monthly';
-                        break;
-                    case 'termly':
-                        durationDisplay = 'Termly (3 terms)';
-                        break;
-                    case 'one-time':
-                        durationDisplay = 'One-time';
-                        break;
-                    default:
-                        durationDisplay = feeType.duration;
-                }
+                const studentCard = document.createElement('div');
+                studentCard.className = 'student-card';
                 
-                feeTypeCard.innerHTML = `
-                    <div class="fee-type-name">${feeType.name}</div>
-                    <div class="fee-type-details">
-                        <div class="fee-type-detail">
-                            <div class="fee-type-label">Amount</div>
-                            <div class="fee-type-value">₵${parseFloat(feeType.amount).toFixed(2)}</div>
-                        </div>
-                        <div class="fee-type-detail">
-                            <div class="fee-type-label">Duration</div>
-                            <div class="fee-type-value">${durationDisplay}</div>
-                        </div>
-                        <div class="fee-type-detail">
-                            <div class="fee-type-label">Created</div>
-                            <div class="fee-type-value">${new Date(feeType.createdAt).toLocaleDateString()}</div>
-                        </div>
+                studentCard.innerHTML = `
+                    <img src="${student.profileImage || 'https://via.placeholder.com/50'}" alt="${student.name}" class="student-avatar">
+                    <div class="student-info">
+                        <div class="student-name">${student.name}</div>
+                        <div class="student-id">ID: ${student.id}</div>
                     </div>
-                    ${feeType.description ? `<p class="fee-type-description">${feeType.description}</p>` : ''}
-                    <div class="fee-type-actions">
-                        <button class="edit-btn" data-fee-type-id="${feeType.id}">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="delete-btn" data-fee-type-id="${feeType.id}">
-                            <i class="fas fa-trash"></i> Delete
+                    <div class="fee-status">
+                        <div class="amount-input-container">
+                            <span>₵</span>
+                            <input type="number" class="amount-input" value="${payment.amount}" data-student="${student.id}" step="0.01" min="0" readonly>
+                            <button class="edit-amount-btn" data-student="${student.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        <button class="status-btn ${payment.paid ? 'active' : 'inactive'}" data-student="${student.id}">
+                            <i class="fas ${payment.paid ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                            ${payment.paid ? 'Paid' : 'Unpaid'}
                         </button>
                     </div>
                 `;
                 
-                feeTypesList.appendChild(feeTypeCard);
+                studentsListElement.appendChild(studentCard);
             });
             
-            // Add event listeners to edit and delete buttons
-            document.querySelectorAll('.edit-btn').forEach(btn => {
+            // Add event listeners to payment status buttons
+            document.querySelectorAll('.status-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const feeTypeId = this.dataset.feeTypeId;
-                    openEditModal(feeTypeId, feeTypes[feeTypeId]);
+                    const studentId = this.getAttribute('data-student');
+                    togglePaymentStatus(studentId);
                 });
             });
             
-            document.querySelectorAll('.delete-btn').forEach(btn => {
+            // Add event listeners to edit amount buttons
+            document.querySelectorAll('.edit-amount-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const feeTypeId = this.dataset.feeTypeId;
-                    deleteFeeTypeWithConfirmation(feeTypeId, feeTypes[feeTypeId].name);
+                    const studentId = this.getAttribute('data-student');
+                    openAmountModal(studentId);
                 });
             });
-        }
-        
-        // Open edit modal with fee type data
-        function openEditModal(feeTypeId, feeTypeData) {
-            currentEditingFeeTypeId = feeTypeId;
             
-            // Populate form fields
-            editFeeTypeNameInput.value = feeTypeData.name || '';
-            editFeeAmountInput.value = feeTypeData.amount || '';
-            editFeeDurationSelect.value = feeTypeData.duration || '';
-            editFeeDescriptionInput.value = feeTypeData.description || '';
-            
-            // Show modal
-            editModal.classList.add('active');
-        }
-        
-        // Delete fee type with confirmation
-        function deleteFeeTypeWithConfirmation(feeTypeId, feeTypeName) {
-            if (confirm(`Are you sure you want to delete the fee type "${feeTypeName}"? This action cannot be undone.`)) {
-                deleteFeeType(feeTypeId).then(success => {
-                    if (success) {
-                        // Reload fee types
-                        loadFeeTypes(currentClass.id).then(feeTypes => {
-                            renderFeeTypes(feeTypes);
-                        });
+            // Add event listeners to amount inputs
+            document.querySelectorAll('.amount-input').forEach(input => {
+                input.addEventListener('change', function() {
+                    const studentId = this.getAttribute('data-student');
+                    const amount = parseFloat(this.value);
+                    
+                    if (!isNaN(amount) && amount >= 0) {
+                        feePaymentsData[studentId].amount = amount;
+                        updateSummary();
                     } else {
-                        alert('Failed to delete fee type. Please try again.');
+                        this.value = feePaymentsData[studentId].amount;
                     }
                 });
-            }
+            });
         }
         
-        // Validate fee type form
-        function validateFeeTypeForm() {
-            if (!feeTypeNameInput.value.trim()) {
-                alert('Please enter a fee type name');
-                feeTypeNameInput.focus();
-                return false;
+        // Toggle payment status for a student
+        function togglePaymentStatus(studentId) {
+            if (!feePaymentsData[studentId]) {
+                feePaymentsData[studentId] = {
+                    studentId: studentId,
+                    feeId: currentFeeType.id,
+                    amount: currentFeeAmount,
+                    paid: false,
+                    paidAt: null
+                };
             }
             
-            if (!feeAmountInput.value || parseFloat(feeAmountInput.value) <= 0) {
-                alert('Please enter a valid fee amount');
-                feeAmountInput.focus();
-                return false;
+            feePaymentsData[studentId].paid = !feePaymentsData[studentId].paid;
+            
+            if (feePaymentsData[studentId].paid) {
+                feePaymentsData[studentId].paidAt = new Date().toISOString();
+            } else {
+                feePaymentsData[studentId].paidAt = null;
             }
             
-            if (!feeDurationSelect.value) {
-                alert('Please select a fee duration');
-                feeDurationSelect.focus();
-                return false;
+            // Update the UI
+            const statusBtn = document.querySelector(`.status-btn[data-student="${studentId}"]`);
+            const icon = statusBtn.querySelector('i');
+            
+            if (feePaymentsData[studentId].paid) {
+                statusBtn.className = 'status-btn active';
+                icon.className = 'fas fa-check-circle';
+                statusBtn.innerHTML = `<i class="fas fa-check-circle"></i> Paid`;
+            } else {
+                statusBtn.className = 'status-btn inactive';
+                icon.className = 'fas fa-times-circle';
+                statusBtn.innerHTML = `<i class="fas fa-times-circle"></i> Unpaid`;
             }
             
-            return true;
+            updateSummary();
         }
         
-        // Reset the form
-        function resetForm() {
-            feeTypeNameInput.value = '';
-            feeAmountInput.value = '';
-            feeDurationSelect.value = '';
-            feeDescriptionInput.value = '';
+        // Open the amount modal for a specific student
+        function openAmountModal(studentId) {
+            currentEditingStudentId = studentId;
+            
+            const payment = feePaymentsData[studentId] || {
+                studentId: studentId,
+                feeId: currentFeeType.id,
+                amount: currentFeeAmount,
+                paid: false,
+                paidAt: null
+            };
+            
+            customAmountInput.value = payment.amount;
+            defaultAmountDisplay.textContent = formatCurrency(currentFeeAmount);
+            
+            amountModal.classList.add('active');
         }
         
-        // Initialize the application
-        async function initApp() {
+        // Save the custom amount for a student
+        function saveCustomAmount() {
+            const amount = parseFloat(customAmountInput.value);
+            
+            if (isNaN(amount) || amount < 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            if (!feePaymentsData[currentEditingStudentId]) {
+                feePaymentsData[currentEditingStudentId] = {
+                    studentId: currentEditingStudentId,
+                    feeId: currentFeeType.id,
+                    paid: false,
+                    paidAt: null
+                };
+            }
+            
+            feePaymentsData[currentEditingStudentId].amount = amount;
+            
+            // Update the input field
+            const amountInput = document.querySelector(`.amount-input[data-student="${currentEditingStudentId}"]`);
+            if (amountInput) {
+                amountInput.value = amount;
+            }
+            
+            updateSummary();
+            closeAmountModal();
+        }
+        
+        // Close the amount modal
+        function closeAmountModal() {
+            amountModal.classList.remove('active');
+            currentEditingStudentId = null;
+        }
+        
+        // Update the summary statistics
+        function updateSummary() {
+            if (!currentFeeType) return;
+            
+            let paidCount = 0;
+            let totalCollected = 0;
+            let expectedTotal = 0;
+            
+            classStudents.forEach(student => {
+                const payment = feePaymentsData[student.id];
+                
+                if (payment) {
+                    expectedTotal += payment.amount;
+                    
+                    if (payment.paid) {
+                        paidCount++;
+                        totalCollected += payment.amount;
+                    }
+                }
+            });
+            
+            totalStudentsElement.textContent = classStudents.length;
+            paidCountElement.textContent = paidCount;
+            unpaidCountElement.textContent = classStudents.length - paidCount;
+            totalCollectedElement.textContent = formatCurrency(totalCollected);
+            expectedTotalElement.textContent = `Expected Total: ${formatCurrency(expectedTotal)}`;
+        }
+        
+        // Mark all students as paid
+        function markAllAsPaid() {
+            classStudents.forEach(student => {
+                if (!feePaymentsData[student.id]) {
+                    feePaymentsData[student.id] = {
+                        studentId: student.id,
+                        feeId: currentFeeType.id,
+                        amount: currentFeeAmount,
+                        paid: true,
+                        paidAt: new Date().toISOString()
+                    };
+                } else {
+                    feePaymentsData[student.id].paid = true;
+                    feePaymentsData[student.id].paidAt = new Date().toISOString();
+                }
+            });
+            
+            renderStudentsList();
+            updateSummary();
+        }
+        
+        // Reset all payments to unpaid
+        function resetPayments() {
+            classStudents.forEach(student => {
+                if (feePaymentsData[student.id]) {
+                    feePaymentsData[student.id].paid = false;
+                    feePaymentsData[student.id].paidAt = null;
+                }
+            });
+            
+            renderStudentsList();
+            updateSummary();
+        }
+        
+        // Save fee payments to Firebase
+        async function saveFeePayments() {
             try {
+                confirmationMessage.textContent = 'Are you sure you want to save the fee payments?';
+                
+                // Show confirmation modal
+                confirmationModal.classList.add('active');
+                
+                // Wait for user confirmation
+                const userConfirmed = await new Promise((resolve) => {
+                    confirmSaveBtn.onclick = () => {
+                        confirmationModal.classList.remove('active');
+                        resolve(true);
+                    };
+                    
+                    cancelBtn.onclick = () => {
+                        confirmationModal.classList.remove('active');
+                        resolve(false);
+                    };
+                    
+                    closeModalBtn.onclick = () => {
+                        confirmationModal.classList.remove('active');
+                        resolve(false);
+                    };
+                });
+                
+                if (!userConfirmed) return;
+                
+                // Show loading
+                loadingScreen.style.display = 'flex';
+                
+                // Save each payment
+                const savePromises = [];
+                
+                for (const studentId in feePaymentsData) {
+                    const payment = feePaymentsData[studentId];
+                    const paymentId = `${currentFeeType.id}_${studentId}`;
+                    
+                    savePromises.push(
+                        feePaymentsRef.child(paymentId).set(payment)
+                    );
+                }
+                
+                await Promise.all(savePromises);
+                
+                // Hide loading
+                loadingScreen.style.display = 'none';
+                
+                alert('Fee payments saved successfully!');
+                
+            } catch (error) {
+                console.error('Error saving fee payments:', error);
+                loadingScreen.style.display = 'none';
+                alert('Failed to save fee payments. Please try again.');
+            }
+        }
+        
+        // Initialize the page
+        async function initPage() {
+            try {
+                loadingScreen.style.display = 'flex';
+                
                 // Identify the current teacher
                 const teacherData = await identifyCurrentTeacher();
                 
@@ -1114,176 +1484,80 @@
                     profileImg.src = teacherData.profileImage;
                 }
                 
-                if (teacherData.name) {
-                    greetingTitle.textContent = `Hello, ${teacherData.name}`;
-                    greetingSubtitle.textContent = 'Manage fee types for your class';
-                }
+                greetingTitle.textContent = `Create New Fee Type`;
+                greetingSubtitle.textContent = `Teacher: ${teacherData.name}`;
                 
                 // Find the class assigned to this teacher
                 currentClass = await findAssignedClass(teacherData.name);
                 
-                // Get the daily fee amount for the class
-                dailyFeeAmount = await getDailyFeeAmount(currentClass.id);
+                // Update class info in UI
+                classNameElement.textContent = currentClass.name;
+                classIdElement.textContent = currentClass.id;
+                classRoomElement.textContent = currentClass.room;
                 
-                // Render class information
-                renderClassInfo(currentClass);
+                // Load students for this class
+                classStudents = await loadClassStudents(currentClass.id);
                 
-                // Load fee types for the class
-                const feeTypes = await loadFeeTypes(currentClass.id);
-                renderFeeTypes(feeTypes);
+                // Update total students count
+                totalStudentsCountElement.textContent = classStudents.length;
                 
-                // Hide loading screen and show main content
+                // Hide loading and show main content
                 loadingScreen.style.display = 'none';
                 mainContent.style.display = 'block';
+                
             } catch (error) {
-                console.error('Error initializing app:', error);
-                loadingScreen.querySelector('.loading-text').textContent = 'Error loading application. Please refresh the page.';
+                console.error('Error initializing page:', error);
+                
+                // Show error but still display the UI with demo data
+                loadingScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+                
+                classNameElement.textContent = "Demo Class";
+                classIdElement.textContent = "demo-class";
+                classRoomElement.textContent = "Room 101";
+                totalStudentsCountElement.textContent = "3";
+                
+                classStudents = [
+                    {
+                        id: "student1",
+                        name: "John Doe",
+                        profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
+                    },
+                    {
+                        id: "student2",
+                        name: "Jane Smith",
+                        profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                    },
+                    {
+                        id: "student3",
+                        name: "Michael Johnson",
+                        profileImage: "https://randomuser.me/api/portraits/men/22.jpg"
+                    }
+                ];
             }
         }
         
         // Event Listeners
-        createFeeTypeBtn.addEventListener('click', function() {
-            if (validateFeeTypeForm()) {
-                // Show confirmation modal
-                const feeTypeName = feeTypeNameInput.value.trim();
-                const feeAmount = parseFloat(feeAmountInput.value).toFixed(2);
-                const feeDuration = feeDurationSelect.options[feeDurationSelect.selectedIndex].text;
-                
-                confirmationMessage.innerHTML = `
-                    <p>Are you sure you want to create the following fee type?</p>
-                    <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
-                        <p><strong>Name:</strong> ${feeTypeName}</p>
-                        <p><strong>Amount:</strong> ₵${feeAmount}</p>
-                        <p><strong>Duration:</strong> ${feeDuration}</p>
-                    </div>
-                `;
-                
-                confirmationModal.classList.add('active');
-            }
-        });
-        
-        confirmCreateBtn.addEventListener('click', async function() {
-            // Create the fee type
-            const feeTypeData = {
-                name: feeTypeNameInput.value.trim(),
-                amount: parseFloat(feeAmountInput.value),
-                duration: feeDurationSelect.value,
-                description: feeDescriptionInput.value.trim(),
-                classId: currentClass.id
-            };
-            
-            const success = await createFeeType(feeTypeData);
-            
-            if (success) {
-                // Close modal and reset form
-                confirmationModal.classList.remove('active');
-                resetForm();
-                
-                // Reload fee types
-                const feeTypes = await loadFeeTypes(currentClass.id);
-                renderFeeTypes(feeTypes);
-                
-                // Show success message
-                alert('Fee type created successfully!');
-            } else {
-                alert('Failed to create fee type. Please try again.');
-            }
-        });
-        
-        saveEditBtn.addEventListener('click', async function() {
-            if (!editFeeTypeNameInput.value.trim()) {
-                alert('Please enter a fee type name');
-                editFeeTypeNameInput.focus();
-                return;
-            }
-            
-            if (!editFeeAmountInput.value || parseFloat(editFeeAmountInput.value) <= 0) {
-                alert('Please enter a valid fee amount');
-                editFeeAmountInput.focus();
-                return;
-            }
-            
-            if (!editFeeDurationSelect.value) {
-                alert('Please select a fee duration');
-                editFeeDurationSelect.focus();
-                return;
-            }
-            
-            // Update the fee type
-            const feeTypeData = {
-                name: editFeeTypeNameInput.value.trim(),
-                amount: parseFloat(editFeeAmountInput.value),
-                duration: editFeeDurationSelect.value,
-                description: editFeeDescriptionInput.value.trim()
-            };
-            
-            const success = await updateFeeType(currentEditingFeeTypeId, feeTypeData);
-            
-            if (success) {
-                // Close modal
-                editModal.classList.remove('active');
-                
-                // Reload fee types
-                const feeTypes = await loadFeeTypes(currentClass.id);
-                renderFeeTypes(feeTypes);
-                
-                // Show success message
-                alert('Fee type updated successfully!');
-            } else {
-                alert('Failed to update fee type. Please try again.');
-            }
-        });
-        
-        resetFormBtn.addEventListener('click', resetForm);
-        
-        refreshBtn.addEventListener('click', async function() {
-            // Show loading indicator
-            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
-            
-            // Reload fee types
-            const feeTypes = await loadFeeTypes(currentClass.id);
-            renderFeeTypes(feeTypes);
-            
-            // Reset button text
-            setTimeout(() => {
-                refreshBtn.innerHTML = '<i class="fas fa-sync"></i> Refresh';
-            }, 1000);
-        });
-        
         backBtn.addEventListener('click', function() {
-            alert('This would navigate back to the fees management page in the full application.');
+            window.history.back();
         });
         
-        // Modal close handlers
-        closeModalBtn.addEventListener('click', function() {
-            confirmationModal.classList.remove('active');
-        });
+        createFeeBtn.addEventListener('click', createFeeType);
         
-        cancelBtn.addEventListener('click', function() {
-            confirmationModal.classList.remove('active');
-        });
+        markAllPaidBtn.addEventListener('click', markAllAsPaid);
         
-        closeEditModalBtn.addEventListener('click', function() {
-            editModal.classList.remove('active');
-        });
+        saveBtn.addEventListener('click', saveFeePayments);
         
-        cancelEditBtn.addEventListener('click', function() {
-            editModal.classList.remove('active');
-        });
+        resetBtn.addEventListener('click', resetPayments);
         
-        // Close modals when clicking outside
-        window.addEventListener('click', function(event) {
-            if (event.target === confirmationModal) {
-                confirmationModal.classList.remove('active');
-            }
-            
-            if (event.target === editModal) {
-                editModal.classList.remove('active');
-            }
-        });
+        closeAmountModalBtn.addEventListener('click', closeAmountModal);
         
-        // Initialize the application when the page loads
-        window.addEventListener('load', initApp);
+        cancelAmountBtn.addEventListener('click', closeAmountModal);
+        
+        saveAmountBtn.addEventListener('click', saveCustomAmount);
+        
+        // Initialize the page when loaded
+        document.addEventListener('DOMContentLoaded', initPage);
     </script>
 </body>
 </html>
