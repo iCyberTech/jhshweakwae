@@ -379,7 +379,7 @@
             padding: 12px 16px;
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 12px;
-            background: rgba(255, 255, 255, 极速飞艇
+            background: rgba(255, 255, 255, 0.2);
             color: var(--text-color);
             font-size: 1rem;
             transition: all var(--transition-speed) ease;
@@ -427,7 +427,7 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 25px;
-            box-shadow: 0 极速飞艇
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
         .loading-text {
@@ -448,7 +448,7 @@
             border-radius: 16px;
             margin-top: 25px;
             box-shadow: var(--card-shadow);
-            border: 1px极速飞艇
+            border: 1px solid var(--glass-border);
             backdrop-filter: blur(var(--glass-blur));
             -webkit-backdrop-filter: blur(var(--glass-blur));
         }
@@ -460,7 +460,7 @@
             opacity: 0.7;
         }
 
-极速飞艇
+        .no-data h3 {
             font-size: 1.5rem;
             margin-bottom: 10px;
             color: var(--text-color);
@@ -482,7 +482,7 @@
 
         .grade-summary {
             background: var(--glass-bg);
-            border-radius: 16极速飞艇
+            border-radius: 16px;
             padding: 20px;
             margin-bottom: 25px;
             box-shadow: var(--card-shadow);
@@ -534,7 +534,7 @@
             right: 20px;
             width: 350px;
             max-width: 90%;
-            z极速飞艇
+            z-index: 9999;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -561,7 +561,7 @@
         .notification.hide {
             transform: translateX(120%);
             opacity: 0;
-极速飞艇
+        }
 
         .notification.success {
             background-color: var(--success-color);
@@ -587,17 +587,25 @@
 
         .notification-content {
             flex: 1;
+            overflow: hidden;
         }
 
         .notification-title {
             font-weight: 600;
             margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .notification-message {
             font-size: 14px;
             opacity: 0.9;
             line-height: 1.4;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
 
         .notification-close {
@@ -630,7 +638,7 @@
             header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 15极速飞艇
+                gap: 15px;
                 padding: 15px;
             }
             
@@ -651,7 +659,7 @@
             }
             
             .subjects-container {
-                grid-template-column极速飞艇
+                grid-template-columns: 1fr;
             }
             
             .students-table {
@@ -745,13 +753,13 @@
                 height: 35px;
             }
             
-极速飞艇
+            .tab {
                 padding: 8px 12px;
                 font-size: 0.8rem;
             }
             
             .subject-icon {
-                width: 35极速飞艇
+                width: 35px;
                 height: 35px;
                 font-size: 0.9rem;
             }
@@ -771,7 +779,8 @@
     </div>
 
     <!-- Notification Container -->
-    <div class极速飞艇
+    <div class="notification-container" id="notification-container"></div>
+
     <!-- Main Content -->
     <div class="container" id="main-content" style="display: none;">
         <!-- Header -->
@@ -787,7 +796,7 @@
         <div class="tabs">
             <div class="tab active" data-tab="subjects">My Subjects</div>
             <div class="tab" data-tab="grades">Enter Grades</div>
-            <div class="tab" data极速飞艇
+            <div class="tab" data-tab="published">Published Grades</div>
         </div>
 
         <!-- Subjects Tab -->
@@ -850,7 +859,7 @@
                 </div>
                 
                 <div class="grade-form">
-                    <h3>Enter Student Grades</极速飞艇
+                    <h3>Enter Student Grades</h3>
                     <table class="students-table" id="students-grade-table">
                         <thead>
                             <tr>
@@ -859,7 +868,7 @@
                                 <th>Projects</th>
                                 <th>Class Score</th>
                                 <th>Final Exam</th>
-                                <th>Total</极速飞艇
+                                <th>Total</th>
                                 <th>Grade</th>
                             </tr>
                         </thead>
@@ -889,7 +898,7 @@
                 <!-- Published grades will be inserted here -->
             </div>
             
-            <div id="no-published-grades" class极速飞艇
+            <div id="no-published-grades" class="no-data" style="display: none;">
                 <i class="fas fa-check-circle"></i>
                 <h3>No Published Grades</h3>
                 <p>You haven't published any grades yet.</p>
@@ -1013,7 +1022,7 @@
             
             // Close button handler
             const closeBtn = notification.querySelector('.notification-close');
-            closeBtn.addEventListener极速飞艇
+            closeBtn.addEventListener('click', () => {
                 clearTimeout(timeoutId);
                 notification.classList.remove('show');
                 notification.classList.add('hide');
@@ -1133,7 +1142,7 @@
                 // Check if there's an active session
                 const hasActiveSession = await checkActiveSession();
                 
-                if (!hasActiveSession极速飞艇
+                if (!hasActiveSession) {
                     // If no active session, redirect to login
                     showNotification({
                         title: 'Session Expired',
@@ -1218,7 +1227,7 @@
             });
         }
         
-        // Load teacher's subjects
+        // Load teacher's subjects - UPDATED to handle new data structure
         async function loadTeacherSubjects() {
             try {
                 const snapshot = await subjectsRef.once('value');
@@ -1240,28 +1249,9 @@
                     
                     // Check if this subject is assigned to the current teacher
                     if (subject.teacher === currentTeacherId) {
-                        // Extract class information from the subject data
-                        let classInfo = null;
-                        let scheduleInfo = null;
-                        
-                        // Check if the subject has class information
-                        if (subject.classId) {
-                            classInfo = {
-                                id: subject.classId,
-                                name: subject.className || `Class ${subject.classId}`
-                            };
-                            
-                            // Check if the subject has schedule information
-                            if (subject.schedule) {
-                                scheduleInfo = subject.schedule;
-                            }
-                        }
-                        
                         teacherSubjects.push({
                             id: subjectId,
-                            name: subject.name,
-                            classInfo: classInfo,
-                            schedule: scheduleInfo
+                            ...subject
                         });
                     }
                 }
@@ -1298,49 +1288,51 @@
                     const classInfo = document.createElement('div');
                     classInfo.className = 'class-info';
                     
-                    if (subject.classInfo) {
-                        // Single class assignment
-                        const classItem = createClassItem(subject.classInfo, subject.schedule);
+                    // Check if subject has classId property (new structure)
+                    if (subject.classId) {
+                        const classItem = createClassItem(subject.classId, subject.schedule);
                         classInfo.appendChild(classItem);
-                    } else {
-                        // Check if this subject has schedule information
-                        if (subject.schedule) {
-                            const scheduleInfo = document.createElement('div');
-                            scheduleInfo.className = 'schedule';
-                            
-                            const daysDiv = document.createElement('div');
-                            days极速飞艇
-                            
-                            if (subject.schedule.days) {
-                                subject.schedule.days.forEach(day => {
-                                    const daySpan = document.createElement('span');
-                                    daySpan.className = 'day';
-                                    daySpan.textContent = day;
-                                    daysDiv.appendChild(daySpan);
-                                });
-                            }
-                            
-                            const timeDiv = document.createElement('div');
-                            timeDiv.className = 'time';
-                            
-                            if (subject.schedule.time) {
-                                timeDiv.textContent = `${subject.schedule.time.from} - ${subject.schedule.time.to}`;
-                            } else {
-                                timeDiv.textContent = 'No time set';
-                                timeDiv.style.color = 'var(--light-text)';
-                                timeDiv.style.fontStyle = 'italic';
-                            }
-                            
-                            scheduleInfo.appendChild(daysDiv);
-                            scheduleInfo.appendChild(timeDiv);
-                            classInfo.appendChild(scheduleInfo);
-                        } else {
-                            const noClassInfo = document.createElement('div');
-                            noClassInfo.textContent = 'No specific class assigned';
-                            noClassInfo.style.color = 'var(--light-text)';
-                            noClassInfo.style.fontStyle = 'italic';
-                            classInfo.appendChild(noClassInfo);
+                    } 
+                    // Check if subject has class property (old structure)
+                    else if (subject.class) {
+                        const classItem = createClassItem(subject.class, subject.schedule);
+                        classInfo.appendChild(classItem);
+                    } 
+                    // Check if subject has schedule information
+                    else if (subject.schedule) {
+                        const scheduleInfo = document.createElement('div');
+                        scheduleInfo.className = 'schedule';
+                        
+                        const daysDiv = document.createElement('div');
+                        daysDiv.className = 'days';
+                        
+                        if (subject.schedule.days && Array.isArray(subject.schedule.days)) {
+                            subject.schedule.days.forEach(day => {
+                                const daySpan = document.createElement('span');
+                                daySpan.className = 'day';
+                                daySpan.textContent = day;
+                                daysDiv.appendChild(daySpan);
+                            });
                         }
+                        
+                        const timeDiv = document.createElement('div');
+                        timeDiv.className = 'time';
+                        
+                        if (subject.schedule.time) {
+                            timeDiv.textContent = `${subject.schedule.time.from || 'TBA'} - ${subject.schedule.time.to || 'TBA'}`;
+                        } else {
+                            timeDiv.textContent = 'Time not specified';
+                        }
+                        
+                        scheduleInfo.appendChild(daysDiv);
+                        scheduleInfo.appendChild(timeDiv);
+                        classInfo.appendChild(scheduleInfo);
+                    } else {
+                        const noClassInfo = document.createElement('div');
+                        noClassInfo.textContent = 'No specific class assigned';
+                        noClassInfo.style.color = 'var(--light-text)';
+                        noClassInfo.style.fontStyle = 'italic';
+                        classInfo.appendChild(noClassInfo);
                     }
                     
                     // Add button to grade this subject
@@ -1357,8 +1349,11 @@
                         subjectSelect.value = subject.id;
                         updateClassDropdown();
                         
-                        if (subject.classInfo) {
-                            classSelect.value = subject.classInfo.id;
+                        // Set the class dropdown if subject has a class
+                        if (subject.classId) {
+                            classSelect.value = subject.classId;
+                        } else if (subject.class) {
+                            classSelect.value = subject.class;
                         }
                         
                         // Trigger load students
@@ -1382,12 +1377,18 @@
         }
         
         // Create a class information item
-        function createClassItem(classInfo, schedule) {
+        function createClassItem(classId, schedule) {
             const classItem = document.createElement('div');
             
             const className = document.createElement('div');
             className.className = 'class-name';
-            className.textContent = classInfo.name;
+            
+            // Find class name from classes collection
+            if (allClasses[classId]) {
+                className.textContent = allClasses[classId].name || allClasses[classId].className || `Class ${classId}`;
+            } else {
+                className.textContent = `Class ${classId}`;
+            }
             
             const scheduleInfo = document.createElement('div');
             scheduleInfo.className = 'schedule';
@@ -1396,7 +1397,7 @@
                 const daysDiv = document.createElement('div');
                 daysDiv.className = 'days';
                 
-                if (schedule.days) {
+                if (schedule.days && Array.isArray(schedule.days)) {
                     schedule.days.forEach(day => {
                         const daySpan = document.createElement('span');
                         daySpan.className = 'day';
@@ -1409,11 +1410,9 @@
                 timeDiv.className = 'time';
                 
                 if (schedule.time) {
-                    timeDiv.textContent = `${schedule.time.from} - ${schedule.time.to}`;
+                    timeDiv.textContent = `${schedule.time.from || 'TBA'} - ${schedule.time.to || 'TBA'}`;
                 } else {
-                    timeDiv.textContent = 'No time set';
-                    timeDiv.style.color = 'var(--light-text)';
-                    timeDiv.style.fontStyle = 'italic';
+                    timeDiv.textContent = 'Time not specified';
                 }
                 
                 scheduleInfo.appendChild(daysDiv);
@@ -1434,12 +1433,30 @@
         async function loadAllClasses() {
             try {
                 const snapshot = await classesRef.once('value');
-                const classes = snapshot.exists() ? snapshot.val() : {};
+                const classesData = snapshot.exists() ? snapshot.val() : {};
                 
-                // Convert to a more accessible format
+                // Process classes data to handle both old and new structures
                 allClasses = {};
-                for (const classId in classes) {
-                    allClasses[classId] = classes[classId];
+                
+                for (const classId in classesData) {
+                    const classData = classesData[classId];
+                    
+                    // Handle different data structures
+                    if (classData.name || classData.className) {
+                        // This is a class object with name property
+                        allClasses[classId] = {
+                            id: classId,
+                            name: classData.name || classData.className,
+                            students: classData.students || []
+                        };
+                    } else {
+                        // This might be a different structure, try to extract class name
+                        allClasses[classId] = {
+                            id: classId,
+                            name: classData.className || `Class ${classId}`,
+                            students: classData.students || []
+                        };
+                    }
                 }
             } catch (error) {
                 console.error('Error loading classes:', error);
@@ -1493,7 +1510,7 @@
                     `Class Score: ${gradeSettings.midtermWeight || '0'}%`,
                     `Final Exam: ${gradeSettings.finalExamWeight || '0'}%`
                 ];
-                gradeWeights.text极速飞艇
+                gradeWeights.textContent = weights.join(' | ');
             }
         }
         
@@ -1520,11 +1537,19 @@
             const subject = teacherSubjects.find(s => s.id === subjectId);
             if (!subject) return;
             
-            // If subject has a specific class assigned
-            if (subject.classInfo) {
+            // If subject has a specific class assigned (check both old and new properties)
+            const classId = subject.classId || subject.class;
+            if (classId) {
                 const option = document.createElement('option');
-                option.value = subject.classInfo.id;
-                option.textContent = subject.classInfo.name;
+                option.value = classId;
+                
+                // Get class name
+                if (allClasses[classId]) {
+                    option.textContent = allClasses[classId].name || `Class ${classId}`;
+                } else {
+                    option.textContent = `Class ${classId}`;
+                }
+                
                 classSelect.appendChild(option);
             } else {
                 // If subject is assigned to multiple classes, we need to determine which ones
@@ -1584,7 +1609,7 @@
                 // Student name and avatar
                 const nameCell = document.createElement('td');
                 const avatarUrl = student.profileImage || student.avatar || 
-                    `https://api.dicebear.com/7.x极速飞艇
+                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${studentId}`;
                 
                 nameCell.innerHTML = `
                     <img src="${avatarUrl}" alt="${student.name}" class="student-avatar">
@@ -1608,7 +1633,7 @@
                 const projectInput = document.createElement('input');
                 projectInput.type = 'number';
                 projectInput.className = 'input-grade';
-                project极速飞艇
+                projectInput.min = '0';
                 projectInput.max = '100';
                 projectInput.placeholder = '0-100';
                 projectInput.setAttribute('data-type', 'projects');
@@ -1628,7 +1653,7 @@
                 classScoreCell.appendChild(classScoreInput);
                 
                 // Final exam
-                const finalExamCell = document.createElement('td');
+                finalExamCell = document.createElement('td');
                 const finalExamInput = document.createElement('input');
                 finalExamInput.type = 'number';
                 finalExamInput.className = 'input-grade';
@@ -1691,13 +1716,18 @@
                     if (grade.studentId === studentId && 
                         grade.subjectId === selectedSubject && 
                         grade.term === selectedTerm &&
-                        grade.class === allClasses[selectedClass].name) {
+                        grade.class === (allClasses[selectedClass].name || `Class ${selectedClass}`)) {
                         
                         // Fill in the inputs
-                        document.querySelector(`input[data-student="${studentId}"][data-type="assignments"]`).value = grade.assignments || '';
-                        document.querySelector(`input[data-student="${studentId}"][data-type="projects"]`).value = grade.projects || '';
-                        document.querySelector(`input极速飞艇
-                        document.querySelector(`input[data-student="${studentId}"][data-type="finalExam"]`).value = grade.finalExam || '';
+                        const assignmentsInput = document.querySelector(`input[data-student="${studentId}"][data-type="assignments"]`);
+                        const projectsInput = document.querySelector(`input[data-student="${studentId}"][data-type="projects"]`);
+                        const classScoreInput = document.querySelector(`input[data-student="${studentId}"][data-type="classScore"]`);
+                        const finalExamInput = document.querySelector(`input[data-student="${studentId}"][data-type="finalExam"]`);
+                        
+                        if (assignmentsInput) assignmentsInput.value = grade.assignments || '';
+                        if (projectsInput) projectsInput.value = grade.projects || '';
+                        if (classScoreInput) classScoreInput.value = grade.classScore || '';
+                        if (finalExamInput) finalExamInput.value = grade.finalExam || '';
                         
                         // Trigger calculation
                         calculateGrades();
@@ -1719,17 +1749,24 @@
             
             rows.forEach(row => {
                 const studentId = row.querySelector('.total-grade').getAttribute('data-student');
+                const assignmentsInput = row.querySelector('input[data-type="assignments"]');
+                const projectsInput = row.querySelector('input[data-type="projects"]');
+                const classScoreInput = row.querySelector('input[data-type="classScore"]');
+                const finalExamInput = row.querySelector('input[data-type="finalExam"]');
+                
+                if (!assignmentsInput || !projectsInput || !classScoreInput || !finalExamInput) return;
+                
                 students[studentId] = {
-                    assignments: parseFloat(row.querySelector('input[data-type="assignments"]').value) || 0,
-                    projects: parseFloat(row.querySelector('input[data-type="projects"]').value) || 0,
-                    classScore: parseFloat(row.querySelector('input[data-type="classScore"]').value) || 0,
-                    finalExam: parseFloat(row.querySelector('input[data-type="finalExam"]').value) || 0
+                    assignments: parseFloat(assignmentsInput.value) || 0,
+                    projects: parseFloat(projectsInput.value) || 0,
+                    classScore: parseFloat(classScoreInput.value) || 0,
+                    finalExam: parseFloat(finalExamInput.value) || 0
                 };
                 
                 // Calculate weighted total
                 const total = (
                     (students[studentId].assignments * (gradeSettings.participationWeight || 0) / 100) +
-                    (students[student极速飞艇
+                    (students[studentId].projects * (gradeSettings.projectsWeight || 0) / 100) +
                     (students[studentId].classScore * (gradeSettings.midtermWeight || 0) / 100) +
                     (students[studentId].finalExam * (gradeSettings.finalExamWeight || 0) / 100)
                 ).toFixed(1);
@@ -1754,11 +1791,11 @@
         
         // Save grades to database
         async function saveGrades() {
-            if (!selectedSubject || !selectedClass || !selected极速飞艇
+            if (!selectedSubject || !selectedClass || !selectedTerm) return;
             
             try {
                 // Get the subject name
-                const subject = teacherSubjects极速飞艇
+                const subject = teacherSubjects.find(s => s.id === selectedSubject);
                 if (!subject) return;
                 
                 // Get the class name
@@ -1773,10 +1810,17 @@
                     const student = allStudents[studentId];
                     if (!student) continue;
                     
-                    const assignments = parseFloat(row.querySelector('input[data-type="assignments"]').value) || 0;
-                    const projects = parseFloat(row.querySelector('input[data-type="projects"]').value) || 0;
-                    const classScore = parseFloat(row.querySelector('input[data-type="classScore"]').value) || 0;
-                    const finalExam = parseFloat(row.querySelector('极速飞艇
+                    const assignmentsInput = row.querySelector('input[data-type="assignments"]');
+                    const projectsInput = row.querySelector('input[data-type="projects"]');
+                    const classScoreInput = row.querySelector('input[data-type="classScore"]');
+                    const finalExamInput = row.querySelector('input[data-type="finalExam"]');
+                    
+                    if (!assignmentsInput || !projectsInput || !classScoreInput || !finalExamInput) continue;
+                    
+                    const assignments = parseFloat(assignmentsInput.value) || 0;
+                    const projects = parseFloat(projectsInput.value) || 0;
+                    const classScore = parseFloat(classScoreInput.value) || 0;
+                    const finalExam = parseFloat(finalExamInput.value) || 0;
                     const total = parseFloat(row.querySelector('.total-grade').textContent);
                     const letterGrade = row.querySelector('.letter-grade').textContent;
                     
@@ -1883,14 +1927,14 @@
                 
                 // Display published grades
                 teacherPublishedGrades.forEach(grade => {
-                    const gradeCard = document.createElement('极速飞艇
+                    const gradeCard = document.createElement('div');
                     gradeCard.className = 'subject-card';
                     gradeCard.style.marginBottom = '20px';
                     
                     gradeCard.innerHTML = `
                         <div class="subject-header">
                             <div class="subject-name">${grade.subject} - ${grade.class}</div>
-                            <极速飞艇
+                            <div class="subject-icon"><i class="fas fa-check"></i></div>
                         </div>
                         <div class="class-info">
                             <p><strong>Term:</strong> ${grade.term}</p>
