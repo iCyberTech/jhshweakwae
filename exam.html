@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Exam Fee Collection</title>
+    <title>Term Exam Fee Collection</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary-color: #6c5ce7;
@@ -37,7 +36,7 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: var(--text-color);
             min-height: 100vh;
-            padding-bottom: 20px;
+            padding-bottom: 80px;
             overflow-x: hidden;
             -webkit-text-size-adjust: 100%;
         }
@@ -133,11 +132,11 @@
             color: var(--text-color);
         }
 
-        .currency-selector {
+        .term-selector {
             position: relative;
         }
 
-        .currency-btn {
+        .term-btn {
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
@@ -151,11 +150,11 @@
             display: flex;
             align-items: center;
             gap: 5px;
-            min-width: 70px;
+            min-width: 100px;
             justify-content: space-between;
         }
 
-        .currency-dropdown {
+        .term-dropdown {
             position: absolute;
             top: 100%;
             right: 0;
@@ -165,14 +164,14 @@
             padding: 10px 0;
             z-index: 100;
             display: none;
-            min-width: 180px;
+            min-width: 120px;
         }
 
-        .currency-dropdown.show {
+        .term-dropdown.show {
             display: block;
         }
 
-        .currency-option {
+        .term-option {
             padding: 10px 15px;
             cursor: pointer;
             display: flex;
@@ -181,15 +180,8 @@
             transition: background-color 0.2s;
         }
 
-        .currency-option:hover {
+        .term-option:hover {
             background-color: #f5f7fa;
-        }
-
-        .currency-flag {
-            width: 20px;
-            height: 15px;
-            object-fit: cover;
-            border-radius: 2px;
         }
 
         /* Class Information */
@@ -231,35 +223,6 @@
         .detail-value {
             font-size: 1rem;
             font-weight: 600;
-        }
-
-        /* Term Selector */
-        .term-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .term-btn {
-            padding: 12px 20px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            flex: 1;
-            min-width: 120px;
-            text-align: center;
-        }
-
-        .term-btn.active {
-            background: var(--primary-color);
-            color: white;
-            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
         }
 
         /* Balance Card */
@@ -394,7 +357,7 @@
             padding: 15px;
             box-shadow: var(--shadow);
             border: 1px solid var(--glass-border);
-            margin-bottom: 20px;
+            margin-bottom: 80px;
         }
 
         .fees-header {
@@ -856,10 +819,6 @@
                 flex: 1;
                 text-align: center;
             }
-            
-            .term-selector {
-                flex-direction: column;
-            }
         }
 
         @media (max-width: 480px) {
@@ -888,6 +847,19 @@
                 font-size: 16px !important;
             }
         }
+
+        /* Term selector styles */
+        .term-selector-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .term-selector-label {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
     </style>
 </head>
 <body>
@@ -904,45 +876,37 @@
                 <div class="profile">
                     <img id="profile-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="profile-img">
                     <div class="greeting">
-                        <h1 id="greeting-title">Exam Fee Collection</h1>
-                        <p id="greeting-subtitle">Recording exam fees for your class</p>
+                        <h1 id="greeting-title">Term Exam Fee Collection</h1>
+                        <p id="greeting-subtitle">Recording term exam fees for your class</p>
                     </div>
                 </div>
                 <div class="fees-actions">
                     <button class="action-btn secondary" id="stats-btn">
                         <i class="fas fa-chart-bar"></i> Statistics
                     </button>
-                    <div class="currency-selector">
-                        <button class="currency-btn" id="currency-btn">
-                            <span id="current-currency">GHS</span>
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                        <div class="currency-dropdown" id="currency-dropdown">
-                            <div class="currency-option" data-currency="GHS" data-symbol="₵" data-rate="1">
-                                <img src="https://flagcdn.com/w20/gh.png" class="currency-flag"> Ghana Cedi (₵)
-                            </div>
-                            <div class="currency-option" data-currency="USD" data-symbol="$" data-rate="12.5">
-                                <img src="https://flagcdn.com/w20/us.png" class="currency-flag"> US Dollar ($)
-                            </div>
-                            <div class="currency-option" data-currency="EUR" data-symbol="€" data-rate="13.8">
-                                <img src="https://flagcdn.com/w20/eu.png" class="currency-flag"> Euro (€)
-                            </div>
-                            <div class="currency-option" data-currency="NGN" data-symbol="₦" data-rate="0.03">
-                                <img src="https://flagcdn.com/w20/ng.png" class="currency-flag"> Nigerian Naira (₦)
-                            </div>
-                            <div class="currency-option" data-currency="ZAR" data-symbol="R" data-rate="0.68">
-                                <img src="https://flagcdn.com/w20/za.png" class="currency-flag"> South African Rand (R)
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </header>
 
             <!-- Term Selector -->
-            <div class="term-selector">
-                <button class="term-btn active" data-term="term1">Term 1</button>
-                <button class="term-btn" data-term="term2">Term 2</button>
-                <button class="term-btn" data-term="term3">Term 3</button>
+            <div class="term-selector-container">
+                <span class="term-selector-label">Select Term:</span>
+                <div class="term-selector">
+                    <button class="term-btn" id="term-btn">
+                        <span id="current-term">Term 1</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="term-dropdown" id="term-dropdown">
+                        <div class="term-option" data-term="Term 1">
+                            Term 1
+                        </div>
+                        <div class="term-option" data-term="Term 2">
+                            Term 2
+                        </div>
+                        <div class="term-option" data-term="Term 3">
+                            Term 3
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Class Information -->
@@ -958,8 +922,8 @@
                         <div class="detail-value" id="class-room">-</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-label">Exam Fee</div>
-                        <div class="detail-value" id="class-exam-fee">-</div>
+                        <div class="detail-label">Term Exam Fee</div>
+                        <div class="detail-value" id="class-term-fee">-</div>
                     </div>
                 </div>
             </div>
@@ -969,7 +933,7 @@
                 <div class="balance-header">
                     <h3 class="balance-title">Class Financial Summary</h3>
                     <button class="action-btn secondary" id="set-fee-btn">
-                        <i class="fas fa-cog"></i> Set Exam Fee
+                        <i class="fas fa-cog"></i> Set Default Fee
                     </button>
                 </div>
                 <div class="balance-amount" id="total-balance">₵0.00</div>
@@ -993,9 +957,9 @@
                 </div>
             </div>
 
-            <!-- Exam Fee Summary -->
+            <!-- Term Fee Summary -->
             <div class="summary-card" id="fee-summary" style="display: none;">
-                <div class="summary-title">Current Term Exam Fee Collection Summary</div>
+                <div class="summary-title">Term Exam Fee Collection Summary</div>
                 <div class="summary-stats">
                     <div class="stat-item">
                         <div class="stat-value" id="total-students">0</div>
@@ -1065,17 +1029,17 @@
     <div class="modal" id="fee-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Set Exam Fee Amount</h3>
+                <h3 class="modal-title">Set Default Exam Fee Amount</h3>
                 <button class="close-btn" id="close-fee-modal">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="fee-amount" class="form-label">Exam Fee Amount (<span id="fee-currency-symbol">₵</span>)</label>
-                    <input type="number" id="fee-amount" class="form-input" placeholder="Enter exam fee amount" step="0.01" min="0">
+                    <label for="fee-amount" class="form-label">Term Exam Fee Amount (₵)</label>
+                    <input type="number" id="fee-amount" class="form-input" placeholder="Enter term exam fee amount" step="0.01" min="0">
                 </div>
                 <div class="form-group">
                     <label for="fee-description" class="form-label">Fee Description (Optional)</label>
-                    <input type="text" id="fee-description" class="form-input" placeholder="E.g., Term 1 Exam Fee">
+                    <input type="text" id="fee-description" class="form-input" placeholder="E.g., Term 1 Exam Fee, etc.">
                 </div>
             </div>
             <div class="modal-footer">
@@ -1094,7 +1058,7 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="custom-amount" class="form-label">Fee Amount (<span id="custom-currency-symbol">₵</span>)</label>
+                    <label for="custom-amount" class="form-label">Fee Amount (₵)</label>
                     <input type="number" id="custom-amount" class="form-input" step="0.01" min="0">
                 </div>
                 <p class="form-label">Default amount: <span id="default-amount-display">₵0.00</span></p>
@@ -1115,12 +1079,12 @@
             </div>
             <div class="modal-body stats-container">
                 <div class="stats-header">
-                    <h4 id="stats-period-title">All Terms</h4>
+                    <h4 id="stats-term-title">All Terms</h4>
                     <div class="stats-period-selector">
-                        <button class="stats-period-btn active" data-period="all">All</button>
-                        <button class="stats-period-btn" data-period="term1">Term 1</button>
-                        <button class="stats-period-btn" data-period="term2">Term 2</button>
-                        <button class="stats-period-btn" data-period="term3">Term 3</button>
+                        <button class="stats-period-btn active" data-term="all">All Terms</button>
+                        <button class="stats-period-btn" data-term="Term 1">Term 1</button>
+                        <button class="stats-period-btn" data-term="Term 2">Term 2</button>
+                        <button class="stats-period-btn" data-term="Term 3">Term 3</button>
                     </div>
                 </div>
 
@@ -1138,30 +1102,23 @@
                         <div class="stats-summary-label">Payment Rate</div>
                     </div>
                     <div class="stats-summary-item">
-                        <div class="stats-summary-value" id="stats-total-students">0</div>
-                        <div class="stats-summary-label">Total Students</div>
+                        <div class="stats-summary-value" id="stats-students-paid">0/0</div>
+                        <div class="stats-summary-label">Students Paid</div>
                     </div>
-                </div>
-
-                <div class="stats-chart-container">
-                    <canvas id="payment-chart"></canvas>
                 </div>
 
                 <h4>Recent Payments</h4>
                 <table class="stats-table">
                     <thead>
                         <tr>
-                            <th>Student</th>
                             <th>Term</th>
+                            <th>Student</th>
                             <th>Amount</th>
                             <th>Status</th>
-                            <th>Date</th>
                         </tr>
                     </thead>
                     <tbody id="stats-payments-list">
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 20px;">No payment data available</td>
-                        </tr>
+                        <!-- Payments will be inserted here -->
                     </tbody>
                 </table>
             </div>
@@ -1171,8 +1128,8 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
             authDomain: "sms-single.firebaseapp.com",
@@ -1183,330 +1140,223 @@
             appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
             measurementId: "G-7ER348P6VZ"
         };
-
+        
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const auth = firebase.auth();
-
-        // Global variables
-        let currentUser = null;
-        let currentClass = null;
-        let students = [];
-        let currentTerm = 'term1';
-        let currencyData = {
-            code: 'GHS',
-            symbol: '₵',
-            rate: 1
-        };
-        let defaultExamFee = 100.00;
-        let paymentChart = null;
-        let currentStudentForAmountEdit = null;
-
-        // DOM elements
-        const mainContent = document.getElementById('main-content');
+        
+        // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
-        const classInfo = document.getElementById('class-info');
-        const classBalance = document.getElementById('class-balance');
-        const feeSummary = document.getElementById('fee-summary');
-        const studentsList = document.getElementById('students-list');
+        const mainContent = document.getElementById('main-content');
+        const profileImg = document.getElementById('profile-img');
+        const greetingTitle = document.getElementById('greeting-title');
+        const greetingSubtitle = document.getElementById('greeting-subtitle');
+        
+        // Class info elements
+        const classNameElement = document.getElementById('class-name');
+        const classIdElement = document.getElementById('class-id');
+        const classRoomElement = document.getElementById('class-room');
+        const classTermFeeElement = document.getElementById('class-term-fee');
+        
+        // Balance elements
+        const classBalanceElement = document.getElementById('class-balance');
+        const totalBalanceElement = document.getElementById('total-balance');
+        const totalExpectedElement = document.getElementById('total-expected');
+        const totalCollectedBalanceElement = document.getElementById('total-collected-balance');
+        const totalOutstandingElement = document.getElementById('total-outstanding');
+        const paymentRateElement = document.getElementById('payment-rate');
+        
+        // Summary elements
+        const totalStudentsElement = document.getElementById('total-students');
+        const paidCountElement = document.getElementById('paid-count');
+        const unpaidCountElement = document.getElementById('unpaid-count');
+        const totalCollectedElement = document.getElementById('total-collected');
+        const expectedTotalElement = document.getElementById('expected-total');
+        
+        // Students list
+        const studentsListElement = document.getElementById('students-list');
+        
+        // Buttons
+        const saveBtn = document.getElementById('save-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
+        const statsBtn = document.getElementById('stats-btn');
+        const setFeeBtn = document.getElementById('set-fee-btn');
+        
+        // Term selector
+        const termBtn = document.getElementById('term-btn');
+        const termDropdown = document.getElementById('term-dropdown');
+        const currentTermElement = document.getElementById('current-term');
+        
+        // Modals
         const confirmationModal = document.getElementById('confirmation-modal');
         const feeModal = document.getElementById('fee-modal');
         const amountModal = document.getElementById('amount-modal');
         const statsModal = document.getElementById('stats-modal');
-
+        
+        // Modal buttons
+        const closeModalBtn = document.getElementById('close-modal');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const confirmSaveBtn = document.getElementById('confirm-save-btn');
+        
+        const closeFeeModalBtn = document.getElementById('close-fee-modal');
+        const cancelFeeBtn = document.getElementById('cancel-fee-btn');
+        const saveFeeBtn = document.getElementById('save-fee-btn');
+        
+        const closeAmountModalBtn = document.getElementById('close-amount-modal');
+        const cancelAmountBtn = document.getElementById('cancel-amount-btn');
+        const saveAmountBtn = document.getElementById('save-amount-btn');
+        
+        const closeStatsModalBtn = document.getElementById('close-stats-modal');
+        const closeStatsBtn = document.getElementById('close-stats-btn');
+        
+        // Form inputs
+        const feeAmountInput = document.getElementById('fee-amount');
+        const feeDescriptionInput = document.getElementById('fee-description');
+        const customAmountInput = document.getElementById('custom-amount');
+        const defaultAmountDisplay = document.getElementById('default-amount-display');
+        
+        // Stats elements
+        const statsTotalCollected = document.getElementById('stats-total-collected');
+        const statsTotalExpected = document.getElementById('stats-total-expected');
+        const statsPaymentRate = document.getElementById('stats-payment-rate');
+        const statsStudentsPaid = document.getElementById('stats-students-paid');
+        const statsPaymentsList = document.getElementById('stats-payments-list');
+        const statsTermTitle = document.getElementById('stats-term-title');
+        
+        // Global variables
+        let currentUser = null;
+        let currentClass = null;
+        let currentTerm = 'Term 1';
+        let students = [];
+        let feePayments = {};
+        let defaultFeeAmount = 0;
+        let feeDescription = 'Term Exam Fee';
+        let currentStudentEditing = null;
+        
         // Initialize the application
         function initApp() {
-            // Update loading text
-            document.querySelector('.loading-text').textContent = "Connecting to database...";
-            
-            // Set up authentication state observer
+            // Check if user is logged in
             auth.onAuthStateChanged(user => {
                 if (user) {
                     currentUser = user;
-                    document.getElementById('profile-img').src = user.photoURL || 'https://randomuser.me/api/portraits/women/44.jpg';
-                    document.getElementById('greeting-title').textContent = `Hello, ${user.displayName || 'Teacher'}`;
-                    loadClassData();
+                    loadUserData();
                 } else {
-                    // Not signed in, redirect to login or simulate for demo
-                    simulateAuthentication();
+                    // Simulate login for demo purposes
+                    auth.signInAnonymously().catch(error => {
+                        console.error('Authentication error:', error);
+                        showError('Authentication failed. Please refresh the page.');
+                    });
                 }
             });
         }
-
-        // Simulate authentication for demo purposes
-        function simulateAuthentication() {
-            currentUser = {
-                uid: 'teacher123',
-                displayName: 'Mrs. Johnson',
-                email: 'teacher@school.edu',
-                photoURL: 'https://randomuser.me/api/portraits/women/44.jpg'
-            };
-            
-            // Update UI with user info
-            document.getElementById('profile-img').src = currentUser.photoURL;
-            document.getElementById('greeting-title').textContent = `Hello, ${currentUser.displayName}`;
-            
-            // Load class information
-            loadClassData();
+        
+        // Load user data
+        function loadUserData() {
+            // In a real app, you would fetch the user's profile and class information
+            // For demo purposes, we'll use mock data
+            setTimeout(() => {
+                currentClass = {
+                    id: 'CLS-2023-001',
+                    name: 'Class 7A - Mathematics',
+                    room: 'Room 101',
+                    teacher: 'Ms. Johnson',
+                    termFee: 120.00
+                };
+                
+                defaultFeeAmount = currentClass.termFee;
+                feeDescription = 'Term Exam Fee';
+                
+                // Update UI with class info
+                updateClassInfo();
+                
+                // Load students
+                loadStudents();
+                
+                // Load fee payments
+                loadFeePayments();
+                
+                // Hide loading screen and show main content
+                loadingScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+            }, 1500);
         }
-
-        // Load class data from Firebase
-        function loadClassData() {
-            document.querySelector('.loading-text').textContent = "Loading class information...";
+        
+        // Update class information in the UI
+        function updateClassInfo() {
+            classNameElement.textContent = currentClass.name;
+            classIdElement.textContent = currentClass.id;
+            classRoomElement.textContent = currentClass.room;
+            classTermFeeElement.textContent = `₵${defaultFeeAmount.toFixed(2)}`;
             
-            // Get teacher's class from Firebase
-            const teacherRef = database.ref('teachers/' + (currentUser.uid || 'teacher123'));
-            
-            teacherRef.once('value')
-                .then(snapshot => {
-                    if (snapshot.exists()) {
-                        const teacherData = snapshot.val();
-                        const classId = teacherData.classId;
-                        
-                        if (classId) {
-                            // Reference to the class data in Firebase
-                            const classRef = database.ref('classes/' + classId);
-                            
-                            return classRef.once('value')
-                                .then(classSnapshot => {
-                                    if (classSnapshot.exists()) {
-                                        currentClass = classSnapshot.val();
-                                        currentClass.id = classId;
-                                        
-                                        // Update UI with class info
-                                        document.getElementById('class-name').textContent = currentClass.name;
-                                        document.getElementById('class-id').textContent = currentClass.id;
-                                        document.getElementById('class-room').textContent = currentClass.room || '-';
-                                        document.getElementById('class-exam-fee').textContent = formatCurrency(currentClass.examFee || defaultExamFee);
-                                        
-                                        // Set default exam fee from class data if available
-                                        if (currentClass.examFee) {
-                                            defaultExamFee = currentClass.examFee;
-                                        }
-                                        
-                                        // Load students for this class
-                                        loadStudents();
-                                    } else {
-                                        // If class doesn't exist, show error
-                                        showError("Class data not found");
-                                    }
-                                });
-                        } else {
-                            showError("No class assigned to this teacher");
-                        }
-                    } else {
-                        // If teacher doesn't exist, create a default one
-                        createDefaultTeacherData();
-                    }
-                })
-                .catch(error => {
-                    console.error("Error loading teacher data:", error);
-                    showError("Error loading class information");
-                });
+            // Update greeting
+            greetingTitle.textContent = `Term Exam Fee Collection`;
+            greetingSubtitle.textContent = `Recording term exam fees for ${currentClass.name}`;
         }
-
-        // Create default teacher data if it doesn't exist
-        function createDefaultTeacherData() {
-            const teacherId = currentUser.uid || 'teacher123';
-            const classId = 'class10a';
-            
-            const teacherData = {
-                name: currentUser.displayName || 'Mrs. Johnson',
-                email: currentUser.email || 'teacher@school.edu',
-                classId: classId
-            };
-            
-            // Save to Firebase
-            database.ref('teachers/' + teacherId).set(teacherData)
-                .then(() => {
-                    // Now create the class data
-                    return createDefaultClassData(classId);
-                })
-                .then(() => {
-                    // Load students
-                    loadStudents();
-                })
-                .catch(error => {
-                    console.error("Error creating teacher data:", error);
-                    showError("Error setting up teacher account");
-                });
-        }
-
-        // Create default class data
-        function createDefaultClassData(classId) {
-            currentClass = {
-                id: classId,
-                name: 'Class 10A - Science',
-                room: 'Room 205',
-                teacher: currentUser ? currentUser.displayName : 'Mrs. Johnson',
-                examFee: defaultExamFee
-            };
-            
-            // Save to Firebase
-            return database.ref('classes/' + classId).set(currentClass)
-                .then(() => {
-                    // Update UI with class info
-                    document.getElementById('class-name').textContent = currentClass.name;
-                    document.getElementById('class-id').textContent = currentClass.id;
-                    document.getElementById('class-room').textContent = currentClass.room;
-                    document.getElementById('class-exam-fee').textContent = formatCurrency(currentClass.examFee);
-                });
-        }
-
-        // Load students from Firebase
+        
+        // Load students from Firebase (mock data for demo)
         function loadStudents() {
-            document.querySelector('.loading-text').textContent = "Loading student data...";
+            // In a real app, you would fetch this from Firebase
+            students = [
+                { id: 'STU-001', name: 'Kwame Mensah', avatar: 'https://randomuser.me/api/portraits/men/32.jpg' },
+                { id: 'STU-002', name: 'Ama Darko', avatar: 'https://randomuser.me/api/portraits/women/65.jpg' },
+                { id: 'STU-003', name: 'Kofi Adu', avatar: 'https://randomuser.me/api/portraits/men/76.jpg' },
+                { id: 'STU-004', name: 'Abena Serwaa', avatar: 'https://randomuser.me/api/portraits/women/43.jpg' },
+                { id: 'STU-005', name: 'Yaw Boateng', avatar: 'https://randomuser.me/api/portraits/men/22.jpg' },
+                { id: 'STU-006', name: 'Akua Nyamekye', avatar: 'https://randomuser.me/api/portraits/women/28.jpg' },
+                { id: 'STU-007', name: 'Kwabena Osei', avatar: 'https://randomuser.me/api/portraits/men/45.jpg' },
+                { id: 'STU-008', name: 'Adwoa Safo', avatar: 'https://randomuser.me/api/portraits/women/52.jpg' }
+            ];
             
-            if (!currentClass || !currentClass.id) {
-                showError("No class information available");
-                return;
-            }
-            
-            // Reference to students data in Firebase
-            const studentsRef = database.ref('students').orderByChild('class').equalTo(currentClass.id);
-            
-            studentsRef.once('value')
-                .then(snapshot => {
-                    if (snapshot.exists()) {
-                        const studentsData = snapshot.val();
-                        students = [];
-                        
-                        // Process each student
-                        Object.keys(studentsData).forEach(key => {
-                            const student = studentsData[key];
-                            student.id = key;
-                            
-                            // Ensure fee structure exists for all terms
-                            if (!student.fees) {
-                                student.fees = {
-                                    term1: { paid: false, amount: defaultExamFee },
-                                    term2: { paid: false, amount: defaultExamFee },
-                                    term3: { paid: false, amount: defaultExamFee }
-                                };
-                            } else {
-                                // Ensure each term has the required structure
-                                ['term1', 'term2', 'term3'].forEach(term => {
-                                    if (!student.fees[term]) {
-                                        student.fees[term] = { paid: false, amount: defaultExamFee };
-                                    } else if (student.fees[term].amount === undefined) {
-                                        student.fees[term].amount = defaultExamFee;
-                                    }
-                                });
-                            }
-                            
-                            students.push(student);
-                        });
-                        
-                        // Update UI
-                        updateUI();
-                        
-                        // Hide loading screen and show main content
-                        loadingScreen.style.display = 'none';
-                        mainContent.style.display = 'block';
-                        
-                        // Set up real-time listener for student fee changes
-                        setupRealTimeListeners();
-                    } else {
-                        // If no students found, show message
-                        students = [];
-                        updateUI();
-                        loadingScreen.style.display = 'none';
-                        mainContent.style.display = 'block';
-                    }
-                })
-                .catch(error => {
-                    console.error("Error loading students:", error);
-                    showError("Error loading student data");
-                });
+            renderStudents();
         }
-
-        // Set up real-time listeners for student fee changes
-        function setupRealTimeListeners() {
-            // Listen for changes to students' fee status
-            const studentsRef = database.ref('students');
-            
-            studentsRef.on('child_changed', snapshot => {
-                const updatedStudent = snapshot.val();
-                updatedStudent.id = snapshot.key;
-                
-                // Only process if student belongs to current class
-                if (updatedStudent.class === currentClass.id) {
-                    // Update local students array
-                    const index = students.findIndex(s => s.id === updatedStudent.id);
-                    if (index !== -1) {
-                        students[index] = updatedStudent;
-                        
-                        // Update UI if the current term is affected
-                        updateUI();
-                    }
+        
+        // Load fee payments from Firebase (mock data for demo)
+        function loadFeePayments() {
+            // In a real app, you would fetch this from Firebase
+            feePayments = {
+                'Term 1': {
+                    'STU-001': { paid: true, amount: defaultFeeAmount, timestamp: Date.now() - 86400000 },
+                    'STU-002': { paid: true, amount: defaultFeeAmount, timestamp: Date.now() - 172800000 },
+                    'STU-003': { paid: false, amount: defaultFeeAmount, timestamp: null },
+                    'STU-004': { paid: true, amount: defaultFeeAmount, timestamp: Date.now() - 259200000 },
+                    'STU-005': { paid: false, amount: defaultFeeAmount, timestamp: null },
+                    'STU-006': { paid: true, amount: defaultFeeAmount, timestamp: Date.now() - 345600000 },
+                    'STU-007': { paid: false, amount: defaultFeeAmount, timestamp: null },
+                    'STU-008': { paid: true, amount: defaultFeeAmount, timestamp: Date.now() - 432000000 }
+                },
+                'Term 2': {
+                    'STU-001': { paid: true, amount: defaultFeeAmount, timestamp: Date.now() - 86400000 },
+                    'STU-002': { paid: false, amount: defaultFeeAmount, timestamp: null },
+                    'STU-003': { paid: false, amount: defaultFeeAmount, timestamp: null },
+                    'STU-004': { paid: true, amount: defaultFeeAmount, timestamp: Date.now() - 172800000 },
+                    'STU-005': { paid: false, amount: defaultFeeAmount, timestamp: null },
+                    'STU-006': { paid: true, amount: defaultFeeAmount, timestamp: Date.now() - 259200000 },
+                    'STU-007': { paid: false, amount: defaultFeeAmount, timestamp: null },
+                    'STU-008': { paid: true, amount: defaultFeeAmount, timestamp: Date.now() - 345600000 }
+                },
+                'Term 3': {
+                    'STU-001': { paid: false, amount: defaultFeeAmount, timestamp: null },
+                    'STU-002': { paid: false, amount: defaultFeeAmount, timestamp: null },
+                    'STU-003': { paid: false, amount: defaultFeeAmount, timestamp: null },
+                    'STU-004': { paid: false, amount: defaultFeeAmount, timestamp: null },
+                    'STU-005': { paid: false, amount: defaultFeeAmount, timestamp: null },
+                    'STU-006': { paid: false, amount: defaultFeeAmount, timestamp: null },
+                    'STU-007': { paid: false, amount: defaultFeeAmount, timestamp: null },
+                    'STU-008': { paid: false, amount: defaultFeeAmount, timestamp: null }
                 }
-            });
+            };
             
-            // Listen for new students added to the class
-            studentsRef.on('child_added', snapshot => {
-                const newStudent = snapshot.val();
-                newStudent.id = snapshot.key;
-                
-                // Only process if student belongs to current class
-                if (newStudent.class === currentClass.id) {
-                    // Check if student already exists in local array
-                    const index = students.findIndex(s => s.id === newStudent.id);
-                    
-                    if (index === -1) {
-                        // Ensure fee structure exists
-                        if (!newStudent.fees) {
-                            newStudent.fees = {
-                                term1: { paid: false, amount: defaultExamFee },
-                                term2: { paid: false, amount: defaultExamFee },
-                                term3: { paid: false, amount: defaultExamFee }
-                            };
-                        }
-                        
-                        students.push(newStudent);
-                        updateUI();
-                    }
-                }
-            });
-            
-            // Listen for students removed from the class
-            studentsRef.on('child_removed', snapshot => {
-                const removedStudentId = snapshot.key;
-                
-                // Remove from local array
-                const index = students.findIndex(s => s.id === removedStudentId);
-                if (index !== -1) {
-                    students.splice(index, 1);
-                    updateUI();
-                }
-            });
-        }
-
-        // Update UI with current data
-        function updateUI() {
-            updateTermButtons();
-            updateStudentsList();
             updateSummary();
-            updateBalanceSummary();
         }
-
-        // Update term buttons
-        function updateTermButtons() {
-            document.querySelectorAll('.term-btn').forEach(btn => {
-                if (btn.dataset.term === currentTerm) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        }
-
-        // Update students list
-        function updateStudentsList() {
-            studentsList.innerHTML = '';
+        
+        // Render students list
+        function renderStudents() {
+            studentsListElement.innerHTML = '';
             
             if (students.length === 0) {
-                studentsList.innerHTML = `
+                studentsListElement.innerHTML = `
                     <div class="no-students">
                         <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
                         <p>No students found in this class</p>
@@ -1516,33 +1366,39 @@
             }
             
             students.forEach(student => {
-                const feeStatus = student.fees[currentTerm];
+                const payment = feePayments[currentTerm] && feePayments[currentTerm][student.id] ? 
+                    feePayments[currentTerm][student.id] : 
+                    { paid: false, amount: defaultFeeAmount, timestamp: null };
+                
                 const studentCard = document.createElement('div');
                 studentCard.className = 'student-card';
                 studentCard.innerHTML = `
-                    <img src="${student.avatar || 'https://randomuser.me/api/portraits/lego/6.jpg'}" alt="${student.name}" class="student-avatar">
+                    <img src="${student.avatar}" alt="${student.name}" class="student-avatar">
                     <div class="student-info">
                         <div class="student-name">${student.name}</div>
-                        <div class="student-id">ID: ${student.id}</div>
+                        <div class="student-id">${student.id}</div>
                     </div>
                     <div class="fee-status">
-                        <div class="fee-amount">${formatCurrency(feeStatus.amount)}</div>
-                        <button class="status-btn ${feeStatus.paid ? 'active' : 'inactive'}" data-student="${student.id}">
-                            <i class="fas ${feeStatus.paid ? 'fa-check-circle' : 'fa-times-circle'}"></i>
-                            ${feeStatus.paid ? 'Paid' : 'Unpaid'}
-                        </button>
-                        <button class="edit-amount-btn" data-student="${student.id}">
-                            <i class="fas fa-edit"></i>
+                        <div class="amount-input-container">
+                            <span class="fee-amount">₵${payment.amount.toFixed(2)}</span>
+                            <button class="edit-amount-btn" data-student-id="${student.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        <button class="status-btn ${payment.paid ? 'active' : 'inactive'}" data-student-id="${student.id}">
+                            <i class="fas ${payment.paid ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                            ${payment.paid ? 'Paid' : 'Unpaid'}
                         </button>
                     </div>
                 `;
-                studentsList.appendChild(studentCard);
+                
+                studentsListElement.appendChild(studentCard);
             });
             
-            // Add event listeners to status buttons
+            // Add event listeners to payment status buttons
             document.querySelectorAll('.status-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const studentId = this.dataset.student;
+                    const studentId = this.getAttribute('data-student-id');
                     togglePaymentStatus(studentId);
                 });
             });
@@ -1550,560 +1406,441 @@
             // Add event listeners to edit amount buttons
             document.querySelectorAll('.edit-amount-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const studentId = this.dataset.student;
-                    editStudentFeeAmount(studentId);
+                    const studentId = this.getAttribute('data-student-id');
+                    openEditAmountModal(studentId);
                 });
             });
         }
-
-        // Toggle payment status and update Firebase
+        
+        // Toggle payment status for a student
         function togglePaymentStatus(studentId) {
-            const student = students.find(s => s.id === studentId);
-            if (student) {
-                student.fees[currentTerm].paid = !student.fees[currentTerm].paid;
-                
-                // Update Firebase
-                const updates = {};
-                updates[`students/${studentId}/fees/${currentTerm}/paid`] = student.fees[currentTerm].paid;
-                
-                // Add payment date if paid
-                if (student.fees[currentTerm].paid) {
-                    updates[`students/${studentId}/fees/${currentTerm}/paymentDate`] = new Date().toISOString();
-                } else {
-                    updates[`students/${studentId}/fees/${currentTerm}/paymentDate`] = null;
-                }
-                
-                database.ref().update(updates)
-                    .then(() => {
-                        // UI will update via real-time listener
-                    })
-                    .catch(error => {
-                        console.error("Error updating payment status:", error);
-                        // Revert the change in UI if update failed
-                        student.fees[currentTerm].paid = !student.fees[currentTerm].paid;
-                        updateUI();
-                        alert("Failed to update payment status. Please try again.");
-                    });
+            if (!feePayments[currentTerm]) {
+                feePayments[currentTerm] = {};
             }
-        }
-
-        // Edit student's fee amount
-        function editStudentFeeAmount(studentId) {
-            const student = students.find(s => s.id === studentId);
-            if (student) {
-                currentStudentForAmountEdit = student;
-                document.getElementById('custom-amount').value = student.fees[currentTerm].amount;
-                document.getElementById('default-amount-display').textContent = formatCurrency(defaultExamFee);
-                amountModal.classList.add('active');
-            }
-        }
-
-        // Update summary
-        function updateSummary() {
-            const totalStudents = students.length;
-            const paidCount = students.filter(s => s.fees[currentTerm].paid).length;
-            const unpaidCount = totalStudents - paidCount;
-            const totalCollected = students.reduce((sum, student) => {
-                return student.fees[currentTerm].paid ? sum + student.fees[currentTerm].amount : sum;
-            }, 0);
-            const expectedTotal = students.reduce((sum, student) => sum + student.fees[currentTerm].amount, 0);
             
-            document.getElementById('total-students').textContent = totalStudents;
-            document.getElementById('paid-count').textContent = paidCount;
-            document.getElementById('unpaid-count').textContent = unpaidCount;
-            document.getElementById('total-collected').textContent = formatCurrency(totalCollected);
-            document.getElementById('expected-total').textContent = `Expected Total: ${formatCurrency(expectedTotal)}`;
-        }
-
-        // Update balance summary
-        function updateBalanceSummary() {
-            // Calculate totals across all terms
-            let totalExpected = 0;
-            let totalCollected = 0;
-            
-            students.forEach(student => {
-                ['term1', 'term2', 'term3'].forEach(term => {
-                    totalExpected += student.fees[term].amount;
-                    if (student.fees[term].paid) {
-                        totalCollected += student.fees[term].amount;
-                    }
-                });
-            });
-            
-            const totalOutstanding = totalExpected - totalCollected;
-            const paymentRate = totalExpected > 0 ? (totalCollected / totalExpected) * 100 : 0;
-            
-            // Update UI
-            document.getElementById('total-balance').textContent = formatCurrency(totalCollected);
-            document.getElementById('total-expected').textContent = formatCurrency(totalExpected);
-            document.getElementById('total-collected-balance').textContent = formatCurrency(totalCollected);
-            document.getElementById('total-outstanding').textContent = formatCurrency(totalOutstanding);
-            document.getElementById('payment-rate').textContent = `${paymentRate.toFixed(1)}%`;
-            
-            // Set balance color
-            const balanceElement = document.getElementById('total-balance');
-            balanceElement.className = 'balance-amount';
-            if (totalCollected >= totalExpected * 0.8) {
-                balanceElement.classList.add('balance-positive');
-            } else if (totalCollected >= totalExpected * 0.5) {
-                balanceElement.classList.add('balance-neutral');
+            if (!feePayments[currentTerm][studentId]) {
+                feePayments[currentTerm][studentId] = {
+                    paid: true,
+                    amount: defaultFeeAmount,
+                    timestamp: Date.now()
+                };
             } else {
-                balanceElement.classList.add('balance-negative');
+                feePayments[currentTerm][studentId].paid = !feePayments[currentTerm][studentId].paid;
+                if (feePayments[currentTerm][studentId].paid) {
+                    feePayments[currentTerm][studentId].timestamp = Date.now();
+                } else {
+                    feePayments[currentTerm][studentId].timestamp = null;
+                }
             }
             
-            // Show the balance card
-            classBalance.style.display = 'block';
-            feeSummary.style.display = 'block';
+            updateSummary();
+            renderStudents();
         }
-
-        // Format currency based on selected currency
-        function formatCurrency(amount) {
-            const convertedAmount = amount * currencyData.rate;
-            return `${currencyData.symbol}${convertedAmount.toFixed(2)}`;
-        }
-
-        // Show error message
-        function showError(message) {
-            loadingScreen.innerHTML = `
-                <div style="text-align: center; color: var(--danger-color);">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 20px;"></i>
-                    <h2>Error</h2>
-                    <p>${message}</p>
-                    <button class="action-btn secondary" onclick="location.reload()" style="margin-top: 20px;">
-                        <i class="fas fa-redo"></i> Try Again
-                    </button>
-                </div>
-            `;
-        }
-
-        // Event Listeners
-        document.querySelectorAll('.term-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                currentTerm = this.dataset.term;
-                updateUI();
-            });
-        });
-
-        document.getElementById('mark-all-paid-btn').addEventListener('click', function() {
-            // Update all students in the current term
-            const updates = {};
-            const paymentDate = new Date().toISOString();
+        
+        // Update summary information
+        function updateSummary() {
+            let totalStudents = students.length;
+            let paidCount = 0;
+            let totalCollected = 0;
+            let totalExpected = 0;
             
             students.forEach(student => {
-                if (!student.fees[currentTerm].paid) {
-                    updates[`students/${student.id}/fees/${currentTerm}/paid`] = true;
-                    updates[`students/${student.id}/fees/${currentTerm}/paymentDate`] = paymentDate;
+                const payment = feePayments[currentTerm] && feePayments[currentTerm][student.id] ? 
+                    feePayments[currentTerm][student.id] : 
+                    { paid: false, amount: defaultFeeAmount, timestamp: null };
+                
+                totalExpected += payment.amount;
+                
+                if (payment.paid) {
+                    paidCount++;
+                    totalCollected += payment.amount;
                 }
             });
             
-            // Update Firebase
-            if (Object.keys(updates).length > 0) {
-                database.ref().update(updates)
-                    .then(() => {
-                        // UI will update automatically via the real-time listener
-                    })
-                    .catch(error => {
-                        console.error("Error marking all as paid:", error);
-                        alert("Failed to mark all as paid. Please try again.");
-                    });
+            const unpaidCount = totalStudents - paidCount;
+            const paymentRate = totalStudents > 0 ? (paidCount / totalStudents) * 100 : 0;
+            
+            // Update summary card
+            totalStudentsElement.textContent = totalStudents;
+            paidCountElement.textContent = paidCount;
+            unpaidCountElement.textContent = unpaidCount;
+            totalCollectedElement.textContent = `₵${totalCollected.toFixed(2)}`;
+            expectedTotalElement.textContent = `Expected Total: ₵${totalExpected.toFixed(2)}`;
+            
+            // Update balance card
+            totalBalanceElement.textContent = `₵${totalCollected.toFixed(2)}`;
+            totalExpectedElement.textContent = `₵${totalExpected.toFixed(2)}`;
+            totalCollectedBalanceElement.textContent = `₵${totalCollected.toFixed(2)}`;
+            totalOutstandingElement.textContent = `₵${(totalExpected - totalCollected).toFixed(2)}`;
+            paymentRateElement.textContent = `${paymentRate.toFixed(1)}%`;
+            
+            // Set balance color based on payment rate
+            if (paymentRate >= 80) {
+                totalBalanceElement.className = 'balance-amount balance-positive';
+            } else if (paymentRate >= 50) {
+                totalBalanceElement.className = 'balance-amount balance-neutral';
+            } else {
+                totalBalanceElement.className = 'balance-amount balance-negative';
             }
-        });
-
-        document.getElementById('save-btn').addEventListener('click', function() {
-            // Show confirmation modal
-            confirmationModal.classList.add('active');
-        });
-
-        document.getElementById('reset-btn').addEventListener('click', function() {
-            // Reset all payments for current term
-            const updates = {};
+            
+            // Show the summary and balance cards
+            document.getElementById('fee-summary').style.display = 'block';
+            classBalanceElement.style.display = 'block';
+        }
+        
+        // Open edit amount modal
+        function openEditAmountModal(studentId) {
+            currentStudentEditing = studentId;
+            
+            const payment = feePayments[currentTerm] && feePayments[currentTerm][studentId] ? 
+                feePayments[currentTerm][studentId] : 
+                { paid: false, amount: defaultFeeAmount, timestamp: null };
+            
+            customAmountInput.value = payment.amount;
+            defaultAmountDisplay.textContent = `₵${defaultFeeAmount.toFixed(2)}`;
+            
+            amountModal.classList.add('active');
+        }
+        
+        // Save custom amount for a student
+        function saveCustomAmount() {
+            if (!currentStudentEditing) return;
+            
+            const amount = parseFloat(customAmountInput.value);
+            
+            if (isNaN(amount) || amount < 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            if (!feePayments[currentTerm]) {
+                feePayments[currentTerm] = {};
+            }
+            
+            if (!feePayments[currentTerm][currentStudentEditing]) {
+                feePayments[currentTerm][currentStudentEditing] = {
+                    paid: false,
+                    amount: amount,
+                    timestamp: null
+                };
+            } else {
+                feePayments[currentTerm][currentStudentEditing].amount = amount;
+            }
+            
+            updateSummary();
+            renderStudents();
+            closeModal(amountModal);
+        }
+        
+        // Mark all students as paid
+        function markAllAsPaid() {
+            if (!confirm('Are you sure you want to mark all students as paid for this term?')) {
+                return;
+            }
+            
+            if (!feePayments[currentTerm]) {
+                feePayments[currentTerm] = {};
+            }
             
             students.forEach(student => {
-                if (student.fees[currentTerm].paid) {
-                    updates[`students/${student.id}/fees/${currentTerm}/paid`] = false;
-                    updates[`students/${student.id}/fees/${currentTerm}/paymentDate`] = null;
+                if (!feePayments[currentTerm][student.id] || !feePayments[currentTerm][student.id].paid) {
+                    feePayments[currentTerm][student.id] = {
+                        paid: true,
+                        amount: defaultFeeAmount,
+                        timestamp: Date.now()
+                    };
                 }
             });
             
-            // Update Firebase
-            if (Object.keys(updates).length > 0) {
-                database.ref().update(updates)
-                    .then(() => {
-                        // UI will update automatically via the real-time listener
-                    })
-                    .catch(error => {
-                        console.error("Error resetting payments:", error);
-                        alert("Failed to reset payments. Please try again.");
-                    });
-            }
-        });
-
-        document.getElementById('close-modal').addEventListener('click', function() {
-            confirmationModal.classList.remove('active');
-        });
-
-        document.getElementById('cancel-btn').addEventListener('click', function() {
-            confirmationModal.classList.remove('active');
-        });
-
-        document.getElementById('confirm-save-btn').addEventListener('click', function() {
-            // In a real app, this might trigger a report generation or other action
-            confirmationModal.classList.remove('active');
+            updateSummary();
+            renderStudents();
+        }
+        
+        // Save fee payments to Firebase
+        function saveFeePayments() {
+            // In a real app, you would save to Firebase here
+            console.log('Saving fee payments:', feePayments);
             
             // Show success message
-            alert('Exam fee payments saved successfully!');
-        });
-
-        document.getElementById('set-fee-btn').addEventListener('click', function() {
-            document.getElementById('fee-amount').value = defaultExamFee;
-            document.getElementById('fee-description').value = '';
-            feeModal.classList.add('active');
-        });
-
-        document.getElementById('close-fee-modal').addEventListener('click', function() {
-            feeModal.classList.remove('active');
-        });
-
-        document.getElementById('cancel-fee-btn').addEventListener('click', function() {
-            feeModal.classList.remove('active');
-        });
-
-        document.getElementById('save-fee-btn').addEventListener('click', function() {
-            const newFee = parseFloat(document.getElementById('fee-amount').value);
-            const feeDescription = document.getElementById('fee-description').value;
-            
-            if (!isNaN(newFee) && newFee >= 0) {
-                defaultExamFee = newFee;
-                
-                // Update class exam fee in Firebase
-                database.ref('classes/' + currentClass.id).update({
-                    examFee: newFee
-                })
-                .then(() => {
-                    // Update all students with the new fee
-                    const updates = {};
-                    
-                    students.forEach(student => {
-                        ['term1', 'term2', 'term3'].forEach(term => {
-                            updates[`students/${student.id}/fees/${term}/amount`] = newFee;
-                            student.fees[term].amount = newFee;
-                        });
-                    });
-                    
-                    // Update Firebase with new fee amounts
-                    return database.ref().update(updates);
-                })
-                .then(() => {
-                    // Update class info
-                    currentClass.examFee = newFee;
-                    document.getElementById('class-exam-fee').textContent = formatCurrency(newFee);
-                    
-                    // Update UI
-                    updateUI();
-                    
-                    feeModal.classList.remove('active');
-                    
-                    // Show success message
-                    alert('Exam fee updated successfully!');
-                })
-                .catch(error => {
-                    console.error("Error updating exam fee:", error);
-                    alert("Failed to update exam fee. Please try again.");
-                });
-            } else {
-                alert('Please enter a valid fee amount.');
+            alert('Fee payments saved successfully!');
+        }
+        
+        // Reset fee payments for current term
+        function resetFeePayments() {
+            if (!confirm('Are you sure you want to reset all payments for this term? This action cannot be undone.')) {
+                return;
             }
-        });
-
-        document.getElementById('currency-btn').addEventListener('click', function() {
-            document.getElementById('currency-dropdown').classList.toggle('show');
-        });
-
-        document.querySelectorAll('.currency-option').forEach(option => {
-            option.addEventListener('click', function() {
-                currencyData = {
-                    code: this.dataset.currency,
-                    symbol: this.dataset.symbol,
-                    rate: parseFloat(this.dataset.rate)
-                };
-                
-                document.getElementById('current-currency').textContent = currencyData.code;
-                document.getElementById('currency-dropdown').classList.remove('show');
-                
-                // Update currency symbols in modals
-                document.getElementById('fee-currency-symbol').textContent = currencyData.symbol;
-                document.getElementById('custom-currency-symbol').textContent = currencyData.symbol;
-                
-                // Update UI with new currency
-                updateUI();
-            });
-        });
-
-        document.getElementById('stats-btn').addEventListener('click', function() {
-            showStatistics();
-            statsModal.classList.add('active');
-        });
-
-        document.getElementById('close-stats-modal').addEventListener('click', function() {
-            statsModal.classList.remove('active');
-        });
-
-        document.getElementById('close-stats-btn').addEventListener('click', function() {
-            statsModal.classList.remove('active');
-        });
-
-        document.getElementById('close-amount-modal').addEventListener('click', function() {
-            amountModal.classList.remove('active');
-        });
-
-        document.getElementById('cancel-amount-btn').addEventListener('click', function() {
-            amountModal.classList.remove('active');
-        });
-
-        document.getElementById('save-amount-btn').addEventListener('click', function() {
-            const customAmount = parseFloat(document.getElementById('custom-amount').value);
             
-            if (!isNaN(customAmount) && customAmount >= 0 && currentStudentForAmountEdit) {
-                // Update student's fee amount in Firebase
-                database.ref(`students/${currentStudentForAmountEdit.id}/fees/${currentTerm}/amount`).set(customAmount)
-                    .then(() => {
-                        // Update local data
-                        currentStudentForAmountEdit.fees[currentTerm].amount = customAmount;
-                        
-                        // Update UI
-                        updateUI();
-                        
-                        amountModal.classList.remove('active');
-                        currentStudentForAmountEdit = null;
-                    })
-                    .catch(error => {
-                        console.error("Error updating student fee amount:", error);
-                        alert("Failed to update fee amount. Please try again.");
-                    });
-            } else {
-                alert('Please enter a valid amount.');
-            }
-        });
-
-        // Close dropdowns when clicking outside
-        window.addEventListener('click', function(e) {
-            if (!e.target.matches('.currency-btn')) {
-                const dropdown = document.getElementById('currency-dropdown');
-                if (dropdown.classList.contains('show')) {
-                    dropdown.classList.remove('show');
+            if (feePayments[currentTerm]) {
+                for (let studentId in feePayments[currentTerm]) {
+                    feePayments[currentTerm][studentId].paid = false;
+                    feePayments[currentTerm][studentId].timestamp = null;
                 }
             }
-        });
-
-        // Show statistics
-        function showStatistics() {
-            // Update stats based on selected period
-            updateStatistics('all');
             
-            // Set up period selector
-            document.querySelectorAll('.stats-period-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.stats-period-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    updateStatistics(this.dataset.period);
-                });
-            });
+            updateSummary();
+            renderStudents();
         }
-
-        // Update statistics based on period
-        function updateStatistics(period) {
+        
+        // Set default fee amount
+        function setDefaultFee() {
+            feeAmountInput.value = defaultFeeAmount;
+            feeDescriptionInput.value = feeDescription;
+            
+            feeModal.classList.add('active');
+        }
+        
+        // Save default fee amount
+        function saveDefaultFee() {
+            const amount = parseFloat(feeAmountInput.value);
+            const description = feeDescriptionInput.value.trim();
+            
+            if (isNaN(amount) || amount < 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            defaultFeeAmount = amount;
+            feeDescription = description || 'Term Exam Fee';
+            
+            // Update class info
+            classTermFeeElement.textContent = `₵${defaultFeeAmount.toFixed(2)}`;
+            
+            // Update all students with the default amount if they haven't been customized
+            if (feePayments[currentTerm]) {
+                for (let studentId in feePayments[currentTerm]) {
+                    const payment = feePayments[currentTerm][studentId];
+                    if (payment.amount === defaultFeeAmount) {
+                        // This student has the old default amount, update to new default
+                        payment.amount = defaultFeeAmount;
+                    }
+                }
+            }
+            
+            updateSummary();
+            renderStudents();
+            closeModal(feeModal);
+        }
+        
+        // Open statistics modal
+        function openStatisticsModal() {
+            updateStatistics();
+            statsModal.classList.add('active');
+        }
+        
+        // Update statistics
+        function updateStatistics(term = 'all') {
             let totalCollected = 0;
             let totalExpected = 0;
-            let totalStudents = students.length;
+            let paidCount = 0;
+            let totalStudents = 0;
+            let recentPayments = [];
             
-            // Calculate based on period
-            if (period === 'all') {
-                students.forEach(student => {
-                    ['term1', 'term2', 'term3'].forEach(term => {
-                        totalExpected += student.fees[term].amount;
-                        if (student.fees[term].paid) {
-                            totalCollected += student.fees[term].amount;
+            if (term === 'all') {
+                // Calculate for all terms
+                statsTermTitle.textContent = 'All Terms';
+                
+                for (let termKey in feePayments) {
+                    for (let studentId in feePayments[termKey]) {
+                        const payment = feePayments[termKey][studentId];
+                        const student = students.find(s => s.id === studentId);
+                        
+                        if (student) {
+                            totalExpected += payment.amount;
+                            if (payment.paid) {
+                                paidCount++;
+                                totalCollected += payment.amount;
+                                recentPayments.push({
+                                    term: termKey,
+                                    student: student.name,
+                                    amount: payment.amount,
+                                    timestamp: payment.timestamp
+                                });
+                            }
                         }
-                    });
-                });
-                document.getElementById('stats-period-title').textContent = 'All Terms';
-            } else {
-                students.forEach(student => {
-                    totalExpected += student.fees[period].amount;
-                    if (student.fees[period].paid) {
-                        totalCollected += student.fees[period].amount;
                     }
-                });
-                document.getElementById('stats-period-title').textContent = `Term ${period.charAt(4)}`;
+                }
+                
+                totalStudents = students.length * 3; // 3 terms per student
+            } else {
+                // Calculate for specific term
+                statsTermTitle.textContent = term;
+                
+                if (feePayments[term]) {
+                    for (let studentId in feePayments[term]) {
+                        const payment = feePayments[term][studentId];
+                        const student = students.find(s => s.id === studentId);
+                        
+                        if (student) {
+                            totalExpected += payment.amount;
+                            if (payment.paid) {
+                                paidCount++;
+                                totalCollected += payment.amount;
+                                recentPayments.push({
+                                    term: term,
+                                    student: student.name,
+                                    amount: payment.amount,
+                                    timestamp: payment.timestamp
+                                });
+                            }
+                        }
+                    }
+                }
+                
+                totalStudents = students.length;
             }
             
             const paymentRate = totalExpected > 0 ? (totalCollected / totalExpected) * 100 : 0;
             
             // Update stats
-            document.getElementById('stats-total-collected').textContent = formatCurrency(totalCollected);
-            document.getElementById('stats-total-expected').textContent = formatCurrency(totalExpected);
-            document.getElementById('stats-payment-rate').textContent = `${paymentRate.toFixed(1)}%`;
-            document.getElementById('stats-total-students').textContent = totalStudents;
+            statsTotalCollected.textContent = `₵${totalCollected.toFixed(2)}`;
+            statsTotalExpected.textContent = `₵${totalExpected.toFixed(2)}`;
+            statsPaymentRate.textContent = `${paymentRate.toFixed(1)}%`;
+            statsStudentsPaid.textContent = `${paidCount}/${totalStudents}`;
             
-            // Update chart
-            updatePaymentChart(period);
+            // Sort recent payments by timestamp (newest first)
+            recentPayments.sort((a, b) => b.timestamp - a.timestamp);
             
-            // Update payment list
-            updatePaymentList(period);
-        }
-
-        // Update payment chart
-        function updatePaymentChart(period) {
-            const ctx = document.getElementById('payment-chart').getContext('2d');
+            // Show only the 5 most recent payments
+            const recentPaymentsToShow = recentPayments.slice(0, 5);
             
-            // Destroy existing chart if it exists
-            if (paymentChart) {
-                paymentChart.destroy();
-            }
+            // Update recent payments list
+            statsPaymentsList.innerHTML = '';
             
-            // Prepare data based on period
-            let labels = [];
-            let paidData = [];
-            let unpaidData = [];
-            
-            if (period === 'all') {
-                labels = ['Term 1', 'Term 2', 'Term 3'];
-                labels.forEach((term, index) => {
-                    const termKey = `term${index + 1}`;
-                    const paid = students.reduce((sum, student) => 
-                        student.fees[termKey].paid ? sum + student.fees[termKey].amount : sum, 0);
-                    const unpaid = students.reduce((sum, student) => 
-                        !student.fees[termKey].paid ? sum + student.fees[termKey].amount : sum, 0);
-                    
-                    paidData.push(paid);
-                    unpaidData.push(unpaid);
-                });
-            } else {
-                labels = ['Paid', 'Unpaid'];
-                const paid = students.reduce((sum, student) => 
-                    student.fees[period].paid ? sum + student.fees[period].amount : sum, 0);
-                const unpaid = students.reduce((sum, student) => 
-                    !student.fees[period].paid ? sum + student.fees[period].amount : sum, 0);
-                
-                paidData = [paid, 0];
-                unpaidData = [0, unpaid];
-            }
-            
-            // Create new chart
-            paymentChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Paid',
-                            data: paidData,
-                            backgroundColor: '#00b894',
-                            borderColor: '#00b894',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Unpaid',
-                            data: unpaidData,
-                            backgroundColor: '#d63031',
-                            borderColor: '#d63031',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return currencyData.symbol + value.toFixed(2);
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.dataset.label + ': ' + currencyData.symbol + context.raw.toFixed(2);
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Update payment list
-        function updatePaymentList(period) {
-            const paymentsList = document.getElementById('stats-payments-list');
-            paymentsList.innerHTML = '';
-            
-            // Get payments based on period
-            let payments = [];
-            
-            if (period === 'all') {
-                students.forEach(student => {
-                    ['term1', 'term2', 'term3'].forEach(term => {
-                        if (student.fees[term].paid) {
-                            payments.push({
-                                student: student.name,
-                                term: term.charAt(0).toUpperCase() + term.slice(1),
-                                amount: student.fees[term].amount,
-                                paid: student.fees[term].paid,
-                                date: student.fees[term].paymentDate ? new Date(student.fees[term].paymentDate).toLocaleDateString() : 'N/A'
-                            });
-                        }
-                    });
-                });
-            } else {
-                students.forEach(student => {
-                    if (student.fees[period].paid) {
-                        payments.push({
-                            student: student.name,
-                            term: period.charAt(0).toUpperCase() + period.slice(1),
-                            amount: student.fees[period].amount,
-                            paid: student.fees[period].paid,
-                            date: student.fees[period].paymentDate ? new Date(student.fees[period].paymentDate).toLocaleDateString() : 'N/A'
-                        });
-                    }
-                });
-            }
-            
-            // Sort by date (newest first)
-            payments.sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            // Display payments
-            if (payments.length === 0) {
-                paymentsList.innerHTML = `
+            if (recentPaymentsToShow.length === 0) {
+                statsPaymentsList.innerHTML = `
                     <tr>
-                        <td colspan="5" style="text-align: center; padding: 20px;">No payment data available</td>
+                        <td colspan="4" style="text-align: center; padding: 20px; color: var(--light-text);">
+                            No payments recorded yet
+                        </td>
                     </tr>
                 `;
-                return;
+            } else {
+                recentPaymentsToShow.forEach(payment => {
+                    const row = document.createElement('tr');
+                    const date = payment.timestamp ? new Date(payment.timestamp).toLocaleDateString() : '-';
+                    
+                    row.innerHTML = `
+                        <td>${payment.term}</td>
+                        <td>${payment.student}</td>
+                        <td>₵${payment.amount.toFixed(2)}</td>
+                        <td>
+                            <span class="payment-status-badge payment-status-paid">
+                                Paid
+                            </span>
+                        </td>
+                    `;
+                    
+                    statsPaymentsList.appendChild(row);
+                });
             }
-            
-            // Show only the 10 most recent payments
-            const recentPayments = payments.slice(0, 10);
-            
-            recentPayments.forEach(payment => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${payment.student}</td>
-                    <td>${payment.term}</td>
-                    <td>${formatCurrency(payment.amount)}</td>
-                    <td><span class="payment-status-badge payment-status-paid">Paid</span></td>
-                    <td>${payment.date}</td>
-                `;
-                paymentsList.appendChild(row);
-            });
         }
-
-        // Initialize the app
-        initApp();
+        
+        // Close modal
+        function closeModal(modal) {
+            modal.classList.remove('active');
+        }
+        
+        // Show error message
+        function showError(message) {
+            alert(`Error: ${message}`);
+        }
+        
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', initApp);
+        
+        // Term selector
+        termBtn.addEventListener('click', function() {
+            termDropdown.classList.toggle('show');
+        });
+        
+        document.querySelectorAll('.term-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const term = this.getAttribute('data-term');
+                currentTerm = term;
+                currentTermElement.textContent = term;
+                termDropdown.classList.remove('show');
+                
+                updateSummary();
+                renderStudents();
+            });
+        });
+        
+        // Close term dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!termBtn.contains(event.target) && !termDropdown.contains(event.target)) {
+                termDropdown.classList.remove('show');
+            }
+        });
+        
+        // Button event listeners
+        saveBtn.addEventListener('click', function() {
+            confirmationModal.classList.add('active');
+        });
+        
+        resetBtn.addEventListener('click', resetFeePayments);
+        
+        markAllPaidBtn.addEventListener('click', markAllAsPaid);
+        
+        statsBtn.addEventListener('click', openStatisticsModal);
+        
+        setFeeBtn.addEventListener('click', setDefaultFee);
+        
+        // Modal event listeners
+        closeModalBtn.addEventListener('click', function() {
+            closeModal(confirmationModal);
+        });
+        
+        cancelBtn.addEventListener('click', function() {
+            closeModal(confirmationModal);
+        });
+        
+        confirmSaveBtn.addEventListener('click', function() {
+            saveFeePayments();
+            closeModal(confirmationModal);
+        });
+        
+        closeFeeModalBtn.addEventListener('click', function() {
+            closeModal(feeModal);
+        });
+        
+        cancelFeeBtn.addEventListener('click', function() {
+            closeModal(feeModal);
+        });
+        
+        saveFeeBtn.addEventListener('click', saveDefaultFee);
+        
+        closeAmountModalBtn.addEventListener('click', function() {
+            closeModal(amountModal);
+        });
+        
+        cancelAmountBtn.addEventListener('click', function() {
+            closeModal(amountModal);
+        });
+        
+        saveAmountBtn.addEventListener('click', saveCustomAmount);
+        
+        closeStatsModalBtn.addEventListener('click', function() {
+            closeModal(statsModal);
+        });
+        
+        closeStatsBtn.addEventListener('click', function() {
+            closeModal(statsModal);
+        });
+        
+        // Stats period selector
+        document.querySelectorAll('.stats-period-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.stats-period-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                
+                this.classList.add('active');
+                
+                const term = this.getAttribute('data-term');
+                updateStatistics(term);
+            });
+        });
     </script>
 </body>
 </html>
