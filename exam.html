@@ -232,6 +232,35 @@
             font-weight: 600;
         }
 
+        /* Term Selector */
+        .term-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .term-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .term-btn.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+        }
+
         /* Balance Card */
         .balance-card {
             background: var(--glass-bg);
@@ -355,31 +384,6 @@
             border-radius: 8px;
         }
 
-        /* Term Selector */
-        .term-selector {
-            display: flex;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .term-btn {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: none;
-            background: transparent;
-            font-weight: 500;
-        }
-
-        .term-btn.active {
-            background: var(--primary-color);
-            color: white;
-        }
-
         /* Fees Container */
         .fees-container {
             background: var(--glass-bg);
@@ -405,23 +409,6 @@
             font-size: 1.1rem;
             font-weight: 600;
             color: var(--primary-color);
-        }
-
-        .date-selector {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.3);
-            padding: 8px 12px;
-            border-radius: 8px;
-        }
-
-        .date-selector input {
-            border: none;
-            background: transparent;
-            color: var(--text-color);
-            font-size: 0.9rem;
-            outline: none;
         }
 
         .fees-actions {
@@ -820,142 +807,144 @@
     </div>
 
     <!-- Main Content (initially hidden) -->
-    <div class="container" id="main-content" style="display: none;">
-        <header>
-            <div class="profile">
-                <img id="profile-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="profile-img">
-                <div class="greeting">
-                    <h1 id="greeting-title">Exam Fees Collection</h1>
-                    <p id="greeting-subtitle">Recording exam fees for your class</p>
+    <div id="main-content" style="display: none;">
+        <div class="container">
+            <header>
+                <div class="profile">
+                    <img id="profile-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="profile-img">
+                    <div class="greeting">
+                        <h1 id="greeting-title">Exam Fee Collection</h1>
+                        <p id="greeting-subtitle">Recording term exam fees for your class</p>
+                    </div>
                 </div>
-            </div>
-            <div class="fees-actions">
-                <div class="currency-selector">
-                    <button class="currency-btn" id="currency-btn">
-                        <span id="current-currency">GHS</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <div class="currency-dropdown" id="currency-dropdown">
-                        <div class="currency-option" data-currency="GHS" data-symbol="₵" data-rate="1">
-                            <img src="https://flagcdn.com/w20/gh.png" class="currency-flag"> Ghana Cedi (₵)
-                        </div>
-                        <div class="currency-option" data-currency="USD" data-symbol="$" data-rate="12.5">
-                            <img src="https://flagcdn.com/w20/us.png" class="currency-flag"> US Dollar ($)
-                        </div>
-                        <div class="currency-option" data-currency="EUR" data-symbol="€" data-rate="13.8">
-                            <img src="https://flagcdn.com/w20/eu.png" class="currency-flag"> Euro (€)
-                        </div>
-                        <div class="currency-option" data-currency="NGN" data-symbol="₦" data-rate="0.03">
-                            <img src="https://flagcdn.com/w20/ng.png" class="currency-flag"> Nigerian Naira (₦)
-                        </div>
-                        <div class="currency-option" data-currency="ZAR" data-symbol="R" data-rate="0.68">
-                            <img src="https://flagcdn.com/w20/za.png" class="currency-flag"> South African Rand (R)
+                <div class="fees-actions">
+                    <div class="currency-selector">
+                        <button class="currency-btn" id="currency-btn">
+                            <span id="current-currency">GHS</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="currency-dropdown" id="currency-dropdown">
+                            <div class="currency-option" data-currency="GHS" data-symbol="₵" data-rate="1">
+                                <img src="https://flagcdn.com/w20/gh.png" class="currency-flag"> Ghana Cedi (₵)
+                            </div>
+                            <div class="currency-option" data-currency="USD" data-symbol="$" data-rate="12.5">
+                                <img src="https://flagcdn.com/w20/us.png" class="currency-flag"> US Dollar ($)
+                            </div>
+                            <div class="currency-option" data-currency="EUR" data-symbol="€" data-rate="13.8">
+                                <img src="https://flagcdn.com/w20/eu.png" class="currency-flag"> Euro (€)
+                            </div>
+                            <div class="currency-option" data-currency="NGN" data-symbol="₦" data-rate="0.03">
+                                <img src="https://flagcdn.com/w20/ng.png" class="currency-flag"> Nigerian Naira (₦)
+                            </div>
+                            <div class="currency-option" data-currency="ZAR" data-symbol="R" data-rate="0.68">
+                                <img src="https://flagcdn.com/w20/za.png" class="currency-flag"> South African Rand (R)
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </header>
+            </header>
 
-        <!-- Class Information -->
-        <div class="class-info" id="class-info">
-            <h2 class="class-title" id="class-name">Loading class...</h2>
-            <div class="class-details">
-                <div class="detail-item">
-                    <div class="detail-label">Class ID</div>
-                    <div class="detail-value" id="class-id">-</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Room</div>
-                    <div class="detail-value" id="class-room">-</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Exam Fee</div>
-                    <div class="detail-value" id="class-exam-fee">-</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Term Selector -->
-        <div class="term-selector">
-            <button class="term-btn active" data-term="1">Term 1</button>
-            <button class="term-btn" data-term="2">Term 2</button>
-            <button class="term-btn" data-term="3">Term 3</button>
-        </div>
-
-        <!-- Class Balance Summary -->
-        <div class="balance-card" id="class-balance" style="display: none;">
-            <div class="balance-header">
-                <h3 class="balance-title">Term Financial Summary</h3>
-                <button class="action-btn secondary" id="set-fee-btn">
-                    <i class="fas fa-cog"></i> Set Exam Fee
-                </button>
-            </div>
-            <div class="balance-amount" id="total-balance">₵0.00</div>
-            <div class="balance-details">
-                <div class="balance-detail">
-                    <div class="balance-label">Total Expected</div>
-                    <div class="balance-value" id="total-expected">₵0.00</div>
-                </div>
-                <div class="balance-detail">
-                    <div class="balance-label">Total Collected</div>
-                    <div class="balance-value" id="total-collected-balance">₵0.00</div>
-                </div>
-                <div class="balance-detail">
-                    <div class="balance-label">Total Outstanding</div>
-                    <div class="balance-value" id="total-outstanding">₵0.00</div>
-                </div>
-                <div class="balance-detail">
-                    <div class="balance-label">Payment Rate</div>
-                    <div class="balance-value" id="payment-rate">0%</div>
+            <!-- Class Information -->
+            <div class="class-info" id="class-info">
+                <h2 class="class-title" id="class-name">Loading class...</h2>
+                <div class="class-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Class ID</div>
+                        <div class="detail-value" id="class-id">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Room</div>
+                        <div class="detail-value" id="class-room">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Exam Fee</div>
+                        <div class="detail-value" id="class-exam-fee">-</div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Term Fee Summary -->
-        <div class="summary-card" id="fee-summary" style="display: none;">
-            <div class="summary-title" id="term-summary-title">Term 1 Exam Fee Collection</div>
-            <div class="summary-stats">
-                <div class="stat-item">
-                    <div class="stat-value" id="total-students">0</div>
-                    <div class="stat-label">Total Students</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="paid-count">0</div>
-                    <div class="stat-label">Paid</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="unpaid-count">0</div>
-                    <div class="stat-label">Unpaid</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="total-collected">₵0</div>
-                    <div class="stat-label">Total Collected</div>
-                </div>
+            <!-- Term Selector -->
+            <div class="term-selector">
+                <button class="term-btn active" data-term="term1">Term 1</button>
+                <button class="term-btn" data-term="term2">Term 2</button>
+                <button class="term-btn" data-term="term3">Term 3</button>
             </div>
-            <div class="total-amount" id="expected-total">Expected Total: ₵0</div>
-        </div>
 
-        <!-- Fees Container -->
-        <div class="fees-container">
-            <div class="fees-header">
-                <h3 class="fees-title">Student Exam Fee Payments</h3>
-                <div class="fees-actions">
-                    <button class="mark-all-paid-btn" id="mark-all-paid-btn">
-                        <i class="fas fa-check-double"></i> Mark All Paid
-                    </button>
-                    <button class="action-btn success" id="save-btn">
-                        <i class="fas fa-save"></i> Save
-                    </button>
-                    <button class="action-btn secondary" id="reset-btn">
-                        <i class="fas fa-redo"></i> Reset
+            <!-- Class Balance Summary -->
+            <div class="balance-card" id="class-balance" style="display: none;">
+                <div class="balance-header">
+                    <h3 class="balance-title">Term Financial Summary</h3>
+                    <button class="action-btn secondary" id="set-fee-btn">
+                        <i class="fas fa-cog"></i> Set Exam Fee
                     </button>
                 </div>
+                <div class="balance-amount" id="total-balance">₵0.00</div>
+                <div class="balance-details">
+                    <div class="balance-detail">
+                        <div class="balance-label">Total Expected</div>
+                        <div class="balance-value" id="total-expected">₵0.00</div>
+                    </div>
+                    <div class="balance-detail">
+                        <div class="balance-label">Total Collected</div>
+                        <div class="balance-value" id="total-collected-balance">₵0.00</div>
+                    </div>
+                    <div class="balance-detail">
+                        <div class="balance-label">Total Outstanding</div>
+                        <div class="balance-value" id="total-outstanding">₵0.00</div>
+                    </div>
+                    <div class="balance-detail">
+                        <div class="balance-label">Payment Rate</div>
+                        <div class="balance-value" id="payment-rate">0%</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="students-list" id="students-list">
-                <div class="no-students">
-                    <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                    <p>No students found in this class</p>
+            <!-- Term Fee Summary -->
+            <div class="summary-card" id="fee-summary" style="display: none;">
+                <div class="summary-title">Current Term Exam Fee Collection Summary</div>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="total-students">0</div>
+                        <div class="stat-label">Total Students</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="paid-count">0</div>
+                        <div class="stat-label">Paid</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="unpaid-count">0</div>
+                        <div class="stat-label">Unpaid</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="total-collected">₵0</div>
+                        <div class="stat-label">Total Collected</div>
+                    </div>
+                </div>
+                <div class="total-amount" id="expected-total">Expected Total: ₵0</div>
+            </div>
+
+            <!-- Fees Container -->
+            <div class="fees-container">
+                <div class="fees-header">
+                    <h3 class="fees-title">Student Exam Fee Payments</h3>
+                    <div class="fees-actions">
+                        <button class="mark-all-paid-btn" id="mark-all-paid-btn">
+                            <i class="fas fa-check-double"></i> Mark All Paid
+                        </button>
+                        <button class="action-btn success" id="save-btn">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                        <button class="action-btn secondary" id="reset-btn">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <div class="students-list" id="students-list">
+                    <div class="no-students">
+                        <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>No students found in this class</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -971,19 +960,15 @@
             <i class="fas fa-file-alt nav-icon"></i>
             <span>Exam Fees</span>
         </a>
-        <a href="week.html" class="nav-item">
-            <i class="fas fa-clipboard-list nav-icon"></i>
-            <span>Weekly Exams</span>
-        </a>
-        <a href="pta.html" class="nav-item">
+        <a href="ptafee.html" class="nav-item">
             <i class="fas fa-users nav-icon"></i>
             <span>PTA & Utility</span>
         </a>
-        <a href="broom.html" class="nav-item">
+        <a href="broomfee.html" class="nav-item">
             <i class="fas fa-broom nav-icon"></i>
             <span>Broom</span>
         </a>
-        <a href="others.html" class="nav-item">
+        <a href="othersfee.html" class="nav-item">
             <i class="fas fa-ellipsis-h nav-icon"></i>
             <span>Others</span>
         </a>
@@ -1020,7 +1005,7 @@
                 </div>
                 <div class="form-group">
                     <label for="fee-description" class="form-label">Fee Description (Optional)</label>
-                    <input type="text" id="fee-description" class="form-input" placeholder="E.g., Term 1 Exam Fee">
+                    <input type="text" id="fee-description" class="form-input" placeholder="E.g., Term exam fee, Final exam fee, etc.">
                 </div>
             </div>
             <div class="modal-footer">
@@ -1076,7 +1061,6 @@
         const resetBtn = document.getElementById('reset-btn');
         const studentsListElement = document.getElementById('students-list');
         const feeSummary = document.getElementById('fee-summary');
-        const termSummaryTitle = document.getElementById('term-summary-title');
         const totalStudentsElement = document.getElementById('total-students');
         const paidCountElement = document.getElementById('paid-count');
         const unpaidCountElement = document.getElementById('unpaid-count');
@@ -1109,168 +1093,183 @@
         // Mark all paid button
         const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
         
+        // Firebase references
+        const authUsersRef = database.ref('authUsers');
+        const teachersRef = database.ref('teachers');
+        const classesRef = database.ref('classes');
+        const examFeePaymentsRef = database.ref('examFeePayments');
+        const examFeeSettingsRef = database.ref('examFeeSettings');
+        
         // Global variables
         let currentUser = null;
+        let currentTeacher = null;
         let currentClass = null;
-        let currentTerm = 1;
-        let students = [];
-        let examFee = 0;
-        let feeDescription = "Term Exam Fee";
-        let currencySymbol = '₵';
-        let currencyRate = 1;
-        let currencyCode = 'GHS';
+        let currentStudents = [];
+        let currentTerm = 'term1';
+        let currentCurrencyData = { code: 'GHS', symbol: '₵', rate: 1 };
+        let examFeeAmount = 0;
+        let examFeeDescription = 'Term Exam Fee';
+        let studentPayments = {};
         
-        // Initialize the application
-        function init() {
+        // Initialize the app
+        function initApp() {
             // Check if user is logged in
             auth.onAuthStateChanged(user => {
                 if (user) {
                     currentUser = user;
-                    loadUserProfile();
-                    loadClassInfo();
+                    loadUserData();
                 } else {
-                    // Redirect to login page if not authenticated
-                    window.location.href = 'login.html';
-                }
-            });
-            
-            // Set up event listeners
-            setupEventListeners();
-        }
-        
-        // Set up event listeners
-        function setupEventListeners() {
-            // Term selector
-            termButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const term = parseInt(button.dataset.term);
-                    setCurrentTerm(term);
-                });
-            });
-            
-            // Save button
-            saveBtn.addEventListener('click', () => {
-                showConfirmationModal();
-            });
-            
-            // Reset button
-            resetBtn.addEventListener('click', () => {
-                resetFeePayments();
-            });
-            
-            // Modal buttons
-            closeModalBtn.addEventListener('click', hideConfirmationModal);
-            cancelBtn.addEventListener('click', hideConfirmationModal);
-            confirmSaveBtn.addEventListener('click', saveFeePayments);
-            
-            // Fee modal buttons
-            closeFeeModalBtn.addEventListener('click', hideFeeModal);
-            cancelFeeBtn.addEventListener('click', hideFeeModal);
-            saveFeeBtn.addEventListener('click', saveExamFee);
-            setFeeBtn.addEventListener('click', showFeeModal);
-            
-            // Currency selector
-            currencyBtn.addEventListener('click', () => {
-                currencyDropdown.classList.toggle('show');
-            });
-            
-            currencyOptions.forEach(option => {
-                option.addEventListener('click', () => {
-                    const symbol = option.dataset.symbol;
-                    const rate = parseFloat(option.dataset.rate);
-                    const code = option.dataset.currency;
-                    
-                    currencySymbol = symbol;
-                    currencyRate = rate;
-                    currencyCode = code;
-                    currentCurrency.textContent = code;
-                    
-                    currencyDropdown.classList.remove('show');
-                    feeCurrencySymbol.textContent = symbol;
-                    
-                    // Update UI with new currency
-                    updateCurrencyDisplay();
-                });
-            });
-            
-            // Mark all paid button
-            markAllPaidBtn.addEventListener('click', markAllAsPaid);
-            
-            // Close dropdown when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!currencyBtn.contains(e.target) && !currencyDropdown.contains(e.target)) {
-                    currencyDropdown.classList.remove('show');
+                    // Redirect to login page if not logged in
+                    window.location.href = 'index.html';
                 }
             });
         }
         
-        // Load user profile
-        function loadUserProfile() {
-            // In a real app, this would come from Firebase
-            greetingTitle.textContent = "Exam Fees Collection";
-            greetingSubtitle.textContent = "Recording exam fees for your class";
+        // Load user data from Firebase
+        function loadUserData() {
+            authUsersRef.orderByChild('email').equalTo(currentUser.email).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        const userData = Object.values(snapshot.val())[0];
+                        loadTeacherData(userData.uid);
+                    } else {
+                        console.error('User data not found');
+                        hideLoadingScreen();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading user data:', error);
+                    hideLoadingScreen();
+                });
         }
         
-        // Load class information
-        function loadClassInfo() {
-            // Simulate loading class info from Firebase
-            setTimeout(() => {
-                // Mock class data
-                currentClass = {
-                    id: "CLS-2023-001",
-                    name: "Class 5A - Mathematics",
-                    room: "Room 101",
-                    examFee: 50.00
-                };
-                
-                // Update UI with class info
-                classNameElement.textContent = currentClass.name;
-                classIdElement.textContent = currentClass.id;
-                classRoomElement.textContent = currentClass.room;
-                classExamFeeElement.textContent = `${currencySymbol}${(currentClass.examFee * currencyRate).toFixed(2)}`;
-                
-                examFee = currentClass.examFee;
-                
-                // Load students
-                loadStudents();
-                
-                // Show content
-                loadingScreen.style.display = 'none';
-                mainContent.style.display = 'block';
-                classBalanceElement.style.display = 'block';
-                feeSummary.style.display = 'block';
-                
-            }, 1500);
+        // Load teacher data from Firebase
+        function loadTeacherData(teacherId) {
+            teachersRef.child(teacherId).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        currentTeacher = snapshot.val();
+                        loadClassData(currentTeacher.classId);
+                    } else {
+                        console.error('Teacher data not found');
+                        hideLoadingScreen();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading teacher data:', error);
+                    hideLoadingScreen();
+                });
         }
         
-        // Load students
+        // Load class data from Firebase
+        function loadClassData(classId) {
+            classesRef.child(classId).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        currentClass = snapshot.val();
+                        currentClass.id = classId;
+                        displayClassInfo();
+                        loadExamFeeSettings();
+                    } else {
+                        console.error('Class data not found');
+                        hideLoadingScreen();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading class data:', error);
+                    hideLoadingScreen();
+                });
+        }
+        
+        // Load exam fee settings
+        function loadExamFeeSettings() {
+            examFeeSettingsRef.child(currentClass.id).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        const settings = snapshot.val();
+                        examFeeAmount = settings.amount || 0;
+                        examFeeDescription = settings.description || 'Term Exam Fee';
+                    } else {
+                        // Set default values if no settings exist
+                        examFeeAmount = 50;
+                        examFeeDescription = 'Term Exam Fee';
+                    }
+                    
+                    updateExamFeeDisplay();
+                    loadStudents();
+                })
+                .catch(error => {
+                    console.error('Error loading exam fee settings:', error);
+                    examFeeAmount = 50;
+                    examFeeDescription = 'Term Exam Fee';
+                    updateExamFeeDisplay();
+                    loadStudents();
+                });
+        }
+        
+        // Load students from Firebase
         function loadStudents() {
-            // Simulate loading students from Firebase
-            setTimeout(() => {
-                // Mock student data
-                students = [
-                    { id: "STU-001", name: "Kwame Mensah", avatar: "https://randomuser.me/api/portraits/men/32.jpg", paid: false },
-                    { id: "STU-002", name: "Ama Serwaa", avatar: "https://randomuser.me/api/portraits/women/65.jpg", paid: true },
-                    { id: "STU-003", name: "Kofi Adu", avatar: "https://randomuser.me/api/portraits/men/76.jpg", paid: false },
-                    { id: "STU-004", name: "Abena Sarpong", avatar: "https://randomuser.me/api/portraits/women/43.jpg", paid: false },
-                    { id: "STU-005", name: "Yaw Boateng", avatar: "https://randomuser.me/api/portraits/men/54.jpg", paid: true },
-                    { id: "STU-006", name: "Akua Nyame", avatar: "https://randomuser.me/api/portraits/women/22.jpg", paid: true },
-                    { id: "STU-007", name: "Kwabena Osei", avatar: "https://randomuser.me/api/portraits/men/11.jpg", paid: false },
-                    { id: "STU-008", name: "Adwoa Asante", avatar: "https://randomuser.me/api/portraits/women/87.jpg", paid: true }
-                ];
-                
-                // Render students
-                renderStudents();
-                updateSummary();
-                
-            }, 1000);
+            const studentsRef = database.ref('students').orderByChild('classId').equalTo(currentClass.id);
+            
+            studentsRef.once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        currentStudents = Object.entries(snapshot.val()).map(([id, data]) => ({ id, ...data }));
+                        loadExamFeePayments();
+                    } else {
+                        console.log('No students found for this class');
+                        currentStudents = [];
+                        hideLoadingScreen();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading students:', error);
+                    currentStudents = [];
+                    hideLoadingScreen();
+                });
         }
         
-        // Render students list
-        function renderStudents() {
+        // Load exam fee payments from Firebase
+        function loadExamFeePayments() {
+            examFeePaymentsRef.child(currentClass.id).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        studentPayments = snapshot.val();
+                    } else {
+                        studentPayments = {};
+                    }
+                    
+                    displayStudents();
+                    updateFeeSummary();
+                    hideLoadingScreen();
+                })
+                .catch(error => {
+                    console.error('Error loading exam fee payments:', error);
+                    studentPayments = {};
+                    displayStudents();
+                    updateFeeSummary();
+                    hideLoadingScreen();
+                });
+        }
+        
+        // Display class information
+        function displayClassInfo() {
+            classNameElement.textContent = currentClass.name;
+            classIdElement.textContent = currentClass.id;
+            classRoomElement.textContent = currentClass.room || 'Not specified';
+        }
+        
+        // Update exam fee display
+        function updateExamFeeDisplay() {
+            const convertedAmount = (examFeeAmount * currentCurrencyData.rate).toFixed(2);
+            classExamFeeElement.textContent = `${currentCurrencyData.symbol}${convertedAmount}`;
+        }
+        
+        // Display students in the list
+        function displayStudents() {
             studentsListElement.innerHTML = '';
             
-            if (students.length === 0) {
+            if (currentStudents.length === 0) {
                 studentsListElement.innerHTML = `
                     <div class="no-students">
                         <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
@@ -1280,190 +1279,330 @@
                 return;
             }
             
-            students.forEach(student => {
-                const studentElement = document.createElement('div');
-                studentElement.className = 'student-card';
-                studentElement.innerHTML = `
-                    <img src="${student.avatar}" alt="${student.name}" class="student-avatar">
+            currentStudents.forEach(student => {
+                const studentPayment = studentPayments[student.id] || {};
+                const termPayment = studentPayment[currentTerm] || { paid: false, amount: examFeeAmount };
+                
+                const convertedAmount = (examFeeAmount * currentCurrencyData.rate).toFixed(2);
+                
+                const studentCard = document.createElement('div');
+                studentCard.className = 'student-card';
+                studentCard.innerHTML = `
+                    <img src="${student.photoURL || 'https://randomuser.me/api/portraits/lego/1.jpg'}" alt="${student.name}" class="student-avatar">
                     <div class="student-info">
                         <div class="student-name">${student.name}</div>
-                        <div class="student-id">${student.id}</div>
+                        <div class="student-id">ID: ${student.id}</div>
                     </div>
                     <div class="fee-status">
-                        <div class="fee-amount">${currencySymbol}${(examFee * currencyRate).toFixed(2)}</div>
-                        <button class="status-btn ${student.paid ? 'active' : 'inactive'}" data-student-id="${student.id}">
-                            <i class="fas ${student.paid ? 'fa-check-circle' : 'fa-times-circle'}"></i>
-                            ${student.paid ? 'Paid' : 'Unpaid'}
+                        <div class="fee-amount">${currentCurrencyData.symbol}${convertedAmount}</div>
+                        <button class="status-btn ${termPayment.paid ? 'active' : 'inactive'}" data-student-id="${student.id}">
+                            <i class="fas ${termPayment.paid ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                            ${termPayment.paid ? 'Paid' : 'Unpaid'}
                         </button>
                     </div>
                 `;
                 
-                // Add event listener to the status button
-                const statusBtn = studentElement.querySelector('.status-btn');
-                statusBtn.addEventListener('click', () => {
-                    togglePaymentStatus(student.id);
+                studentsListElement.appendChild(studentCard);
+            });
+            
+            // Add event listeners to payment buttons
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const studentId = this.getAttribute('data-student-id');
+                    togglePaymentStatus(studentId);
                 });
-                
-                studentsListElement.appendChild(studentElement);
             });
         }
         
-        // Toggle payment status
+        // Toggle payment status for a student
         function togglePaymentStatus(studentId) {
-            const student = students.find(s => s.id === studentId);
-            if (student) {
-                student.paid = !student.paid;
-                renderStudents();
-                updateSummary();
+            if (!studentPayments[studentId]) {
+                studentPayments[studentId] = {};
             }
+            
+            if (!studentPayments[studentId][currentTerm]) {
+                studentPayments[studentId][currentTerm] = { paid: false, amount: examFeeAmount };
+            }
+            
+            studentPayments[studentId][currentTerm].paid = !studentPayments[studentId][currentTerm].paid;
+            
+            // Update the UI
+            const statusBtn = document.querySelector(`.status-btn[data-student-id="${studentId}"]`);
+            if (statusBtn) {
+                if (studentPayments[studentId][currentTerm].paid) {
+                    statusBtn.classList.remove('inactive');
+                    statusBtn.classList.add('active');
+                    statusBtn.innerHTML = '<i class="fas fa-check-circle"></i> Paid';
+                } else {
+                    statusBtn.classList.remove('active');
+                    statusBtn.classList.add('inactive');
+                    statusBtn.innerHTML = '<i class="fas fa-times-circle"></i> Unpaid';
+                }
+            }
+            
+            updateFeeSummary();
         }
         
-        // Set current term
-        function setCurrentTerm(term) {
-            currentTerm = term;
+        // Update fee summary
+        function updateFeeSummary() {
+            const totalStudents = currentStudents.length;
+            let paidCount = 0;
+            let totalCollected = 0;
             
-            // Update UI
-            termButtons.forEach(button => {
-                if (parseInt(button.dataset.term) === term) {
-                    button.classList.add('active');
-                } else {
-                    button.classList.remove('active');
+            currentStudents.forEach(student => {
+                const studentPayment = studentPayments[student.id] || {};
+                const termPayment = studentPayment[currentTerm] || { paid: false, amount: examFeeAmount };
+                
+                if (termPayment.paid) {
+                    paidCount++;
+                    totalCollected += termPayment.amount;
                 }
             });
             
-            termSummaryTitle.textContent = `Term ${term} Exam Fee Collection`;
-            
-            // In a real app, this would load the fee data for the selected term
-            // For this demo, we'll just update the summary
-            updateSummary();
-        }
-        
-        // Update summary
-        function updateSummary() {
-            const totalStudents = students.length;
-            const paidCount = students.filter(s => s.paid).length;
             const unpaidCount = totalStudents - paidCount;
-            const totalCollected = paidCount * examFee;
-            const expectedTotal = totalStudents * examFee;
-            const paymentRate = totalStudents > 0 ? (paidCount / totalStudents * 100).toFixed(1) : 0;
+            const expectedTotal = totalStudents * examFeeAmount;
             
-            // Update summary elements
+            // Update the summary
             totalStudentsElement.textContent = totalStudents;
             paidCountElement.textContent = paidCount;
             unpaidCountElement.textContent = unpaidCount;
-            totalCollectedElement.textContent = `${currencySymbol}${(totalCollected * currencyRate).toFixed(2)}`;
-            expectedTotalElement.textContent = `Expected Total: ${currencySymbol}${(expectedTotal * currencyRate).toFixed(2)}`;
             
-            // Update balance elements
-            totalBalanceElement.textContent = `${currencySymbol}${(totalCollected * currencyRate).toFixed(2)}`;
-            totalExpectedElement.textContent = `${currencySymbol}${(expectedTotal * currencyRate).toFixed(2)}`;
-            totalCollectedBalanceElement.textContent = `${currencySymbol}${(totalCollected * currencyRate).toFixed(2)}`;
-            totalOutstandingElement.textContent = `${currencySymbol}${((expectedTotal - totalCollected) * currencyRate).toFixed(2)}`;
+            const convertedCollected = (totalCollected * currentCurrencyData.rate).toFixed(2);
+            const convertedExpected = (expectedTotal * currentCurrencyData.rate).toFixed(2);
+            
+            totalCollectedElement.textContent = `${currentCurrencyData.symbol}${convertedCollected}`;
+            expectedTotalElement.textContent = `Expected Total: ${currentCurrencyData.symbol}${convertedExpected}`;
+            
+            // Update the balance card
+            const convertedTotalCollected = (totalCollected * currentCurrencyData.rate).toFixed(2);
+            const convertedTotalExpected = (expectedTotal * currentCurrencyData.rate).toFixed(2);
+            const convertedOutstanding = ((expectedTotal - totalCollected) * currentCurrencyData.rate).toFixed(2);
+            const paymentRate = totalStudents > 0 ? Math.round((paidCount / totalStudents) * 100) : 0;
+            
+            totalCollectedBalanceElement.textContent = `${currentCurrencyData.symbol}${convertedTotalCollected}`;
+            totalExpectedElement.textContent = `${currentCurrencyData.symbol}${convertedTotalExpected}`;
+            totalOutstandingElement.textContent = `${currentCurrencyData.symbol}${convertedOutstanding}`;
             paymentRateElement.textContent = `${paymentRate}%`;
             
-            // Set balance color based on payment rate
-            if (paymentRate >= 80) {
-                totalBalanceElement.className = 'balance-amount balance-positive';
-            } else if (paymentRate >= 50) {
-                totalBalanceElement.className = 'balance-amount balance-neutral';
-            } else {
+            // Update the total balance
+            totalBalanceElement.textContent = `${currentCurrencyData.symbol}${convertedOutstanding}`;
+            
+            // Set color based on outstanding amount
+            if (expectedTotal - totalCollected > 0) {
                 totalBalanceElement.className = 'balance-amount balance-negative';
+            } else if (expectedTotal - totalCollected < 0) {
+                totalBalanceElement.className = 'balance-amount balance-positive';
+            } else {
+                totalBalanceElement.className = 'balance-amount balance-neutral';
             }
+            
+            // Show the summary and balance cards
+            feeSummary.style.display = 'block';
+            classBalanceElement.style.display = 'block';
         }
         
-        // Show confirmation modal
-        function showConfirmationModal() {
-            const paidCount = students.filter(s => s.paid).length;
-            const totalStudents = students.length;
-            const totalAmount = paidCount * examFee;
+        // Save exam fee payments to Firebase
+        function saveExamFeePayments() {
+            showLoadingScreen('Saving exam fee payments...');
             
-            confirmationMessage.textContent = `Are you sure you want to save the exam fee payments for Term ${currentTerm}? ${paidCount} out of ${totalStudents} students have paid, totaling ${currencySymbol}${(totalAmount * currencyRate).toFixed(2)}.`;
+            examFeePaymentsRef.child(currentClass.id).set(studentPayments)
+                .then(() => {
+                    hideLoadingScreen();
+                    alert('Exam fee payments saved successfully!');
+                })
+                .catch(error => {
+                    hideLoadingScreen();
+                    console.error('Error saving exam fee payments:', error);
+                    alert('Error saving exam fee payments. Please try again.');
+                });
+        }
+        
+        // Save exam fee settings to Firebase
+        function saveExamFeeSettings() {
+            showLoadingScreen('Saving exam fee settings...');
+            
+            const settings = {
+                amount: parseFloat(feeAmountInput.value),
+                description: feeDescriptionInput.value || 'Term Exam Fee'
+            };
+            
+            examFeeSettingsRef.child(currentClass.id).set(settings)
+                .then(() => {
+                    examFeeAmount = settings.amount;
+                    examFeeDescription = settings.description;
+                    
+                    // Update all student payments with the new amount
+                    Object.keys(studentPayments).forEach(studentId => {
+                        if (studentPayments[studentId][currentTerm]) {
+                            studentPayments[studentId][currentTerm].amount = examFeeAmount;
+                        }
+                    });
+                    
+                    hideLoadingScreen();
+                    updateExamFeeDisplay();
+                    displayStudents();
+                    updateFeeSummary();
+                    closeFeeModal();
+                    alert('Exam fee settings saved successfully!');
+                })
+                .catch(error => {
+                    hideLoadingScreen();
+                    console.error('Error saving exam fee settings:', error);
+                    alert('Error saving exam fee settings. Please try again.');
+                });
+        }
+        
+        // Show loading screen
+        function showLoadingScreen(message) {
+            if (message) {
+                document.querySelector('.loading-text').textContent = message;
+            }
+            loadingScreen.style.display = 'flex';
+            mainContent.style.display = 'none';
+        }
+        
+        // Hide loading screen
+        function hideLoadingScreen() {
+            loadingScreen.style.display = 'none';
+            mainContent.style.display = 'block';
+        }
+        
+        // Open confirmation modal
+        function openConfirmationModal() {
+            const paidCount = document.getElementById('paid-count').textContent;
+            const totalStudents = document.getElementById('total-students').textContent;
+            
+            confirmationMessage.textContent = `Are you sure you want to save the exam fee payments for ${currentTerm}? ${paidCount} out of ${totalStudents} students have paid.`;
             confirmationModal.classList.add('active');
         }
         
-        // Hide confirmation modal
-        function hideConfirmationModal() {
+        // Close confirmation modal
+        function closeConfirmationModal() {
             confirmationModal.classList.remove('active');
         }
         
-        // Save fee payments
-        function saveFeePayments() {
-            // In a real app, this would save to Firebase
-            console.log(`Saving exam fee payments for Term ${currentTerm}:`, students);
-            
-            // Show success message (in a real app)
-            alert(`Exam fee payments for Term ${currentTerm} saved successfully!`);
-            
-            hideConfirmationModal();
-        }
-        
-        // Reset fee payments
-        function resetFeePayments() {
-            if (confirm("Are you sure you want to reset all payment statuses? This cannot be undone.")) {
-                students.forEach(student => {
-                    student.paid = false;
-                });
-                
-                renderStudents();
-                updateSummary();
-            }
-        }
-        
-        // Mark all as paid
-        function markAllAsPaid() {
-            students.forEach(student => {
-                student.paid = true;
-            });
-            
-            renderStudents();
-            updateSummary();
-        }
-        
-        // Show fee modal
-        function showFeeModal() {
-            feeAmountInput.value = examFee;
-            feeDescriptionInput.value = feeDescription;
+        // Open fee modal
+        function openFeeModal() {
+            feeAmountInput.value = examFeeAmount;
+            feeDescriptionInput.value = examFeeDescription;
+            feeCurrencySymbol.textContent = currentCurrencyData.symbol;
             feeModal.classList.add('active');
         }
         
-        // Hide fee modal
-        function hideFeeModal() {
+        // Close fee modal
+        function closeFeeModal() {
             feeModal.classList.remove('active');
         }
         
-        // Save exam fee
-        function saveExamFee() {
-            const newFee = parseFloat(feeAmountInput.value);
-            const newDescription = feeDescriptionInput.value;
+        // Mark all students as paid
+        function markAllAsPaid() {
+            currentStudents.forEach(student => {
+                if (!studentPayments[student.id]) {
+                    studentPayments[student.id] = {};
+                }
+                
+                studentPayments[student.id][currentTerm] = { paid: true, amount: examFeeAmount };
+            });
             
-            if (isNaN(newFee) || newFee < 0) {
-                alert("Please enter a valid fee amount.");
-                return;
+            displayStudents();
+            updateFeeSummary();
+        }
+        
+        // Reset all payments for current term
+        function resetPayments() {
+            if (confirm('Are you sure you want to reset all payments for this term? This action cannot be undone.')) {
+                currentStudents.forEach(student => {
+                    if (studentPayments[student.id]) {
+                        studentPayments[student.id][currentTerm] = { paid: false, amount: examFeeAmount };
+                    }
+                });
+                
+                displayStudents();
+                updateFeeSummary();
             }
-            
-            examFee = newFee;
-            feeDescription = newDescription;
-            
-            // Update UI
-            classExamFeeElement.textContent = `${currencySymbol}${(examFee * currencyRate).toFixed(2)}`;
-            renderStudents();
-            updateSummary();
-            
-            hideFeeModal();
         }
         
-        // Update currency display
-        function updateCurrencyDisplay() {
-            // Update class exam fee
-            classExamFeeElement.textContent = `${currencySymbol}${(examFee * currencyRate).toFixed(2)}`;
+        // Change currency
+        function changeCurrency(currencyCode, symbol, rate) {
+            currentCurrencyData = { code: currencyCode, symbol: symbol, rate: rate };
+            currentCurrency.textContent = currencyCode;
             
-            // Update student list and summary
-            renderStudents();
-            updateSummary();
+            updateExamFeeDisplay();
+            displayStudents();
+            updateFeeSummary();
         }
         
-        // Initialize the app
-        init();
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', initApp);
+        
+        // Term selector buttons
+        termButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                termButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentTerm = this.getAttribute('data-term');
+                
+                displayStudents();
+                updateFeeSummary();
+            });
+        });
+        
+        // Save button
+        saveBtn.addEventListener('click', openConfirmationModal);
+        
+        // Reset button
+        resetBtn.addEventListener('click', resetPayments);
+        
+        // Mark all paid button
+        markAllPaidBtn.addEventListener('click', markAllAsPaid);
+        
+        // Modal buttons
+        closeModalBtn.addEventListener('click', closeConfirmationModal);
+        cancelBtn.addEventListener('click', closeConfirmationModal);
+        confirmSaveBtn.addEventListener('click', () => {
+            closeConfirmationModal();
+            saveExamFeePayments();
+        });
+        
+        // Fee modal buttons
+        setFeeBtn.addEventListener('click', openFeeModal);
+        closeFeeModalBtn.addEventListener('click', closeFeeModal);
+        cancelFeeBtn.addEventListener('click', closeFeeModal);
+        saveFeeBtn.addEventListener('click', saveExamFeeSettings);
+        
+        // Currency selector
+        currencyBtn.addEventListener('click', function() {
+            currencyDropdown.classList.toggle('show');
+        });
+        
+        // Currency options
+        currencyOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const currencyCode = this.getAttribute('data-currency');
+                const symbol = this.getAttribute('data-symbol');
+                const rate = parseFloat(this.getAttribute('data-rate'));
+                
+                changeCurrency(currencyCode, symbol, rate);
+                currencyDropdown.classList.remove('show');
+            });
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!currencyBtn.contains(event.target) && !currencyDropdown.contains(event.target)) {
+                currencyDropdown.classList.remove('show');
+            }
+        });
+        
+        // Close modals when clicking outside
+        document.addEventListener('click', function(event) {
+            if (event.target === confirmationModal) {
+                closeConfirmationModal();
+            }
+            if (event.target === feeModal) {
+                closeFeeModal();
+            }
+        });
     </script>
 </body>
 </html>
