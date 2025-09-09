@@ -821,6 +821,40 @@ header {
     100% { transform: rotate(360deg); }
 }
 
+/* Custom Amount Input */
+.amount-input-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.amount-input {
+    width: 80px;
+    padding: 5px 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    text-align: right;
+}
+
+.amount-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.edit-amount-btn {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 2px 5px;
+}
+
+.edit-amount-btn:hover {
+    color: var(--secondary-color);
+}
+
 /* Responsive Styles */
 @media (max-width: 768px) {
     .container {
@@ -1186,6 +1220,27 @@ header {
         </div>
     </div>
 
+    <!-- Edit Amount Modal -->
+    <div class="modal" id="amount-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Fee Amount</h3>
+                <button class="close-btn" id="close-amount-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="custom-amount" class="form-label">Fee Amount (<span id="custom-currency-symbol">₵</span>)</label>
+                    <input type="number" id="custom-amount" class="form-input" step="0.01" min="0">
+                </div>
+                <p class="form-label">Default amount: <span id="default-amount-display">₵0.00</span></p>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" id="cancel-amount-btn">Cancel</button>
+                <button class="action-btn success" id="save-amount-btn">Save Amount</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Statistics Modal -->
     <div class="modal" id="stats-modal">
         <div class="modal-content">
@@ -1317,6 +1372,15 @@ const firebaseConfig = {
         const setFeeBtn = document.getElementById('set-fee-btn');
         const feeCurrencySymbol = document.getElementById('fee-currency-symbol');
         
+        // Amount modal elements
+        const amountModal = document.getElementById('amount-modal');
+        const closeAmountModalBtn = document.getElementById('close-amount-modal');
+        const cancelAmountBtn = document.getElementById('cancel-amount-btn');
+        const saveAmountBtn = document.getElementById('save-amount-btn');
+        const customAmountInput = document.getElementById('custom-amount');
+        const customCurrencySymbol = document.getElementById('custom-currency-symbol');
+        const defaultAmountDisplay = document.getElementById('default-amount-display');
+        
         // Statistics modal elements
         const statsModal = document.getElementById('stats-modal');
         const statsBtn = document.getElementById('stats-btn');
@@ -1378,6 +1442,9 @@ const firebaseConfig = {
         // Chart instance
         let paymentChart = null;
         
+        // Current student being edited
+        let currentEditingStudentId = null;
+        
         // Set today's date as default
         feesDate.value = currentDate;
         
@@ -1403,11 +1470,27 @@ const firebaseConfig = {
             
             // Update fee modal currency symbol
             feeCurrencySymbol.textContent = currentCurrencySettings.symbol;
+            customCurrencySymbol.textContent = currentCurrencySettings.symbol;
+            defaultAmountDisplay.textContent = formatCurrency(dailyFeeAmount);
             
             // Update statistics if modal is open
             if (statsModal.classList.contains('active')) {
                 updateStatistics(30); // Refresh statistics with current currency
             }
+            
+            // Update student cards if they exist
+            updateStudentCardsCurrency();
+        }
+        
+        // Update currency display in student cards
+        function updateStudentCardsCurrency() {
+            const feeAmountElements = document.querySelectorAll('.fee-amount');
+            feeAmountElements.forEach(element => {
+                const studentId = element.closest('.student-card').dataset.studentId;
+                const payment = feePaymentsData[studentId] || {};
+                const amount = payment.amount || dailyFeeAmount;
+                element.textContent = formatCurrency(amount);
+            });
         }
         
         // Get total collected for current date
@@ -1893,9 +1976,15 @@ const firebaseConfig = {
                         <div class="student-id">ID: ${student.id || 'N/A'}</div>
                     </div>
                     <div class="fee-status">
-                        <div class="fee-amount">${formatCurrency(dailyFeeAmount)}</div>
+                        <div class="amount-input-container">
+                            <span class="fee-amount">${formatCurrency(amountPaid || dailyFeeAmount)}</span>
+                            <button class="edit-amount-btn" data-student-id="${studentId}" title="Edit amount">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
                         <button class="status-btn ${isPaid ? 'active' : 'inactive'}" 
                                 data-status="${isPaid ? 'paid' : 'unpaid'}" 
+                                data-student-id="${studentId}"
                                 title="${isPaid ? 'Paid' : 'Unpaid'}">
                             ${isPaid ? '<i class="fas fa-check-circle"></i> Paid' : '<i class="fas fa-times-circle"></i> Unpaid'}
                         </button>
@@ -1914,8 +2003,7 @@ const firebaseConfig = {
             // Add event listeners to status buttons
             document.querySelectorAll('.status-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const card = this.closest('.student-card');
-                    const studentId = card.dataset.studentId;
+                    const studentId = this.dataset.studentId;
                     const currentStatus = this.dataset.status;
                     const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid';
                     
@@ -1936,7 +2024,7 @@ const firebaseConfig = {
                     // Update fee payments data
                     if (!feePaymentsData[studentId]) {
                         feePaymentsData[studentId] = {
-                            amount: 0,
+                            amount: dailyFeeAmount,
                             paid: false,
                             timestamp: new Date().toISOString(),
                             recordedBy: currentTeacherId
@@ -1944,7 +2032,7 @@ const firebaseConfig = {
                     }
                     
                     feePaymentsData[studentId].paid = newStatus === 'paid';
-                    feePaymentsData[studentId].amount = newStatus === 'paid' ? dailyFeeAmount : 0;
+                    // Keep the existing amount, don't reset to default
                     feePaymentsData[studentId].timestamp = new Date().toISOString();
                     feePaymentsData[studentId].recordedBy = currentTeacherId;
                     
@@ -1952,6 +2040,61 @@ const firebaseConfig = {
                     updateSummaryCounts();
                 });
             });
+            
+            // Add event listeners to edit amount buttons
+            document.querySelectorAll('.edit-amount-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const studentId = this.dataset.studentId;
+                    openAmountModal(studentId);
+                });
+            });
+        }
+        
+        // Open amount editing modal
+        function openAmountModal(studentId) {
+            currentEditingStudentId = studentId;
+            const payment = feePaymentsData[studentId] || {};
+            const amount = payment.amount || dailyFeeAmount;
+            
+            customAmountInput.value = amount;
+            defaultAmountDisplay.textContent = formatCurrency(dailyFeeAmount);
+            
+            amountModal.classList.add('active');
+        }
+        
+        // Save custom amount for a student
+        function saveCustomAmount() {
+            if (!currentEditingStudentId) return;
+            
+            const amount = parseFloat(customAmountInput.value);
+            
+            if (isNaN(amount) || amount < 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            // Update fee payments data
+            if (!feePaymentsData[currentEditingStudentId]) {
+                feePaymentsData[currentEditingStudentId] = {
+                    paid: false,
+                    timestamp: new Date().toISOString(),
+                    recordedBy: currentTeacherId
+                };
+            }
+            
+            feePaymentsData[currentEditingStudentId].amount = amount;
+            
+            // Update UI
+            const amountElement = document.querySelector(`.fee-amount`);
+            if (amountElement) {
+                amountElement.textContent = formatCurrency(amount);
+            }
+            
+            // Update summary counts
+            updateSummaryCounts();
+            
+            // Close modal
+            amountModal.classList.remove('active');
         }
         
         // Update summary counts based on current fee payments data
@@ -1985,7 +2128,7 @@ const firebaseConfig = {
                     
                     if (!feePaymentsData[studentId]) {
                         feePaymentsData[studentId] = {
-                            amount: 0,
+                            amount: dailyFeeAmount,
                             paid: false,
                             timestamp: new Date().toISOString(),
                             recordedBy: currentTeacherId
@@ -1993,7 +2136,6 @@ const firebaseConfig = {
                     }
                     
                     feePaymentsData[studentId].paid = true;
-                    feePaymentsData[studentId].amount = dailyFeeAmount;
                     feePaymentsData[studentId].timestamp = new Date().toISOString();
                     feePaymentsData[studentId].recordedBy = currentTeacherId;
                 });
@@ -2065,7 +2207,7 @@ const firebaseConfig = {
                 feePaymentsData = {};
                 classStudents.forEach(student => {
                     feePaymentsData[student.id] = {
-                        amount: 0,
+                        amount: dailyFeeAmount,
                         paid: false,
                         timestamp: new Date().toISOString(),
                         recordedBy: currentTeacherId
@@ -2084,7 +2226,7 @@ const firebaseConfig = {
             classStudents.forEach(student => {
                 if (!feePaymentsData[student.id]) {
                     feePaymentsData[student.id] = {
-                        amount: 0,
+                        amount: dailyFeeAmount,
                         paid: false,
                         timestamp: new Date().toISOString(),
                         recordedBy: currentTeacherId
@@ -2387,7 +2529,7 @@ const firebaseConfig = {
                 classStudents.forEach(student => {
                     if (!feePaymentsData[student.id]) {
                         feePaymentsData[student.id] = {
-                            amount: 0,
+                            amount: dailyFeeAmount,
                             paid: false,
                             timestamp: new Date().toISOString(),
                             recordedBy: currentTeacherId
@@ -2454,7 +2596,7 @@ const firebaseConfig = {
                         // Initialize empty records for students
                         classStudents.forEach(student => {
                             feePaymentsData[student.id] = {
-                                amount: 0,
+                                amount: dailyFeeAmount,
                                 paid: false,
                                 timestamp: new Date().toISOString(),
                                 recordedBy: "demo-teacher"
@@ -2552,9 +2694,9 @@ const firebaseConfig = {
                     classDailyFeeElement.textContent = formatCurrency(amount);
                     feeModal.classList.remove('active');
                     
-                    // Update all current payments to use the new amount
+                    // Update all current payments to use the new amount for unpaid students
                     classStudents.forEach(student => {
-                        if (feePaymentsData[student.id] && feePaymentsData[student.id].paid) {
+                        if (feePaymentsData[student.id] && !feePaymentsData[student.id].paid) {
                             feePaymentsData[student.id].amount = amount;
                         }
                     });
@@ -2573,6 +2715,24 @@ const firebaseConfig = {
             } catch (error) {
                 console.error('Error saving fee amount:', error);
                 alert('An error occurred while saving the fee amount');
+            }
+        });
+        
+        // Amount modal event listeners
+        closeAmountModalBtn.addEventListener('click', () => {
+            amountModal.classList.remove('active');
+        });
+        
+        cancelAmountBtn.addEventListener('click', () => {
+            amountModal.classList.remove('active');
+        });
+        
+        saveAmountBtn.addEventListener('click', saveCustomAmount);
+        
+        // Close amount modal when clicking outside
+        amountModal.addEventListener('click', (e) => {
+            if (e.target === amountModal) {
+                amountModal.classList.remove('active');
             }
         });
         
