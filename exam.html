@@ -325,7 +325,6 @@
             font-size: 0.8rem;
             color: var(--light-text);
             margin-bottom: 5px;
-            white-space: nowrap;
         }
 
         .balance-value {
@@ -700,7 +699,6 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 20px;
-            display: none;
         }
 
         .loading-text {
@@ -1110,20 +1108,16 @@
         let currentCurrencySymbol = '₵';
         let currentCurrencyRate = 1;
         let students = [];
-        let feePayments = {};
         let examFeeSettings = {
             amount: 50,
             description: "Term Exam Fee"
         };
+        let studentPayments = {};
         
-        // Initialize the app
+        // Initialize the application
         function initApp() {
-            // Show loading screen
-            loadingScreen.style.display = 'flex';
-            loadingScreen.querySelector('.loading-spinner').style.display = 'block';
-            
             // Check if user is logged in
-            auth.onAuthStateChanged(user => {
+            auth.onAuthStateChanged((user) => {
                 if (user) {
                     currentUser = user;
                     loadUserProfile();
@@ -1136,109 +1130,116 @@
         
         // Load user profile
         function loadUserProfile() {
-            authUsersRef.orderByChild('email').equalTo(currentUser.email).once('value')
-                .then(snapshot => {
-                    if (snapshot.exists()) {
-                        const userData = Object.values(snapshot.val())[0];
-                        greetingTitle.textContent = `Welcome, ${userData.name || 'Teacher'}`;
+            authUsersRef.child(currentUser.uid).once('value')
+                .then((snapshot) => {
+                    const userData = snapshot.val();
+                    if (userData) {
+                        greetingTitle.textContent = `Hello, ${userData.displayName || 'Teacher'}`;
+                        greetingSubtitle.textContent = 'Recording term exam fees for your class';
                         
                         // Load teacher data
-                        return teachersRef.orderByChild('email').equalTo(currentUser.email).once('value');
-                    } else {
-                        throw new Error('User not found in authUsers');
+                        teachersRef.child(userData.teacherId).once('value')
+                            .then((teacherSnapshot) => {
+                                currentTeacher = teacherSnapshot.val();
+                                if (currentTeacher) {
+                                    // Load class data
+                                    loadClassData(currentTeacher.classId);
+                                }
+                            })
+                            .catch((error) => {
+                                console.error('Error loading teacher data:', error);
+                                hideLoadingScreen();
+                            });
                     }
                 })
-                .then(snapshot => {
-                    if (snapshot.exists()) {
-                        currentTeacher = Object.values(snapshot.val())[0];
-                        greetingSubtitle.textContent = `Class: ${currentTeacher.class || 'Not assigned'}`;
-                        
-                        // Load class data
-                        return classesRef.orderByChild('name').equalTo(currentTeacher.class).once('value');
-                    } else {
-                        throw new Error('Teacher not found');
-                    }
-                })
-                .then(snapshot => {
-                    if (snapshot.exists()) {
-                        currentClass = Object.values(snapshot.val())[0];
-                        classNameElement.textContent = currentClass.name;
-                        classIdElement.textContent = currentClass.id || '-';
-                        classRoomElement.textContent = currentClass.room || '-';
+                .catch((error) => {
+                    console.error('Error loading user profile:', error);
+                    hideLoadingScreen();
+                });
+        }
+        
+        // Load class data
+        function loadClassData(classId) {
+            classesRef.child(classId).once('value')
+                .then((snapshot) => {
+                    currentClass = snapshot.val();
+                    if (currentClass) {
+                        classNameElement.textContent = currentClass.name || 'Unnamed Class';
+                        classIdElement.textContent = classId;
+                        classRoomElement.textContent = currentClass.room || 'Not specified';
                         
                         // Load exam fee settings
-                        return examFeeSettingsRef.child(currentClass.id).once('value');
+                        loadExamFeeSettings(classId);
+                        
+                        // Load students for this class
+                        loadStudents(classId);
                     } else {
-                        throw new Error('Class not found');
+                        hideLoadingScreen();
                     }
                 })
-                .then(snapshot => {
+                .catch((error) => {
+                    console.error('Error loading class data:', error);
+                    hideLoadingScreen();
+                });
+        }
+        
+        // Load exam fee settings
+        function loadExamFeeSettings(classId) {
+            examFeeSettingsRef.child(classId).once('value')
+                .then((snapshot) => {
                     if (snapshot.exists()) {
                         examFeeSettings = snapshot.val();
                     }
-                    
-                    // Update exam fee display
                     updateExamFeeDisplay();
-                    
-                    // Load students
-                    return database.ref('students').orderByChild('class').equalTo(currentClass.name).once('value');
                 })
-                .then(snapshot => {
-                    if (snapshot.exists()) {
-                        students = Object.values(snapshot.val());
-                        students.sort((a, b) => a.name.localeCompare(b.name));
-                        
-                        // Load fee payments
-                        return examFeePaymentsRef.child(currentClass.id).once('value');
-                    } else {
-                        students = [];
-                        return Promise.resolve(null);
-                    }
-                })
-                .then(snapshot => {
-                    if (snapshot && snapshot.exists()) {
-                        feePayments = snapshot.val();
-                    } else {
-                        feePayments = {};
-                    }
-                    
-                    // Render students
-                    renderStudents();
-                    
-                    // Update summary
-                    updateSummary();
-                    
-                    // Hide loading screen and show main content
-                    loadingScreen.style.display = 'none';
-                    mainContent.style.display = 'block';
-                    
-                    // Show balance and summary
-                    classBalanceElement.style.display = 'block';
-                    feeSummary.style.display = 'block';
-                })
-                .catch(error => {
-                    console.error('Error loading data:', error);
-                    loadingScreen.querySelector('.loading-text').textContent = 'Error loading data. Please try again.';
+                .catch((error) => {
+                    console.error('Error loading exam fee settings:', error);
                 });
         }
         
         // Update exam fee display
         function updateExamFeeDisplay() {
-            const feeAmount = convertCurrency(examFeeSettings.amount || 50);
-            classExamFeeElement.textContent = `${currentCurrencySymbol}${feeAmount.toFixed(2)}`;
-            
-            if (examFeeSettings.description) {
-                classExamFeeElement.textContent += ` (${examFeeSettings.description})`;
-            }
+            const convertedAmount = (examFeeSettings.amount * currentCurrencyRate).toFixed(2);
+            classExamFeeElement.textContent = `${currentCurrencySymbol}${convertedAmount}`;
         }
         
-        // Convert amount to current currency
-        function convertCurrency(amount) {
-            return amount * currentCurrencyRate;
+        // Load students for the class
+        function loadStudents(classId) {
+            database.ref('students').orderByChild('classId').equalTo(classId).once('value')
+                .then((snapshot) => {
+                    students = [];
+                    snapshot.forEach((childSnapshot) => {
+                        const student = childSnapshot.val();
+                        student.id = childSnapshot.key;
+                        students.push(student);
+                    });
+                    
+                    // Load exam fee payments for the current term
+                    loadExamFeePayments(classId);
+                })
+                .catch((error) => {
+                    console.error('Error loading students:', error);
+                    hideLoadingScreen();
+                });
+        }
+        
+        // Load exam fee payments
+        function loadExamFeePayments(classId) {
+            examFeePaymentsRef.child(classId).child(currentTerm).once('value')
+                .then((snapshot) => {
+                    studentPayments = snapshot.exists() ? snapshot.val() : {};
+                    renderStudentsList();
+                    updateFeeSummary();
+                    hideLoadingScreen();
+                })
+                .catch((error) => {
+                    console.error('Error loading exam fee payments:', error);
+                    hideLoadingScreen();
+                });
         }
         
         // Render students list
-        function renderStudents() {
+        function renderStudentsList() {
             studentsListElement.innerHTML = '';
             
             if (students.length === 0) {
@@ -1251,25 +1252,23 @@
                 return;
             }
             
-            students.forEach(student => {
-                const studentId = student.id || student.studentId;
-                const paymentStatus = feePayments[currentTerm] && feePayments[currentTerm][studentId] ? feePayments[currentTerm][studentId].paid : false;
-                const paidAmount = feePayments[currentTerm] && feePayments[currentTerm][studentId] ? feePayments[currentTerm][studentId].amount : examFeeSettings.amount;
-                const convertedAmount = convertCurrency(paidAmount);
+            students.forEach((student) => {
+                const hasPaid = studentPayments[student.id] || false;
+                const convertedAmount = (examFeeSettings.amount * currentCurrencyRate).toFixed(2);
                 
                 const studentCard = document.createElement('div');
                 studentCard.className = 'student-card';
                 studentCard.innerHTML = `
-                    <img src="${student.profilePicture || 'https://randomuser.me/api/portraits/lego/1.jpg'}" alt="${student.name}" class="student-avatar">
+                    <img src="${student.photoURL || 'https://randomuser.me/api/portraits/lego/1.jpg'}" alt="${student.name}" class="student-avatar">
                     <div class="student-info">
-                        <div class="student-name">${student.name}</div>
-                        <div class="student-id">ID: ${studentId}</div>
+                        <div class="student-name">${student.name || 'Unnamed Student'}</div>
+                        <div class="student-id">ID: ${student.id || 'N/A'}</div>
                     </div>
                     <div class="fee-status">
-                        <div class="fee-amount">${currentCurrencySymbol}${convertedAmount.toFixed(2)}</div>
-                        <button class="status-btn ${paymentStatus ? 'active' : 'inactive'}" data-student="${studentId}">
-                            <i class="fas ${paymentStatus ? 'fa-check-circle' : 'fa-times-circle'}"></i>
-                            ${paymentStatus ? 'Paid' : 'Unpaid'}
+                        <div class="fee-amount">${currentCurrencySymbol}${convertedAmount}</div>
+                        <button class="status-btn ${hasPaid ? 'active' : 'inactive'}" data-student-id="${student.id}">
+                            <i class="fas ${hasPaid ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                            ${hasPaid ? 'Paid' : 'Unpaid'}
                         </button>
                     </div>
                 `;
@@ -1277,307 +1276,242 @@
                 studentsListElement.appendChild(studentCard);
             });
             
-            // Add event listeners to status buttons
-            const statusButtons = document.querySelectorAll('.status-btn');
-            statusButtons.forEach(button => {
-                button.addEventListener('click', togglePaymentStatus);
+            // Add event listeners to payment status buttons
+            document.querySelectorAll('.status-btn').forEach((btn) => {
+                btn.addEventListener('click', (e) => {
+                    const studentId = e.currentTarget.getAttribute('data-student-id');
+                    togglePaymentStatus(studentId);
+                });
             });
         }
         
         // Toggle payment status
-        function togglePaymentStatus(event) {
-            const studentId = event.currentTarget.getAttribute('data-student');
-            const studentCard = event.currentTarget.closest('.student-card');
-            const statusBtn = studentCard.querySelector('.status-btn');
-            const statusIcon = studentCard.querySelector('.fa');
+        function togglePaymentStatus(studentId) {
+            studentPayments[studentId] = !studentPayments[studentId];
             
-            const isPaid = statusBtn.classList.contains('active');
-            
-            if (isPaid) {
-                // Mark as unpaid
-                statusBtn.classList.remove('active');
-                statusBtn.classList.add('inactive');
-                statusBtn.innerHTML = '<i class="fas fa-times-circle"></i> Unpaid';
-            } else {
-                // Mark as paid
+            // Update the UI
+            const statusBtn = document.querySelector(`.status-btn[data-student-id="${studentId}"]`);
+            if (studentPayments[studentId]) {
                 statusBtn.classList.remove('inactive');
                 statusBtn.classList.add('active');
                 statusBtn.innerHTML = '<i class="fas fa-check-circle"></i> Paid';
+            } else {
+                statusBtn.classList.remove('active');
+                statusBtn.classList.add('inactive');
+                statusBtn.innerHTML = '<i class="fas fa-times-circle"></i> Unpaid';
             }
             
-            // Update the feePayments object
-            if (!feePayments[currentTerm]) {
-                feePayments[currentTerm] = {};
-            }
-            
-            if (!feePayments[currentTerm][studentId]) {
-                feePayments[currentTerm][studentId] = {
-                    paid: false,
-                    amount: examFeeSettings.amount
-                };
-            }
-            
-            feePayments[currentTerm][studentId].paid = !isPaid;
-            
-            // Update summary
-            updateSummary();
+            updateFeeSummary();
         }
         
-        // Update summary information
-        function updateSummary() {
-            if (students.length === 0) return;
-            
+        // Update fee summary
+        function updateFeeSummary() {
             const totalStudents = students.length;
-            let paidCount = 0;
-            let unpaidCount = 0;
-            let totalCollected = 0;
-            const expectedTotal = convertCurrency(examFeeSettings.amount * totalStudents);
+            const paidCount = Object.values(studentPayments).filter(status => status).length;
+            const unpaidCount = totalStudents - paidCount;
+            const totalCollectedAmount = paidCount * examFeeSettings.amount;
+            const expectedTotalAmount = totalStudents * examFeeSettings.amount;
             
-            students.forEach(student => {
-                const studentId = student.id || student.studentId;
-                const paymentStatus = feePayments[currentTerm] && feePayments[currentTerm][studentId] ? feePayments[currentTerm][studentId].paid : false;
-                
-                if (paymentStatus) {
-                    paidCount++;
-                    const paidAmount = feePayments[currentTerm][studentId].amount;
-                    totalCollected += convertCurrency(paidAmount);
-                } else {
-                    unpaidCount++;
-                }
-            });
+            // Convert amounts to current currency
+            const convertedCollected = (totalCollectedAmount * currentCurrencyRate).toFixed(2);
+            const convertedExpected = (expectedTotalAmount * currentCurrencyRate).toFixed(2);
             
-            // Update summary elements
+            // Update UI
             totalStudentsElement.textContent = totalStudents;
             paidCountElement.textContent = paidCount;
             unpaidCountElement.textContent = unpaidCount;
-            totalCollectedElement.textContent = `${currentCurrencySymbol}${totalCollected.toFixed(2)}`;
-            expectedTotalElement.textContent = `Expected Total: ${currentCurrencySymbol}${expectedTotal.toFixed(2)}`;
+            totalCollectedElement.textContent = `${currentCurrencySymbol}${convertedCollected}`;
+            expectedTotalElement.textContent = `Expected Total: ${currentCurrencySymbol}${convertedExpected}`;
             
-            // Update balance elements
-            totalExpectedElement.textContent = `${currentCurrencySymbol}${expectedTotal.toFixed(2)}`;
-            totalCollectedBalanceElement.textContent = `${currentCurrencySymbol}${totalCollected.toFixed(2)}`;
+            // Update balance card
+            totalExpectedElement.textContent = `${currentCurrencySymbol}${convertedExpected}`;
+            totalCollectedBalanceElement.textContent = `${currentCurrencySymbol}${convertedCollected}`;
             
-            const totalOutstanding = expectedTotal - totalCollected;
-            totalOutstandingElement.textContent = `${currentCurrencySymbol}${totalOutstanding.toFixed(2)}`;
+            const outstandingAmount = expectedTotalAmount - totalCollectedAmount;
+            const convertedOutstanding = (outstandingAmount * currentCurrencyRate).toFixed(2);
+            totalOutstandingElement.textContent = `${currentCurrencySymbol}${convertedOutstanding}`;
+            
+            const paymentRate = totalStudents > 0 ? Math.round((paidCount / totalStudents) * 100) : 0;
+            paymentRateElement.textContent = `${paymentRate}%`;
             
             // Update total balance
-            totalBalanceElement.textContent = `${currentCurrencySymbol}${totalCollected.toFixed(2)}`;
+            totalBalanceElement.textContent = `${currentCurrencySymbol}${convertedOutstanding}`;
+            totalBalanceElement.className = 'balance-amount';
             
-            // Add appropriate class based on balance
-            totalBalanceElement.classList.remove('balance-positive', 'balance-negative', 'balance-neutral');
-            if (totalCollected > 0) {
-                totalBalanceElement.classList.add('balance-positive');
-            } else if (totalCollected < 0) {
+            if (outstandingAmount > 0) {
                 totalBalanceElement.classList.add('balance-negative');
+            } else if (outstandingAmount < 0) {
+                totalBalanceElement.classList.add('balance-positive');
             } else {
                 totalBalanceElement.classList.add('balance-neutral');
             }
             
-            // Update payment rate
-            const paymentRate = totalStudents > 0 ? (paidCount / totalStudents) * 100 : 0;
-            paymentRateElement.textContent = `${paymentRate.toFixed(1)}%`;
+            // Show the summary and balance cards
+            feeSummary.style.display = 'block';
+            classBalanceElement.style.display = 'block';
         }
         
-        // Save fee payments
-        function saveFeePayments() {
-            loadingScreen.style.display = 'flex';
-            loadingScreen.querySelector('.loading-text').textContent = 'Saving fee payments...';
+        // Hide loading screen
+        function hideLoadingScreen() {
+            loadingScreen.style.display = 'none';
+            mainContent.style.display = 'block';
+        }
+        
+        // Save exam fee payments
+        function saveExamFeePayments() {
+            if (!currentClass) return;
             
-            examFeePaymentsRef.child(currentClass.id).set(feePayments)
+            const updates = {};
+            updates[`${currentClass.id}/${currentTerm}`] = studentPayments;
+            
+            examFeePaymentsRef.update(updates)
                 .then(() => {
-                    loadingScreen.style.display = 'none';
-                    confirmationModal.classList.remove('active');
-                    
-                    // Show success message
                     alert('Exam fee payments saved successfully!');
+                    confirmationModal.classList.remove('active');
                 })
-                .catch(error => {
-                    loadingScreen.style.display = 'none';
-                    console.error('Error saving fee payments:', error);
-                    alert('Error saving fee payments. Please try again.');
+                .catch((error) => {
+                    console.error('Error saving exam fee payments:', error);
+                    alert('Error saving exam fee payments. Please try again.');
                 });
         }
         
-        // Set exam fee amount
-        function setExamFee() {
-            const feeAmount = parseFloat(feeAmountInput.value);
-            const feeDescription = feeDescriptionInput.value;
-            
-            if (isNaN(feeAmount) || feeAmount <= 0) {
-                alert('Please enter a valid fee amount.');
-                return;
-            }
-            
-            loadingScreen.style.display = 'flex';
-            loadingScreen.querySelector('.loading-text').textContent = 'Updating exam fee...';
-            
-            examFeeSettingsRef.child(currentClass.id).set({
-                amount: feeAmount,
-                description: feeDescription
-            })
-            .then(() => {
-                examFeeSettings.amount = feeAmount;
-                examFeeSettings.description = feeDescription;
-                
-                // Update display
-                updateExamFeeDisplay();
-                
-                // Update student amounts
-                students.forEach(student => {
-                    const studentId = student.id || student.studentId;
-                    
-                    if (feePayments[currentTerm] && feePayments[currentTerm][studentId]) {
-                        feePayments[currentTerm][studentId].amount = feeAmount;
-                    }
+        // Set up event listeners
+        function setupEventListeners() {
+            // Term selector
+            termButtons.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    termButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentTerm = btn.getAttribute('data-term');
+                    loadExamFeePayments(currentClass.id);
                 });
-                
-                // Re-render students and update summary
-                renderStudents();
-                updateSummary();
-                
-                loadingScreen.style.display = 'none';
+            });
+            
+            // Save button
+            saveBtn.addEventListener('click', () => {
+                confirmationMessage.textContent = `Are you sure you want to save the exam fee payments for ${currentTerm}?`;
+                confirmationModal.classList.add('active');
+            });
+            
+            // Reset button
+            resetBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to reset all changes?')) {
+                    loadExamFeePayments(currentClass.id);
+                }
+            });
+            
+            // Modal buttons
+            closeModalBtn.addEventListener('click', () => {
+                confirmationModal.classList.remove('active');
+            });
+            
+            cancelBtn.addEventListener('click', () => {
+                confirmationModal.classList.remove('active');
+            });
+            
+            confirmSaveBtn.addEventListener('click', () => {
+                saveExamFeePayments();
+            });
+            
+            // Fee modal buttons
+            setFeeBtn.addEventListener('click', () => {
+                feeAmountInput.value = examFeeSettings.amount;
+                feeDescriptionInput.value = examFeeSettings.description || '';
+                feeModal.classList.add('active');
+            });
+            
+            closeFeeModalBtn.addEventListener('click', () => {
                 feeModal.classList.remove('active');
+            });
+            
+            cancelFeeBtn.addEventListener('click', () => {
+                feeModal.classList.remove('active');
+            });
+            
+            saveFeeBtn.addEventListener('click', () => {
+                const newAmount = parseFloat(feeAmountInput.value);
+                const newDescription = feeDescriptionInput.value;
                 
-                alert('Exam fee updated successfully!');
-            })
-            .catch(error => {
-                loadingScreen.style.display = 'none';
-                console.error('Error updating exam fee:', error);
-                alert('Error updating exam fee. Please try again.');
+                if (isNaN(newAmount) || newAmount <= 0) {
+                    alert('Please enter a valid exam fee amount.');
+                    return;
+                }
+                
+                examFeeSettings.amount = newAmount;
+                examFeeSettings.description = newDescription;
+                
+                // Save to Firebase
+                examFeeSettingsRef.child(currentClass.id).set(examFeeSettings)
+                    .then(() => {
+                        updateExamFeeDisplay();
+                        updateFeeSummary();
+                        renderStudentsList();
+                        feeModal.classList.remove('active');
+                        alert('Exam fee settings updated successfully!');
+                    })
+                    .catch((error) => {
+                        console.error('Error saving exam fee settings:', error);
+                        alert('Error saving exam fee settings. Please try again.');
+                    });
+            });
+            
+            // Currency selector
+            currencyBtn.addEventListener('click', () => {
+                currencyDropdown.classList.toggle('show');
+            });
+            
+            currencyOptions.forEach((option) => {
+                option.addEventListener('click', () => {
+                    const currency = option.getAttribute('data-currency');
+                    const symbol = option.getAttribute('data-symbol');
+                    const rate = parseFloat(option.getAttribute('data-rate'));
+                    
+                    currentCurrencySymbol = symbol;
+                    currentCurrencyRate = rate;
+                    currentCurrency.textContent = currency;
+                    
+                    // Update UI with new currency
+                    updateExamFeeDisplay();
+                    updateFeeSummary();
+                    renderStudentsList();
+                    
+                    // Update fee modal currency symbol
+                    feeCurrencySymbol.textContent = symbol;
+                    
+                    currencyDropdown.classList.remove('show');
+                });
+            });
+            
+            // Mark all paid button
+            markAllPaidBtn.addEventListener('click', () => {
+                if (confirm('Mark all students as paid for this term?')) {
+                    students.forEach((student) => {
+                        studentPayments[student.id] = true;
+                    });
+                    renderStudentsList();
+                    updateFeeSummary();
+                }
+            });
+            
+            // Close modals when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === confirmationModal) {
+                    confirmationModal.classList.remove('active');
+                }
+                if (e.target === feeModal) {
+                    feeModal.classList.remove('active');
+                }
+                if (!e.target.closest('.currency-selector')) {
+                    currencyDropdown.classList.remove('show');
+                }
             });
         }
         
-        // Mark all students as paid
-        function markAllAsPaid() {
-            if (students.length === 0) return;
-            
-            if (!confirm('Are you sure you want to mark all students as paid for this term?')) {
-                return;
-            }
-            
-            if (!feePayments[currentTerm]) {
-                feePayments[currentTerm] = {};
-            }
-            
-            students.forEach(student => {
-                const studentId = student.id || student.studentId;
-                
-                feePayments[currentTerm][studentId] = {
-                    paid: true,
-                    amount: examFeeSettings.amount
-                };
-            });
-            
-            // Re-render students and update summary
-            renderStudents();
-            updateSummary();
-            
-            alert('All students marked as paid for this term.');
-        }
-        
-        // Reset fee payments for current term
-        function resetFeePayments() {
-            if (students.length === 0) return;
-            
-            if (!confirm('Are you sure you want to reset all fee payments for this term? This action cannot be undone.')) {
-                return;
-            }
-            
-            if (feePayments[currentTerm]) {
-                feePayments[currentTerm] = {};
-            }
-            
-            // Re-render students and update summary
-            renderStudents();
-            updateSummary();
-            
-            alert('Fee payments reset for this term.');
-        }
-        
-        // Event Listeners
-        termButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                // Update active term
-                termButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                currentTerm = button.getAttribute('data-term');
-                
-                // Re-render students and update summary
-                renderStudents();
-                updateSummary();
-            });
+        // Initialize the application when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            initApp();
+            setupEventListeners();
         });
-        
-        saveBtn.addEventListener('click', () => {
-            confirmationMessage.textContent = 'Are you sure you want to save the exam fee payments for this term?';
-            confirmationModal.classList.add('active');
-        });
-        
-        resetBtn.addEventListener('click', resetFeePayments);
-        
-        closeModalBtn.addEventListener('click', () => {
-            confirmationModal.classList.remove('active');
-        });
-        
-        cancelBtn.addEventListener('click', () => {
-            confirmationModal.classList.remove('active');
-        });
-        
-        confirmSaveBtn.addEventListener('click', saveFeePayments);
-        
-        setFeeBtn.addEventListener('click', () => {
-            feeAmountInput.value = examFeeSettings.amount;
-            feeDescriptionInput.value = examFeeSettings.description || '';
-            feeModal.classList.add('active');
-        });
-        
-        closeFeeModalBtn.addEventListener('click', () => {
-            feeModal.classList.remove('active');
-        });
-        
-        cancelFeeBtn.addEventListener('click', () => {
-            feeModal.classList.remove('active');
-        });
-        
-        saveFeeBtn.addEventListener('click', setExamFee);
-        
-        currencyBtn.addEventListener('click', () => {
-            currencyDropdown.classList.toggle('show');
-        });
-        
-        currencyOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                const currency = option.getAttribute('data-currency');
-                const symbol = option.getAttribute('data-symbol');
-                const rate = parseFloat(option.getAttribute('data-rate'));
-                
-                currentCurrencySymbol = symbol;
-                currentCurrencyRate = rate;
-                currentCurrency.textContent = currency;
-                
-                // Update displays
-                updateExamFeeDisplay();
-                renderStudents();
-                updateSummary();
-                
-                // Update fee modal currency symbol
-                feeCurrencySymbol.textContent = symbol;
-                
-                currencyDropdown.classList.remove('show');
-            });
-        });
-        
-        markAllPaidBtn.addEventListener('click', markAllAsPaid);
-        
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', (event) => {
-            if (!currencyBtn.contains(event.target) && !currencyDropdown.contains(event.target)) {
-                currencyDropdown.classList.remove('show');
-            }
-        });
-        
-        // Initialize the app
-        initApp();
     </script>
 </body>
 </html>
