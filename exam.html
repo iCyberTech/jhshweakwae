@@ -132,65 +132,6 @@
             color: var(--text-color);
         }
 
-        .currency-selector {
-            position: relative;
-        }
-
-        .currency-btn {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--text-color);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            min-width: 70px;
-            justify-content: space-between;
-        }
-
-        .currency-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            padding: 10px 0;
-            z-index: 100;
-            display: none;
-            min-width: 180px;
-        }
-
-        .currency-dropdown.show {
-            display: block;
-        }
-
-        .currency-option {
-            padding: 10px 15px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: background-color 0.2s;
-        }
-
-        .currency-option:hover {
-            background-color: #f5f7fa;
-        }
-
-        .currency-flag {
-            width: 20px;
-            height: 15px;
-            object-fit: cover;
-            border-radius: 2px;
-        }
-
         /* Class Information */
         .class-info {
             background: var(--glass-bg);
@@ -230,6 +171,37 @@
         .detail-value {
             font-size: 1rem;
             font-weight: 600;
+        }
+
+        /* Term Selector */
+        .term-selector {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .term-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .term-btn.active {
+            background: var(--primary-color);
+            color: white;
         }
 
         /* Balance Card */
@@ -355,31 +327,6 @@
             border-radius: 8px;
         }
 
-        /* Term Selector */
-        .term-selector {
-            display: flex;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .term-btn {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: none;
-            background: transparent;
-            font-weight: 500;
-        }
-
-        .term-btn.active {
-            background: var(--primary-color);
-            color: white;
-        }
-
         /* Fees Container */
         .fees-container {
             background: var(--glass-bg);
@@ -405,23 +352,6 @@
             font-size: 1.1rem;
             font-weight: 600;
             color: var(--primary-color);
-        }
-
-        .date-selector {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.3);
-            padding: 8px 12px;
-            border-radius: 8px;
-        }
-
-        .date-selector input {
-            border: none;
-            background: transparent;
-            color: var(--text-color);
-            font-size: 0.9rem;
-            outline: none;
         }
 
         .fees-actions {
@@ -537,58 +467,6 @@
             text-align: center;
             padding: 40px 20px;
             color: var(--light-text);
-        }
-
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid var(--glass-border);
-            display: flex;
-            justify-content: space-around;
-            padding: 8px 0;
-            z-index: 100;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--light-text);
-            text-decoration: none;
-            font-size: 0.7rem;
-            transition: all 0.3s ease;
-            position: relative;
-            padding: 5px;
-            min-width: 60px;
-        }
-
-        .nav-item.active {
-            color: var(--primary-color);
-        }
-
-        .nav-item.active .nav-icon {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
-        }
-
-        .nav-icon {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 4px;
-            font-size: 1.1rem;
-            background: rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
         }
 
         /* Modal Styles */
@@ -771,6 +649,7 @@
             
             .term-selector {
                 flex-direction: column;
+                align-items: flex-start;
             }
         }
 
@@ -791,16 +670,6 @@
             .mark-all-paid-btn, .action-btn {
                 width: 100%;
                 justify-content: center;
-            }
-            
-            .nav-item {
-                min-width: 50px;
-            }
-            
-            .nav-icon {
-                width: 40px;
-                height: 40px;
-                font-size: 1rem;
             }
         }
 
@@ -830,29 +699,9 @@
                 </div>
             </div>
             <div class="fees-actions">
-                <div class="currency-selector">
-                    <button class="currency-btn" id="currency-btn">
-                        <span id="current-currency">GHS</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <div class="currency-dropdown" id="currency-dropdown">
-                        <div class="currency-option" data-currency="GHS" data-symbol="₵" data-rate="1">
-                            <img src="https://flagcdn.com/w20/gh.png" class="currency-flag"> Ghana Cedi (₵)
-                        </div>
-                        <div class="currency-option" data-currency="USD" data-symbol="$" data-rate="12.5">
-                            <img src="https://flagcdn.com/w20/us.png" class="currency-flag"> US Dollar ($)
-                        </div>
-                        <div class="currency-option" data-currency="EUR" data-symbol="€" data-rate="13.8">
-                            <img src="https://flagcdn.com/w20/eu.png" class="currency-flag"> Euro (€)
-                        </div>
-                        <div class="currency-option" data-currency="NGN" data-symbol="₦" data-rate="0.03">
-                            <img src="https://flagcdn.com/w20/ng.png" class="currency-flag"> Nigerian Naira (₦)
-                        </div>
-                        <div class="currency-option" data-currency="ZAR" data-symbol="R" data-rate="0.68">
-                            <img src="https://flagcdn.com/w20/za.png" class="currency-flag"> South African Rand (R)
-                        </div>
-                    </div>
-                </div>
+                <button class="action-btn secondary" id="stats-btn">
+                    <i class="fas fa-chart-bar"></i> Statistics
+                </button>
             </div>
         </header>
 
@@ -877,6 +726,7 @@
 
         <!-- Term Selector -->
         <div class="term-selector">
+            <h3>Select Term:</h3>
             <button class="term-btn active" data-term="1">Term 1</button>
             <button class="term-btn" data-term="2">Term 2</button>
             <button class="term-btn" data-term="3">Term 3</button>
@@ -913,7 +763,7 @@
 
         <!-- Term Fee Summary -->
         <div class="summary-card" id="fee-summary" style="display: none;">
-            <div class="summary-title" id="term-summary-title">Term 1 Exam Fee Collection</div>
+            <div class="summary-title">Term Exam Fee Collection Summary</div>
             <div class="summary-stats">
                 <div class="stat-item">
                     <div class="stat-value" id="total-students">0</div>
@@ -961,34 +811,6 @@
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-        <a href="feespay.html" class="nav-item">
-            <i class="fas fa-money-bill-wave nav-icon"></i>
-            <span>Daily Fees</span>
-        </a>
-        <a href="#" class="nav-item active">
-            <i class="fas fa-file-alt nav-icon"></i>
-            <span>Exam Fees</span>
-        </a>
-        <a href="week.html" class="nav-item">
-            <i class="fas fa-clipboard-list nav-icon"></i>
-            <span>Weekly Exams</span>
-        </a>
-        <a href="pta.html" class="nav-item">
-            <i class="fas fa-users nav-icon"></i>
-            <span>PTA & Utility</span>
-        </a>
-        <a href="broom.html" class="nav-item">
-            <i class="fas fa-broom nav-icon"></i>
-            <span>Broom</span>
-        </a>
-        <a href="others.html" class="nav-item">
-            <i class="fas fa-ellipsis-h nav-icon"></i>
-            <span>Others</span>
-        </a>
-    </nav>
-
     <!-- Confirmation Modal -->
     <div class="modal" id="confirmation-modal">
         <div class="modal-content">
@@ -1015,17 +837,86 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="fee-amount" class="form-label">Exam Fee Amount (<span id="fee-currency-symbol">₵</span>)</label>
+                    <label for="fee-amount" class="form-label">Exam Fee Amount (₵)</label>
                     <input type="number" id="fee-amount" class="form-input" placeholder="Enter exam fee amount" step="0.01" min="0">
                 </div>
                 <div class="form-group">
                     <label for="fee-description" class="form-label">Fee Description (Optional)</label>
-                    <input type="text" id="fee-description" class="form-input" placeholder="E.g., Term 1 Exam Fee">
+                    <input type="text" id="fee-description" class="form-input" placeholder="E.g., Term exam fee">
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="action-btn secondary" id="cancel-fee-btn">Cancel</button>
                 <button class="action-btn success" id="save-fee-btn">Save Fee</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Modal -->
+    <div class="modal" id="stats-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Exam Payment Statistics</h3>
+                <button class="close-btn" id="close-stats-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="stats-header">
+                    <h4>All Terms Summary</h4>
+                </div>
+
+                <div class="stats-summary">
+                    <div class="stats-summary-item">
+                        <div class="stats-summary-value" id="stats-total-collected">₵0.00</div>
+                        <div class="stats-summary-label">Total Collected</div>
+                    </div>
+                    <div class="stats-summary-item">
+                        <div class="stats-summary-value" id="stats-total-expected">₵0.00</div>
+                        <div class="stats-summary-label">Total Expected</div>
+                    </div>
+                    <div class="stats-summary-item">
+                        <div class="stats-summary-value" id="stats-payment-rate">0%</div>
+                        <div class="stats-summary-label">Payment Rate</div>
+                    </div>
+                </div>
+
+                <h4>Term-wise Breakdown</h4>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Term</th>
+                            <th>Expected</th>
+                            <th>Collected</th>
+                            <th>Outstanding</th>
+                            <th>Payment Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stats-terms-list">
+                        <tr>
+                            <td>Term 1</td>
+                            <td>₵0.00</td>
+                            <td>₵0.00</td>
+                            <td>₵0.00</td>
+                            <td>0%</td>
+                        </tr>
+                        <tr>
+                            <td>Term 2</td>
+                            <td>₵0.00</td>
+                            <td>₵0.00</td>
+                            <td>₵0.00</td>
+                            <td>0%</td>
+                        </tr>
+                        <tr>
+                            <td>Term 3</td>
+                            <td>₵0.00</td>
+                            <td>₵0.00</td>
+                            <td>₵0.00</td>
+                            <td>0%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" id="close-stats-btn">Close</button>
             </div>
         </div>
     </div>
@@ -1076,7 +967,6 @@
         const resetBtn = document.getElementById('reset-btn');
         const studentsListElement = document.getElementById('students-list');
         const feeSummary = document.getElementById('fee-summary');
-        const termSummaryTitle = document.getElementById('term-summary-title');
         const totalStudentsElement = document.getElementById('total-students');
         const paidCountElement = document.getElementById('paid-count');
         const unpaidCountElement = document.getElementById('unpaid-count');
@@ -1098,179 +988,420 @@
         const feeAmountInput = document.getElementById('fee-amount');
         const feeDescriptionInput = document.getElementById('fee-description');
         const setFeeBtn = document.getElementById('set-fee-btn');
-        const feeCurrencySymbol = document.getElementById('fee-currency-symbol');
         
-        // Currency selector elements
-        const currencyBtn = document.getElementById('currency-btn');
-        const currencyDropdown = document.getElementById('currency-dropdown');
-        const currentCurrency = document.getElementById('current-currency');
-        const currencyOptions = document.querySelectorAll('.currency-option');
+        // Statistics modal elements
+        const statsModal = document.getElementById('stats-modal');
+        const statsBtn = document.getElementById('stats-btn');
+        const closeStatsModalBtn = document.getElementById('close-stats-modal');
+        const closeStatsBtn = document.getElementById('close-stats-btn');
+        const statsTotalCollected = document.getElementById('stats-total-collected');
+        const statsTotalExpected = document.getElementById('stats-total-expected');
+        const statsPaymentRate = document.getElementById('stats-payment-rate');
+        const statsTermsList = document.getElementById('stats-terms-list');
         
         // Mark all paid button
         const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
         
+        // Firebase references
+        const authUsersRef = database.ref('authUsers');
+        const teachersRef = database.ref('teachers');
+        const classesRef = database.ref('classes');
+        const examFeePaymentsRef = database.ref('examFeePayments');
+        const examFeeSettingsRef = database.ref('examFeeSettings');
+        const classExamBalancesRef = database.ref('classExamBalances');
+        const studentsRef = database.ref('students');
+        
         // Global variables
-        let currentUser = null;
+        let currentTeacherId = null;
+        let currentTeacherData = null;
         let currentClass = null;
-        let currentTerm = 1;
-        let students = [];
-        let examFee = 0;
-        let feeDescription = "Term Exam Fee";
-        let currencySymbol = '₵';
-        let currencyRate = 1;
-        let currencyCode = 'GHS';
+        let classStudents = [];
+        let examFeePaymentsData = {};
+        let currentTerm = 1; // Default to Term 1
+        let examFeeAmount = 0;
+        let termBalanceData = {
+            totalExpected: 0,
+            totalCollected: 0,
+            totalOutstanding: 0,
+            paymentRate: 0
+        };
         
-        // Initialize the application
-        function init() {
-            // Check if user is logged in
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    currentUser = user;
-                    loadUserProfile();
-                    loadClassInfo();
+        // Format currency
+        function formatCurrency(amount) {
+            return `₵${parseFloat(amount).toFixed(2)}`;
+        }
+        
+        // Get total collected for current term
+        function getTotalCollected() {
+            let total = 0;
+            classStudents.forEach(student => {
+                const payment = examFeePaymentsData[student.id] || {};
+                if (payment.paid) {
+                    total += payment.amount || 0;
+                }
+            });
+            return total;
+        }
+        
+        // Identify the current teacher based on Firebase Auth
+        async function identifyCurrentTeacher() {
+            return new Promise((resolve, reject) => {
+                // Check if user is already signed in
+                const unsubscribe = auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        try {
+                            // User is signed in, get their data from authUsers
+                            const authUserSnapshot = await database.ref(`authUsers/${user.uid}`).once('value');
+                            
+                            if (authUserSnapshot.exists()) {
+                                const authUser = authUserSnapshot.val();
+                                
+                                if (authUser.userType === 'teacher') {
+                                    currentTeacherId = authUser.userId;
+                                    
+                                    // Get teacher details from teachers collection
+                                    const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
+                                    
+                                    if (teacherSnapshot.exists()) {
+                                        currentTeacherData = teacherSnapshot.val();
+                                        unsubscribe();
+                                        resolve(currentTeacherData);
+                                        return;
+                                    }
+                                }
+                            }
+                            
+                            // If we reach here, the auth user doesn't have proper teacher data
+                            unsubscribe();
+                            reject(new Error('Teacher data not found for authenticated user'));
+                        } catch (error) {
+                            unsubscribe();
+                            reject(error);
+                        }
+                    } else {
+                        // No user is signed in, try to sign in anonymously
+                        try {
+                            const result = await auth.signInAnonymously();
+                            const user = result.user;
+                            
+                            // For demo purposes, create a mock teacher
+                            currentTeacherId = "demo-teacher";
+                            currentTeacherData = {
+                                name: "Demo Teacher",
+                                email: "demo@teacher.com",
+                                profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
+                            };
+                            
+                            unsubscribe();
+                            resolve(currentTeacherData);
+                        } catch (error) {
+                            unsubscribe();
+                            reject(error);
+                        }
+                    }
+                }, (error) => {
+                    unsubscribe();
+                    reject(error);
+                });
+            });
+        }
+        
+        // Find the class assigned to this teacher
+        async function findAssignedClass(teacherName) {
+            try {
+                const classesSnapshot = await classesRef.once('value');
+                const classes = classesSnapshot.val();
+                
+                if (!classes) {
+                    throw new Error('No classes found in the database');
+                }
+                
+                // Find the class assigned to this teacher
+                for (const classId in classes) {
+                    const classData = classes[classId];
+                    if (classData.teacher === teacherName) {
+                        return { id: classId, ...classData };
+                    }
+                }
+                
+                // If no class found, use the first class as a fallback for demo
+                const firstClassId = Object.keys(classes)[0];
+                return { id: firstClassId, ...classes[firstClassId] };
+            } catch (error) {
+                console.error('Error finding assigned class:', error);
+                throw error;
+            }
+        }
+        
+        // Get students for the current class
+        async function getClassStudents(classId) {
+            try {
+                const studentsSnapshot = await studentsRef.orderByChild('class').equalTo(classId).once('value');
+                const students = studentsSnapshot.val();
+                
+                if (!students) {
+                    return [];
+                }
+                
+                // Convert to array
+                return Object.keys(students).map(id => ({
+                    id,
+                    ...students[id]
+                }));
+            } catch (error) {
+                console.error('Error getting class students:', error);
+                return [];
+            }
+        }
+        
+        // Get exam fee payments for the current term
+        async function getExamFeePayments(term) {
+            try {
+                const paymentsSnapshot = await examFeePaymentsRef
+                    .orderByChild('class')
+                    .equalTo(currentClass.id)
+                    .once('value');
+                
+                const payments = paymentsSnapshot.val();
+                
+                if (!payments) {
+                    return {};
+                }
+                
+                // Filter by term and convert to a more usable format
+                const filteredPayments = {};
+                
+                for (const paymentId in payments) {
+                    const payment = payments[paymentId];
+                    if (payment.term === term) {
+                        filteredPayments[payment.studentId] = payment;
+                    }
+                }
+                
+                return filteredPayments;
+            } catch (error) {
+                console.error('Error getting exam fee payments:', error);
+                return {};
+            }
+        }
+        
+        // Get exam fee settings for the current class
+        async function getExamFeeSettings() {
+            try {
+                const settingsSnapshot = await examFeeSettingsRef
+                    .orderByChild('class')
+                    .equalTo(currentClass.id)
+                    .once('value');
+                
+                const settings = settingsSnapshot.val();
+                
+                if (!settings) {
+                    return { amount: 0, description: "Exam Fee" };
+                }
+                
+                // Get the first setting (should be only one per class)
+                return Object.values(settings)[0];
+            } catch (error) {
+                console.error('Error getting exam fee settings:', error);
+                return { amount: 0, description: "Exam Fee" };
+            }
+        }
+        
+        // Get class exam balance for the current term
+        async function getClassExamBalance(term) {
+            try {
+                const balanceSnapshot = await classExamBalancesRef
+                    .orderByChild('class')
+                    .equalTo(currentClass.id)
+                    .once('value');
+                
+                const balances = balanceSnapshot.val();
+                
+                if (!balances) {
+                    return null;
+                }
+                
+                // Find the balance for the current term
+                for (const balanceId in balances) {
+                    const balance = balances[balanceId];
+                    if (balance.term === term) {
+                        return balance;
+                    }
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Error getting class exam balance:', error);
+                return null;
+            }
+        }
+        
+        // Update class exam balance for the current term
+        async function updateClassExamBalance(term, balanceData) {
+            try {
+                // Check if balance already exists
+                const existingBalance = await getClassExamBalance(term);
+                
+                if (existingBalance) {
+                    // Update existing balance
+                    const balanceId = Object.keys(existingBalance)[0];
+                    await classExamBalancesRef.child(balanceId).update(balanceData);
                 } else {
-                    // Redirect to login page if not authenticated
-                    window.location.href = 'login.html';
+                    // Create new balance
+                    await classExamBalancesRef.push({
+                        ...balanceData,
+                        class: currentClass.id,
+                        term: term
+                    });
+                }
+            } catch (error) {
+                console.error('Error updating class exam balance:', error);
+            }
+        }
+        
+        // Save exam fee payment for a student
+        async function saveExamFeePayment(studentId, paymentData) {
+            try {
+                // Check if payment already exists
+                let existingPaymentId = null;
+                
+                for (const paymentId in examFeePaymentsData) {
+                    const payment = examFeePaymentsData[paymentId];
+                    if (payment.studentId === studentId && payment.term === currentTerm) {
+                        existingPaymentId = paymentId;
+                        break;
+                    }
+                }
+                
+                if (existingPaymentId) {
+                    // Update existing payment
+                    await examFeePaymentsRef.child(existingPaymentId).update(paymentData);
+                } else {
+                    // Create new payment
+                    await examFeePaymentsRef.push({
+                        ...paymentData,
+                        studentId: studentId,
+                        class: currentClass.id,
+                        term: currentTerm,
+                        date: new Date().toISOString()
+                    });
+                }
+            } catch (error) {
+                console.error('Error saving exam fee payment:', error);
+            }
+        }
+        
+        // Save all exam fee payments
+        async function saveAllExamFeePayments() {
+            try {
+                for (const student of classStudents) {
+                    const payment = examFeePaymentsData[student.id] || {};
+                    
+                    if (payment.paid) {
+                        await saveExamFeePayment(student.id, {
+                            amount: payment.amount || examFeeAmount,
+                            paid: true,
+                            paymentDate: new Date().toISOString()
+                        });
+                    }
+                }
+                
+                // Update class exam balance
+                const totalCollected = getTotalCollected();
+                const totalExpected = classStudents.length * examFeeAmount;
+                const totalOutstanding = totalExpected - totalCollected;
+                const paymentRate = totalExpected > 0 ? (totalCollected / totalExpected) * 100 : 0;
+                
+                await updateClassExamBalance(currentTerm, {
+                    totalExpected: totalExpected,
+                    totalCollected: totalCollected,
+                    totalOutstanding: totalOutstanding,
+                    paymentRate: paymentRate
+                });
+                
+                // Update UI
+                updateBalanceUI();
+                updateFeeSummaryUI();
+                
+                // Show success message
+                alert('Exam fee payments saved successfully!');
+            } catch (error) {
+                console.error('Error saving all exam fee payments:', error);
+                alert('Error saving exam fee payments. Please try again.');
+            }
+        }
+        
+        // Update class information UI
+        function updateClassInfoUI() {
+            classNameElement.textContent = currentClass.name;
+            classIdElement.textContent = currentClass.id;
+            classRoomElement.textContent = currentClass.room || 'Not specified';
+            classExamFeeElement.textContent = formatCurrency(examFeeAmount);
+        }
+        
+        // Update balance UI
+        function updateBalanceUI() {
+            const totalExpected = classStudents.length * examFeeAmount;
+            const totalCollected = getTotalCollected();
+            const totalOutstanding = totalExpected - totalCollected;
+            const paymentRate = totalExpected > 0 ? (totalCollected / totalExpected) * 100 : 0;
+            
+            // Update term balance data
+            termBalanceData = {
+                totalExpected: totalExpected,
+                totalCollected: totalCollected,
+                totalOutstanding: totalOutstanding,
+                paymentRate: paymentRate
+            };
+            
+            // Update UI
+            totalExpectedElement.textContent = formatCurrency(totalExpected);
+            totalCollectedBalanceElement.textContent = formatCurrency(totalCollected);
+            totalOutstandingElement.textContent = formatCurrency(totalOutstanding);
+            paymentRateElement.textContent = `${paymentRate.toFixed(1)}%`;
+            
+            // Update total balance
+            totalBalanceElement.textContent = formatCurrency(totalCollected);
+            
+            // Set balance color based on payment rate
+            if (paymentRate >= 90) {
+                totalBalanceElement.className = 'balance-amount balance-positive';
+            } else if (paymentRate >= 50) {
+                totalBalanceElement.className = 'balance-amount balance-neutral';
+            } else {
+                totalBalanceElement.className = 'balance-amount balance-negative';
+            }
+        }
+        
+        // Update fee summary UI
+        function updateFeeSummaryUI() {
+            const totalStudents = classStudents.length;
+            let paidCount = 0;
+            let unpaidCount = 0;
+            let totalCollected = 0;
+            
+            classStudents.forEach(student => {
+                const payment = examFeePaymentsData[student.id] || {};
+                if (payment.paid) {
+                    paidCount++;
+                    totalCollected += payment.amount || examFeeAmount;
+                } else {
+                    unpaidCount++;
                 }
             });
             
-            // Set up event listeners
-            setupEventListeners();
+            const expectedTotal = totalStudents * examFeeAmount;
+            
+            totalStudentsElement.textContent = totalStudents;
+            paidCountElement.textContent = paidCount;
+            unpaidCountElement.textContent = unpaidCount;
+            totalCollectedElement.textContent = formatCurrency(totalCollected);
+            expectedTotalElement.textContent = `Expected Total: ${formatCurrency(expectedTotal)}`;
         }
         
-        // Set up event listeners
-        function setupEventListeners() {
-            // Term selector
-            termButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const term = parseInt(button.dataset.term);
-                    setCurrentTerm(term);
-                });
-            });
-            
-            // Save button
-            saveBtn.addEventListener('click', () => {
-                showConfirmationModal();
-            });
-            
-            // Reset button
-            resetBtn.addEventListener('click', () => {
-                resetFeePayments();
-            });
-            
-            // Modal buttons
-            closeModalBtn.addEventListener('click', hideConfirmationModal);
-            cancelBtn.addEventListener('click', hideConfirmationModal);
-            confirmSaveBtn.addEventListener('click', saveFeePayments);
-            
-            // Fee modal buttons
-            closeFeeModalBtn.addEventListener('click', hideFeeModal);
-            cancelFeeBtn.addEventListener('click', hideFeeModal);
-            saveFeeBtn.addEventListener('click', saveExamFee);
-            setFeeBtn.addEventListener('click', showFeeModal);
-            
-            // Currency selector
-            currencyBtn.addEventListener('click', () => {
-                currencyDropdown.classList.toggle('show');
-            });
-            
-            currencyOptions.forEach(option => {
-                option.addEventListener('click', () => {
-                    const symbol = option.dataset.symbol;
-                    const rate = parseFloat(option.dataset.rate);
-                    const code = option.dataset.currency;
-                    
-                    currencySymbol = symbol;
-                    currencyRate = rate;
-                    currencyCode = code;
-                    currentCurrency.textContent = code;
-                    
-                    currencyDropdown.classList.remove('show');
-                    feeCurrencySymbol.textContent = symbol;
-                    
-                    // Update UI with new currency
-                    updateCurrencyDisplay();
-                });
-            });
-            
-            // Mark all paid button
-            markAllPaidBtn.addEventListener('click', markAllAsPaid);
-            
-            // Close dropdown when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!currencyBtn.contains(e.target) && !currencyDropdown.contains(e.target)) {
-                    currencyDropdown.classList.remove('show');
-                }
-            });
-        }
-        
-        // Load user profile
-        function loadUserProfile() {
-            // In a real app, this would come from Firebase
-            greetingTitle.textContent = "Exam Fees Collection";
-            greetingSubtitle.textContent = "Recording exam fees for your class";
-        }
-        
-        // Load class information
-        function loadClassInfo() {
-            // Simulate loading class info from Firebase
-            setTimeout(() => {
-                // Mock class data
-                currentClass = {
-                    id: "CLS-2023-001",
-                    name: "Class 5A - Mathematics",
-                    room: "Room 101",
-                    examFee: 50.00
-                };
-                
-                // Update UI with class info
-                classNameElement.textContent = currentClass.name;
-                classIdElement.textContent = currentClass.id;
-                classRoomElement.textContent = currentClass.room;
-                classExamFeeElement.textContent = `${currencySymbol}${(currentClass.examFee * currencyRate).toFixed(2)}`;
-                
-                examFee = currentClass.examFee;
-                
-                // Load students
-                loadStudents();
-                
-                // Show content
-                loadingScreen.style.display = 'none';
-                mainContent.style.display = 'block';
-                classBalanceElement.style.display = 'block';
-                feeSummary.style.display = 'block';
-                
-            }, 1500);
-        }
-        
-        // Load students
-        function loadStudents() {
-            // Simulate loading students from Firebase
-            setTimeout(() => {
-                // Mock student data
-                students = [
-                    { id: "STU-001", name: "Kwame Mensah", avatar: "https://randomuser.me/api/portraits/men/32.jpg", paid: false },
-                    { id: "STU-002", name: "Ama Serwaa", avatar: "https://randomuser.me/api/portraits/women/65.jpg", paid: true },
-                    { id: "STU-003", name: "Kofi Adu", avatar: "https://randomuser.me/api/portraits/men/76.jpg", paid: false },
-                    { id: "STU-004", name: "Abena Sarpong", avatar: "https://randomuser.me/api/portraits/women/43.jpg", paid: false },
-                    { id: "STU-005", name: "Yaw Boateng", avatar: "https://randomuser.me/api/portraits/men/54.jpg", paid: true },
-                    { id: "STU-006", name: "Akua Nyame", avatar: "https://randomuser.me/api/portraits/women/22.jpg", paid: true },
-                    { id: "STU-007", name: "Kwabena Osei", avatar: "https://randomuser.me/api/portraits/men/11.jpg", paid: false },
-                    { id: "STU-008", name: "Adwoa Asante", avatar: "https://randomuser.me/api/portraits/women/87.jpg", paid: true }
-                ];
-                
-                // Render students
-                renderStudents();
-                updateSummary();
-                
-            }, 1000);
-        }
-        
-        // Render students list
-        function renderStudents() {
-            studentsListElement.innerHTML = '';
-            
-            if (students.length === 0) {
+        // Update students list UI
+        function updateStudentsListUI() {
+            if (classStudents.length === 0) {
                 studentsListElement.innerHTML = `
                     <div class="no-students">
                         <i class="fas fa-user-graduate" style="font-size: 2rem; margin-bottom: 10px;"></i>
@@ -1280,190 +1411,316 @@
                 return;
             }
             
-            students.forEach(student => {
-                const studentElement = document.createElement('div');
-                studentElement.className = 'student-card';
-                studentElement.innerHTML = `
-                    <img src="${student.avatar}" alt="${student.name}" class="student-avatar">
+            studentsListElement.innerHTML = '';
+            
+            classStudents.forEach(student => {
+                const payment = examFeePaymentsData[student.id] || {};
+                const isPaid = payment.paid || false;
+                const paymentAmount = payment.amount || examFeeAmount;
+                
+                const studentCard = document.createElement('div');
+                studentCard.className = 'student-card';
+                studentCard.innerHTML = `
+                    <img src="${student.profileImage || 'https://randomuser.me/api/portraits/lego/1.jpg'}" alt="${student.name}" class="student-avatar">
                     <div class="student-info">
                         <div class="student-name">${student.name}</div>
-                        <div class="student-id">${student.id}</div>
+                        <div class="student-id">ID: ${student.id}</div>
                     </div>
                     <div class="fee-status">
-                        <div class="fee-amount">${currencySymbol}${(examFee * currencyRate).toFixed(2)}</div>
-                        <button class="status-btn ${student.paid ? 'active' : 'inactive'}" data-student-id="${student.id}">
-                            <i class="fas ${student.paid ? 'fa-check-circle' : 'fa-times-circle'}"></i>
-                            ${student.paid ? 'Paid' : 'Unpaid'}
+                        <div class="fee-amount">${formatCurrency(paymentAmount)}</div>
+                        <button class="status-btn ${isPaid ? 'active' : 'inactive'}" data-student-id="${student.id}">
+                            <i class="fas ${isPaid ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                            ${isPaid ? 'Paid' : 'Unpaid'}
                         </button>
                     </div>
                 `;
                 
-                // Add event listener to the status button
-                const statusBtn = studentElement.querySelector('.status-btn');
-                statusBtn.addEventListener('click', () => {
-                    togglePaymentStatus(student.id);
+                studentsListElement.appendChild(studentCard);
+            });
+            
+            // Add event listeners to status buttons
+            const statusButtons = document.querySelectorAll('.status-btn');
+            statusButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const studentId = this.getAttribute('data-student-id');
+                    const currentStatus = examFeePaymentsData[studentId] ? examFeePaymentsData[studentId].paid : false;
+                    
+                    // Toggle payment status
+                    if (!examFeePaymentsData[studentId]) {
+                        examFeePaymentsData[studentId] = {};
+                    }
+                    
+                    examFeePaymentsData[studentId].paid = !currentStatus;
+                    examFeePaymentsData[studentId].amount = examFeeAmount;
+                    
+                    // Update UI
+                    updateStudentsListUI();
+                    updateBalanceUI();
+                    updateFeeSummaryUI();
                 });
-                
-                studentsListElement.appendChild(studentElement);
             });
         }
         
-        // Toggle payment status
-        function togglePaymentStatus(studentId) {
-            const student = students.find(s => s.id === studentId);
-            if (student) {
-                student.paid = !student.paid;
-                renderStudents();
-                updateSummary();
-            }
-        }
-        
-        // Set current term
-        function setCurrentTerm(term) {
-            currentTerm = term;
-            
-            // Update UI
-            termButtons.forEach(button => {
-                if (parseInt(button.dataset.term) === term) {
-                    button.classList.add('active');
-                } else {
-                    button.classList.remove('active');
+        // Initialize the application
+        async function initApp() {
+            try {
+                // Identify the current teacher
+                await identifyCurrentTeacher();
+                
+                // Update UI with teacher info
+                profileImg.src = currentTeacherData.profileImage || 'https://randomuser.me/api/portraits/women/44.jpg';
+                greetingTitle.textContent = `Hello, ${currentTeacherData.name}`;
+                greetingSubtitle.textContent = 'Exam Fee Collection System';
+                
+                // Find the class assigned to this teacher
+                currentClass = await findAssignedClass(currentTeacherData.name);
+                
+                // Get class students
+                classStudents = await getClassStudents(currentClass.id);
+                
+                // Get exam fee settings
+                const feeSettings = await getExamFeeSettings();
+                examFeeAmount = feeSettings.amount || 0;
+                
+                // Get exam fee payments for the current term
+                examFeePaymentsData = await getExamFeePayments(currentTerm);
+                
+                // Get class exam balance for the current term
+                const classExamBalance = await getClassExamBalance(currentTerm);
+                if (classExamBalance) {
+                    termBalanceData = classExamBalance;
                 }
-            });
-            
-            termSummaryTitle.textContent = `Term ${term} Exam Fee Collection`;
-            
-            // In a real app, this would load the fee data for the selected term
-            // For this demo, we'll just update the summary
-            updateSummary();
-        }
-        
-        // Update summary
-        function updateSummary() {
-            const totalStudents = students.length;
-            const paidCount = students.filter(s => s.paid).length;
-            const unpaidCount = totalStudents - paidCount;
-            const totalCollected = paidCount * examFee;
-            const expectedTotal = totalStudents * examFee;
-            const paymentRate = totalStudents > 0 ? (paidCount / totalStudents * 100).toFixed(1) : 0;
-            
-            // Update summary elements
-            totalStudentsElement.textContent = totalStudents;
-            paidCountElement.textContent = paidCount;
-            unpaidCountElement.textContent = unpaidCount;
-            totalCollectedElement.textContent = `${currencySymbol}${(totalCollected * currencyRate).toFixed(2)}`;
-            expectedTotalElement.textContent = `Expected Total: ${currencySymbol}${(expectedTotal * currencyRate).toFixed(2)}`;
-            
-            // Update balance elements
-            totalBalanceElement.textContent = `${currencySymbol}${(totalCollected * currencyRate).toFixed(2)}`;
-            totalExpectedElement.textContent = `${currencySymbol}${(expectedTotal * currencyRate).toFixed(2)}`;
-            totalCollectedBalanceElement.textContent = `${currencySymbol}${(totalCollected * currencyRate).toFixed(2)}`;
-            totalOutstandingElement.textContent = `${currencySymbol}${((expectedTotal - totalCollected) * currencyRate).toFixed(2)}`;
-            paymentRateElement.textContent = `${paymentRate}%`;
-            
-            // Set balance color based on payment rate
-            if (paymentRate >= 80) {
-                totalBalanceElement.className = 'balance-amount balance-positive';
-            } else if (paymentRate >= 50) {
-                totalBalanceElement.className = 'balance-amount balance-neutral';
-            } else {
-                totalBalanceElement.className = 'balance-amount balance-negative';
+                
+                // Update UI
+                updateClassInfoUI();
+                updateBalanceUI();
+                updateFeeSummaryUI();
+                updateStudentsListUI();
+                
+                // Show main content, hide loading screen
+                loadingScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+                classBalanceElement.style.display = 'block';
+                feeSummary.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                loadingScreen.querySelector('.loading-text').textContent = 'Error loading application. Please refresh the page.';
             }
         }
         
-        // Show confirmation modal
-        function showConfirmationModal() {
-            const paidCount = students.filter(s => s.paid).length;
-            const totalStudents = students.length;
-            const totalAmount = paidCount * examFee;
-            
-            confirmationMessage.textContent = `Are you sure you want to save the exam fee payments for Term ${currentTerm}? ${paidCount} out of ${totalStudents} students have paid, totaling ${currencySymbol}${(totalAmount * currencyRate).toFixed(2)}.`;
+        // Event Listeners
+        // Term selector buttons
+        termButtons.forEach(button => {
+            button.addEventListener('click', async function() {
+                // Update active button
+                termButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update current term
+                currentTerm = parseInt(this.getAttribute('data-term'));
+                
+                // Get exam fee payments for the new term
+                examFeePaymentsData = await getExamFeePayments(currentTerm);
+                
+                // Get class exam balance for the new term
+                const classExamBalance = await getClassExamBalance(currentTerm);
+                if (classExamBalance) {
+                    termBalanceData = classExamBalance;
+                }
+                
+                // Update UI
+                updateBalanceUI();
+                updateFeeSummaryUI();
+                updateStudentsListUI();
+            });
+        });
+        
+        // Save button
+        saveBtn.addEventListener('click', function() {
+            // Show confirmation modal
+            const totalCollected = getTotalCollected();
+            confirmationMessage.textContent = `Are you sure you want to save the exam fee payments for Term ${currentTerm}? Total collected: ${formatCurrency(totalCollected)}`;
             confirmationModal.classList.add('active');
-        }
+        });
         
-        // Hide confirmation modal
-        function hideConfirmationModal() {
-            confirmationModal.classList.remove('active');
-        }
-        
-        // Save fee payments
-        function saveFeePayments() {
-            // In a real app, this would save to Firebase
-            console.log(`Saving exam fee payments for Term ${currentTerm}:`, students);
-            
-            // Show success message (in a real app)
-            alert(`Exam fee payments for Term ${currentTerm} saved successfully!`);
-            
-            hideConfirmationModal();
-        }
-        
-        // Reset fee payments
-        function resetFeePayments() {
-            if (confirm("Are you sure you want to reset all payment statuses? This cannot be undone.")) {
-                students.forEach(student => {
-                    student.paid = false;
+        // Reset button
+        resetBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to reset all changes for this term?')) {
+                // Reset all payments to their original state
+                Object.keys(examFeePaymentsData).forEach(studentId => {
+                    const payment = examFeePaymentsData[studentId];
+                    if (payment) {
+                        payment.paid = false;
+                    }
                 });
                 
-                renderStudents();
-                updateSummary();
+                // Update UI
+                updateStudentsListUI();
+                updateBalanceUI();
+                updateFeeSummaryUI();
             }
-        }
+        });
         
-        // Mark all as paid
-        function markAllAsPaid() {
-            students.forEach(student => {
-                student.paid = true;
-            });
-            
-            renderStudents();
-            updateSummary();
-        }
+        // Mark all paid button
+        markAllPaidBtn.addEventListener('click', function() {
+            if (confirm('Mark all students as paid for this term?')) {
+                // Mark all students as paid
+                classStudents.forEach(student => {
+                    if (!examFeePaymentsData[student.id]) {
+                        examFeePaymentsData[student.id] = {};
+                    }
+                    
+                    examFeePaymentsData[student.id].paid = true;
+                    examFeePaymentsData[student.id].amount = examFeeAmount;
+                });
+                
+                // Update UI
+                updateStudentsListUI();
+                updateBalanceUI();
+                updateFeeSummaryUI();
+            }
+        });
         
-        // Show fee modal
-        function showFeeModal() {
-            feeAmountInput.value = examFee;
-            feeDescriptionInput.value = feeDescription;
+        // Set fee button
+        setFeeBtn.addEventListener('click', function() {
+            // Show fee modal with current values
+            feeAmountInput.value = examFeeAmount;
+            feeDescriptionInput.value = "Term Exam Fee";
             feeModal.classList.add('active');
-        }
+        });
         
-        // Hide fee modal
-        function hideFeeModal() {
-            feeModal.classList.remove('active');
-        }
-        
-        // Save exam fee
-        function saveExamFee() {
-            const newFee = parseFloat(feeAmountInput.value);
-            const newDescription = feeDescriptionInput.value;
+        // Save fee button
+        saveFeeBtn.addEventListener('click', async function() {
+            const newAmount = parseFloat(feeAmountInput.value);
+            const description = feeDescriptionInput.value;
             
-            if (isNaN(newFee) || newFee < 0) {
-                alert("Please enter a valid fee amount.");
+            if (isNaN(newAmount) || newAmount < 0) {
+                alert('Please enter a valid fee amount.');
                 return;
             }
             
-            examFee = newFee;
-            feeDescription = newDescription;
+            // Update exam fee amount
+            examFeeAmount = newAmount;
             
             // Update UI
-            classExamFeeElement.textContent = `${currencySymbol}${(examFee * currencyRate).toFixed(2)}`;
-            renderStudents();
-            updateSummary();
+            updateClassInfoUI();
+            updateBalanceUI();
+            updateFeeSummaryUI();
+            updateStudentsListUI();
             
-            hideFeeModal();
-        }
-        
-        // Update currency display
-        function updateCurrencyDisplay() {
-            // Update class exam fee
-            classExamFeeElement.textContent = `${currencySymbol}${(examFee * currencyRate).toFixed(2)}`;
+            // Close modal
+            feeModal.classList.remove('active');
             
-            // Update student list and summary
-            renderStudents();
-            updateSummary();
-        }
+            // Save to database (for demo, we'll just show a message)
+            alert(`Exam fee set to ${formatCurrency(examFeeAmount)} for all terms.`);
+        });
         
-        // Initialize the app
-        init();
+        // Statistics button
+        statsBtn.addEventListener('click', async function() {
+            // Calculate statistics for all terms
+            let totalExpectedAllTerms = 0;
+            let totalCollectedAllTerms = 0;
+            let termsData = [];
+            
+            for (let term = 1; term <= 3; term++) {
+                const payments = await getExamFeePayments(term);
+                const balance = await getClassExamBalance(term);
+                
+                let termExpected = 0;
+                let termCollected = 0;
+                
+                if (balance) {
+                    termExpected = balance.totalExpected || 0;
+                    termCollected = balance.totalCollected || 0;
+                } else {
+                    termExpected = classStudents.length * examFeeAmount;
+                    
+                    // Calculate collected from payments
+                    termCollected = 0;
+                    for (const studentId in payments) {
+                        const payment = payments[studentId];
+                        if (payment.paid) {
+                            termCollected += payment.amount || examFeeAmount;
+                        }
+                    }
+                }
+                
+                const termOutstanding = termExpected - termCollected;
+                const termPaymentRate = termExpected > 0 ? (termCollected / termExpected) * 100 : 0;
+                
+                termsData.push({
+                    term: term,
+                    expected: termExpected,
+                    collected: termCollected,
+                    outstanding: termOutstanding,
+                    paymentRate: termPaymentRate
+                });
+                
+                totalExpectedAllTerms += termExpected;
+                totalCollectedAllTerms += termCollected;
+            }
+            
+            const totalPaymentRate = totalExpectedAllTerms > 0 ? 
+                (totalCollectedAllTerms / totalExpectedAllTerms) * 100 : 0;
+            
+            // Update statistics modal
+            statsTotalExpected.textContent = formatCurrency(totalExpectedAllTerms);
+            statsTotalCollected.textContent = formatCurrency(totalCollectedAllTerms);
+            statsPaymentRate.textContent = `${totalPaymentRate.toFixed(1)}%`;
+            
+            // Update terms table
+            statsTermsList.innerHTML = '';
+            
+            termsData.forEach(termData => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>Term ${termData.term}</td>
+                    <td>${formatCurrency(termData.expected)}</td>
+                    <td>${formatCurrency(termData.collected)}</td>
+                    <td>${formatCurrency(termData.outstanding)}</td>
+                    <td>${termData.paymentRate.toFixed(1)}%</td>
+                `;
+                statsTermsList.appendChild(row);
+            });
+            
+            // Show statistics modal
+            statsModal.classList.add('active');
+        });
+        
+        // Modal close buttons
+        closeModalBtn.addEventListener('click', function() {
+            confirmationModal.classList.remove('active');
+        });
+        
+        cancelBtn.addEventListener('click', function() {
+            confirmationModal.classList.remove('active');
+        });
+        
+        closeFeeModalBtn.addEventListener('click', function() {
+            feeModal.classList.remove('active');
+        });
+        
+        cancelFeeBtn.addEventListener('click', function() {
+            feeModal.classList.remove('active');
+        });
+        
+        closeStatsModalBtn.addEventListener('click', function() {
+            statsModal.classList.remove('active');
+        });
+        
+        closeStatsBtn.addEventListener('click', function() {
+            statsModal.classList.remove('active');
+        });
+        
+        // Confirm save button
+        confirmSaveBtn.addEventListener('click', async function() {
+            confirmationModal.classList.remove('active');
+            await saveAllExamFeePayments();
+        });
+        
+        // Initialize the application when the page loads
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
