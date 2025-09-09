@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Exam Fees Collection</title>
+    <title>Student Exam Fee Collection</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -23,9 +23,6 @@
             --info-color: #0984e3;
             --card-bg: rgba(255, 255, 255, 0.7);
             --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-            --term1-color: #6c5ce7;
-            --term2-color: #00b894;
-            --term3-color: #fdcb6e;
         }
 
         * {
@@ -40,7 +37,7 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: var(--text-color);
             min-height: 100vh;
-            padding-bottom: 80px;
+            padding-bottom: 20px;
             overflow-x: hidden;
             -webkit-text-size-adjust: 100%;
         }
@@ -136,6 +133,65 @@
             color: var(--text-color);
         }
 
+        .currency-selector {
+            position: relative;
+        }
+
+        .currency-btn {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 70px;
+            justify-content: space-between;
+        }
+
+        .currency-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 10px 0;
+            z-index: 100;
+            display: none;
+            min-width: 180px;
+        }
+
+        .currency-dropdown.show {
+            display: block;
+        }
+
+        .currency-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .currency-option:hover {
+            background-color: #f5f7fa;
+        }
+
+        .currency-flag {
+            width: 20px;
+            height: 15px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+
         /* Class Information */
         .class-info {
             background: var(--glass-bg);
@@ -180,42 +236,30 @@
         /* Term Selector */
         .term-selector {
             display: flex;
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 5px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--glass-border);
+            gap: 10px;
             margin-bottom: 20px;
-            overflow: hidden;
+            flex-wrap: wrap;
         }
 
         .term-btn {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
+            padding: 12px 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
             border-radius: 8px;
-            font-weight: 500;
+            font-weight: 600;
+            cursor: pointer;
             transition: all 0.3s ease;
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
         }
 
         .term-btn.active {
-            background: white;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .term-btn.term1.active {
-            color: var(--term1-color);
-        }
-
-        .term-btn.term2.active {
-            color: var(--term2-color);
-        }
-
-        .term-btn.term3.active {
-            color: var(--term3-color);
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
         }
 
         /* Balance Card */
@@ -350,7 +394,7 @@
             padding: 15px;
             box-shadow: var(--shadow);
             border: 1px solid var(--glass-border);
-            margin-bottom: 80px;
+            margin-bottom: 20px;
         }
 
         .fees-header {
@@ -812,6 +856,10 @@
                 flex: 1;
                 text-align: center;
             }
+            
+            .term-selector {
+                flex-direction: column;
+            }
         }
 
         @media (max-width: 480px) {
@@ -834,24 +882,6 @@
             }
         }
 
-        /* Orientation change handling */
-        @media (max-height: 500px) and (orientation: landscape) {
-            .container {
-                padding: 8px;
-            }
-            
-            .student-card {
-                flex-direction: row;
-                text-align: left;
-            }
-            
-            .fee-status {
-                flex-direction: column;
-                align-items: flex-end;
-                width: auto;
-            }
-        }
-
         /* Prevent zoom on input focus for iOS */
         @media screen and (max-width: 768px) {
             input, select, textarea {
@@ -864,7 +894,7 @@
     <!-- Loading Screen -->
     <div class="loading-screen" id="loading-screen">
         <div class="loading-spinner"></div>
-        <div class="loading-text">Loading Exam Fees Information...</div>
+        <div class="loading-text">Loading Class Information...</div>
     </div>
 
     <div class="container">
@@ -874,7 +904,7 @@
                 <div class="profile">
                     <img id="profile-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="profile-img">
                     <div class="greeting">
-                        <h1 id="greeting-title">Exam Fees Collection</h1>
+                        <h1 id="greeting-title">Exam Fee Collection</h1>
                         <p id="greeting-subtitle">Recording exam fees for your class</p>
                     </div>
                 </div>
@@ -882,11 +912,38 @@
                     <button class="action-btn secondary" id="stats-btn">
                         <i class="fas fa-chart-bar"></i> Statistics
                     </button>
-                    <button class="action-btn secondary" id="set-fee-btn">
-                        <i class="fas fa-cog"></i> Set Exam Fees
-                    </button>
+                    <div class="currency-selector">
+                        <button class="currency-btn" id="currency-btn">
+                            <span id="current-currency">GHS</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="currency-dropdown" id="currency-dropdown">
+                            <div class="currency-option" data-currency="GHS" data-symbol="₵" data-rate="1">
+                                <img src="https://flagcdn.com/w20/gh.png" class="currency-flag"> Ghana Cedi (₵)
+                            </div>
+                            <div class="currency-option" data-currency="USD" data-symbol="$" data-rate="12.5">
+                                <img src="https://flagcdn.com/w20/us.png" class="currency-flag"> US Dollar ($)
+                            </div>
+                            <div class="currency-option" data-currency="EUR" data-symbol="€" data-rate="13.8">
+                                <img src="https://flagcdn.com/w20/eu.png" class="currency-flag"> Euro (€)
+                            </div>
+                            <div class="currency-option" data-currency="NGN" data-symbol="₦" data-rate="0.03">
+                                <img src="https://flagcdn.com/w20/ng.png" class="currency-flag"> Nigerian Naira (₦)
+                            </div>
+                            <div class="currency-option" data-currency="ZAR" data-symbol="R" data-rate="0.68">
+                                <img src="https://flagcdn.com/w20/za.png" class="currency-flag"> South African Rand (R)
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </header>
+
+            <!-- Term Selector -->
+            <div class="term-selector">
+                <button class="term-btn active" data-term="term1">Term 1</button>
+                <button class="term-btn" data-term="term2">Term 2</button>
+                <button class="term-btn" data-term="term3">Term 3</button>
+            </div>
 
             <!-- Class Information -->
             <div class="class-info" id="class-info">
@@ -901,24 +958,19 @@
                         <div class="detail-value" id="class-room">-</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-label">Students</div>
-                        <div class="detail-value" id="class-students-count">-</div>
+                        <div class="detail-label">Exam Fee</div>
+                        <div class="detail-value" id="class-exam-fee">-</div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Term Selector -->
-            <div class="term-selector">
-                <div class="term-btn term1 active" data-term="1">Term 1</div>
-                <div class="term-btn term2" data-term="2">Term 2</div>
-                <div class="term-btn term3" data-term="3">Term 3</div>
             </div>
 
             <!-- Class Balance Summary -->
             <div class="balance-card" id="class-balance" style="display: none;">
                 <div class="balance-header">
                     <h3 class="balance-title">Class Financial Summary</h3>
-                    <span id="balance-term">Term 1</span>
+                    <button class="action-btn secondary" id="set-fee-btn">
+                        <i class="fas fa-cog"></i> Set Exam Fee
+                    </button>
                 </div>
                 <div class="balance-amount" id="total-balance">₵0.00</div>
                 <div class="balance-details">
@@ -943,7 +995,7 @@
 
             <!-- Exam Fee Summary -->
             <div class="summary-card" id="fee-summary" style="display: none;">
-                <div class="summary-title">Exam Fee Collection Summary</div>
+                <div class="summary-title">Current Term Exam Fee Collection Summary</div>
                 <div class="summary-stats">
                     <div class="stat-item">
                         <div class="stat-value" id="total-students">0</div>
@@ -1013,30 +1065,22 @@
     <div class="modal" id="fee-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Set Exam Fee Amounts</h3>
+                <h3 class="modal-title">Set Exam Fee Amount</h3>
                 <button class="close-btn" id="close-fee-modal">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="term1-fee" class="form-label">Term 1 Fee Amount (₵)</label>
-                    <input type="number" id="term1-fee" class="form-input" placeholder="Enter term 1 fee amount" step="0.01" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="term2-fee" class="form-label">Term 2 Fee Amount (₵)</label>
-                    <input type="number" id="term2-fee" class="form-input" placeholder="Enter term 2 fee amount" step="0.01" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="term3-fee" class="form-label">Term 3 Fee Amount (₵)</label>
-                    <input type="number" id="term3-fee" class="form-input" placeholder="Enter term 3 fee amount" step="0.01" min="0">
+                    <label for="fee-amount" class="form-label">Exam Fee Amount (<span id="fee-currency-symbol">₵</span>)</label>
+                    <input type="number" id="fee-amount" class="form-input" placeholder="Enter exam fee amount" step="0.01" min="0">
                 </div>
                 <div class="form-group">
                     <label for="fee-description" class="form-label">Fee Description (Optional)</label>
-                    <input type="text" id="fee-description" class="form-input" placeholder="E.g., Exam fee, Materials fee, etc.">
+                    <input type="text" id="fee-description" class="form-input" placeholder="E.g., Term 1 Exam Fee">
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="action-btn secondary" id="cancel-fee-btn">Cancel</button>
-                <button class="action-btn success" id="save-fee-btn">Save Fees</button>
+                <button class="action-btn success" id="save-fee-btn">Save Fee</button>
             </div>
         </div>
     </div>
@@ -1050,7 +1094,7 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="custom-amount" class="form-label">Fee Amount (₵)</label>
+                    <label for="custom-amount" class="form-label">Fee Amount (<span id="custom-currency-symbol">₵</span>)</label>
                     <input type="number" id="custom-amount" class="form-input" step="0.01" min="0">
                 </div>
                 <p class="form-label">Default amount: <span id="default-amount-display">₵0.00</span></p>
@@ -1074,9 +1118,9 @@
                     <h4 id="stats-period-title">All Terms</h4>
                     <div class="stats-period-selector">
                         <button class="stats-period-btn active" data-period="all">All</button>
-                        <button class="stats-period-btn" data-period="1">Term 1</button>
-                        <button class="stats-period-btn" data-period="2">Term 2</button>
-                        <button class="stats-period-btn" data-period="3">Term 3</button>
+                        <button class="stats-period-btn" data-period="term1">Term 1</button>
+                        <button class="stats-period-btn" data-period="term2">Term 2</button>
+                        <button class="stats-period-btn" data-period="term3">Term 3</button>
                     </div>
                 </div>
 
@@ -1094,27 +1138,30 @@
                         <div class="stats-summary-label">Payment Rate</div>
                     </div>
                     <div class="stats-summary-item">
-                        <div class="stats-summary-value" id="stats-avg-term">₵0.00</div>
-                        <div class="stats-summary-label">Avg. Per Term</div>
+                        <div class="stats-summary-value" id="stats-total-students">0</div>
+                        <div class="stats-summary-label">Total Students</div>
                     </div>
                 </div>
 
                 <div class="stats-chart-container">
-                    <canvas id="stats-chart"></canvas>
+                    <canvas id="payment-chart"></canvas>
                 </div>
 
                 <h4>Recent Payments</h4>
                 <table class="stats-table">
                     <thead>
                         <tr>
-                            <th>Term</th>
                             <th>Student</th>
+                            <th>Term</th>
                             <th>Amount</th>
                             <th>Status</th>
+                            <th>Date</th>
                         </tr>
                     </thead>
                     <tbody id="stats-payments-list">
-                        <!-- Payments will be inserted here -->
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px;">No payment data available</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -1125,6 +1172,7 @@
     </div>
 
     <script>
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
             authDomain: "sms-single.firebaseapp.com",
@@ -1135,163 +1183,125 @@
             appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
             measurementId: "G-7ER348P6VZ"
         };
-        
+
+
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const auth = firebase.auth();
-        
-        // DOM Elements
-        const loadingScreen = document.getElementById('loading-screen');
+
+        // Global variables
+        let currentUser = null;
+        let currentClass = null;
+        let students = [];
+        let currentTerm = 'term1';
+        let currencyData = {
+            code: 'GHS',
+            symbol: '₵',
+            rate: 1
+        };
+        let defaultExamFee = 100.00;
+        let paymentChart = null;
+
+        // DOM elements
         const mainContent = document.getElementById('main-content');
-        const studentsList = document.getElementById('students-list');
+        const loadingScreen = document.getElementById('loading-screen');
         const classInfo = document.getElementById('class-info');
         const classBalance = document.getElementById('class-balance');
         const feeSummary = document.getElementById('fee-summary');
-        const termBtns = document.querySelectorAll('.term-btn');
-        const saveBtn = document.getElementById('save-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
+        const studentsList = document.getElementById('students-list');
         const confirmationModal = document.getElementById('confirmation-modal');
-        const closeModal = document.getElementById('close-modal');
-        const cancelBtn = document.getElementById('cancel-btn');
-        const confirmSaveBtn = document.getElementById('confirm-save-btn');
-        const setFeeBtn = document.getElementById('set-fee-btn');
         const feeModal = document.getElementById('fee-modal');
-        const closeFeeModal = document.getElementById('close-fee-modal');
-        const cancelFeeBtn = document.getElementById('cancel-fee-btn');
-        const saveFeeBtn = document.getElementById('save-fee-btn');
-        const statsBtn = document.getElementById('stats-btn');
+        const amountModal = document.getElementById('amount-modal');
         const statsModal = document.getElementById('stats-modal');
-        const closeStatsModal = document.getElementById('close-stats-modal');
-        const closeStatsBtn = document.getElementById('close-stats-btn');
-        const statsPeriodBtns = document.querySelectorAll('.stats-period-btn');
-        
-        // State variables
-        let currentTerm = 1;
-        let students = [];
-        let feeSettings = {
-            term1: 100,
-            term2: 100,
-            term3: 100,
-            description: "Exam Fee"
-        };
-        let currentStudentEditing = null;
-        let currentAmountEditing = null;
-        
+
         // Initialize the application
         function initApp() {
-            // Check if user is logged in
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    // User is signed in
-                    document.getElementById('greeting-title').textContent = `Hello, ${user.displayName || 'Teacher'}`;
-                    loadClassInfo();
-                    loadFeeSettings();
+            // Simulate loading process
+            setTimeout(() => {
+                // Simulate authentication
+                simulateAuthentication();
+            }, 1500);
+        }
+
+        // Simulate authentication
+        function simulateAuthentication() {
+            // In a real app, this would be handled by Firebase Auth
+            currentUser = {
+                uid: 'teacher123',
+                displayName: 'Mrs. Johnson',
+                email: 'teacher@school.edu',
+                photoURL: 'https://randomuser.me/api/portraits/women/44.jpg'
+            };
+            
+            // Load class information
+            loadClassData();
+        }
+
+        // Load class data
+        function loadClassData() {
+            // In a real app, this would come from Firebase
+            currentClass = {
+                id: 'class10a',
+                name: 'Class 10A - Science',
+                room: 'Room 205',
+                teacher: 'Mrs. Johnson',
+                examFee: defaultExamFee
+            };
+            
+            // Update UI with class info
+            document.getElementById('class-name').textContent = currentClass.name;
+            document.getElementById('class-id').textContent = currentClass.id;
+            document.getElementById('class-room').textContent = currentClass.room;
+            document.getElementById('class-exam-fee').textContent = formatCurrency(currentClass.examFee);
+            
+            // Load students
+            loadStudents();
+        }
+
+        // Load students
+        function loadStudents() {
+            // In a real app, this would come from Firebase
+            students = [
+                { id: 's1001', name: 'Kwame Mensah', avatar: 'https://randomuser.me/api/portraits/men/32.jpg', fees: { term1: { paid: false, amount: defaultExamFee }, term2: { paid: false, amount: defaultExamFee }, term3: { paid: false, amount: defaultExamFee } } },
+                { id: 's1002', name: 'Ama Boateng', avatar: 'https://randomuser.me/api/portraits/women/65.jpg', fees: { term1: { paid: true, amount: defaultExamFee }, term2: { paid: false, amount: defaultExamFee }, term3: { paid: false, amount: defaultExamFee } } },
+                { id: 's1003', name: 'Kofi Acheampong', avatar: 'https://randomuser.me/api/portraits/men/76.jpg', fees: { term1: { paid: true, amount: defaultExamFee }, term2: { paid: true, amount: defaultExamFee }, term3: { paid: false, amount: defaultExamFee } } },
+                { id: 's1004', name: 'Abena Sarpong', avatar: 'https://randomuser.me/api/portraits/women/43.jpg', fees: { term1: { paid: false, amount: defaultExamFee }, term2: { paid: false, amount: defaultExamFee }, term3: { paid: false, amount: defaultExamFee } } },
+                { id: 's1005', name: 'Yaw Owusu', avatar: 'https://randomuser.me/api/portraits/men/22.jpg', fees: { term1: { paid: true, amount: defaultExamFee }, term2: { paid: true, amount: defaultExamFee }, term3: { paid: true, amount: defaultExamFee } } },
+                { id: 's1006', name: 'Akua Manu', avatar: 'https://randomuser.me/api/portraits/women/23.jpg', fees: { term1: { paid: false, amount: defaultExamFee }, term2: { paid: false, amount: defaultExamFee }, term3: { paid: false, amount: defaultExamFee } } },
+                { id: 's1007', name: 'Kwabena Osei', avatar: 'https://randomuser.me/api/portraits/men/55.jpg', fees: { term1: { paid: true, amount: defaultExamFee }, term2: { paid: false, amount: defaultExamFee }, term3: { paid: false, amount: defaultExamFee } } },
+                { id: 's1008', name: 'Adwoa Asante', avatar: 'https://randomuser.me/api/portraits/women/33.jpg', fees: { term1: { paid: false, amount: defaultExamFee }, term2: { paid: false, amount: defaultExamFee }, term3: { paid: false, amount: defaultExamFee } } }
+            ];
+            
+            // Update UI
+            updateUI();
+            
+            // Hide loading screen and show main content
+            loadingScreen.style.display = 'none';
+            mainContent.style.display = 'block';
+        }
+
+        // Update UI with current data
+        function updateUI() {
+            updateTermButtons();
+            updateStudentsList();
+            updateSummary();
+            updateBalanceSummary();
+        }
+
+        // Update term buttons
+        function updateTermButtons() {
+            document.querySelectorAll('.term-btn').forEach(btn => {
+                if (btn.dataset.term === currentTerm) {
+                    btn.classList.add('active');
                 } else {
-                    // No user is signed in, redirect to login
-                    setTimeout(() => {
-                        loadingScreen.querySelector('.loading-text').textContent = 'Redirecting to login...';
-                        // Simulate redirect for demo
-                        setTimeout(() => {
-                            alert("Please sign in to access the fees collection system.");
-                            simulateLogin();
-                        }, 1500);
-                    }, 2000);
+                    btn.classList.remove('active');
                 }
             });
         }
-        
-        // Simulate login for demo purposes
-        function simulateLogin() {
-            loadingScreen.style.display = 'flex';
-            mainContent.style.display = 'none';
-            
-            // Simulate authentication process
-            setTimeout(() => {
-                auth.onAuthStateChanged(user => {
-                    if (user) {
-                        document.getElementById('greeting-title').textContent = `Hello, ${user.displayName || 'Teacher'}`;
-                        loadClassInfo();
-                        loadFeeSettings();
-                    }
-                });
-                
-                // Create a mock user
-                const mockUser = {
-                    displayName: "Ms. Johnson",
-                    email: "teacher@school.edu",
-                    uid: "teacher123"
-                };
-                
-                // Trigger auth state change with mock user
-                auth.updateCurrentUser(mockUser);
-            }, 2000);
-        }
-        
-        // Load class information
-        function loadClassInfo() {
-            // In a real app, this would come from Firebase
-            // For demo, we'll use mock data
-            setTimeout(() => {
-                document.getElementById('class-name').textContent = "Class 6A - Science";
-                document.getElementById('class-id').textContent = "CLS-2023-6A";
-                document.getElementById('class-room').textContent = "Room 201";
-                
-                // Load students
-                loadStudents();
-            }, 1000);
-        }
-        
-        // Load fee settings from Firebase
-        function loadFeeSettings() {
-            // In a real app, this would come from Firebase
-            // For demo, we'll use mock data
-            setTimeout(() => {
-                feeSettings = {
-                    term1: 120,
-                    term2: 130,
-                    term3: 125,
-                    description: "End of Term Examination Fee"
-                };
-                
-                // Update UI with fee settings
-                updateFeeSummary();
-                classBalance.style.display = 'block';
-                feeSummary.style.display = 'block';
-            }, 1500);
-        }
-        
-        // Load students from Firebase
-        function loadStudents() {
-            // In a real app, this would come from Firebase
-            // For demo, we'll generate mock data
-            const mockStudents = [
-                { id: "S1001", name: "Kwame Mensah", avatar: "https://randomuser.me/api/portraits/men/32.jpg", paid: false, amount: feeSettings.term1 },
-                { id: "S1002", name: "Ama Sarpong", avatar: "https://randomuser.me/api/portraits/women/44.jpg", paid: true, amount: feeSettings.term1 },
-                { id: "S1003", name: "Kofi Owusu", avatar: "https://randomuser.me/api/portraits/men/22.jpg", paid: false, amount: feeSettings.term1 },
-                { id: "S1004", name: "Abena Asare", avatar: "https://randomuser.me/api/portraits/women/65.jpg", paid: true, amount: feeSettings.term1 },
-                { id: "S1005", name: "Yaw Boateng", avatar: "https://randomuser.me/api/portraits/men/45.jpg", paid: false, amount: feeSettings.term1 },
-                { id: "S1006", name: "Akua Manu", avatar: "https://randomuser.me/api/portraits/women/23.jpg", paid: true, amount: feeSettings.term1 },
-                { id: "S1007", name: "Kwabena Yeboah", avatar: "https://randomuser.me/api/portraits/men/67.jpg", paid: false, amount: feeSettings.term1 },
-                { id: "S1008", name: "Adwoa Dankwa", avatar: "https://randomuser.me/api/portraits/women/76.jpg", paid: true, amount: feeSettings.term1 }
-            ];
-            
-            students = mockStudents;
-            document.getElementById('class-students-count').textContent = students.length;
-            
-            renderStudents();
-            updateFeeSummary();
-            
-            // Hide loading screen and show main content
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-                mainContent.style.display = 'block';
-            }, 1000);
-        }
-        
-        // Render students list
-        function renderStudents() {
+
+        // Update students list
+        function updateStudentsList() {
             studentsList.innerHTML = '';
             
             if (students.length === 0) {
@@ -1304,7 +1314,8 @@
                 return;
             }
             
-            students.forEach((student, index) => {
+            students.forEach(student => {
+                const feeStatus = student.fees[currentTerm];
                 const studentCard = document.createElement('div');
                 studentCard.className = 'student-card';
                 studentCard.innerHTML = `
@@ -1314,370 +1325,420 @@
                         <div class="student-id">ID: ${student.id}</div>
                     </div>
                     <div class="fee-status">
-                        <div class="amount-input-container">
-                            <span>₵</span>
-                            <input type="number" class="amount-input" value="${student.amount}" data-index="${index}" readonly>
-                            <button class="edit-amount-btn" data-index="${index}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </div>
-                        <button class="status-btn ${student.paid ? 'active' : 'inactive'}" data-index="${index}">
-                            <i class="fas ${student.paid ? 'fa-check-circle' : 'fa-times-circle'}"></i>
-                            ${student.paid ? 'Paid' : 'Unpaid'}
+                        <div class="fee-amount">${formatCurrency(feeStatus.amount)}</div>
+                        <button class="status-btn ${feeStatus.paid ? 'active' : 'inactive'}" data-student="${student.id}">
+                            <i class="fas ${feeStatus.paid ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                            ${feeStatus.paid ? 'Paid' : 'Unpaid'}
                         </button>
                     </div>
                 `;
                 studentsList.appendChild(studentCard);
             });
             
-            // Add event listeners to payment status buttons
+            // Add event listeners to status buttons
             document.querySelectorAll('.status-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const index = this.getAttribute('data-index');
-                    togglePaymentStatus(index);
-                });
-            });
-            
-            // Add event listeners to edit amount buttons
-            document.querySelectorAll('.edit-amount-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = this.getAttribute('data-index');
-                    openEditAmountModal(index);
+                    const studentId = this.dataset.student;
+                    togglePaymentStatus(studentId);
                 });
             });
         }
-        
-        // Toggle payment status for a student
-        function togglePaymentStatus(index) {
-            students[index].paid = !students[index].paid;
-            renderStudents();
-            updateFeeSummary();
+
+        // Toggle payment status
+        function togglePaymentStatus(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (student) {
+                student.fees[currentTerm].paid = !student.fees[currentTerm].paid;
+                updateUI();
+            }
         }
-        
-        // Update fee summary
-        function updateFeeSummary() {
+
+        // Update summary
+        function updateSummary() {
             const totalStudents = students.length;
-            const paidCount = students.filter(s => s.paid).length;
+            const paidCount = students.filter(s => s.fees[currentTerm].paid).length;
             const unpaidCount = totalStudents - paidCount;
-            const totalCollected = students.filter(s => s.paid).reduce((sum, student) => sum + student.amount, 0);
-            const expectedTotal = students.reduce((sum, student) => sum + student.amount, 0);
+            const totalCollected = students.reduce((sum, student) => {
+                return student.fees[currentTerm].paid ? sum + student.fees[currentTerm].amount : sum;
+            }, 0);
+            const expectedTotal = students.reduce((sum, student) => sum + student.fees[currentTerm].amount, 0);
             
             document.getElementById('total-students').textContent = totalStudents;
             document.getElementById('paid-count').textContent = paidCount;
             document.getElementById('unpaid-count').textContent = unpaidCount;
-            document.getElementById('total-collected').textContent = `₵${totalCollected.toFixed(2)}`;
-            document.getElementById('expected-total').textContent = `Expected Total: ₵${expectedTotal.toFixed(2)}`;
-            
-            // Update class balance
-            document.getElementById('total-expected').textContent = `₵${expectedTotal.toFixed(2)}`;
-            document.getElementById('total-collected-balance').textContent = `₵${totalCollected.toFixed(2)}`;
-            document.getElementById('total-outstanding').textContent = `₵${(expectedTotal - totalCollected).toFixed(2)}`;
-            
-            const paymentRate = totalStudents > 0 ? (paidCount / totalStudents * 100).toFixed(1) : 0;
-            document.getElementById('payment-rate').textContent = `${paymentRate}%`;
-            
-            // Update balance amount color
-            const balanceAmount = document.getElementById('total-balance');
-            balanceAmount.textContent = `₵${totalCollected.toFixed(2)}`;
-            
-            if (paymentRate >= 80) {
-                balanceAmount.className = 'balance-amount balance-positive';
-            } else if (paymentRate >= 50) {
-                balanceAmount.className = 'balance-amount balance-neutral';
-            } else {
-                balanceAmount.className = 'balance-amount balance-negative';
-            }
+            document.getElementById('total-collected').textContent = formatCurrency(totalCollected);
+            document.getElementById('expected-total').textContent = `Expected Total: ${formatCurrency(expectedTotal)}`;
         }
-        
-        // Open edit amount modal
-        function openEditAmountModal(index) {
-            currentStudentEditing = index;
-            currentAmountEditing = students[index].amount;
+
+        // Update balance summary
+        function updateBalanceSummary() {
+            // Calculate totals across all terms
+            let totalExpected = 0;
+            let totalCollected = 0;
             
-            document.getElementById('custom-amount').value = students[index].amount;
-            document.getElementById('default-amount-display').textContent = `₵${feeSettings[`term${currentTerm}`].toFixed(2)}`;
-            
-            amountModal.classList.add('active');
-        }
-        
-        // Save the custom amount
-        function saveCustomAmount() {
-            if (currentStudentEditing !== null) {
-                const customAmount = parseFloat(document.getElementById('custom-amount').value);
-                
-                if (!isNaN(customAmount) && customAmount >= 0) {
-                    students[currentStudentEditing].amount = customAmount;
-                    renderStudents();
-                    updateFeeSummary();
-                }
-            }
-            
-            amountModal.classList.remove('active');
-            currentStudentEditing = null;
-            currentAmountEditing = null;
-        }
-        
-        // Mark all students as paid
-        function markAllAsPaid() {
             students.forEach(student => {
-                student.paid = true;
+                ['term1', 'term2', 'term3'].forEach(term => {
+                    totalExpected += student.fees[term].amount;
+                    if (student.fees[term].paid) {
+                        totalCollected += student.fees[term].amount;
+                    }
+                });
             });
             
-            renderStudents();
-            updateFeeSummary();
-        }
-        
-        // Reset all changes
-        function resetChanges() {
-            if (confirm("Are you sure you want to reset all changes? This will revert to the last saved state.")) {
-                loadStudents();
+            const totalOutstanding = totalExpected - totalCollected;
+            const paymentRate = totalExpected > 0 ? (totalCollected / totalExpected) * 100 : 0;
+            
+            // Update UI
+            document.getElementById('total-balance').textContent = formatCurrency(totalCollected);
+            document.getElementById('total-expected').textContent = formatCurrency(totalExpected);
+            document.getElementById('total-collected-balance').textContent = formatCurrency(totalCollected);
+            document.getElementById('total-outstanding').textContent = formatCurrency(totalOutstanding);
+            document.getElementById('payment-rate').textContent = `${paymentRate.toFixed(1)}%`;
+            
+            // Set balance color
+            const balanceElement = document.getElementById('total-balance');
+            balanceElement.className = 'balance-amount';
+            if (totalCollected >= totalExpected * 0.8) {
+                balanceElement.classList.add('balance-positive');
+            } else if (totalCollected >= totalExpected * 0.5) {
+                balanceElement.classList.add('balance-neutral');
+            } else {
+                balanceElement.classList.add('balance-negative');
             }
+            
+            // Show the balance card
+            classBalance.style.display = 'block';
+            feeSummary.style.display = 'block';
         }
-        
-        // Save fee payments
-        function saveFeePayments() {
+
+        // Format currency based on selected currency
+        function formatCurrency(amount) {
+            const convertedAmount = amount * currencyData.rate;
+            return `${currencyData.symbol}${convertedAmount.toFixed(2)}`;
+        }
+
+        // Event Listeners
+        document.querySelectorAll('.term-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                currentTerm = this.dataset.term;
+                updateUI();
+            });
+        });
+
+        document.getElementById('mark-all-paid-btn').addEventListener('click', function() {
+            students.forEach(student => {
+                student.fees[currentTerm].paid = true;
+            });
+            updateUI();
+        });
+
+        document.getElementById('save-btn').addEventListener('click', function() {
+            // Show confirmation modal
             confirmationModal.classList.add('active');
-        }
-        
-        // Confirm save fee payments
-        function confirmSaveFeePayments() {
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', function() {
+            // Reset all payments for current term
+            students.forEach(student => {
+                student.fees[currentTerm].paid = false;
+            });
+            updateUI();
+        });
+
+        document.getElementById('close-modal').addEventListener('click', function() {
+            confirmationModal.classList.remove('active');
+        });
+
+        document.getElementById('cancel-btn').addEventListener('click', function() {
+            confirmationModal.classList.remove('active');
+        });
+
+        document.getElementById('confirm-save-btn').addEventListener('click', function() {
             // In a real app, this would save to Firebase
-            // For demo, we'll just show a confirmation
             confirmationModal.classList.remove('active');
             
-            // Show success message
-            alert("Exam fee payments saved successfully!");
-        }
-        
-        // Open set fee modal
-        function openSetFeeModal() {
-            document.getElementById('term1-fee').value = feeSettings.term1;
-            document.getElementById('term2-fee').value = feeSettings.term2;
-            document.getElementById('term3-fee').value = feeSettings.term3;
-            document.getElementById('fee-description').value = feeSettings.description;
-            
+            // Show success message (in a real app)
+            alert('Exam fee payments saved successfully!');
+        });
+
+        document.getElementById('set-fee-btn').addEventListener('click', function() {
+            document.getElementById('fee-amount').value = defaultExamFee;
             feeModal.classList.add('active');
-        }
-        
-        // Save fee settings
-        function saveFeeSettings() {
-            const term1Fee = parseFloat(document.getElementById('term1-fee').value);
-            const term2Fee = parseFloat(document.getElementById('term2-fee').value);
-            const term3Fee = parseFloat(document.getElementById('term3-fee').value);
-            const description = document.getElementById('fee-description').value;
-            
-            if (isNaN(term1Fee) || term1Fee < 0 || 
-                isNaN(term2Fee) || term2Fee < 0 || 
-                isNaN(term3Fee) || term3Fee < 0) {
-                alert("Please enter valid fee amounts.");
-                return;
-            }
-            
-            // In a real app, this would save to Firebase
-            feeSettings = {
-                term1: term1Fee,
-                term2: term2Fee,
-                term3: term3Fee,
-                description: description || "Exam Fee"
-            };
-            
-            // Update current term fees for all students
-            students.forEach(student => {
-                student.amount = feeSettings[`term${currentTerm}`];
-            });
-            
-            renderStudents();
-            updateFeeSummary();
-            
+        });
+
+        document.getElementById('close-fee-modal').addEventListener('click', function() {
             feeModal.classList.remove('active');
-            
-            // Show success message
-            alert("Exam fee settings updated successfully!");
-        }
-        
-        // Open statistics modal
-        function openStatsModal() {
-            updateStats('all');
-            statsModal.classList.add('active');
-        }
-        
-        // Update statistics based on selected period
-        function updateStats(period) {
-            // Update period title
-            const periodTitle = document.getElementById('stats-period-title');
-            if (period === 'all') {
-                periodTitle.textContent = "All Terms";
+        });
+
+        document.getElementById('cancel-fee-btn').addEventListener('click', function() {
+            feeModal.classList.remove('active');
+        });
+
+        document.getElementById('save-fee-btn').addEventListener('click', function() {
+            const newFee = parseFloat(document.getElementById('fee-amount').value);
+            if (!isNaN(newFee) && newFee >= 0) {
+                defaultExamFee = newFee;
+                
+                // Update all students with the new fee
+                students.forEach(student => {
+                    ['term1', 'term2', 'term3'].forEach(term => {
+                        student.fees[term].amount = newFee;
+                    });
+                });
+                
+                // Update class info
+                currentClass.examFee = newFee;
+                document.getElementById('class-exam-fee').textContent = formatCurrency(newFee);
+                
+                // Update UI
+                updateUI();
+                
+                feeModal.classList.remove('active');
             } else {
-                periodTitle.textContent = `Term ${period}`;
+                alert('Please enter a valid fee amount.');
             }
-            
-            // Update active button
-            statsPeriodBtns.forEach(btn => {
-                if (btn.getAttribute('data-period') === period) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+        });
+
+        document.getElementById('currency-btn').addEventListener('click', function() {
+            document.getElementById('currency-dropdown').classList.toggle('show');
+        });
+
+        document.querySelectorAll('.currency-option').forEach(option => {
+            option.addEventListener('click', function() {
+                currencyData = {
+                    code: this.dataset.currency,
+                    symbol: this.dataset.symbol,
+                    rate: parseFloat(this.dataset.rate)
+                };
+                
+                document.getElementById('current-currency').textContent = currencyData.code;
+                document.getElementById('currency-dropdown').classList.remove('show');
+                
+                // Update UI with new currency
+                updateUI();
             });
+        });
+
+        document.getElementById('stats-btn').addEventListener('click', function() {
+            showStatistics();
+            statsModal.classList.add('active');
+        });
+
+        document.getElementById('close-stats-modal').addEventListener('click', function() {
+            statsModal.classList.remove('active');
+        });
+
+        document.getElementById('close-stats-btn').addEventListener('click', function() {
+            statsModal.classList.remove('active');
+        });
+
+        // Close dropdowns when clicking outside
+        window.addEventListener('click', function(e) {
+            if (!e.target.matches('.currency-btn')) {
+                const dropdown = document.getElementById('currency-dropdown');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+
+        // Show statistics
+        function showStatistics() {
+            // Update stats based on selected period
+            updateStatistics('all');
             
-            // In a real app, this would calculate based on actual data
-            // For demo, we'll use mock data
-            let totalCollected, totalExpected, paymentRate, avgPerTerm;
+            // Set up period selector
+            document.querySelectorAll('.stats-period-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.stats-period-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    updateStatistics(this.dataset.period);
+                });
+            });
+        }
+
+        // Update statistics based on period
+        function updateStatistics(period) {
+            let totalCollected = 0;
+            let totalExpected = 0;
+            let totalStudents = students.length;
             
+            // Calculate based on period
             if (period === 'all') {
-                totalCollected = 895;
-                totalExpected = 1200;
-                paymentRate = 74.6;
-                avgPerTerm = 298.33;
+                students.forEach(student => {
+                    ['term1', 'term2', 'term3'].forEach(term => {
+                        totalExpected += student.fees[term].amount;
+                        if (student.fees[term].paid) {
+                            totalCollected += student.fees[term].amount;
+                        }
+                    });
+                });
+                document.getElementById('stats-period-title').textContent = 'All Terms';
             } else {
-                totalCollected = 300 + (Math.random() * 100);
-                totalExpected = 400;
-                paymentRate = (totalCollected / totalExpected * 100).toFixed(1);
-                avgPerTerm = totalCollected;
+                students.forEach(student => {
+                    totalExpected += student.fees[period].amount;
+                    if (student.fees[period].paid) {
+                        totalCollected += student.fees[period].amount;
+                    }
+                });
+                document.getElementById('stats-period-title').textContent = `Term ${period.charAt(4)}`;
             }
             
-            document.getElementById('stats-total-collected').textContent = `₵${totalCollected.toFixed(2)}`;
-            document.getElementById('stats-total-expected').textContent = `₵${totalExpected.toFixed(2)}`;
-            document.getElementById('stats-payment-rate').textContent = `${paymentRate}%`;
-            document.getElementById('stats-avg-term').textContent = `₵${avgPerTerm.toFixed(2)}`;
+            const paymentRate = totalExpected > 0 ? (totalCollected / totalExpected) * 100 : 0;
+            
+            // Update stats
+            document.getElementById('stats-total-collected').textContent = formatCurrency(totalCollected);
+            document.getElementById('stats-total-expected').textContent = formatCurrency(totalExpected);
+            document.getElementById('stats-payment-rate').textContent = `${paymentRate.toFixed(1)}%`;
+            document.getElementById('stats-total-students').textContent = totalStudents;
             
             // Update chart
-            updateStatsChart(period);
+            updatePaymentChart(period);
             
-            // Update payments list
-            updatePaymentsList(period);
+            // Update payment list
+            updatePaymentList(period);
         }
-        
-        // Update statistics chart
-        function updateStatsChart(period) {
-            const ctx = document.getElementById('stats-chart').getContext('2d');
+
+        // Update payment chart
+        function updatePaymentChart(period) {
+            const ctx = document.getElementById('payment-chart').getContext('2d');
             
-            // In a real app, this would use real data
-            let termData;
-            
-            if (period === 'all') {
-                termData = {
-                    labels: ['Term 1', 'Term 2', 'Term 3'],
-                    collected: [280, 310, 305],
-                    expected: [400, 400, 400]
-                };
-            } else {
-                const termIndex = parseInt(period) - 1;
-                termData = {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                    collected: [70, 85, 65, 80],
-                    expected: [100, 100, 100, 100]
-                };
+            // Destroy existing chart if it exists
+            if (paymentChart) {
+                paymentChart.destroy();
             }
             
-            // For simplicity, we're just going to show a basic chart
-            // In a real app, you would use Chart.js to create a proper chart
-            document.getElementById('stats-chart').innerHTML = `
-                <div style="text-align: center; padding: 20px; color: #636e72;">
-                    <i class="fas fa-chart-bar" style="font-size: 3rem; margin-bottom: 10px;"></i>
-                    <p>Payment statistics chart would appear here</p>
-                    <p><small>Collected: ₵${termData.collected.reduce((a, b) => a + b, 0).toFixed(2)} / Expected: ₵${termData.expected.reduce((a, b) => a + b, 0).toFixed(2)}</small></p>
-                </div>
-            `;
+            // Prepare data based on period
+            let labels = [];
+            let paidData = [];
+            let unpaidData = [];
+            
+            if (period === 'all') {
+                labels = ['Term 1', 'Term 2', 'Term 3'];
+                labels.forEach((term, index) => {
+                    const termKey = `term${index + 1}`;
+                    const paid = students.reduce((sum, student) => 
+                        student.fees[termKey].paid ? sum + student.fees[termKey].amount : sum, 0);
+                    const unpaid = students.reduce((sum, student) => 
+                        !student.fees[termKey].paid ? sum + student.fees[termKey].amount : sum, 0);
+                    
+                    paidData.push(paid);
+                    unpaidData.push(unpaid);
+                });
+            } else {
+                labels = ['Paid', 'Unpaid'];
+                const paid = students.reduce((sum, student) => 
+                    student.fees[period].paid ? sum + student.fees[period].amount : sum, 0);
+                const unpaid = students.reduce((sum, student) => 
+                    !student.fees[period].paid ? sum + student.fees[period].amount : sum, 0);
+                
+                paidData = [paid, 0];
+                unpaidData = [0, unpaid];
+            }
+            
+            // Create new chart
+            paymentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Paid',
+                            data: paidData,
+                            backgroundColor: '#00b894',
+                            borderColor: '#00b894',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Unpaid',
+                            data: unpaidData,
+                            backgroundColor: '#d63031',
+                            borderColor: '#d63031',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return currencyData.symbol + value.toFixed(2);
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + currencyData.symbol + context.raw.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
-        
-        // Update payments list in statistics
-        function updatePaymentsList(period) {
+
+        // Update payment list
+        function updatePaymentList(period) {
             const paymentsList = document.getElementById('stats-payments-list');
+            paymentsList.innerHTML = '';
             
-            // In a real app, this would come from Firebase
-            // For demo, we'll use mock data
-            let payments;
+            // Get payments based on period
+            let payments = [];
             
             if (period === 'all') {
-                payments = [
-                    { term: 1, student: "Kwame Mensah", amount: 120, status: "Paid" },
-                    { term: 1, student: "Ama Sarpong", amount: 120, status: "Paid" },
-                    { term: 2, student: "Kofi Owusu", amount: 130, status: "Unpaid" },
-                    { term: 2, student: "Abena Asare", amount: 130, status: "Paid" },
-                    { term: 3, student: "Yaw Boateng", amount: 125, status: "Unpaid" }
-                ];
+                students.forEach(student => {
+                    ['term1', 'term2', 'term3'].forEach(term => {
+                        payments.push({
+                            student: student.name,
+                            term: term.charAt(0).toUpperCase() + term.slice(1),
+                            amount: student.fees[term].amount,
+                            paid: student.fees[term].paid,
+                            date: '2023-06-15' // Sample date
+                        });
+                    });
+                });
             } else {
-                payments = [
-                    { term: period, student: "Kwame Mensah", amount: feeSettings[`term${period}`], status: "Paid" },
-                    { term: period, student: "Ama Sarpong", amount: feeSettings[`term${period}`], status: "Paid" },
-                    { term: period, student: "Kofi Owusu", amount: feeSettings[`term${period}`], status: "Unpaid" },
-                    { term: period, student: "Abena Asare", amount: feeSettings[`term${period}`], status: "Paid" },
-                    { term: period, student: "Yaw Boateng", amount: feeSettings[`term${period}`], status: "Unpaid" }
-                ];
+                students.forEach(student => {
+                    payments.push({
+                        student: student.name,
+                        term: period.charAt(0).toUpperCase() + period.slice(1),
+                        amount: student.fees[period].amount,
+                        paid: student.fees[period].paid,
+                        date: '2023-06-15' // Sample date
+                    });
+                });
             }
             
-            paymentsList.innerHTML = '';
+            // Display payments
+            if (payments.length === 0) {
+                paymentsList.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 20px;">No payment data available</td>
+                    </tr>
+                `;
+                return;
+            }
             
             payments.forEach(payment => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>Term ${payment.term}</td>
                     <td>${payment.student}</td>
-                    <td>₵${payment.amount.toFixed(2)}</td>
-                    <td>
-                        <span class="payment-status-badge payment-status-${payment.status.toLowerCase()}">
-                            ${payment.status}
-                        </span>
-                    </td>
+                    <td>${payment.term}</td>
+                    <td>${formatCurrency(payment.amount)}</td>
+                    <td><span class="payment-status-badge ${payment.paid ? 'payment-status-paid' : 'payment-status-unpaid'}">${payment.paid ? 'Paid' : 'Unpaid'}</span></td>
+                    <td>${payment.date}</td>
                 `;
                 paymentsList.appendChild(row);
             });
         }
-        
-        // Event Listeners
-        termBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                termBtns.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                
-                currentTerm = parseInt(this.getAttribute('data-term'));
-                document.getElementById('balance-term').textContent = `Term ${currentTerm}`;
-                
-                // Update student amounts for the selected term
-                students.forEach(student => {
-                    student.amount = feeSettings[`term${currentTerm}`];
-                });
-                
-                renderStudents();
-                updateFeeSummary();
-            });
-        });
-        
-        markAllPaidBtn.addEventListener('click', markAllAsPaid);
-        resetBtn.addEventListener('click', resetChanges);
-        saveBtn.addEventListener('click', saveFeePayments);
-        closeModal.addEventListener('click', () => confirmationModal.classList.remove('active'));
-        cancelBtn.addEventListener('click', () => confirmationModal.classList.remove('active'));
-        confirmSaveBtn.addEventListener('click', confirmSaveFeePayments);
-        
-        setFeeBtn.addEventListener('click', openSetFeeModal);
-        closeFeeModal.addEventListener('click', () => feeModal.classList.remove('active'));
-        cancelFeeBtn.addEventListener('click', () => feeModal.classList.remove('active'));
-        saveFeeBtn.addEventListener('click', saveFeeSettings);
-        
-        statsBtn.addEventListener('click', openStatsModal);
-        closeStatsModal.addEventListener('click', () => statsModal.classList.remove('active'));
-        closeStatsBtn.addEventListener('click', () => statsModal.classList.remove('active'));
-        
-        statsPeriodBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const period = this.getAttribute('data-period');
-                updateStats(period);
-            });
-        });
-        
-        // Amount modal event listeners
-        document.getElementById('close-amount-modal').addEventListener('click', () => {
-            document.getElementById('amount-modal').classList.remove('active');
-        });
-        
-        document.getElementById('cancel-amount-btn').addEventListener('click', () => {
-            document.getElementById('amount-modal').classList.remove('active');
-        });
-        
-        document.getElementById('save-amount-btn').addEventListener('click', saveCustomAmount);
-        
+
         // Initialize the app
         initApp();
     </script>
