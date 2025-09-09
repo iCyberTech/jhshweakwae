@@ -1201,6 +1201,7 @@
         };
         let defaultExamFee = 100.00;
         let paymentChart = null;
+        let currentStudentForAmountEdit = null;
 
         // DOM elements
         const mainContent = document.getElementById('main-content');
@@ -1227,7 +1228,7 @@
                     document.getElementById('greeting-title').textContent = `Hello, ${user.displayName || 'Teacher'}`;
                     loadClassData();
                 } else {
-                    // Not signed in, simulate authentication for demo
+                    // Not signed in, redirect to login or simulate for demo
                     simulateAuthentication();
                 }
             });
@@ -1254,44 +1255,85 @@
         function loadClassData() {
             document.querySelector('.loading-text').textContent = "Loading class information...";
             
-            // In a real app, this would come from Firebase based on the teacher's ID
-            const classId = 'class10a';
+            // Get teacher's class from Firebase
+            const teacherRef = database.ref('teachers/' + (currentUser.uid || 'teacher123'));
             
-            // Reference to the class data in Firebase
-            const classRef = database.ref('classes/' + classId);
-            
-            classRef.once('value')
+            teacherRef.once('value')
                 .then(snapshot => {
                     if (snapshot.exists()) {
-                        currentClass = snapshot.val();
-                        currentClass.id = classId;
+                        const teacherData = snapshot.val();
+                        const classId = teacherData.classId;
                         
-                        // Update UI with class info
-                        document.getElementById('class-name').textContent = currentClass.name;
-                        document.getElementById('class-id').textContent = currentClass.id;
-                        document.getElementById('class-room').textContent = currentClass.room;
-                        document.getElementById('class-exam-fee').textContent = formatCurrency(currentClass.examFee || defaultExamFee);
-                        
-                        // Set default exam fee from class data if available
-                        if (currentClass.examFee) {
-                            defaultExamFee = currentClass.examFee;
+                        if (classId) {
+                            // Reference to the class data in Firebase
+                            const classRef = database.ref('classes/' + classId);
+                            
+                            return classRef.once('value')
+                                .then(classSnapshot => {
+                                    if (classSnapshot.exists()) {
+                                        currentClass = classSnapshot.val();
+                                        currentClass.id = classId;
+                                        
+                                        // Update UI with class info
+                                        document.getElementById('class-name').textContent = currentClass.name;
+                                        document.getElementById('class-id').textContent = currentClass.id;
+                                        document.getElementById('class-room').textContent = currentClass.room || '-';
+                                        document.getElementById('class-exam-fee').textContent = formatCurrency(currentClass.examFee || defaultExamFee);
+                                        
+                                        // Set default exam fee from class data if available
+                                        if (currentClass.examFee) {
+                                            defaultExamFee = currentClass.examFee;
+                                        }
+                                        
+                                        // Load students for this class
+                                        loadStudents();
+                                    } else {
+                                        // If class doesn't exist, show error
+                                        showError("Class data not found");
+                                    }
+                                });
+                        } else {
+                            showError("No class assigned to this teacher");
                         }
-                        
-                        // Load students for this class
-                        loadStudents();
                     } else {
-                        // If class doesn't exist, create a default one
-                        createDefaultClassData(classId);
+                        // If teacher doesn't exist, create a default one
+                        createDefaultTeacherData();
                     }
                 })
                 .catch(error => {
-                    console.error("Error loading class data:", error);
-                    // Fallback to default data
-                    loadDefaultClassData();
+                    console.error("Error loading teacher data:", error);
+                    showError("Error loading class information");
                 });
         }
 
-        // Create default class data if it doesn't exist
+        // Create default teacher data if it doesn't exist
+        function createDefaultTeacherData() {
+            const teacherId = currentUser.uid || 'teacher123';
+            const classId = 'class10a';
+            
+            const teacherData = {
+                name: currentUser.displayName || 'Mrs. Johnson',
+                email: currentUser.email || 'teacher@school.edu',
+                classId: classId
+            };
+            
+            // Save to Firebase
+            database.ref('teachers/' + teacherId).set(teacherData)
+                .then(() => {
+                    // Now create the class data
+                    return createDefaultClassData(classId);
+                })
+                .then(() => {
+                    // Load students
+                    loadStudents();
+                })
+                .catch(error => {
+                    console.error("Error creating teacher data:", error);
+                    showError("Error setting up teacher account");
+                });
+        }
+
+        // Create default class data
         function createDefaultClassData(classId) {
             currentClass = {
                 id: classId,
@@ -1302,47 +1344,24 @@
             };
             
             // Save to Firebase
-            database.ref('classes/' + classId).set(currentClass)
+            return database.ref('classes/' + classId).set(currentClass)
                 .then(() => {
                     // Update UI with class info
                     document.getElementById('class-name').textContent = currentClass.name;
                     document.getElementById('class-id').textContent = currentClass.id;
                     document.getElementById('class-room').textContent = currentClass.room;
                     document.getElementById('class-exam-fee').textContent = formatCurrency(currentClass.examFee);
-                    
-                    // Load students
-                    loadStudents();
-                })
-                .catch(error => {
-                    console.error("Error creating class data:", error);
-                    // Fallback to default data
-                    loadDefaultClassData();
                 });
-        }
-
-        // Load default class data as fallback
-        function loadDefaultClassData() {
-            currentClass = {
-                id: 'class10a',
-                name: 'Class 10A - Science',
-                room: 'Room 205',
-                teacher: currentUser ? currentUser.displayName : 'Mrs. Johnson',
-                examFee: defaultExamFee
-            };
-            
-            // Update UI with class info
-            document.getElementById('class-name').textContent = currentClass.name;
-            document.getElementById('class-id').textContent = currentClass.id;
-            document.getElementById('class-room').textContent = currentClass.room;
-            document.getElementById('class-exam-fee').textContent = formatCurrency(currentClass.examFee);
-            
-            // Load students
-            loadStudents();
         }
 
         // Load students from Firebase
         function loadStudents() {
             document.querySelector('.loading-text').textContent = "Loading student data...";
+            
+            if (!currentClass || !currentClass.id) {
+                showError("No class information available");
+                return;
+            }
             
             // Reference to students data in Firebase
             const studentsRef = database.ref('students').orderByChild('class').equalTo(currentClass.id);
@@ -1389,60 +1408,16 @@
                         // Set up real-time listener for student fee changes
                         setupRealTimeListeners();
                     } else {
-                        // If no students found, create sample data
-                        createSampleStudents();
+                        // If no students found, show message
+                        students = [];
+                        updateUI();
+                        loadingScreen.style.display = 'none';
+                        mainContent.style.display = 'block';
                     }
                 })
                 .catch(error => {
                     console.error("Error loading students:", error);
-                    // Fallback to sample data
-                    createSampleStudents();
-                });
-        }
-
-        // Create sample students if none exist
-        function createSampleStudents() {
-            const sampleStudents = [
-                { id: 's1001', name: 'Kwame Mensah', avatar: 'https://randomuser.me/api/portraits/men/32.jpg', class: currentClass.id, fees: { term1: { paid: false, amount: defaultExamFee }, term2: { paid: false, amount: defaultExamFee }, term3: { paid: false, amount: defaultExamFee } } },
-                { id: 's1002', name: 'Ama Boateng', avatar: 'https://randomuser.me/api/portraits/women/65.jpg', class: currentClass.id, fees: { term1: { paid: true, amount: defaultExamFee }, term2: { paid: false, amount: defaultExamFee }, term3: { paid: false, amount: defaultExamFee } } },
-                { id: 's1003', name: 'Kofi Acheampong', avatar: 'https://randomuser.me/api/portraits/men/76.jpg', class: currentClass.id, fees: { term1: { paid: true, amount: defaultExamFee }, term2: { paid: true, amount: defaultExamFee }, term3: { paid: false, amount: defaultExamFee } } },
-                { id: 's1004', name: 'Abena Sarpong', avatar: 'https://randomuser.me/api/portraits/women/43.jpg', class: currentClass.id, fees: { term1: { paid: false, amount: defaultExamFee }, term2: { paid: false, amount: defaultExamFee }, term3: { paid: false, amount: defaultExamFee } } },
-                { id: 's1005', name: 'Yaw Owusu', avatar: 'https://randomuser.me/api/portraits/men/22.jpg', class: currentClass.id, fees: { term1: { paid: true, amount: defaultExamFee }, term2: { paid: true, amount: defaultExamFee }, term3: { paid: true, amount: defaultExamFee } } }
-            ];
-            
-            const updates = {};
-            
-            sampleStudents.forEach(student => {
-                updates['students/' + student.id] = student;
-            });
-            
-            // Save sample students to Firebase
-            database.ref().update(updates)
-                .then(() => {
-                    // Now load the students
-                    students = sampleStudents;
-                    
-                    // Update UI
-                    updateUI();
-                    
-                    // Hide loading screen and show main content
-                    loadingScreen.style.display = 'none';
-                    mainContent.style.display = 'block';
-                    
-                    // Set up real-time listener for student fee changes
-                    setupRealTimeListeners();
-                })
-                .catch(error => {
-                    console.error("Error creating sample students:", error);
-                    // Use the sample data directly
-                    students = sampleStudents;
-                    
-                    // Update UI
-                    updateUI();
-                    
-                    // Hide loading screen and show main content
-                    loadingScreen.style.display = 'none';
-                    mainContent.style.display = 'block';
+                    showError("Error loading student data");
                 });
         }
 
@@ -1455,12 +1430,53 @@
                 const updatedStudent = snapshot.val();
                 updatedStudent.id = snapshot.key;
                 
-                // Update local students array
-                const index = students.findIndex(s => s.id === updatedStudent.id);
-                if (index !== -1) {
-                    students[index] = updatedStudent;
+                // Only process if student belongs to current class
+                if (updatedStudent.class === currentClass.id) {
+                    // Update local students array
+                    const index = students.findIndex(s => s.id === updatedStudent.id);
+                    if (index !== -1) {
+                        students[index] = updatedStudent;
+                        
+                        // Update UI if the current term is affected
+                        updateUI();
+                    }
+                }
+            });
+            
+            // Listen for new students added to the class
+            studentsRef.on('child_added', snapshot => {
+                const newStudent = snapshot.val();
+                newStudent.id = snapshot.key;
+                
+                // Only process if student belongs to current class
+                if (newStudent.class === currentClass.id) {
+                    // Check if student already exists in local array
+                    const index = students.findIndex(s => s.id === newStudent.id);
                     
-                    // Update UI if the current term is affected
+                    if (index === -1) {
+                        // Ensure fee structure exists
+                        if (!newStudent.fees) {
+                            newStudent.fees = {
+                                term1: { paid: false, amount: defaultExamFee },
+                                term2: { paid: false, amount: defaultExamFee },
+                                term3: { paid: false, amount: defaultExamFee }
+                            };
+                        }
+                        
+                        students.push(newStudent);
+                        updateUI();
+                    }
+                }
+            });
+            
+            // Listen for students removed from the class
+            studentsRef.on('child_removed', snapshot => {
+                const removedStudentId = snapshot.key;
+                
+                // Remove from local array
+                const index = students.findIndex(s => s.id === removedStudentId);
+                if (index !== -1) {
+                    students.splice(index, 1);
                     updateUI();
                 }
             });
@@ -1504,7 +1520,7 @@
                 const studentCard = document.createElement('div');
                 studentCard.className = 'student-card';
                 studentCard.innerHTML = `
-                    <img src="${student.avatar}" alt="${student.name}" class="student-avatar">
+                    <img src="${student.avatar || 'https://randomuser.me/api/portraits/lego/6.jpg'}" alt="${student.name}" class="student-avatar">
                     <div class="student-info">
                         <div class="student-name">${student.name}</div>
                         <div class="student-id">ID: ${student.id}</div>
@@ -1514,6 +1530,9 @@
                         <button class="status-btn ${feeStatus.paid ? 'active' : 'inactive'}" data-student="${student.id}">
                             <i class="fas ${feeStatus.paid ? 'fa-check-circle' : 'fa-times-circle'}"></i>
                             ${feeStatus.paid ? 'Paid' : 'Unpaid'}
+                        </button>
+                        <button class="edit-amount-btn" data-student="${student.id}">
+                            <i class="fas fa-edit"></i>
                         </button>
                     </div>
                 `;
@@ -1525,6 +1544,14 @@
                 btn.addEventListener('click', function() {
                     const studentId = this.dataset.student;
                     togglePaymentStatus(studentId);
+                });
+            });
+            
+            // Add event listeners to edit amount buttons
+            document.querySelectorAll('.edit-amount-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const studentId = this.dataset.student;
+                    editStudentFeeAmount(studentId);
                 });
             });
         }
@@ -1539,10 +1566,16 @@
                 const updates = {};
                 updates[`students/${studentId}/fees/${currentTerm}/paid`] = student.fees[currentTerm].paid;
                 
+                // Add payment date if paid
+                if (student.fees[currentTerm].paid) {
+                    updates[`students/${studentId}/fees/${currentTerm}/paymentDate`] = new Date().toISOString();
+                } else {
+                    updates[`students/${studentId}/fees/${currentTerm}/paymentDate`] = null;
+                }
+                
                 database.ref().update(updates)
                     .then(() => {
-                        // Update UI
-                        updateUI();
+                        // UI will update via real-time listener
                     })
                     .catch(error => {
                         console.error("Error updating payment status:", error);
@@ -1551,6 +1584,17 @@
                         updateUI();
                         alert("Failed to update payment status. Please try again.");
                     });
+            }
+        }
+
+        // Edit student's fee amount
+        function editStudentFeeAmount(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (student) {
+                currentStudentForAmountEdit = student;
+                document.getElementById('custom-amount').value = student.fees[currentTerm].amount;
+                document.getElementById('default-amount-display').textContent = formatCurrency(defaultExamFee);
+                amountModal.classList.add('active');
             }
         }
 
@@ -1618,6 +1662,20 @@
             return `${currencyData.symbol}${convertedAmount.toFixed(2)}`;
         }
 
+        // Show error message
+        function showError(message) {
+            loadingScreen.innerHTML = `
+                <div style="text-align: center; color: var(--danger-color);">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                    <h2>Error</h2>
+                    <p>${message}</p>
+                    <button class="action-btn secondary" onclick="location.reload()" style="margin-top: 20px;">
+                        <i class="fas fa-redo"></i> Try Again
+                    </button>
+                </div>
+            `;
+        }
+
         // Event Listeners
         document.querySelectorAll('.term-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -1629,11 +1687,12 @@
         document.getElementById('mark-all-paid-btn').addEventListener('click', function() {
             // Update all students in the current term
             const updates = {};
+            const paymentDate = new Date().toISOString();
             
             students.forEach(student => {
                 if (!student.fees[currentTerm].paid) {
-                    student.fees[currentTerm].paid = true;
                     updates[`students/${student.id}/fees/${currentTerm}/paid`] = true;
+                    updates[`students/${student.id}/fees/${currentTerm}/paymentDate`] = paymentDate;
                 }
             });
             
@@ -1661,8 +1720,8 @@
             
             students.forEach(student => {
                 if (student.fees[currentTerm].paid) {
-                    student.fees[currentTerm].paid = false;
                     updates[`students/${student.id}/fees/${currentTerm}/paid`] = false;
+                    updates[`students/${student.id}/fees/${currentTerm}/paymentDate`] = null;
                 }
             });
             
@@ -1791,6 +1850,39 @@
 
         document.getElementById('close-stats-btn').addEventListener('click', function() {
             statsModal.classList.remove('active');
+        });
+
+        document.getElementById('close-amount-modal').addEventListener('click', function() {
+            amountModal.classList.remove('active');
+        });
+
+        document.getElementById('cancel-amount-btn').addEventListener('click', function() {
+            amountModal.classList.remove('active');
+        });
+
+        document.getElementById('save-amount-btn').addEventListener('click', function() {
+            const customAmount = parseFloat(document.getElementById('custom-amount').value);
+            
+            if (!isNaN(customAmount) && customAmount >= 0 && currentStudentForAmountEdit) {
+                // Update student's fee amount in Firebase
+                database.ref(`students/${currentStudentForAmountEdit.id}/fees/${currentTerm}/amount`).set(customAmount)
+                    .then(() => {
+                        // Update local data
+                        currentStudentForAmountEdit.fees[currentTerm].amount = customAmount;
+                        
+                        // Update UI
+                        updateUI();
+                        
+                        amountModal.classList.remove('active');
+                        currentStudentForAmountEdit = null;
+                    })
+                    .catch(error => {
+                        console.error("Error updating student fee amount:", error);
+                        alert("Failed to update fee amount. Please try again.");
+                    });
+            } else {
+                alert('Please enter a valid amount.');
+            }
         });
 
         // Close dropdowns when clicking outside
@@ -1956,26 +2048,33 @@
             if (period === 'all') {
                 students.forEach(student => {
                     ['term1', 'term2', 'term3'].forEach(term => {
-                        payments.push({
-                            student: student.name,
-                            term: term.charAt(0).toUpperCase() + term.slice(1),
-                            amount: student.fees[term].amount,
-                            paid: student.fees[term].paid,
-                            date: '2023-06-15' // Sample date
-                        });
+                        if (student.fees[term].paid) {
+                            payments.push({
+                                student: student.name,
+                                term: term.charAt(0).toUpperCase() + term.slice(1),
+                                amount: student.fees[term].amount,
+                                paid: student.fees[term].paid,
+                                date: student.fees[term].paymentDate ? new Date(student.fees[term].paymentDate).toLocaleDateString() : 'N/A'
+                            });
+                        }
                     });
                 });
             } else {
                 students.forEach(student => {
-                    payments.push({
-                        student: student.name,
-                        term: period.charAt(0).toUpperCase() + period.slice(1),
-                        amount: student.fees[period].amount,
-                        paid: student.fees[period].paid,
-                        date: '2023-06-15' // Sample date
-                    });
+                    if (student.fees[period].paid) {
+                        payments.push({
+                            student: student.name,
+                            term: period.charAt(0).toUpperCase() + period.slice(1),
+                            amount: student.fees[period].amount,
+                            paid: student.fees[period].paid,
+                            date: student.fees[period].paymentDate ? new Date(student.fees[period].paymentDate).toLocaleDateString() : 'N/A'
+                        });
+                    }
                 });
             }
+            
+            // Sort by date (newest first)
+            payments.sort((a, b) => new Date(b.date) - new Date(a.date));
             
             // Display payments
             if (payments.length === 0) {
@@ -1987,13 +2086,16 @@
                 return;
             }
             
-            payments.forEach(payment => {
+            // Show only the 10 most recent payments
+            const recentPayments = payments.slice(0, 10);
+            
+            recentPayments.forEach(payment => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${payment.student}</td>
                     <td>${payment.term}</td>
                     <td>${formatCurrency(payment.amount)}</td>
-                    <td><span class="payment-status-badge ${payment.paid ? 'payment-status-paid' : 'payment-status-unpaid'}">${payment.paid ? 'Paid' : 'Unpaid'}</span></td>
+                    <td><span class="payment-status-badge payment-status-paid">Paid</span></td>
                     <td>${payment.date}</td>
                 `;
                 paymentsList.appendChild(row);
