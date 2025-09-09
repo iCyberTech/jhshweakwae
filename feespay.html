@@ -9,6 +9,51 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
+        /* Floating Withdraw Button */
+.floating-withdraw-btn {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+    cursor: pointer;
+    z-index: 99;
+    transition: all 0.3s ease;
+}
+
+.floating-withdraw-btn:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(108, 92, 231, 0.6);
+}
+
+/* Responsive adjustments for floating button */
+@media (max-width: 768px) {
+    .floating-withdraw-btn {
+        bottom: 80px;
+        right: 15px;
+        width: 55px;
+        height: 55px;
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .floating-withdraw-btn {
+        bottom: 70px;
+        right: 10px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+}
         :root {
     --primary-color: #6c5ce7;
     --secondary-color: #a29bfe;
@@ -1150,6 +1195,9 @@ header {
     <div class="iframe-container" id="others-frame">
         <iframe src="others.html"></iframe>
     </div>
+    <div class="iframe-container" id="withdraw-frame">
+    <iframe src="withdraw.html"></iframe>
+</div>
 
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
@@ -1302,6 +1350,10 @@ header {
             </div>
         </div>
     </div>
+    <!-- Floating Withdraw Button -->
+<div class="floating-withdraw-btn" id="floating-withdraw-btn">
+    <i class="fas fa-money-bill-transfer"></i>
+</div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -2809,6 +2861,30 @@ const firebaseConfig = {
         
         // Start the application
         initializePage();
+        // Get DOM elements for withdraw functionality
+const floatingWithdrawBtn = document.getElementById('floating-withdraw-btn');
+const withdrawFrame = document.getElementById('withdraw-frame');
+
+// Withdraw button click handler
+floatingWithdrawBtn.addEventListener('click', () => {
+    // Hide main content and other iframes
+    mainContent.style.display = 'none';
+    iframeContainers.forEach(container => container.classList.remove('active'));
+    
+    // Show withdraw iframe
+    withdrawFrame.classList.add('active');
+    
+    // Update navigation to show no active tab
+    navItems.forEach(item => item.classList.remove('active'));
+});
+
+// Close withdraw iframe when clicking outside (if needed)
+withdrawFrame.addEventListener('click', (e) => {
+    if (e.target === withdrawFrame) {
+        withdrawFrame.classList.remove('active');
+        mainContent.style.display = 'block';
+    }
+});
     </script>
 </body>
 </html>
