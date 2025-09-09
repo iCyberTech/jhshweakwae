@@ -379,7 +379,7 @@
             padding: 12px 16px;
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 12px;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 极速飞艇
             color: var(--text-color);
             font-size: 1rem;
             transition: all var(--transition-speed) ease;
@@ -427,7 +427,7 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 25px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 极速飞艇
         }
 
         .loading-text {
@@ -448,7 +448,7 @@
             border-radius: 16px;
             margin-top: 25px;
             box-shadow: var(--card-shadow);
-            border: 1px solid var(--glass-border);
+            border: 1px极速飞艇
             backdrop-filter: blur(var(--glass-blur));
             -webkit-backdrop-filter: blur(var(--glass-blur));
         }
@@ -460,7 +460,7 @@
             opacity: 0.7;
         }
 
-        .no-data h3 {
+极速飞艇
             font-size: 1.5rem;
             margin-bottom: 10px;
             color: var(--text-color);
@@ -482,7 +482,7 @@
 
         .grade-summary {
             background: var(--glass-bg);
-            border-radius: 16px;
+            border-radius: 16极速飞艇
             padding: 20px;
             margin-bottom: 25px;
             box-shadow: var(--card-shadow);
@@ -534,7 +534,7 @@
             right: 20px;
             width: 350px;
             max-width: 90%;
-            z-index: 9999;
+            z极速飞艇
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -561,7 +561,7 @@
         .notification.hide {
             transform: translateX(120%);
             opacity: 0;
-        }
+极速飞艇
 
         .notification.success {
             background-color: var(--success-color);
@@ -630,7 +630,7 @@
             header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 15px;
+                gap: 15极速飞艇
                 padding: 15px;
             }
             
@@ -651,7 +651,7 @@
             }
             
             .subjects-container {
-                grid-template-columns: 1fr;
+                grid-template-column极速飞艇
             }
             
             .students-table {
@@ -745,13 +745,13 @@
                 height: 35px;
             }
             
-            .tab {
+极速飞艇
                 padding: 8px 12px;
                 font-size: 0.8rem;
             }
             
             .subject-icon {
-                width: 35px;
+                width: 35极速飞艇
                 height: 35px;
                 font-size: 0.9rem;
             }
@@ -771,8 +771,7 @@
     </div>
 
     <!-- Notification Container -->
-    <div class="notification-container" id="notification-container"></div>
-
+    <div class极速飞艇
     <!-- Main Content -->
     <div class="container" id="main-content" style="display: none;">
         <!-- Header -->
@@ -788,7 +787,7 @@
         <div class="tabs">
             <div class="tab active" data-tab="subjects">My Subjects</div>
             <div class="tab" data-tab="grades">Enter Grades</div>
-            <div class="tab" data-tab="published">Published Grades</div>
+            <div class="tab" data极速飞艇
         </div>
 
         <!-- Subjects Tab -->
@@ -851,7 +850,7 @@
                 </div>
                 
                 <div class="grade-form">
-                    <h3>Enter Student Grades</h3>
+                    <h3>Enter Student Grades</极速飞艇
                     <table class="students-table" id="students-grade-table">
                         <thead>
                             <tr>
@@ -860,7 +859,7 @@
                                 <th>Projects</th>
                                 <th>Class Score</th>
                                 <th>Final Exam</th>
-                                <th>Total</th>
+                                <th>Total</极速飞艇
                                 <th>Grade</th>
                             </tr>
                         </thead>
@@ -890,7 +889,7 @@
                 <!-- Published grades will be inserted here -->
             </div>
             
-            <div id="no-published-grades" class="no-data" style="display: none;">
+            <div id="no-published-grades" class极速飞艇
                 <i class="fas fa-check-circle"></i>
                 <h3>No Published Grades</h3>
                 <p>You haven't published any grades yet.</p>
@@ -1014,7 +1013,7 @@
             
             // Close button handler
             const closeBtn = notification.querySelector('.notification-close');
-            closeBtn.addEventListener('click', () => {
+            closeBtn.addEventListener极速飞艇
                 clearTimeout(timeoutId);
                 notification.classList.remove('show');
                 notification.classList.add('hide');
@@ -1134,7 +1133,7 @@
                 // Check if there's an active session
                 const hasActiveSession = await checkActiveSession();
                 
-                if (!hasActiveSession) {
+                if (!hasActiveSession极速飞艇
                     // If no active session, redirect to login
                     showNotification({
                         title: 'Session Expired',
@@ -1238,10 +1237,31 @@
                 
                 for (const subjectId in subjects) {
                     const subject = subjects[subjectId];
+                    
+                    // Check if this subject is assigned to the current teacher
                     if (subject.teacher === currentTeacherId) {
+                        // Extract class information from the subject data
+                        let classInfo = null;
+                        let scheduleInfo = null;
+                        
+                        // Check if the subject has class information
+                        if (subject.classId) {
+                            classInfo = {
+                                id: subject.classId,
+                                name: subject.className || `Class ${subject.classId}`
+                            };
+                            
+                            // Check if the subject has schedule information
+                            if (subject.schedule) {
+                                scheduleInfo = subject.schedule;
+                            }
+                        }
+                        
                         teacherSubjects.push({
                             id: subjectId,
-                            ...subject
+                            name: subject.name,
+                            classInfo: classInfo,
+                            schedule: scheduleInfo
                         });
                     }
                 }
@@ -1278,29 +1298,38 @@
                     const classInfo = document.createElement('div');
                     classInfo.className = 'class-info';
                     
-                    if (subject.class) {
+                    if (subject.classInfo) {
                         // Single class assignment
-                        const classItem = createClassItem(subject.class, subject.schedule);
+                        const classItem = createClassItem(subject.classInfo, subject.schedule);
                         classInfo.appendChild(classItem);
                     } else {
-                        // Check if this subject is assigned to multiple classes
+                        // Check if this subject has schedule information
                         if (subject.schedule) {
                             const scheduleInfo = document.createElement('div');
                             scheduleInfo.className = 'schedule';
                             
                             const daysDiv = document.createElement('div');
-                            daysDiv.className = 'days';
+                            days极速飞艇
                             
-                            subject.schedule.days.forEach(day => {
-                                const daySpan = document.createElement('span');
-                                daySpan.className = 'day';
-                                daySpan.textContent = day;
-                                daysDiv.appendChild(daySpan);
-                            });
+                            if (subject.schedule.days) {
+                                subject.schedule.days.forEach(day => {
+                                    const daySpan = document.createElement('span');
+                                    daySpan.className = 'day';
+                                    daySpan.textContent = day;
+                                    daysDiv.appendChild(daySpan);
+                                });
+                            }
                             
                             const timeDiv = document.createElement('div');
                             timeDiv.className = 'time';
-                            timeDiv.textContent = `${subject.schedule.time.from} - ${subject.schedule.time.to}`;
+                            
+                            if (subject.schedule.time) {
+                                timeDiv.textContent = `${subject.schedule.time.from} - ${subject.schedule.time.to}`;
+                            } else {
+                                timeDiv.textContent = 'No time set';
+                                timeDiv.style.color = 'var(--light-text)';
+                                timeDiv.style.fontStyle = 'italic';
+                            }
                             
                             scheduleInfo.appendChild(daysDiv);
                             scheduleInfo.appendChild(timeDiv);
@@ -1328,8 +1357,8 @@
                         subjectSelect.value = subject.id;
                         updateClassDropdown();
                         
-                        if (subject.class) {
-                            classSelect.value = subject.class;
+                        if (subject.classInfo) {
+                            classSelect.value = subject.classInfo.id;
                         }
                         
                         // Trigger load students
@@ -1353,18 +1382,12 @@
         }
         
         // Create a class information item
-        function createClassItem(classId, schedule) {
+        function createClassItem(classInfo, schedule) {
             const classItem = document.createElement('div');
             
             const className = document.createElement('div');
             className.className = 'class-name';
-            
-            // Find class name from classes collection
-            if (allClasses[classId]) {
-                className.textContent = allClasses[classId].name || `Class ${classId}`;
-            } else {
-                className.textContent = `Class ${classId}`;
-            }
+            className.textContent = classInfo.name;
             
             const scheduleInfo = document.createElement('div');
             scheduleInfo.className = 'schedule';
@@ -1373,16 +1396,25 @@
                 const daysDiv = document.createElement('div');
                 daysDiv.className = 'days';
                 
-                schedule.days.forEach(day => {
-                    const daySpan = document.createElement('span');
-                    daySpan.className = 'day';
-                    daySpan.textContent = day;
-                    daysDiv.appendChild(daySpan);
-                });
+                if (schedule.days) {
+                    schedule.days.forEach(day => {
+                        const daySpan = document.createElement('span');
+                        daySpan.className = 'day';
+                        daySpan.textContent = day;
+                        daysDiv.appendChild(daySpan);
+                    });
+                }
                 
                 const timeDiv = document.createElement('div');
                 timeDiv.className = 'time';
-                timeDiv.textContent = `${schedule.time.from} - ${schedule.time.to}`;
+                
+                if (schedule.time) {
+                    timeDiv.textContent = `${schedule.time.from} - ${schedule.time.to}`;
+                } else {
+                    timeDiv.textContent = 'No time set';
+                    timeDiv.style.color = 'var(--light-text)';
+                    timeDiv.style.fontStyle = 'italic';
+                }
                 
                 scheduleInfo.appendChild(daysDiv);
                 scheduleInfo.appendChild(timeDiv);
@@ -1402,7 +1434,13 @@
         async function loadAllClasses() {
             try {
                 const snapshot = await classesRef.once('value');
-                allClasses = snapshot.exists() ? snapshot.val() : {};
+                const classes = snapshot.exists() ? snapshot.val() : {};
+                
+                // Convert to a more accessible format
+                allClasses = {};
+                for (const classId in classes) {
+                    allClasses[classId] = classes[classId];
+                }
             } catch (error) {
                 console.error('Error loading classes:', error);
                 showNotification({
@@ -1455,7 +1493,7 @@
                     `Class Score: ${gradeSettings.midtermWeight || '0'}%`,
                     `Final Exam: ${gradeSettings.finalExamWeight || '0'}%`
                 ];
-                gradeWeights.textContent = weights.join(' | ');
+                gradeWeights.text极速飞艇
             }
         }
         
@@ -1483,17 +1521,10 @@
             if (!subject) return;
             
             // If subject has a specific class assigned
-            if (subject.class) {
+            if (subject.classInfo) {
                 const option = document.createElement('option');
-                option.value = subject.class;
-                
-                // Get class name
-                if (allClasses[subject.class]) {
-                    option.textContent = allClasses[subject.class].name || `Class ${subject.class}`;
-                } else {
-                    option.textContent = `Class ${subject.class}`;
-                }
-                
+                option.value = subject.classInfo.id;
+                option.textContent = subject.classInfo.name;
                 classSelect.appendChild(option);
             } else {
                 // If subject is assigned to multiple classes, we need to determine which ones
@@ -1553,7 +1584,7 @@
                 // Student name and avatar
                 const nameCell = document.createElement('td');
                 const avatarUrl = student.profileImage || student.avatar || 
-                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${studentId}`;
+                    `https://api.dicebear.com/7.x极速飞艇
                 
                 nameCell.innerHTML = `
                     <img src="${avatarUrl}" alt="${student.name}" class="student-avatar">
@@ -1577,7 +1608,7 @@
                 const projectInput = document.createElement('input');
                 projectInput.type = 'number';
                 projectInput.className = 'input-grade';
-                projectInput.min = '0';
+                project极速飞艇
                 projectInput.max = '100';
                 projectInput.placeholder = '0-100';
                 projectInput.setAttribute('data-type', 'projects');
@@ -1658,14 +1689,14 @@
                     const grade = grades[gradeId];
                     
                     if (grade.studentId === studentId && 
-                        grade.subject === selectedSubject && 
+                        grade.subjectId === selectedSubject && 
                         grade.term === selectedTerm &&
                         grade.class === allClasses[selectedClass].name) {
                         
                         // Fill in the inputs
                         document.querySelector(`input[data-student="${studentId}"][data-type="assignments"]`).value = grade.assignments || '';
                         document.querySelector(`input[data-student="${studentId}"][data-type="projects"]`).value = grade.projects || '';
-                        document.querySelector(`input[data-student="${studentId}"][data-type="classScore"]`).value = grade.classScore || '';
+                        document.querySelector(`input极速飞艇
                         document.querySelector(`input[data-student="${studentId}"][data-type="finalExam"]`).value = grade.finalExam || '';
                         
                         // Trigger calculation
@@ -1698,7 +1729,7 @@
                 // Calculate weighted total
                 const total = (
                     (students[studentId].assignments * (gradeSettings.participationWeight || 0) / 100) +
-                    (students[studentId].projects * (gradeSettings.projectsWeight || 0) / 100) +
+                    (students[student极速飞艇
                     (students[studentId].classScore * (gradeSettings.midtermWeight || 0) / 100) +
                     (students[studentId].finalExam * (gradeSettings.finalExamWeight || 0) / 100)
                 ).toFixed(1);
@@ -1723,11 +1754,11 @@
         
         // Save grades to database
         async function saveGrades() {
-            if (!selectedSubject || !selectedClass || !selectedTerm) return;
+            if (!selectedSubject || !selectedClass || !selected极速飞艇
             
             try {
                 // Get the subject name
-                const subject = teacherSubjects.find(s => s.id === selectedSubject);
+                const subject = teacherSubjects极速飞艇
                 if (!subject) return;
                 
                 // Get the class name
@@ -1745,7 +1776,7 @@
                     const assignments = parseFloat(row.querySelector('input[data-type="assignments"]').value) || 0;
                     const projects = parseFloat(row.querySelector('input[data-type="projects"]').value) || 0;
                     const classScore = parseFloat(row.querySelector('input[data-type="classScore"]').value) || 0;
-                    const finalExam = parseFloat(row.querySelector('input[data-type="finalExam"]').value) || 0;
+                    const finalExam = parseFloat(row.querySelector('极速飞艇
                     const total = parseFloat(row.querySelector('.total-grade').textContent);
                     const letterGrade = row.querySelector('.letter-grade').textContent;
                     
@@ -1852,14 +1883,14 @@
                 
                 // Display published grades
                 teacherPublishedGrades.forEach(grade => {
-                    const gradeCard = document.createElement('div');
+                    const gradeCard = document.createElement('极速飞艇
                     gradeCard.className = 'subject-card';
                     gradeCard.style.marginBottom = '20px';
                     
                     gradeCard.innerHTML = `
                         <div class="subject-header">
                             <div class="subject-name">${grade.subject} - ${grade.class}</div>
-                            <div class="subject-icon"><i class="fas fa-check"></i></div>
+                            <极速飞艇
                         </div>
                         <div class="class-info">
                             <p><strong>Term:</strong> ${grade.term}</p>
