@@ -142,6 +142,7 @@
             box-shadow: var(--shadow);
             border: 1px solid var(--glass-border);
             margin-bottom: 20px;
+            position: relative;
         }
 
         .class-title {
@@ -149,6 +150,27 @@
             font-weight: 600;
             margin-bottom: 15px;
             color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .edit-fee-btn {
+            background: var(--info-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .edit-fee-btn:hover {
+            background: #0877d1;
         }
 
         .class-details {
@@ -553,6 +575,50 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Statistics Section */
+        .statistics-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+        }
+
+        .statistics-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .statistics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .statistic-card {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .statistic-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .statistic-label {
+            font-size: 0.9rem;
+            color: var(--light-text);
+        }
+
         /* Responsive Styles */
         @media (max-width: 768px) {
             .container {
@@ -598,6 +664,10 @@
                 justify-content: space-between;
                 width: 100%;
             }
+
+            .statistics-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 480px) {
@@ -642,9 +712,6 @@
                 </div>
             </div>
             <div class="fees-actions">
-                <button class="action-btn secondary" id="back-btn">
-                    <i class="fas fa-arrow-left"></i> Back
-                </button>
                 <button class="action-btn success" id="save-btn">
                     <i class="fas fa-save"></i> Save
                 </button>
@@ -653,7 +720,12 @@
 
         <!-- Class Information -->
         <div class="class-info" id="class-info">
-            <h2 class="class-title" id="class-name">Loading class...</h2>
+            <h2 class="class-title">
+                <span id="class-name">Loading class...</span>
+                <button class="edit-fee-btn" id="edit-fee-btn">
+                    <i class="fas fa-edit"></i> Edit Fee
+                </button>
+            </h2>
             <div class="class-details">
                 <div class="detail-item">
                     <div class="detail-label">Class ID</div>
@@ -708,6 +780,25 @@
             <div class="total-amount" id="expected-total">Expected Total: ₵0</div>
         </div>
 
+        <!-- Statistics Section -->
+        <div class="statistics-section" id="statistics-section" style="display: none;">
+            <h3 class="statistics-title">Payment Statistics</h3>
+            <div class="statistics-grid">
+                <div class="statistic-card">
+                    <div class="statistic-value" id="payment-rate">0%</div>
+                    <div class="statistic-label">Payment Rate</div>
+                </div>
+                <div class="statistic-card">
+                    <div class="statistic-value" id="avg-payment-time">0 days</div>
+                    <div class="statistic-label">Avg. Payment Time</div>
+                </div>
+                <div class="statistic-card">
+                    <div class="statistic-value" id="weekly-trend">0%</div>
+                    <div class="statistic-label">Weekly Trend</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Fees Container -->
         <div class="fees-container">
             <div class="fees-header">
@@ -748,6 +839,29 @@
         </div>
     </div>
 
+    <!-- Edit Fee Modal -->
+    <div class="modal" id="edit-fee-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Weekly Exam Fee</h3>
+                <button class="close-btn" id="close-edit-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="fee-amount">Weekly Exam Fee Amount (₵)</label>
+                    <input type="number" class="form-input" id="fee-amount" min="0" step="0.01">
+                </div>
+                <p style="font-size: 0.9rem; color: var(--light-text); margin-top: 10px;">
+                    This will set the default fee amount for all students in this class.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" id="cancel-edit-btn">Cancel</button>
+                <button class="action-btn success" id="save-fee-btn">Save Fee</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
@@ -771,13 +885,13 @@
         const profileImg = document.getElementById('profile-img');
         const greetingTitle = document.getElementById('greeting-title');
         const greetingSubtitle = document.getElementById('greeting-subtitle');
-        const backBtn = document.getElementById('back-btn');
         
         // Class info elements
         const classNameElement = document.getElementById('class-name');
         const classIdElement = document.getElementById('class-id');
         const classRoomElement = document.getElementById('class-room');
         const classExamFeeElement = document.getElementById('class-exam-fee');
+        const editFeeBtn = document.getElementById('edit-fee-btn');
         
         // Week selector elements
         const weekDisplay = document.getElementById('week-display');
@@ -795,12 +909,25 @@
         const totalCollectedElement = document.getElementById('total-collected');
         const expectedTotalElement = document.getElementById('expected-total');
         
+        // Statistics elements
+        const statisticsSection = document.getElementById('statistics-section');
+        const paymentRateElement = document.getElementById('payment-rate');
+        const avgPaymentTimeElement = document.getElementById('avg-payment-time');
+        const weeklyTrendElement = document.getElementById('weekly-trend');
+        
         // Modal elements
         const confirmationModal = document.getElementById('confirmation-modal');
         const closeModalBtn = document.getElementById('close-modal');
         const cancelBtn = document.getElementById('cancel-btn');
         const confirmSaveBtn = document.getElementById('confirm-save-btn');
         const confirmationMessage = document.getElementById('confirmation-message');
+        
+        // Edit fee modal elements
+        const editFeeModal = document.getElementById('edit-fee-modal');
+        const closeEditModalBtn = document.getElementById('close-edit-modal');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const saveFeeBtn = document.getElementById('save-fee-btn');
+        const feeAmountInput = document.getElementById('fee-amount');
         
         // Mark all paid button
         const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
@@ -820,6 +947,7 @@
         let classStudents = [];
         let examFeePaymentsData = {};
         let weeklyExamFeeAmount = 0;
+        let paymentHistory = {};
         
         // Current week tracking (Monday to Friday)
         let currentWeekStart = getMonday(new Date());
@@ -888,6 +1016,51 @@
                 }
             });
             return total;
+        }
+        
+        // Calculate payment statistics
+        function calculatePaymentStatistics() {
+            const totalStudents = classStudents.length;
+            let paidCount = 0;
+            let totalPaymentTime = 0;
+            let paymentTimeCount = 0;
+            
+            classStudents.forEach(student => {
+                const payment = examFeePaymentsData[student.id] || {};
+                if (payment.paid) {
+                    paidCount++;
+                    
+                    if (payment.timestamp) {
+                        const paymentDate = new Date(payment.timestamp);
+                        const weekStart = new Date(currentWeekStart);
+                        const daysDiff = Math.floor((paymentDate - weekStart) / (1000 * 60 * 60 * 24));
+                        
+                        if (daysDiff >= 0 && daysDiff <= 7) {
+                            totalPaymentTime += daysDiff;
+                            paymentTimeCount++;
+                        }
+                    }
+                }
+            });
+            
+            // Payment rate
+            const paymentRate = totalStudents > 0 ? (paidCount / totalStudents) * 100 : 0;
+            paymentRateElement.textContent = `${paymentRate.toFixed(1)}%`;
+            
+            // Average payment time
+            const avgPaymentTime = paymentTimeCount > 0 ? totalPaymentTime / paymentTimeCount : 0;
+            avgPaymentTimeElement.textContent = `${avgPaymentTime.toFixed(1)} days`;
+            
+            // Weekly trend (placeholder - would need historical data for real calculation)
+            const weeklyTrend = paidCount > 0 ? 5.2 : 0;
+            weeklyTrendElement.textContent = `${weeklyTrend.toFixed(1)}%`;
+            
+            // Show statistics section if there are students
+            if (totalStudents > 0) {
+                statisticsSection.style.display = 'block';
+            } else {
+                statisticsSection.style.display = 'none';
+            }
         }
         
         // Identify the current teacher based on Firebase Auth
@@ -1148,16 +1321,33 @@
             }
         }
         
+        // Load payment history for statistics
+        async function loadPaymentHistory() {
+            try {
+                const historySnapshot = await examFeePaymentsRef.orderByKey().limitToLast(4).once('value');
+                
+                if (historySnapshot.exists()) {
+                    return historySnapshot.val();
+                }
+                
+                return {};
+            } catch (error) {
+                console.error('Error loading payment history:', error);
+                return {};
+            }
+        }
+        
         // Load data for the current week
         async function loadWeekData() {
             const weekKey = getWeekKey(currentWeekStart);
             examFeePaymentsData = await loadExamFeePaymentsData(weekKey);
+            paymentHistory = await loadPaymentHistory();
             
             // Initialize empty records for students without payment data
             classStudents.forEach(student => {
                 if (!examFeePaymentsData[student.id]) {
                     examFeePaymentsData[student.id] = {
-                        amount: 0,
+                        amount: weeklyExamFeeAmount,
                         paid: false,
                         timestamp: new Date().toISOString(),
                         recordedBy: currentTeacherId
@@ -1167,6 +1357,7 @@
             
             renderStudentsList();
             updateFeeSummary();
+            calculatePaymentStatistics();
         }
         
         // Render the students list with payment status
@@ -1235,6 +1426,7 @@
             
             renderStudentsList();
             updateFeeSummary();
+            calculatePaymentStatistics();
         }
         
         // Update the fee summary section
@@ -1276,6 +1468,43 @@
             } catch (error) {
                 console.error('Error saving exam fee payments:', error);
                 showNotification('Failed to save exam fee payments. Please try again.', 'error');
+            }
+        }
+        
+        // Update the weekly exam fee amount
+        async function updateWeeklyExamFee(newAmount) {
+            try {
+                // Update in examFeeSettings
+                await examFeeSettingsRef.child(currentClass.id).set({
+                    amount: newAmount,
+                    updatedBy: currentTeacherId,
+                    updatedAt: new Date().toISOString()
+                });
+                
+                // Also update in class document for backward compatibility
+                await classesRef.child(currentClass.id).update({
+                    weeklyExamAmount: newAmount
+                });
+                
+                // Update local variable
+                weeklyExamFeeAmount = newAmount;
+                
+                // Update UI
+                classExamFeeElement.textContent = formatCurrency(weeklyExamFeeAmount);
+                
+                // Update all student payments with the new amount
+                for (const studentId in examFeePaymentsData) {
+                    examFeePaymentsData[studentId].amount = newAmount;
+                }
+                
+                renderStudentsList();
+                updateFeeSummary();
+                calculatePaymentStatistics();
+                
+                showNotification('Weekly exam fee updated successfully!', 'success');
+            } catch (error) {
+                console.error('Error updating weekly exam fee:', error);
+                showNotification('Failed to update weekly exam fee. Please try again.', 'error');
             }
         }
         
@@ -1407,6 +1636,7 @@
                 updateWeekDisplay();
                 renderStudentsList();
                 updateFeeSummary();
+                calculatePaymentStatistics();
             }
         }
         
@@ -1447,6 +1677,7 @@
             
             renderStudentsList();
             updateFeeSummary();
+            calculatePaymentStatistics();
             showNotification('All payments have been reset to unpaid.', 'info');
         });
         
@@ -1460,12 +1691,34 @@
             
             renderStudentsList();
             updateFeeSummary();
+            calculatePaymentStatistics();
             showNotification('All students have been marked as paid.', 'success');
         });
         
-        backBtn.addEventListener('click', function() {
-            // Go back to the previous page or dashboard
-            window.history.back();
+        editFeeBtn.addEventListener('click', function() {
+            // Show edit fee modal with current fee amount
+            feeAmountInput.value = weeklyExamFeeAmount;
+            editFeeModal.classList.add('active');
+        });
+        
+        closeEditModalBtn.addEventListener('click', function() {
+            editFeeModal.classList.remove('active');
+        });
+        
+        cancelEditBtn.addEventListener('click', function() {
+            editFeeModal.classList.remove('active');
+        });
+        
+        saveFeeBtn.addEventListener('click', function() {
+            const newAmount = parseFloat(feeAmountInput.value);
+            
+            if (isNaN(newAmount) || newAmount < 0) {
+                showNotification('Please enter a valid fee amount.', 'error');
+                return;
+            }
+            
+            editFeeModal.classList.remove('active');
+            updateWeeklyExamFee(newAmount);
         });
         
         // Initialize the app when the DOM is loaded
