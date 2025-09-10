@@ -1115,7 +1115,7 @@
                 
             }).catch((error) => {
                 logDebug("Error loading students:", error);
-                studentsContainer.innerHTML = '<div class="text-center text-muted py-3">Error loading students</div>';
+                studentsContainer.innerHTML = '<div class="text-center text-muted py-3'>Error loading students</div>';
             });
         }
 
@@ -1880,6 +1880,20 @@
             });
         }
 
+        // Listen for changes to withdrawal requests to update totals when approved
+        function setupWithdrawalListeners() {
+            database.ref('requests').on('child_changed', (snapshot) => {
+                const request = snapshot.val();
+                if (request.status === 'approved') {
+                    logDebug("Withdrawal request approved, updating totals");
+                    calculateTotals();
+                    updateChart();
+                    loadPendingRequests();
+                    loadTransactionHistory();
+                }
+            });
+        }
+
         // Initialize the application
         function initApp() {
             logDebug("Initializing application...");
@@ -1899,6 +1913,9 @@
             // Update recent vendors and titles displays
             updateRecentVendorsDisplay();
             updateRecentTitlesDisplay();
+            
+            // Set up withdrawal listeners
+            setupWithdrawalListeners();
             
             logDebug("Application initialized successfully");
         }
