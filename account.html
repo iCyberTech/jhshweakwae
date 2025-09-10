@@ -797,6 +797,7 @@
         const firebaseConfig = {
             apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
             authDomain: "sms-single.firebaseapp.com",
+            databaseURL: "https://sms-single-default-rtdb.firebaseio.com",
             projectId: "sms-single",
             storageBucket: "sms-single.appspot.com",
             messagingSenderId: "140188895278",
@@ -934,11 +935,13 @@
             
             database.ref('classes').once('value').then((snapshot) => {
                 classes = [];
-                snapshot.forEach((childSnapshot) => {
-                    const cls = childSnapshot.val();
-                    cls.id = childSnapshot.key;
-                    classes.push(cls);
-                });
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        const cls = childSnapshot.val();
+                        cls.id = childSnapshot.key;
+                        classes.push(cls);
+                    });
+                }
                 
                 // Update classes container
                 classesContainer.innerHTML = '';
@@ -953,10 +956,10 @@
                     classElement.className = 'class-group';
                     
                     classElement.innerHTML = `
-                        <div class="class-header">${cls.name} - ${cls.room}</div>
+                        <div class="class-header">${cls.name || 'Unnamed Class'} - ${cls.room || 'No Room'}</div>
                         <div class="class-body p-3">
                             <div class="d-flex justify-content-between align-items-center">
-                                <div>Schedule: ${cls.schedule}</div>
+                                <div>Schedule: ${cls.schedule || 'No Schedule'}</div>
                                 <button class="btn btn-primary btn-sm view-students" data-class-id="${cls.id}">
                                     View Students
                                 </button>
@@ -991,7 +994,7 @@
                 return;
             }
             
-            selectedClassName.textContent = cls.name;
+            selectedClassName.textContent = cls.name || 'Unnamed Class';
             ptaClassList.style.display = 'none';
             ptaStudentList.style.display = 'block';
             
@@ -1011,27 +1014,29 @@
             studentsContainer.innerHTML = '';
             
             const cls = classes.find(c => c.id === classId);
-            if (!cls || !cls.students) {
-                studentsContainer.innerHTML = '<div class="text-center text-muted py-3">No students in this class</div>';
+            if (!cls) {
+                studentsContainer.innerHTML = '<div class="text-center text-muted py-3">Class not found</div>';
                 return;
             }
             
             // Get all students
             database.ref('students').once('value').then((snapshot) => {
                 const allStudents = [];
-                snapshot.forEach((childSnapshot) => {
-                    const student = childSnapshot.val();
-                    student.id = childSnapshot.key;
-                    allStudents.push(student);
-                });
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        const student = childSnapshot.val();
+                        student.id = childSnapshot.key;
+                        allStudents.push(student);
+                    });
+                }
                 
                 // Filter students for this class
                 const classStudents = allStudents.filter(student => 
-                    cls.students.includes(student.id)
+                    cls.students && cls.students.includes(student.id)
                 );
                 
                 if (classStudents.length === 0) {
-                    studentsContainer.innerHTML = '<div class="text-center text-muted py-3'>No students found</div>';
+                    studentsContainer.innerHTML = '<div class="text-center text-muted py-3">No students in this class</div>';
                     return;
                 }
                 
@@ -1039,12 +1044,14 @@
                 database.ref('ptaFees').once('value').then((ptaSnapshot) => {
                     const paidStudents = new Set();
                     
-                    ptaSnapshot.forEach((childSnapshot) => {
-                        const fee = childSnapshot.val();
-                        if (!fee.deleted && classStudents.some(s => s.id === fee.studentId)) {
-                            paidStudents.add(fee.studentId);
-                        }
-                    });
+                    if (ptaSnapshot.exists()) {
+                        ptaSnapshot.forEach((childSnapshot) => {
+                            const fee = childSnapshot.val();
+                            if (!fee.deleted && classStudents.some(s => s.id === fee.studentId)) {
+                                paidStudents.add(fee.studentId);
+                            }
+                        });
+                    }
                     
                     // Display students with payment status
                     classStudents.forEach(student => {
@@ -1055,7 +1062,7 @@
                         
                         studentElement.innerHTML = `
                             <div>
-                                <div class="fw-bold">${student.name}</div>
+                                <div class="fw-bold">${student.name || 'Unnamed Student'}</div>
                                 <div class="small text-muted">ID: ${student.id}</div>
                             </div>
                             <div>
@@ -1064,7 +1071,7 @@
                                 </span>
                                 <button class="btn btn-sm ${isPaid ? 'btn-outline-secondary' : 'btn-primary'} ms-2 select-student" 
                                         data-student-id="${student.id}" 
-                                        data-student-name="${student.name}">
+                                        data-student-name="${student.name || 'Unnamed Student'}">
                                     ${isPaid ? 'Remove' : 'Mark Paid'}
                                 </button>
                             </div>
@@ -1115,7 +1122,7 @@
                 
             }).catch((error) => {
                 logDebug("Error loading students:", error);
-                studentsContainer.innerHTML = '<div class="text-center text-muted py-3">Error loading students</div>';
+                studentsContainer.innerHTML = '<div class="text-center text-muted py-3'>Error loading students</div>';
             });
         }
 
@@ -1223,39 +1230,47 @@
             
             // Calculate offerings total
             database.ref('offerings').once('value').then((snapshot) => {
-                snapshot.forEach((childSnapshot) => {
-                    const offering = childSnapshot.val();
-                    if (!offering.deleted) {
-                        categoryTotals.offerings += parseFloat(offering.amount) || 0;
-                    }
-                });
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        const offering = childSnapshot.val();
+                        if (!offering.deleted) {
+                            categoryTotals.offerings += parseFloat(offering.amount) || 0;
+                        }
+                    });
+                }
                 
                 // Calculate PTA total
                 database.ref('ptaFees').once('value').then((snapshot) => {
-                    snapshot.forEach((childSnapshot) => {
-                        const fee = childSnapshot.val();
-                        if (!fee.deleted) {
-                            categoryTotals.pta += parseFloat(fee.amount) || 0;
-                        }
-                    });
+                    if (snapshot.exists()) {
+                        snapshot.forEach((childSnapshot) => {
+                            const fee = childSnapshot.val();
+                            if (!fee.deleted) {
+                                categoryTotals.pta += parseFloat(fee.amount) || 0;
+                            }
+                        });
+                    }
                     
                     // Calculate food vendors total
                     database.ref('foodVendors').once('value').then((snapshot) => {
-                        snapshot.forEach((childSnapshot) => {
-                            const vendor = childSnapshot.val();
-                            if (!vendor.deleted) {
-                                categoryTotals.food_vendors += parseFloat(vendor.amount) || 0;
-                            }
-                        });
+                        if (snapshot.exists()) {
+                            snapshot.forEach((childSnapshot) => {
+                                const vendor = childSnapshot.val();
+                                if (!vendor.deleted) {
+                                    categoryTotals.food_vendors += parseFloat(vendor.amount) || 0;
+                                }
+                            });
+                        }
                         
                         // Calculate other fees total
                         database.ref('otherFees').once('value').then((snapshot) => {
-                            snapshot.forEach((childSnapshot) => {
-                                const other = childSnapshot.val();
-                                if (!other.deleted) {
-                                    categoryTotals.other_fees += parseFloat(other.amount) || 0;
-                                }
-                            });
+                            if (snapshot.exists()) {
+                                snapshot.forEach((childSnapshot) => {
+                                    const other = childSnapshot.val();
+                                    if (!other.deleted) {
+                                        categoryTotals.other_fees += parseFloat(other.amount) || 0;
+                                    }
+                                });
+                            }
                             
                             // Update UI with calculated totals
                             updateTotalsDisplay();
@@ -1493,48 +1508,6 @@
                 });
         });
 
-        // Process approved withdrawal by deducting from the source
-        function processApprovedWithdrawal(requestId, requestData) {
-            logDebug(`Processing approved withdrawal: ${requestId}`, requestData);
-            
-            // Create a withdrawal record to track the deduction
-            const withdrawalRecord = {
-                amount: requestData.amount,
-                source: requestData.source,
-                reason: requestData.reason,
-                date: requestData.date,
-                processedDate: Date.now(),
-                requestId: requestId
-            };
-            
-            // Add to withdrawals collection
-            database.ref('withdrawals').push(withdrawalRecord)
-                .then(() => {
-                    logDebug("Withdrawal record created successfully");
-                    // Recalculate totals to reflect the deduction
-                    calculateTotals();
-                })
-                .catch((error) => {
-                    logDebug('Error creating withdrawal record:', error);
-                });
-        }
-
-        // Listen for changes to withdrawal requests
-        function setupWithdrawalListener() {
-            database.ref('requests').on('child_changed', (snapshot) => {
-                const request = snapshot.val();
-                request.id = snapshot.key;
-                
-                // If request was approved, process the withdrawal
-                if (request.status === 'approved') {
-                    processApprovedWithdrawal(request.id, request);
-                }
-                
-                // Refresh pending requests list
-                loadPendingRequests();
-            });
-        }
-
         // Load recent transactions
         function loadRecentTransactions() {
             logDebug("Loading recent transactions...");
@@ -1545,78 +1518,69 @@
                 database.ref('offerings').orderByChild('date').limitToLast(5).once('value'),
                 database.ref('ptaFees').orderByChild('date').limitToLast(5).once('value'),
                 database.ref('foodVendors').orderByChild('date').limitToLast(5).once('value'),
-                database.ref('otherFees').orderByChild('date').limitToLast(5).once('value'),
-                database.ref('withdrawals').orderByChild('date').limitToLast(5).once('value')
-            ]).then(([offeringsSnapshot, ptaSnapshot, foodSnapshot, otherSnapshot, withdrawalsSnapshot]) => {
+                database.ref('otherFees').orderByChild('date').limitToLast(5).once('value')
+            ]).then(([offeringsSnapshot, ptaSnapshot, foodSnapshot, otherSnapshot]) => {
                 const transactions = [];
                 
                 // Process offerings
-                offeringsSnapshot.forEach((childSnapshot) => {
-                    const offering = childSnapshot.val();
-                    if (!offering.deleted) {
-                        transactions.push({
-                            type: 'Offering',
-                            amount: offering.amount,
-                            date: offering.date,
-                            details: 'Church Offering',
-                            isWithdrawal: false
-                        });
-                    }
-                });
+                if (offeringsSnapshot.exists()) {
+                    offeringsSnapshot.forEach((childSnapshot) => {
+                        const offering = childSnapshot.val();
+                        if (!offering.deleted) {
+                            transactions.push({
+                                type: 'Offering',
+                                amount: offering.amount,
+                                date: offering.date,
+                                details: 'Church Offering'
+                            });
+                        }
+                    });
+                }
                 
                 // Process PTA fees
-                ptaSnapshot.forEach((childSnapshot) => {
-                    const fee = childSnapshot.val();
-                    if (!fee.deleted) {
-                        transactions.push({
-                            type: 'PTA',
-                            amount: fee.amount,
-                            date: fee.date,
-                            details: `PTA - ${fee.studentName}`,
-                            isWithdrawal: false
-                        });
-                    }
-                });
+                if (ptaSnapshot.exists()) {
+                    ptaSnapshot.forEach((childSnapshot) => {
+                        const fee = childSnapshot.val();
+                        if (!fee.deleted) {
+                            transactions.push({
+                                type: 'PTA',
+                                amount: fee.amount,
+                                date: fee.date,
+                                details: `PTA - ${fee.studentName || 'Unknown Student'}`
+                            });
+                        }
+                    });
+                }
                 
                 // Process food vendors
-                foodSnapshot.forEach((childSnapshot) => {
-                    const vendor = childSnapshot.val();
-                    if (!vendor.deleted) {
-                        transactions.push({
-                            type: 'Food Vendor',
-                            amount: vendor.amount,
-                            date: vendor.date,
-                            details: `Food - ${vendor.vendorName}`,
-                            isWithdrawal: false
-                        });
-                    }
-                });
+                if (foodSnapshot.exists()) {
+                    foodSnapshot.forEach((childSnapshot) => {
+                        const vendor = childSnapshot.val();
+                        if (!vendor.deleted) {
+                            transactions.push({
+                                type: 'Food Vendor',
+                                amount: vendor.amount,
+                                date: vendor.date,
+                                details: `Food - ${vendor.vendorName || 'Unknown Vendor'}`
+                            });
+                        }
+                    });
+                }
                 
                 // Process other fees
-                otherSnapshot.forEach((childSnapshot) => {
-                    const other = childSnapshot.val();
-                    if (!other.deleted) {
-                        transactions.push({
-                            type: 'Other Fee',
-                            amount: other.amount,
-                            date: other.date,
-                            details: `Other - ${other.title}`,
-                            isWithdrawal: false
-                        });
-                    }
-                });
-                
-                // Process withdrawals
-                withdrawalsSnapshot.forEach((childSnapshot) => {
-                    const withdrawal = childSnapshot.val();
-                    transactions.push({
-                        type: 'Withdrawal',
-                        amount: withdrawal.amount,
-                        date: withdrawal.date,
-                        details: `Withdrawal from ${withdrawal.source}`,
-                        isWithdrawal: true
+                if (otherSnapshot.exists()) {
+                    otherSnapshot.forEach((childSnapshot) => {
+                        const other = childSnapshot.val();
+                        if (!other.deleted) {
+                            transactions.push({
+                                type: 'Other Fee',
+                                amount: other.amount,
+                                date: other.date,
+                                details: `Other - ${other.title || 'Untitled Fee'}`
+                            });
+                        }
                     });
-                });
+                }
                 
                 // Sort by date (newest first)
                 transactions.sort((a, b) => b.date - a.date);
@@ -1638,9 +1602,7 @@
                             <div class="fw-bold">${transaction.details}</div>
                             <div class="small text-muted">${formatDate(transaction.date)}</div>
                         </div>
-                        <div class="${transaction.isWithdrawal ? 'negative-amount' : 'positive-amount'}">
-                            ${transaction.isWithdrawal ? '-' : '+'}${formatCurrency(transaction.amount)}
-                        </div>
+                        <div class="positive-amount">+${formatCurrency(transaction.amount)}</div>
                     `;
                     
                     recentTransactionsContainer.appendChild(transactionElement);
@@ -1660,29 +1622,31 @@
             database.ref('requests').orderByChild('date').once('value').then((snapshot) => {
                 let hasPending = false;
                 
-                snapshot.forEach((childSnapshot) => {
-                    const request = childSnapshot.val();
-                    request.id = childSnapshot.key;
-                    
-                    if (request.status === 'pending') {
-                        hasPending = true;
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        const request = childSnapshot.val();
+                        request.id = childSnapshot.key;
                         
-                        const requestElement = document.createElement('div');
-                        requestElement.className = 'history-item';
-                        
-                        requestElement.innerHTML = `
-                            <div>
-                                <div class="fw-bold">Withdrawal Request</div>
-                                <div class="small">From: ${request.source}</div>
-                                <div class="small">Reason: ${request.reason}</div>
-                                <div class="small text-muted">${formatDate(request.date)}</div>
-                            </div>
-                            <div class="negative-amount">-${formatCurrency(request.amount)}</div>
-                        `;
-                        
-                        pendingRequestsContainer.appendChild(requestElement);
-                    }
-                });
+                        if (request.status === 'pending') {
+                            hasPending = true;
+                            
+                            const requestElement = document.createElement('div');
+                            requestElement.className = 'history-item';
+                            
+                            requestElement.innerHTML = `
+                                <div>
+                                    <div class="fw-bold">Withdrawal Request</div>
+                                    <div class="small">From: ${request.source}</div>
+                                    <div class="small">Reason: ${request.reason}</div>
+                                    <div class="small text-muted">${formatDate(request.date)}</div>
+                                </div>
+                                <div class="negative-amount">-${formatCurrency(request.amount)}</div>
+                            `;
+                            
+                            pendingRequestsContainer.appendChild(requestElement);
+                        }
+                    });
+                }
                 
                 if (!hasPending) {
                     pendingRequestsContainer.innerHTML = '<div class="text-center text-muted py-3">No pending requests</div>';
@@ -1718,61 +1682,63 @@
             }
             
             if (filter === 'all' || filter === 'withdrawals') {
-                promises.push(database.ref('withdrawals').orderByChild('date').once('value'));
+                promises.push(database.ref('requests').orderByChild('date').once('value'));
             }
             
             Promise.all(promises).then((snapshots) => {
                 const transactions = [];
                 
                 snapshots.forEach(snapshot => {
-                    snapshot.forEach((childSnapshot) => {
-                        const item = childSnapshot.val();
-                        item.id = childSnapshot.key;
-                        
-                        if (item.deleted) return;
-                        
-                        if (snapshot.key === 'offerings') {
-                            transactions.push({
-                                type: 'Offering',
-                                amount: item.amount,
-                                date: item.date,
-                                details: 'Church Offering',
-                                isWithdrawal: false
-                            });
-                        } else if (snapshot.key === 'ptaFees') {
-                            transactions.push({
-                                type: 'PTA',
-                                amount: item.amount,
-                                date: item.date,
-                                details: `PTA - ${item.studentName}`,
-                                isWithdrawal: false
-                            });
-                        } else if (snapshot.key === 'foodVendors') {
-                            transactions.push({
-                                type: 'Food Vendor',
-                                amount: item.amount,
-                                date: item.date,
-                                details: `Food - ${item.vendorName}`,
-                                isWithdrawal: false
-                            });
-                        } else if (snapshot.key === 'otherFees') {
-                            transactions.push({
-                                type: 'Other Fee',
-                                amount: item.amount,
-                                date: item.date,
-                                details: `Other - ${item.title}`,
-                                isWithdrawal: false
-                            });
-                        } else if (snapshot.key === 'withdrawals') {
-                            transactions.push({
-                                type: 'Withdrawal',
-                                amount: item.amount,
-                                date: item.date,
-                                details: `Withdrawal from ${item.source}`,
-                                isWithdrawal: true
-                            });
-                        }
-                    });
+                    if (snapshot.exists()) {
+                        snapshot.forEach((childSnapshot) => {
+                            const item = childSnapshot.val();
+                            item.id = childSnapshot.key;
+                            
+                            if (item.deleted) return;
+                            
+                            if (snapshot.key === 'offerings') {
+                                transactions.push({
+                                    type: 'Offering',
+                                    amount: item.amount,
+                                    date: item.date,
+                                    details: 'Church Offering',
+                                    isWithdrawal: false
+                                });
+                            } else if (snapshot.key === 'ptaFees') {
+                                transactions.push({
+                                    type: 'PTA',
+                                    amount: item.amount,
+                                    date: item.date,
+                                    details: `PTA - ${item.studentName || 'Unknown Student'}`,
+                                    isWithdrawal: false
+                                });
+                            } else if (snapshot.key === 'foodVendors') {
+                                transactions.push({
+                                    type: 'Food Vendor',
+                                    amount: item.amount,
+                                    date: item.date,
+                                    details: `Food - ${item.vendorName || 'Unknown Vendor'}`,
+                                    isWithdrawal: false
+                                });
+                            } else if (snapshot.key === 'otherFees') {
+                                transactions.push({
+                                    type: 'Other Fee',
+                                    amount: item.amount,
+                                    date: item.date,
+                                    details: `Other - ${item.title || 'Untitled Fee'}`,
+                                    isWithdrawal: false
+                                });
+                            } else if (snapshot.key === 'requests' && item.status === 'approved') {
+                                transactions.push({
+                                    type: 'Withdrawal',
+                                    amount: item.amount,
+                                    date: item.date,
+                                    details: `Withdrawal from ${item.source}`,
+                                    isWithdrawal: true
+                                });
+                            }
+                        });
+                    }
                 });
                 
                 // Sort by date (newest first)
@@ -1816,55 +1782,67 @@
                 database.ref('ptaFees').once('value'),
                 database.ref('foodVendors').once('value'),
                 database.ref('otherFees').once('value'),
-                database.ref('withdrawals').once('value')
-            ]).then(([offeringsSnapshot, ptaSnapshot, foodSnapshot, otherSnapshot, withdrawalsSnapshot]) => {
+                database.ref('requests').once('value')
+            ]).then(([offeringsSnapshot, ptaSnapshot, foodSnapshot, otherSnapshot, requestsSnapshot]) => {
                 const categories = ['Offerings', 'PTA', 'Food Vendors', 'Other Fees'];
                 const incomeData = [0, 0, 0, 0];
                 const expenseData = [0, 0, 0, 0];
                 
                 // Process offerings
-                offeringsSnapshot.forEach((childSnapshot) => {
-                    const offering = childSnapshot.val();
-                    if (!offering.deleted) {
-                        incomeData[0] += parseFloat(offering.amount) || 0;
-                    }
-                });
+                if (offeringsSnapshot.exists()) {
+                    offeringsSnapshot.forEach((childSnapshot) => {
+                        const offering = childSnapshot.val();
+                        if (!offering.deleted) {
+                            incomeData[0] += parseFloat(offering.amount) || 0;
+                        }
+                    });
+                }
                 
                 // Process PTA fees
-                ptaSnapshot.forEach((childSnapshot) => {
-                    const fee = childSnapshot.val();
-                    if (!fee.deleted) {
-                        incomeData[1] += parseFloat(fee.amount) || 0;
-                    }
-                });
+                if (ptaSnapshot.exists()) {
+                    ptaSnapshot.forEach((childSnapshot) => {
+                        const fee = childSnapshot.val();
+                        if (!fee.deleted) {
+                            incomeData[1] += parseFloat(fee.amount) || 0;
+                        }
+                    });
+                }
                 
                 // Process food vendors
-                foodSnapshot.forEach((childSnapshot) => {
-                    const vendor = childSnapshot.val();
-                    if (!vendor.deleted) {
-                        incomeData[2] += parseFloat(vendor.amount) || 0;
-                    }
-                });
+                if (foodSnapshot.exists()) {
+                    foodSnapshot.forEach((childSnapshot) => {
+                        const vendor = childSnapshot.val();
+                        if (!vendor.deleted) {
+                            incomeData[2] += parseFloat(vendor.amount) || 0;
+                        }
+                    });
+                }
                 
                 // Process other fees
-                otherSnapshot.forEach((childSnapshot) => {
-                    const other = childSnapshot.val();
-                    if (!other.deleted) {
-                        incomeData[3] += parseFloat(other.amount) || 0;
-                    }
-                });
+                if (otherSnapshot.exists()) {
+                    otherSnapshot.forEach((childSnapshot) => {
+                        const other = childSnapshot.val();
+                        if (!other.deleted) {
+                            incomeData[3] += parseFloat(other.amount) || 0;
+                        }
+                    });
+                }
                 
-                // Process withdrawals
-                withdrawalsSnapshot.forEach((childSnapshot) => {
-                    const withdrawal = childSnapshot.val();
-                    const sourceIndex = categories.findIndex(cat => 
-                        cat.toLowerCase().replace(' ', '_') === withdrawal.source
-                    );
-                    
-                    if (sourceIndex !== -1) {
-                        expenseData[sourceIndex] += parseFloat(withdrawal.amount) || 0;
-                    }
-                });
+                // Process approved withdrawal requests
+                if (requestsSnapshot.exists()) {
+                    requestsSnapshot.forEach((childSnapshot) => {
+                        const request = childSnapshot.val();
+                        if (request.status === 'approved') {
+                            const sourceIndex = categories.findIndex(cat => 
+                                cat.toLowerCase().replace(' ', '_') === request.source
+                            );
+                            
+                            if (sourceIndex !== -1) {
+                                expenseData[sourceIndex] += parseFloat(request.amount) || 0;
+                            }
+                        }
+                    });
+                }
                 
                 // Calculate net values
                 const netData = incomeData.map((income, index) => income - expenseData[index]);
@@ -1939,6 +1917,20 @@
             });
         }
 
+        // Listen for changes to withdrawal requests to update totals when approved
+        function setupWithdrawalListeners() {
+            database.ref('requests').on('child_changed', (snapshot) => {
+                const request = snapshot.val();
+                if (request.status === 'approved') {
+                    logDebug("Withdrawal request approved, updating totals");
+                    calculateTotals();
+                    updateChart();
+                    loadPendingRequests();
+                    loadTransactionHistory();
+                }
+            });
+        }
+
         // Initialize the application
         function initApp() {
             logDebug("Initializing application...");
@@ -1955,12 +1947,12 @@
                 loadTransactionHistory(this.value);
             });
             
-            // Set up withdrawal listener
-            setupWithdrawalListener();
-            
             // Update recent vendors and titles displays
             updateRecentVendorsDisplay();
             updateRecentTitlesDisplay();
+            
+            // Set up withdrawal listeners
+            setupWithdrawalListeners();
             
             logDebug("Application initialized successfully");
         }
