@@ -665,6 +665,93 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Notification dropdown styles */
+        .notification-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            width: 320px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .notification-dropdown.show {
+            display: flex;
+        }
+
+        .notification-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--text-color);
+        }
+
+        .notification-clear {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .notification-list {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .notification-item {
+            padding: 15px;
+            border-bottom: 1px solid #f5f5f5;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .notification-item:hover {
+            background: #f9f9f9;
+        }
+
+        .notification-item.unread {
+            background: #f0f7ff;
+        }
+
+        .notification-item-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+
+        .notification-item-message {
+            font-size: 0.9rem;
+            color: var(--light-text);
+            margin-bottom: 5px;
+        }
+
+        .notification-item-time {
+            font-size: 0.75rem;
+            color: #999;
+            text-align: right;
+        }
+
+        .notification-empty {
+            padding: 20px;
+            text-align: center;
+            color: var(--light-text);
+        }
+
         /* Mobile-specific styles */
         @media (max-width: 768px) {
             .container {
@@ -732,6 +819,11 @@
                 height: 36px;
                 font-size: 1.1rem;
             }
+
+            .notification-dropdown {
+                width: 280px;
+                right: -10px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -775,6 +867,10 @@
                 height: 34px;
                 font-size: 1rem;
             }
+
+            .notification-dropdown {
+                width: 260px;
+            }
         }
 
         @media (max-width: 360px) {
@@ -810,6 +906,10 @@
                 width: 32px;
                 height: 32px;
                 font-size: 0.9rem;
+            }
+
+            .notification-dropdown {
+                width: 240px;
             }
         }
 
@@ -868,9 +968,20 @@
                         <p id="greeting-subtitle">Let's make today productive</p>
                     </div>
                 </div>
-                <div class="notification-bell">
+                <div class="notification-bell" id="notification-bell">
                     <i class="fas fa-bell"></i>
-                    <span class="notification-dot"></span>
+                    <span class="notification-dot" id="notification-dot" style="display: none;"></span>
+                    
+                    <!-- Notification Dropdown -->
+                    <div class="notification-dropdown" id="notification-dropdown">
+                        <div class="notification-header">
+                            <h3>Notifications</h3>
+                            <button class="notification-clear" id="notification-clear">Clear All</button>
+                        </div>
+                        <ul class="notification-list" id="notification-list">
+                            <li class="notification-empty" id="notification-empty">No notifications</li>
+                        </ul>
+                    </div>
                 </div>
             </header>
 
@@ -1138,6 +1249,12 @@
         const greetingSubtitle = document.getElementById('greeting-subtitle');
         const notificationContainer = document.getElementById('notification-container');
         const bottomNav = document.getElementById('bottom-nav');
+        const notificationBell = document.getElementById('notification-bell');
+        const notificationDot = document.getElementById('notification-dot');
+        const notificationDropdown = document.getElementById('notification-dropdown');
+        const notificationList = document.getElementById('notification-list');
+        const notificationEmpty = document.getElementById('notification-empty');
+        const notificationClear = document.getElementById('notification-clear');
         
         // Attendance elements
         const attendanceStatus = document.getElementById('attendance-status');
@@ -1171,6 +1288,8 @@
         const teacherAttendanceRef = database.ref('teacherAttendance');
         const classesRef = database.ref('classes');
         const credentialsRef = database.ref('credentials');
+        const requestsRef = database.ref('requests');
+        const notificationsRef = database.ref('notifications');
         
         // Global variables
         let currentTeacherId = null;
@@ -1180,6 +1299,8 @@
         let isInRange = false;
         let isClassTeacher = false;
         let isAccountant = false;
+        let notifications = [];
+        let requestListener = null;
         
         // Get current date in YYYY-MM-DD format based on local time
         function getCurrentDate() {
@@ -1315,6 +1436,13 @@
                         if (accountants[accountantId].id === teacherId) {
                             isAccountant = true;
                             accountNav.style.display = 'flex';
+                            
+                            // Start listening for request changes if the user is an accountant
+                            setupRequestListener();
+                            
+                            // Load existing notifications
+                            loadNotifications();
+                            
                             showNotification({
                                 title: 'Accountant Access',
                                 message: 'Account management features enabled',
@@ -1335,6 +1463,220 @@
                 accountNav.style.display = 'none';
                 return false;
             }
+        }
+        
+        // Setup listener for request changes
+        function setupRequestListener() {
+            if (!isAccountant) return;
+            
+            // Listen for changes in the requests collection
+            requestListener = requestsRef.on('child_changed', (snapshot) => {
+                const request = snapshot.val();
+                const requestId = snapshot.key;
+                
+                // Check if the request status has changed from pending
+                if (request.status && request.status !== 'pending') {
+                    // Create a notification for the accountant
+                    createRequestNotification(requestId, request);
+                }
+            });
+            
+            // Also listen for new requests with pending status
+            requestsRef.on('child_added', (snapshot) => {
+                const request = snapshot.val();
+                const requestId = snapshot.key;
+                
+                if (request.status === 'pending') {
+                    // Check if notification already exists
+                    checkAndCreateNotification(requestId, request);
+                }
+            });
+        }
+        
+        // Check if notification already exists and create if not
+        function checkAndCreateNotification(requestId, request) {
+            const notificationId = `request_${requestId}`;
+            
+            notificationsRef.child(notificationId).once('value')
+                .then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        createRequestNotification(requestId, request);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error checking notification:', error);
+                });
+        }
+        
+        // Create a notification for a request change
+        function createRequestNotification(requestId, request) {
+            const notificationId = `request_${requestId}`;
+            const now = Date.now();
+            
+            let message = '';
+            let type = 'info';
+            
+            if (request.status === 'approved') {
+                message = `Request for ${request.reason} (₦${request.amount}) has been approved`;
+                type = 'success';
+            } else if (request.status === 'denied') {
+                message = `Request for ${request.reason} (₦${request.amount}) has been denied`;
+                type = 'error';
+                if (request.reason) {
+                    message += `. Reason: ${request.reason}`;
+                }
+            }
+            
+            // Create notification data
+            const notificationData = {
+                id: notificationId,
+                title: 'Request Update',
+                message: message,
+                type: type,
+                requestId: requestId,
+                timestamp: now,
+                read: false
+            };
+            
+            // Save to database
+            notificationsRef.child(notificationId).set(notificationData)
+                .then(() => {
+                    console.log('Notification created:', notificationId);
+                    
+                    // Show notification to user
+                    showNotification({
+                        title: notificationData.title,
+                        message: notificationData.message,
+                        type: notificationData.type,
+                        duration: 5000
+                    });
+                    
+                    // Update notification dot
+                    notificationDot.style.display = 'block';
+                    
+                    // Add to local notifications array
+                    notifications.unshift(notificationData);
+                    
+                    // Update notification dropdown
+                    updateNotificationDropdown();
+                })
+                .catch((error) => {
+                    console.error('Error creating notification:', error);
+                });
+        }
+        
+        // Load notifications from database
+        function loadNotifications() {
+            notificationsRef.orderByChild('timestamp').once('value')
+                .then((snapshot) => {
+                    notifications = [];
+                    
+                    if (snapshot.exists()) {
+                        snapshot.forEach((childSnapshot) => {
+                            const notification = childSnapshot.val();
+                            notifications.push(notification);
+                        });
+                        
+                        // Sort by timestamp (newest first)
+                        notifications.sort((a, b) => b.timestamp - a.timestamp);
+                        
+                        // Check if there are unread notifications
+                        const hasUnread = notifications.some(notification => !notification.read);
+                        if (hasUnread) {
+                            notificationDot.style.display = 'block';
+                        }
+                    }
+                    
+                    // Update notification dropdown
+                    updateNotificationDropdown();
+                })
+                .catch((error) => {
+                    console.error('Error loading notifications:', error);
+                });
+        }
+        
+        // Update notification dropdown UI
+        function updateNotificationDropdown() {
+            // Clear current list
+            notificationList.innerHTML = '';
+            
+            if (notifications.length === 0) {
+                notificationEmpty.style.display = 'block';
+                return;
+            }
+            
+            notificationEmpty.style.display = 'none';
+            
+            // Add notifications to list
+            notifications.forEach(notification => {
+                const listItem = document.createElement('li');
+                listItem.className = `notification-item ${notification.read ? '' : 'unread'}`;
+                listItem.dataset.id = notification.id;
+                
+                const date = new Date(notification.timestamp);
+                const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const dateString = date.toLocaleDateString();
+                
+                listItem.innerHTML = `
+                    <div class="notification-item-title">${notification.title}</div>
+                    <div class="notification-item-message">${notification.message}</div>
+                    <div class="notification-item-time">${timeString} · ${dateString}</div>
+                `;
+                
+                // Add click handler to mark as read
+                listItem.addEventListener('click', () => {
+                    markNotificationAsRead(notification.id);
+                });
+                
+                notificationList.appendChild(listItem);
+            });
+        }
+        
+        // Mark notification as read
+        function markNotificationAsRead(notificationId) {
+            // Update in database
+            notificationsRef.child(notificationId).update({ read: true })
+                .then(() => {
+                    // Update local copy
+                    const notification = notifications.find(n => n.id === notificationId);
+                    if (notification) {
+                        notification.read = true;
+                    }
+                    
+                    // Check if all notifications are read
+                    const hasUnread = notifications.some(notification => !notification.read);
+                    if (!hasUnread) {
+                        notificationDot.style.display = 'none';
+                    }
+                    
+                    // Update UI
+                    const listItem = notificationList.querySelector(`[data-id="${notificationId}"]`);
+                    if (listItem) {
+                        listItem.classList.remove('unread');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error marking notification as read:', error);
+                });
+        }
+        
+        // Clear all notifications
+        function clearAllNotifications() {
+            // Remove all notifications from database
+            notificationsRef.remove()
+                .then(() => {
+                    // Clear local array
+                    notifications = [];
+                    
+                    // Hide notification dot
+                    notificationDot.style.display = 'none';
+                    
+                    // Update UI
+                    updateNotificationDropdown();
+                })
+                .catch((error) => {
+                    console.error('Error clearing notifications:', error);
+                });
         }
         
         // Check for active teacher session
@@ -1683,7 +2025,8 @@
                     type: 'error'
                 });
             }
-        });
+        }
+        );
         
         // Load teacher stats (classes, students, etc.)
         function loadTeacherStats() {
@@ -1849,14 +2192,32 @@
             });
         });
         
-        // Notification click handler
-        document.querySelector('.notification-bell').addEventListener('click', function() {
-            showNotification({
-                title: 'Notifications',
-                message: 'You have 3 new notifications',
-                type: 'info'
-            });
-            this.querySelector('.notification-dot').style.display = 'none';
+        // Notification bell click handler
+        notificationBell.addEventListener('click', function(e) {
+            e.stopPropagation();
+            notificationDropdown.classList.toggle('show');
+            
+            // Mark all notifications as read when dropdown is opened
+            if (notificationDropdown.classList.contains('show')) {
+                notifications.forEach(notification => {
+                    if (!notification.read) {
+                        markNotificationAsRead(notification.id);
+                    }
+                });
+            }
+        });
+        
+        // Close notification dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!notificationBell.contains(e.target) && !notificationDropdown.contains(e.target)) {
+                notificationDropdown.classList.remove('show');
+            }
+        });
+        
+        // Clear all notifications handler
+        notificationClear.addEventListener('click', function(e) {
+            e.stopPropagation();
+            clearAllNotifications();
         });
         
         // Card hover effects
