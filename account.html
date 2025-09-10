@@ -1115,7 +1115,7 @@
                 
             }).catch((error) => {
                 logDebug("Error loading students:", error);
-                studentsContainer.innerHTML = '<div class="text-center text-muted py-3'>Error loading students</div>';
+                studentsContainer.innerHTML = '<div class="text-center text-muted py-3">Error loading students</div>';
             });
         }
 
@@ -1706,8 +1706,8 @@
                             transactions.push({
                                 type: 'Withdrawal',
                                 amount: item.amount,
-                                date: item.processedAt || item.date, // Use processedAt if available
-                                details: `Withdrawal from ${item.source} (Processed by: ${item.processedBy || 'Admin'})`,
+                                date: item.date,
+                                details: `Withdrawal from ${item.source}`,
                                 isWithdrawal: true
                             });
                         }
