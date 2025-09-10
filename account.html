@@ -1031,7 +1031,7 @@
                 );
                 
                 if (classStudents.length === 0) {
-                    studentsContainer.innerHTML = '<div class="text-center text-muted py-3">No students found</div>';
+                    studentsContainer.innerHTML = '<div class="text-center text-muted py-3'>No students found</div>';
                     return;
                 }
                 
@@ -1115,7 +1115,7 @@
                 
             }).catch((error) => {
                 logDebug("Error loading students:", error);
-                studentsContainer.innerHTML = '<div class="text-center text-muted py-3'>Error loading students</div>';
+                studentsContainer.innerHTML = '<div class="text-center text-muted py-3">Error loading students</div>';
             });
         }
 
@@ -1493,6 +1493,48 @@
                 });
         });
 
+        // Process approved withdrawal by deducting from the source
+        function processApprovedWithdrawal(requestId, requestData) {
+            logDebug(`Processing approved withdrawal: ${requestId}`, requestData);
+            
+            // Create a withdrawal record to track the deduction
+            const withdrawalRecord = {
+                amount: requestData.amount,
+                source: requestData.source,
+                reason: requestData.reason,
+                date: requestData.date,
+                processedDate: Date.now(),
+                requestId: requestId
+            };
+            
+            // Add to withdrawals collection
+            database.ref('withdrawals').push(withdrawalRecord)
+                .then(() => {
+                    logDebug("Withdrawal record created successfully");
+                    // Recalculate totals to reflect the deduction
+                    calculateTotals();
+                })
+                .catch((error) => {
+                    logDebug('Error creating withdrawal record:', error);
+                });
+        }
+
+        // Listen for changes to withdrawal requests
+        function setupWithdrawalListener() {
+            database.ref('requests').on('child_changed', (snapshot) => {
+                const request = snapshot.val();
+                request.id = snapshot.key;
+                
+                // If request was approved, process the withdrawal
+                if (request.status === 'approved') {
+                    processApprovedWithdrawal(request.id, request);
+                }
+                
+                // Refresh pending requests list
+                loadPendingRequests();
+            });
+        }
+
         // Load recent transactions
         function loadRecentTransactions() {
             logDebug("Loading recent transactions...");
@@ -1503,8 +1545,9 @@
                 database.ref('offerings').orderByChild('date').limitToLast(5).once('value'),
                 database.ref('ptaFees').orderByChild('date').limitToLast(5).once('value'),
                 database.ref('foodVendors').orderByChild('date').limitToLast(5).once('value'),
-                database.ref('otherFees').orderByChild('date').limitToLast(5).once('value')
-            ]).then(([offeringsSnapshot, ptaSnapshot, foodSnapshot, otherSnapshot]) => {
+                database.ref('otherFees').orderByChild('date').limitToLast(5).once('value'),
+                database.ref('withdrawals').orderByChild('date').limitToLast(5).once('value')
+            ]).then(([offeringsSnapshot, ptaSnapshot, foodSnapshot, otherSnapshot, withdrawalsSnapshot]) => {
                 const transactions = [];
                 
                 // Process offerings
@@ -1515,7 +1558,8 @@
                             type: 'Offering',
                             amount: offering.amount,
                             date: offering.date,
-                            details: 'Church Offering'
+                            details: 'Church Offering',
+                            isWithdrawal: false
                         });
                     }
                 });
@@ -1528,7 +1572,8 @@
                             type: 'PTA',
                             amount: fee.amount,
                             date: fee.date,
-                            details: `PTA - ${fee.studentName}`
+                            details: `PTA - ${fee.studentName}`,
+                            isWithdrawal: false
                         });
                     }
                 });
@@ -1541,7 +1586,8 @@
                             type: 'Food Vendor',
                             amount: vendor.amount,
                             date: vendor.date,
-                            details: `Food - ${vendor.vendorName}`
+                            details: `Food - ${vendor.vendorName}`,
+                            isWithdrawal: false
                         });
                     }
                 });
@@ -1554,9 +1600,22 @@
                             type: 'Other Fee',
                             amount: other.amount,
                             date: other.date,
-                            details: `Other - ${other.title}`
+                            details: `Other - ${other.title}`,
+                            isWithdrawal: false
                         });
                     }
+                });
+                
+                // Process withdrawals
+                withdrawalsSnapshot.forEach((childSnapshot) => {
+                    const withdrawal = childSnapshot.val();
+                    transactions.push({
+                        type: 'Withdrawal',
+                        amount: withdrawal.amount,
+                        date: withdrawal.date,
+                        details: `Withdrawal from ${withdrawal.source}`,
+                        isWithdrawal: true
+                    });
                 });
                 
                 // Sort by date (newest first)
@@ -1579,7 +1638,9 @@
                             <div class="fw-bold">${transaction.details}</div>
                             <div class="small text-muted">${formatDate(transaction.date)}</div>
                         </div>
-                        <div class="positive-amount">+${formatCurrency(transaction.amount)}</div>
+                        <div class="${transaction.isWithdrawal ? 'negative-amount' : 'positive-amount'}">
+                            ${transaction.isWithdrawal ? '-' : '+'}${formatCurrency(transaction.amount)}
+                        </div>
                     `;
                     
                     recentTransactionsContainer.appendChild(transactionElement);
@@ -1657,7 +1718,7 @@
             }
             
             if (filter === 'all' || filter === 'withdrawals') {
-                promises.push(database.ref('requests').orderByChild('date').once('value'));
+                promises.push(database.ref('withdrawals').orderByChild('date').once('value'));
             }
             
             Promise.all(promises).then((snapshots) => {
@@ -1702,7 +1763,7 @@
                                 details: `Other - ${item.title}`,
                                 isWithdrawal: false
                             });
-                        } else if (snapshot.key === 'requests' && item.status === 'approved') {
+                        } else if (snapshot.key === 'withdrawals') {
                             transactions.push({
                                 type: 'Withdrawal',
                                 amount: item.amount,
@@ -1755,8 +1816,8 @@
                 database.ref('ptaFees').once('value'),
                 database.ref('foodVendors').once('value'),
                 database.ref('otherFees').once('value'),
-                database.ref('requests').once('value')
-            ]).then(([offeringsSnapshot, ptaSnapshot, foodSnapshot, otherSnapshot, requestsSnapshot]) => {
+                database.ref('withdrawals').once('value')
+            ]).then(([offeringsSnapshot, ptaSnapshot, foodSnapshot, otherSnapshot, withdrawalsSnapshot]) => {
                 const categories = ['Offerings', 'PTA', 'Food Vendors', 'Other Fees'];
                 const incomeData = [0, 0, 0, 0];
                 const expenseData = [0, 0, 0, 0];
@@ -1793,17 +1854,15 @@
                     }
                 });
                 
-                // Process approved withdrawal requests
-                requestsSnapshot.forEach((childSnapshot) => {
-                    const request = childSnapshot.val();
-                    if (request.status === 'approved') {
-                        const sourceIndex = categories.findIndex(cat => 
-                            cat.toLowerCase().replace(' ', '_') === request.source
-                        );
-                        
-                        if (sourceIndex !== -1) {
-                            expenseData[sourceIndex] += parseFloat(request.amount) || 0;
-                        }
+                // Process withdrawals
+                withdrawalsSnapshot.forEach((childSnapshot) => {
+                    const withdrawal = childSnapshot.val();
+                    const sourceIndex = categories.findIndex(cat => 
+                        cat.toLowerCase().replace(' ', '_') === withdrawal.source
+                    );
+                    
+                    if (sourceIndex !== -1) {
+                        expenseData[sourceIndex] += parseFloat(withdrawal.amount) || 0;
                     }
                 });
                 
@@ -1880,20 +1939,6 @@
             });
         }
 
-        // Listen for changes to withdrawal requests to update totals when approved
-        function setupWithdrawalListeners() {
-            database.ref('requests').on('child_changed', (snapshot) => {
-                const request = snapshot.val();
-                if (request.status === 'approved') {
-                    logDebug("Withdrawal request approved, updating totals");
-                    calculateTotals();
-                    updateChart();
-                    loadPendingRequests();
-                    loadTransactionHistory();
-                }
-            });
-        }
-
         // Initialize the application
         function initApp() {
             logDebug("Initializing application...");
@@ -1910,12 +1955,12 @@
                 loadTransactionHistory(this.value);
             });
             
+            // Set up withdrawal listener
+            setupWithdrawalListener();
+            
             // Update recent vendors and titles displays
             updateRecentVendorsDisplay();
             updateRecentTitlesDisplay();
-            
-            // Set up withdrawal listeners
-            setupWithdrawalListeners();
             
             logDebug("Application initialized successfully");
         }
