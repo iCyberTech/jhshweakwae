@@ -1706,8 +1706,8 @@
                             transactions.push({
                                 type: 'Withdrawal',
                                 amount: item.amount,
-                                date: item.date,
-                                details: `Withdrawal from ${item.source}`,
+                                date: item.processedAt || item.date, // Use processedAt if available
+                                details: `Withdrawal from ${item.source} (Processed by: ${item.processedBy || 'Admin'})`,
                                 isWithdrawal: true
                             });
                         }
