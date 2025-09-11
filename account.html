@@ -1115,7 +1115,7 @@
                 
             }).catch((error) => {
                 logDebug("Error loading students:", error);
-                studentsContainer.innerHTML = '<div class="text-center text-muted py-3'>Error loading students</div>';
+                studentsContainer.innerHTML = '<div class="text-center text-muted py-3">Error loading students</div>';
             });
         }
 
@@ -1880,57 +1880,6 @@
             });
         }
 
-        // Listen for changes in withdrawal request status
-        function setupWithdrawalRequestListener() {
-            logDebug("Setting up withdrawal request status listener...");
-            
-            database.ref('requests').on('child_changed', (snapshot) => {
-                const request = snapshot.val();
-                request.id = snapshot.key;
-                
-                logDebug("Withdrawal request status changed:", request);
-                
-                if (request.status === 'approved') {
-                    // Handle approved withdrawal request
-                    handleApprovedWithdrawal(request);
-                } else if (request.status === 'denied') {
-                    // Handle denied withdrawal request
-                    logDebug(`Withdrawal request ${request.id} was denied`);
-                }
-            });
-        }
-
-        // Handle approved withdrawal request
-        function handleApprovedWithdrawal(request) {
-            logDebug(`Processing approved withdrawal request: ${request.id}`, request);
-            
-            // Create a withdrawal record
-            const withdrawalRecord = {
-                amount: request.amount,
-                source: request.source,
-                reason: request.reason,
-                date: request.date,
-                processedAt: Date.now(),
-                requestId: request.id
-            };
-            
-            // Add to withdrawals collection
-            database.ref('withdrawals').push(withdrawalRecord)
-                .then(() => {
-                    logDebug("Withdrawal record created successfully");
-                    
-                    // Update UI
-                    calculateTotals();
-                    updateChart();
-                    loadRecentTransactions();
-                    loadTransactionHistory();
-                    loadPendingRequests();
-                })
-                .catch((error) => {
-                    logDebug("Error creating withdrawal record:", error);
-                });
-        }
-
         // Initialize the application
         function initApp() {
             logDebug("Initializing application...");
@@ -1946,9 +1895,6 @@
             historyFilterSelect.addEventListener('change', function() {
                 loadTransactionHistory(this.value);
             });
-            
-            // Set up withdrawal request status listener
-            setupWithdrawalRequestListener();
             
             // Update recent vendors and titles displays
             updateRecentVendorsDisplay();
