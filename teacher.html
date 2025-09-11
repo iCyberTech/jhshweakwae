@@ -260,6 +260,23 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
         }
 
         .card-icon {
@@ -868,9 +885,9 @@
                         <p id="greeting-subtitle">Let's make today productive</p>
                     </div>
                 </div>
-                <div class="notification-bell">
+                <div class="notification-bell" id="notification-bell">
                     <i class="fas fa-bell"></i>
-                    <span class="notification-dot"></span>
+                    <span class="notification-dot" id="notification-dot" style="display: none;"></span>
                 </div>
             </header>
 
@@ -1138,6 +1155,8 @@
         const greetingSubtitle = document.getElementById('greeting-subtitle');
         const notificationContainer = document.getElementById('notification-container');
         const bottomNav = document.getElementById('bottom-nav');
+        const notificationBell = document.getElementById('notification-bell');
+        const notificationDot = document.getElementById('notification-dot');
         
         // Attendance elements
         const attendanceStatus = document.getElementById('attendance-status');
@@ -1171,6 +1190,7 @@
         const teacherAttendanceRef = database.ref('teacherAttendance');
         const classesRef = database.ref('classes');
         const credentialsRef = database.ref('credentials');
+        const requestsRef = database.ref('requests'); // New reference for requests
         
         // Global variables
         let currentTeacherId = null;
@@ -1180,6 +1200,8 @@
         let isInRange = false;
         let isClassTeacher = false;
         let isAccountant = false;
+        let pendingRequests = [];
+        let requestListener = null;
         
         // Get current date in YYYY-MM-DD format based on local time
         function getCurrentDate() {
@@ -1191,9 +1213,12 @@
         }
         
         // Show notification function
-        function showNotification({ title, message, type = 'info', duration = 5000 }) {
+        function showNotification({ title, message, type = 'info', duration = 5000, id = null }) {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
+            if (id) {
+                notification.dataset.id = id;
+            }
             
             const iconMap = {
                 success: 'check-circle',
@@ -1239,12 +1264,31 @@
                 notification.classList.remove('show');
                 notification.classList.add('hide');
                 
+                // Mark notification as read if it has an ID
+                if (id) {
+                    markNotificationAsRead(id);
+                }
+                
                 setTimeout(() => {
                     notification.remove();
                 }, 300);
             });
             
             return notification;
+        }
+        
+        // Mark notification as read in the database
+        function markNotificationAsRead(requestId) {
+            if (!isAccountant || !currentTeacherId) return;
+            
+            // Update the notification status for this request
+            database.ref(`requests/${requestId}/notification`).set({
+                status: 'read',
+                readBy: currentTeacherId,
+                readAt: Date.now()
+            }).catch(error => {
+                console.error('Error marking notification as read:', error);
+            });
         }
         
         // Toggle bottom navigation visibility
@@ -1315,6 +1359,10 @@
                         if (accountants[accountantId].id === teacherId) {
                             isAccountant = true;
                             accountNav.style.display = 'flex';
+                            
+                            // Start listening for request changes if the user is an accountant
+                            setupRequestListener();
+                            
                             showNotification({
                                 title: 'Accountant Access',
                                 message: 'Account management features enabled',
@@ -1334,6 +1382,92 @@
                 isAccountant = false;
                 accountNav.style.display = 'none';
                 return false;
+            }
+        }
+        
+        // Setup listener for request changes
+        function setupRequestListener() {
+            if (!isAccountant) return;
+            
+            // Remove existing listener if any
+            if (requestListener) {
+                requestsRef.off('value', requestListener);
+            }
+            
+            requestListener = requestsRef.on('value', (snapshot) => {
+                const requests = snapshot.val();
+                const newPendingRequests = [];
+                
+                if (requests) {
+                    // Process all requests
+                    Object.keys(requests).forEach(requestId => {
+                        const request = requests[requestId];
+                        
+                        // Check if this is a pending request with unread notification
+                        if (request.status === 'pending') {
+                            // Check notification status
+                            const notificationStatus = request.notification ? request.notification.status : 'unread';
+                            
+                            if (notificationStatus === 'unread') {
+                                newPendingRequests.push({
+                                    id: requestId,
+                                    ...request
+                                });
+                            }
+                        }
+                        
+                        // Check for status changes from pending to approved/denied
+                        if (request.status === 'approved' || request.status === 'denied') {
+                            // Check if we have a record of this request being pending before
+                            const wasPending = pendingRequests.find(r => r.id === requestId);
+                            
+                            if (wasPending) {
+                                // Show notification about the status change
+                                showNotification({
+                                    title: `Request ${request.status}`,
+                                    message: `Request for ${request.amount} from ${request.source} has been ${request.status}`,
+                                    type: request.status === 'approved' ? 'success' : 'error',
+                                    duration: 5000,
+                                    id: requestId
+                                });
+                                
+                                // Update notification dot
+                                updateNotificationDot();
+                            }
+                        }
+                    });
+                }
+                
+                // Update pending requests
+                pendingRequests = newPendingRequests;
+                
+                // Show notification dot if there are pending requests
+                updateNotificationDot();
+                
+                // Show notifications for new pending requests
+                pendingRequests.forEach(request => {
+                    // Check if this request is new (wasn't in our previous list)
+                    const wasAlreadyPending = pendingRequests.find(r => r.id === request.id);
+                    
+                    if (!wasAlreadyPending) {
+                        showNotification({
+                            title: 'New Pending Request',
+                            message: `New request for ${request.amount} from ${request.source}: ${request.reason}`,
+                            type: 'info',
+                            duration: 5000,
+                            id: request.id
+                        });
+                    }
+                });
+            });
+        }
+        
+        // Update notification dot visibility
+        function updateNotificationDot() {
+            if (pendingRequests.length > 0) {
+                notificationDot.style.display = 'block';
+            } else {
+                notificationDot.style.display = 'none';
             }
         }
         
@@ -1850,13 +1984,29 @@
         });
         
         // Notification click handler
-        document.querySelector('.notification-bell').addEventListener('click', function() {
-            showNotification({
-                title: 'Notifications',
-                message: 'You have 3 new notifications',
-                type: 'info'
-            });
-            this.querySelector('.notification-dot').style.display = 'none';
+        notificationBell.addEventListener('click', function() {
+            if (pendingRequests.length > 0) {
+                // Show all pending requests as notifications
+                pendingRequests.forEach(request => {
+                    showNotification({
+                        title: 'Pending Request',
+                        message: `Request for ${request.amount} from ${request.source}: ${request.reason}`,
+                        type: 'info',
+                        duration: 5000,
+                        id: request.id
+                    });
+                });
+                
+                // Hide the notification dot
+                notificationDot.style.display = 'none';
+            } else {
+                showNotification({
+                    title: 'Notifications',
+                    message: 'You have no new notifications',
+                    type: 'info',
+                    duration: 3000
+                });
+            }
         });
         
         // Card hover effects
