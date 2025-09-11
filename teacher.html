@@ -868,9 +868,9 @@
                         <p id="greeting-subtitle">Let's make today productive</p>
                     </div>
                 </div>
-                <div class="notification-bell" id="notification-bell">
+                <div class="notification-bell">
                     <i class="fas fa-bell"></i>
-                    <span class="notification-dot" id="notification-dot" style="display: none;"></span>
+                    <span class="notification-dot"></span>
                 </div>
             </header>
 
@@ -1138,8 +1138,6 @@
         const greetingSubtitle = document.getElementById('greeting-subtitle');
         const notificationContainer = document.getElementById('notification-container');
         const bottomNav = document.getElementById('bottom-nav');
-        const notificationBell = document.getElementById('notification-bell');
-        const notificationDot = document.getElementById('notification-dot');
         
         // Attendance elements
         const attendanceStatus = document.getElementById('attendance-status');
@@ -1173,7 +1171,6 @@
         const teacherAttendanceRef = database.ref('teacherAttendance');
         const classesRef = database.ref('classes');
         const credentialsRef = database.ref('credentials');
-        const requestsRef = database.ref('requests'); // New reference for requests
         
         // Global variables
         let currentTeacherId = null;
@@ -1183,7 +1180,6 @@
         let isInRange = false;
         let isClassTeacher = false;
         let isAccountant = false;
-        let unreadRequestNotifications = new Set(); // Track unread request notifications
         
         // Get current date in YYYY-MM-DD format based on local time
         function getCurrentDate() {
@@ -1195,12 +1191,9 @@
         }
         
         // Show notification function
-        function showNotification({ title, message, type = 'info', duration = 5000, requestId = null }) {
+        function showNotification({ title, message, type = 'info', duration = 5000 }) {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
-            if (requestId) {
-                notification.dataset.requestId = requestId;
-            }
             
             const iconMap = {
                 success: 'check-circle',
@@ -1246,43 +1239,12 @@
                 notification.classList.remove('show');
                 notification.classList.add('hide');
                 
-                // If this is a request notification, mark it as read
-                if (requestId) {
-                    markNotificationAsRead(requestId);
-                }
-                
                 setTimeout(() => {
                     notification.remove();
                 }, 300);
             });
             
             return notification;
-        }
-        
-        // Mark notification as read in the database
-        function markNotificationAsRead(requestId) {
-            if (!isAccountant || !currentTeacherId) return;
-            
-            // Update the notification status to "read" for this user
-            database.ref(`requests/${requestId}/notification/${currentTeacherId}`).set({
-                status: "read",
-                readAt: Date.now()
-            }).then(() => {
-                console.log(`Notification for request ${requestId} marked as read`);
-                unreadRequestNotifications.delete(requestId);
-                updateNotificationDot();
-            }).catch(error => {
-                console.error("Error marking notification as read:", error);
-            });
-        }
-        
-        // Update notification dot visibility
-        function updateNotificationDot() {
-            if (unreadRequestNotifications.size > 0) {
-                notificationDot.style.display = 'block';
-            } else {
-                notificationDot.style.display = 'none';
-            }
         }
         
         // Toggle bottom navigation visibility
@@ -1353,10 +1315,6 @@
                         if (accountants[accountantId].id === teacherId) {
                             isAccountant = true;
                             accountNav.style.display = 'flex';
-                            
-                            // Start listening for request changes if the user is an accountant
-                            setupRequestNotifications();
-                            
                             showNotification({
                                 title: 'Accountant Access',
                                 message: 'Account management features enabled',
@@ -1376,77 +1334,6 @@
                 isAccountant = false;
                 accountNav.style.display = 'none';
                 return false;
-            }
-        }
-        
-        // Setup request notifications for accountants
-        function setupRequestNotifications() {
-            if (!isAccountant) return;
-            
-            // Listen for changes in the requests collection
-            requestsRef.on('child_added', (snapshot) => {
-                const request = snapshot.val();
-                const requestId = snapshot.key;
-                
-                // Check if this request has already been notified for this user
-                checkAndNotifyRequest(request, requestId);
-            });
-            
-            requestsRef.on('child_changed', (snapshot) => {
-                const request = snapshot.val();
-                const requestId = snapshot.key;
-                
-                // Check if this request has already been notified for this user
-                checkAndNotifyRequest(request, requestId);
-            });
-        }
-        
-        // Check if a request should trigger a notification
-        async function checkAndNotifyRequest(request, requestId) {
-            if (!isAccountant || !currentTeacherId) return;
-            
-            try {
-                // Check if this request has a notification entry for the current user
-                const notificationSnapshot = await database.ref(`requests/${requestId}/notification/${currentTeacherId}`).once('value');
-                
-                if (!notificationSnapshot.exists() || notificationSnapshot.val().status !== "read") {
-                    // This is an unread notification for this user
-                    unreadRequestNotifications.add(requestId);
-                    updateNotificationDot();
-                    
-                    // Show notification based on request status
-                    let notificationTitle = "New Request";
-                    let notificationMessage = "";
-                    let notificationType = "info";
-                    
-                    if (request.status === "pending") {
-                        notificationTitle = "New Payment Request";
-                        notificationMessage = `Amount: ${request.amount || 'N/A'} for ${request.reason || 'unspecified reason'}`;
-                        notificationType = "info";
-                    } else if (request.status === "approved") {
-                        notificationTitle = "Request Approved";
-                        notificationMessage = `Your request for ${request.reason || 'unspecified reason'} has been approved`;
-                        notificationType = "success";
-                    } else if (request.status === "denied") {
-                        notificationTitle = "Request Denied";
-                        notificationMessage = `Your request for ${request.reason || 'unspecified reason'} has been denied`;
-                        if (request.reason) {
-                            notificationMessage += `: ${request.reason}`;
-                        }
-                        notificationType = "error";
-                    }
-                    
-                    // Show the notification
-                    showNotification({
-                        title: notificationTitle,
-                        message: notificationMessage,
-                        type: notificationType,
-                        duration: 7000,
-                        requestId: requestId
-                    });
-                }
-            } catch (error) {
-                console.error("Error checking request notification status:", error);
             }
         }
         
@@ -1796,7 +1683,7 @@
                     type: 'error'
                 });
             }
-        }
+        });
         
         // Load teacher stats (classes, students, etc.)
         function loadTeacherStats() {
@@ -1963,25 +1850,12 @@
         });
         
         // Notification click handler
-        notificationBell.addEventListener('click', function() {
-            // Show all unread notifications
-            if (unreadRequestNotifications.size > 0) {
-                // For each unread notification, show it again
-                unreadRequestNotifications.forEach(requestId => {
-                    database.ref(`requests/${requestId}`).once('value').then(snapshot => {
-                        const request = snapshot.val();
-                        checkAndNotifyRequest(request, requestId);
-                    });
-                });
-            } else {
-                showNotification({
-                    title: 'Notifications',
-                    message: 'You have no new notifications',
-                    type: 'info',
-                    duration: 3000
-                });
-            }
-            
+        document.querySelector('.notification-bell').addEventListener('click', function() {
+            showNotification({
+                title: 'Notifications',
+                message: 'You have 3 new notifications',
+                type: 'info'
+            });
             this.querySelector('.notification-dot').style.display = 'none';
         });
         
