@@ -797,8 +797,9 @@
         const firebaseConfig = {
             apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
             authDomain: "sms-single.firebaseapp.com",
+            databaseURL: "https://sms-single-default-rtdb.firebaseio.com",
             projectId: "sms-single",
-            storageBucket: "sms-single.appspot.com",
+            storageBucket: "sms-single.firebasestorage.app",
             messagingSenderId: "140188895278",
             appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
             measurementId: "G-7ER348P6VZ"
@@ -1115,7 +1116,7 @@
                 
             }).catch((error) => {
                 logDebug("Error loading students:", error);
-                studentsContainer.innerHTML = '<div class="text-center text-muted py-3">Error loading students</div>';
+                studentsContainer.innerHTML = '<div class="text-center text-muted py-3'>Error loading students</div>';
             });
         }
 
@@ -1257,8 +1258,22 @@
                                 }
                             });
                             
-                            // Update UI with calculated totals
-                            updateTotalsDisplay();
+                            // Subtract pending withdrawals from the respective categories
+                            database.ref('requests').orderByChild('status').equalTo('pending').once('value').then((snapshot) => {
+                                snapshot.forEach((childSnapshot) => {
+                                    const request = childSnapshot.val();
+                                    if (request.status === 'pending') {
+                                        categoryTotals[request.source] -= parseFloat(request.amount) || 0;
+                                    }
+                                });
+                                
+                                // Update UI with calculated totals
+                                updateTotalsDisplay();
+                            }).catch((error) => {
+                                logDebug("Error getting pending requests:", error);
+                                updateTotalsDisplay();
+                            });
+                            
                         }).catch((error) => {
                             logDebug("Error getting other fees:", error);
                         });
@@ -1461,7 +1476,7 @@
                 return;
             }
             
-            // Check if amount exceeds available balance
+            // Check if amount exceeds available balance (including pending withdrawals)
             if (amount > categoryTotals[source]) {
                 alert(`Withdrawal amount exceeds available balance for this source. Available: ${formatCurrency(categoryTotals[source])}`);
                 return;
@@ -1484,6 +1499,7 @@
                     withdrawSourceSelect.value = '';
                     withdrawReasonInput.value = '';
                     
+                    calculateTotals();
                     loadPendingRequests();
                     alert('Withdrawal request submitted successfully! It will be processed after approval.');
                 })
@@ -1492,6 +1508,38 @@
                     alert('Error submitting withdrawal request. Please try again.');
                 });
         });
+
+        // Listen for request status changes
+        function setupRequestStatusListener() {
+            database.ref('requests').on('child_changed', (snapshot) => {
+                const request = snapshot.val();
+                request.id = snapshot.key;
+                
+                logDebug("Request status changed:", request);
+                
+                // If request was rejected, refund the amount to the source
+                if (request.status === 'rejected') {
+                    // Check if this request was previously approved (to avoid double refunding)
+                    database.ref(`requests/${request.id}/refunded`).once('value').then((refundSnapshot) => {
+                        if (!refundSnapshot.exists()) {
+                            // Mark as refunded to prevent double processing
+                            database.ref(`requests/${request.id}/refunded`).set(true)
+                                .then(() => {
+                                    logDebug(`Refunded ${request.amount} to ${request.source} for rejected request`);
+                                    calculateTotals();
+                                    loadPendingRequests();
+                                });
+                        }
+                    });
+                }
+                
+                // Refresh data when request status changes
+                calculateTotals();
+                loadPendingRequests();
+                loadTransactionHistory();
+                updateChart();
+            });
+        }
 
         // Load recent transactions
         function loadRecentTransactions() {
@@ -1702,14 +1750,24 @@
                                 details: `Other - ${item.title}`,
                                 isWithdrawal: false
                             });
-                        } else if (snapshot.key === 'requests' && item.status === 'approved') {
-                            transactions.push({
-                                type: 'Withdrawal',
-                                amount: item.amount,
-                                date: item.date,
-                                details: `Withdrawal from ${item.source}`,
-                                isWithdrawal: true
-                            });
+                        } else if (snapshot.key === 'requests') {
+                            if (item.status === 'approved') {
+                                transactions.push({
+                                    type: 'Withdrawal',
+                                    amount: item.amount,
+                                    date: item.date,
+                                    details: `Withdrawal from ${item.source}`,
+                                    isWithdrawal: true
+                                });
+                            } else if (item.status === 'rejected') {
+                                transactions.push({
+                                    type: 'Refund',
+                                    amount: item.amount,
+                                    date: item.date,
+                                    details: `Refund to ${item.source} (Rejected request)`,
+                                    isWithdrawal: false
+                                });
+                            }
                         }
                     });
                 });
@@ -1793,16 +1851,23 @@
                     }
                 });
                 
-                // Process approved withdrawal requests
+                // Process approved withdrawal requests and pending requests
                 requestsSnapshot.forEach((childSnapshot) => {
                     const request = childSnapshot.val();
-                    if (request.status === 'approved') {
-                        const sourceIndex = categories.findIndex(cat => 
-                            cat.toLowerCase().replace(' ', '_') === request.source
-                        );
-                        
-                        if (sourceIndex !== -1) {
+                    const sourceIndex = categories.findIndex(cat => 
+                        cat.toLowerCase().replace(' ', '_') === request.source
+                    );
+                    
+                    if (sourceIndex !== -1) {
+                        if (request.status === 'approved') {
                             expenseData[sourceIndex] += parseFloat(request.amount) || 0;
+                        } else if (request.status === 'pending') {
+                            // For pending requests, subtract from income and add to expenses
+                            incomeData[sourceIndex] -= parseFloat(request.amount) || 0;
+                            expenseData[sourceIndex] += parseFloat(request.amount) || 0;
+                        } else if (request.status === 'rejected') {
+                            // For rejected requests, the amount was already subtracted from income when pending
+                            // and will be added back when the request is rejected (handled in calculateTotals)
                         }
                     }
                 });
@@ -1895,6 +1960,9 @@
             historyFilterSelect.addEventListener('change', function() {
                 loadTransactionHistory(this.value);
             });
+            
+            // Set up request status listener
+            setupRequestStatusListener();
             
             // Update recent vendors and titles displays
             updateRecentVendorsDisplay();
