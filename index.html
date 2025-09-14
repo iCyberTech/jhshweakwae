@@ -1005,7 +1005,7 @@
 
         .blog-comment-input {
             padding: 12px;
-            borderRadius: 8px;
+            border-radius: 8px;
             border: 1px solid #ddd;
             resize: vertical;
             min-height: 100px;
@@ -1657,7 +1657,7 @@
                 </div>
             </div>
             <div class="hero-image">
-                <img id="hero-image" src="" alt="Students Learning at Hweakwae JHS" width="600" height="400">
+                <img id="hero-image" src="imagea.png" alt="Students Learning at Hweakwae JHS" width="600" height="400">
             </div>
         </div>
     </section>
@@ -1729,13 +1729,37 @@
             </div>
             <div class="gallery-container">
                 <div class="gallery-grid" id="gallery-grid">
-                    <!-- Gallery items will be loaded dynamically from Firebase -->
+                    <!-- Gallery items will be loaded from local files -->
+                    <div class="gallery-item">
+                        <img src="image1.png" alt="School Building" loading="lazy">
+                        <div class="gallery-item-caption">Our School Building</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="image2.png" alt="Classroom" loading="lazy">
+                        <div class="gallery-item-caption">Modern Classroom</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="image3.png" alt="Science Lab" loading="lazy">
+                        <div class="gallery-item-caption">Science Laboratory</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="image4.png" alt="Students" loading="lazy">
+                        <div class="gallery-item-caption">Our Students</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="image5.png" alt="Sports Day" loading="lazy">
+                        <div class="gallery-item-caption">Sports Day</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="image6.png" alt="Library" loading="lazy">
+                        <div class="gallery-item-caption">School Library</div>
+                    </div>
                 </div>
                 <div class="gallery-nav">
                     <button class="gallery-nav-btn" id="gallery-prev" disabled aria-label="Previous gallery page">
                         <i class="fas fa-chevron-left"></i>
                     </button>
-                    <button class="gallery-nav-btn" id="gallery-next" aria-label="Next gallery page">
+                    <button class="gallery-nav-btn" id="gallery-next" disabled aria-label="Next gallery page">
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
@@ -1755,7 +1779,22 @@
                     <i class="fas fa-chevron-left"></i>
                 </button>
                 <div class="video-container" id="video-container">
-                    <!-- Video items will be loaded dynamically from Firebase -->
+                    <!-- Video items will be static -->
+                    <div class="video-card">
+                        <div class="video-player">
+                            <div style="display: flex; justify-content: center; align-items: center; height: 100%; background: #f0f0f0;">
+                                <div style="text-align: center; padding: 20px;">
+                                    <i class="fas fa-video" style="font-size: 3rem; color: #2e7d32; margin-bottom: 15px;"></i>
+                                    <h3>School Videos Coming Soon</h3>
+                                    <p>We're working on bringing you exciting videos of our school activities.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="video-card-content">
+                            <h3>School Videos Coming Soon</h3>
+                            <p>Check back later for videos showcasing our school activities and events.</p>
+                        </div>
+                    </div>
                 </div>
                 <button class="video-nav video-next" id="video-next" aria-label="Next videos">
                     <i class="fas fa-chevron-right"></i>
@@ -1772,7 +1811,7 @@
         <div class="container">
             <div class="cta-container">
                 <div class="cta-image">
-                    <img id="cta-image" src="" alt="Apply to Hweakwae JHS - Quality Education" width="500" height="400">
+                    <img id="cta-image" src="imagez.png" alt="Apply to Hweakwae JHS - Quality Education" width="500" height="400">
                 </div>
                 <div class="cta-content">
                     <h2>Ready to Join Our Community?</h2>
@@ -1886,7 +1925,6 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const storage = firebase.storage();
 
         // Track currently playing video
         let currentlyPlayingVideo = null;
@@ -2169,100 +2207,30 @@
             currentlyPlayingVideo = event.target;
         }
 
-        // Load media from Firebase
-        function loadMediaFromFirebase() {
-            // Load hero image
-            database.ref('websiteMedia/heroImage').once('value').then(snapshot => {
-                const heroImage = snapshot.val();
-                if (heroImage) {
-                    storage.ref(heroImage.path).getDownloadURL().then(url => {
-                        document.getElementById('hero-image').src = url;
-                    });
-                }
-            });
-
-            // Load CTA image
-            database.ref('websiteMedia/ctaImage').once('value').then(snapshot => {
-                const ctaImage = snapshot.val();
-                if (ctaImage) {
-                    storage.ref(ctaImage.path).getDownloadURL().then(url => {
-                        document.getElementById('cta-image').src = url;
-                    });
-                }
-            });
-
-            // Load gallery images
-            database.ref('websiteMedia/gallery').once('value').then(snapshot => {
-                const galleryData = snapshot.val();
-                galleryItems = [];
-                
-                if (galleryData) {
-                    const promises = Object.values(galleryData).map(item => {
-                        return storage.ref(item.path).getDownloadURL().then(url => {
-                            return {
-                                url: url,
-                                caption: item.caption || 'School Image'
-                            };
-                        });
-                    });
-                    
-                    Promise.all(promises).then(items => {
-                        galleryItems = items;
-                        displayGalleryPage(0);
-                    });
-                }
-            });
-
-            // Load videos
-            database.ref('websiteMedia/videos').once('value').then(snapshot => {
-                const videoItems = snapshot.val();
-                const videoContainer = document.getElementById('video-container');
-                
-                if (videoItems) {
-                    videoContainer.innerHTML = '';
-                    Object.values(videoItems).forEach(item => {
-                        const videoCard = document.createElement('div');
-                        videoCard.className = 'video-card';
-                        
-                        // Modify YouTube URL to prevent autoplay and add modest branding
-                        let videoUrl = item.url;
-                        if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
-                            // Remove any existing autoplay parameter
-                            videoUrl = videoUrl.replace('autoplay=1', 'autoplay=0');
-                            
-                            // Add parameters to prevent autoplay and enable modest branding
-                            if (videoUrl.includes('?')) {
-                                videoUrl += '&autoplay=0&modestbranding=1';
-                            } else {
-                                videoUrl += '?autoplay=0&modestbranding=1';
-                            }
-                        }
-                        
-                        videoCard.innerHTML = `
-                            <div class="video-player">
-                                <iframe src="${videoUrl}" title="${item.title || 'School Video'}" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
-                            </div>
-                            <div class="video-card-content">
-                                <h3>${item.title || 'School Video'}</h3>
-                                <p>${item.description || ''}</p>
-                            </div>
-                        `;
-                        videoContainer.appendChild(videoCard);
-                    });
-                    
-                    // Add event listeners to iframes to handle video playback
-                    setTimeout(() => {
-                        const iframes = document.querySelectorAll('.video-player iframe');
-                        iframes.forEach(iframe => {
-                            iframe.addEventListener('load', function() {
-                                // Add a click event to the iframe container to handle play
-                                const container = iframe.closest('.video-player');
-                                container.addEventListener('click', handleVideoPlay);
-                            });
-                        });
-                    }, 1000);
-                }
-            });
+        // Load media from local files
+        function loadMediaFromLocal() {
+            // Set hero image
+            document.getElementById('hero-image').src = "imagea.png";
+            
+            // Set CTA image
+            document.getElementById('cta-image').src = "imagez.png";
+            
+            // Set gallery images
+            galleryItems = [
+                { url: "image1.png", caption: "Our School Building" },
+                { url: "image2.png", caption: "Modern Classroom" },
+                { url: "image3.png", caption: "Science Laboratory" },
+                { url: "image4.png", caption: "Our Students" },
+                { url: "image5.png", caption: "Sports Day" },
+                { url: "image6.png", caption: "School Library" }
+            ];
+            
+            // Since we have only 6 images, disable pagination buttons
+            galleryPrevBtn.disabled = true;
+            galleryNextBtn.disabled = true;
+            
+            // Videos are static - no need to load from Firebase
+            // The video section already contains the "Coming Soon" message
         }
 
         // Blog functionality
@@ -2731,7 +2699,7 @@
         // Load all content when page loads
         window.addEventListener('load', () => {
             loadAnnouncements();
-            loadMediaFromFirebase();
+            loadMediaFromLocal();
             loadBlogPosts();
             setupBlogRealtimeUpdates();
             initScrollTransitions();
