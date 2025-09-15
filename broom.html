@@ -793,6 +793,55 @@
             color: var(--secondary-color);
         }
 
+        /* Overall Totals Section */
+        .overall-totals {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+        }
+
+        .overall-totals-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .overall-totals-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .overall-totals-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .overall-total-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+        }
+
+        .overall-total-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .overall-total-label {
+            font-size: 0.8rem;
+            color: var(--light-text);
+        }
+
         /* Responsive Styles */
         @media (max-width: 768px) {
             .container {
@@ -866,6 +915,10 @@
                 flex: 1;
                 text-align: center;
             }
+            
+            .overall-totals-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 480px) {
@@ -885,6 +938,10 @@
             .mark-all-paid-btn, .action-btn {
                 width: 100%;
                 justify-content: center;
+            }
+            
+            .overall-totals-content {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -918,6 +975,9 @@
                     <button class="action-btn secondary" id="stats-btn">
                         <i class="fas fa-chart-bar"></i> Statistics
                     </button>
+                    <button class="action-btn secondary" id="overall-totals-btn">
+                        <i class="fas fa-globe"></i> Overall Totals
+                    </button>
                     <div class="currency-selector">
                         <button class="currency-btn" id="currency-btn">
                             <span id="current-currency">GHS</span>
@@ -943,6 +1003,34 @@
                     </div>
                 </div>
             </header>
+
+            <!-- Overall Totals Section -->
+            <div class="overall-totals" id="overall-totals" style="display: none;">
+                <div class="overall-totals-header">
+                    <h3 class="overall-totals-title">Overall Broom Fees Summary</h3>
+                    <button class="action-btn secondary" id="refresh-totals-btn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                <div class="overall-totals-content">
+                    <div class="overall-total-item">
+                        <div class="overall-total-value" id="overall-total-collected">₵0.00</div>
+                        <div class="overall-total-label">Total Collected</div>
+                    </div>
+                    <div class="overall-total-item">
+                        <div class="overall-total-value" id="overall-total-expected">₵0.00</div>
+                        <div class="overall-total-label">Total Expected</div>
+                    </div>
+                    <div class="overall-total-item">
+                        <div class="overall-total-value" id="overall-total-outstanding">₵0.00</div>
+                        <div class="overall-total-label">Total Outstanding</div>
+                    </div>
+                    <div class="overall-total-item">
+                        <div class="overall-total-value" id="overall-payment-rate">0%</div>
+                        <div class="overall-total-label">Overall Payment Rate</div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Class Information -->
             <div class="class-info" id="class-info">
@@ -1162,6 +1250,55 @@
         </div>
     </div>
 
+    <!-- Overall Totals Modal -->
+    <div class="modal" id="overall-totals-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Overall Broom Fees Summary</h3>
+                <button class="close-btn" id="close-overall-totals-modal">&times;</button>
+            </div>
+            <div class="modal-body stats-container">
+                <div class="stats-header">
+                    <h4>All Classes Summary</h4>
+                    <button class="action-btn secondary" id="refresh-overall-totals-btn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="stats-summary">
+                    <div class="stats-summary-item">
+                        <div class="stats-summary-value" id="modal-overall-total-collected">₵0.00</div>
+                        <div class="stats-summary-label">Total Collected</div>
+                    </div>
+                    <div class="stats-summary-item">
+                        <div class="stats-summary-value" id="modal-overall-total-expected">₵0.00</div>
+                        <div class="stats-summary-label">Total Expected</div>
+                    </div>
+                    <div class="stats-summary-item">
+                        <div class="stats-summary-value" id="modal-overall-total-outstanding">₵0.00</div>
+                        <div class="stats-summary-label">Total Outstanding</div>
+                    </div>
+                    <div class="stats-summary-item">
+                        <div class="stats-summary-value" id="modal-overall-payment-rate">0%</div>
+                        <div class="stats-summary-label">Payment Rate</div>
+                    </div>
+                </div>
+
+                <div class="stats-chart-container">
+                    <canvas id="overall-totals-chart"></canvas>
+                </div>
+
+                <h4>Class-wise Breakdown</h4>
+                <div id="class-breakdown-list">
+                    <!-- Class breakdown will be inserted here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" id="close-overall-totals-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
@@ -1258,6 +1395,26 @@
         const statsTotalStudents = document.getElementById('stats-total-students');
         const statsPaymentsList = document.getElementById('stats-payments-list');
         
+        // Overall totals elements
+        const overallTotalsBtn = document.getElementById('overall-totals-btn');
+        const overallTotalsSection = document.getElementById('overall-totals');
+        const refreshTotalsBtn = document.getElementById('refresh-totals-btn');
+        const overallTotalCollected = document.getElementById('overall-total-collected');
+        const overallTotalExpected = document.getElementById('overall-total-expected');
+        const overallTotalOutstanding = document.getElementById('overall-total-outstanding');
+        const overallPaymentRate = document.getElementById('overall-payment-rate');
+        
+        // Overall totals modal elements
+        const overallTotalsModal = document.getElementById('overall-totals-modal');
+        const closeOverallTotalsModalBtn = document.getElementById('close-overall-totals-modal');
+        const refreshOverallTotalsBtn = document.getElementById('refresh-overall-totals-btn');
+        const closeOverallTotalsBtn = document.getElementById('close-overall-totals-btn');
+        const modalOverallTotalCollected = document.getElementById('modal-overall-total-collected');
+        const modalOverallTotalExpected = document.getElementById('modal-overall-total-expected');
+        const modalOverallTotalOutstanding = document.getElementById('modal-overall-total-outstanding');
+        const modalOverallPaymentRate = document.getElementById('modal-overall-payment-rate');
+        const classBreakdownList = document.getElementById('class-breakdown-list');
+        
         // Mark all paid button
         const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
         
@@ -1268,6 +1425,7 @@
         const broomFeesRef = database.ref('broomFees');
         const broomFeeSettingsRef = database.ref('broomFeeSettings');
         const studentsRef = database.ref('students');
+        const overallTotalsRef = database.ref('overallTotals');
         
         // Global variables
         let currentTeacherId = null;
@@ -1281,8 +1439,10 @@
         let currencySymbol = '₵';
         let currencyRate = 1;
         let statsChart = null;
+        let overallTotalsChart = null;
         let currentStatsPeriod = 'term';
         let editingStudentId = null;
+        let overallTotalsData = {};
         
         // Format currency
         function formatCurrency(amount) {
@@ -1770,12 +1930,259 @@
             try {
                 await broomFeesRef.child(`${currentClass.id}/term${currentTerm}`).set(broomFeesData);
                 
+                // Update overall totals
+                await updateOverallTotals();
+                
                 // Show success message
                 alert('Broom fees saved successfully!');
             } catch (error) {
                 console.error('Error saving broom fees:', error);
                 alert('Failed to save broom fees. Please try again.');
             }
+        }
+        
+        // Update overall totals in Firebase
+        async function updateOverallTotals() {
+            try {
+                // Calculate totals for this class
+                let classCollected = 0;
+                let classExpected = 0;
+                
+                classStudents.forEach(student => {
+                    const payment = broomFeesData[student.id] || {};
+                    const amount = payment.amount || broomFeeAmount;
+                    
+                    classExpected += amount;
+                    
+                    if (payment.paid) {
+                        classCollected += amount;
+                    }
+                });
+                
+                // Update overall totals for this class and term
+                const overallTotalData = {
+                    feeType: 'broom',
+                    class: currentClass.id,
+                    className: currentClass.name,
+                    term: currentTerm,
+                    collected: classCollected,
+                    expected: classExpected,
+                    outstanding: classExpected - classCollected,
+                    updatedAt: Date.now()
+                };
+                
+                await overallTotalsRef.child(`broom/${currentClass.id}/term${currentTerm}`).set(overallTotalData);
+                
+                return true;
+            } catch (error) {
+                console.error('Error updating overall totals:', error);
+                return false;
+            }
+        }
+        
+        // Load overall totals from Firebase
+        async function loadOverallTotals() {
+            try {
+                const overallTotalsSnapshot = await overallTotalsRef.child('broom').once('value');
+                
+                if (!overallTotalsSnapshot.exists()) {
+                    return {};
+                }
+                
+                return overallTotalsSnapshot.val();
+            } catch (error) {
+                console.error('Error loading overall totals:', error);
+                return {};
+            }
+        }
+        
+        // Calculate and display overall totals
+        async function calculateAndDisplayOverallTotals() {
+            try {
+                overallTotalsData = await loadOverallTotals();
+                
+                let totalCollected = 0;
+                let totalExpected = 0;
+                let classBreakdown = [];
+                
+                // Calculate totals across all classes and terms
+                for (const classId in overallTotalsData) {
+                    const classData = overallTotalsData[classId];
+                    
+                    for (const termKey in classData) {
+                        if (classData[termKey]) {
+                            const termData = classData[termKey];
+                            totalCollected += termData.collected || 0;
+                            totalExpected += termData.expected || 0;
+                            
+                            // Add to class breakdown
+                            classBreakdown.push({
+                                className: termData.className || classId,
+                                term: termData.term,
+                                collected: termData.collected || 0,
+                                expected: termData.expected || 0,
+                                outstanding: termData.outstanding || 0
+                            });
+                        }
+                    }
+                }
+                
+                // Update overall totals display
+                overallTotalCollected.textContent = formatCurrency(totalCollected);
+                overallTotalExpected.textContent = formatCurrency(totalExpected);
+                overallTotalOutstanding.textContent = formatCurrency(totalExpected - totalCollected);
+                
+                const paymentRate = totalExpected > 0 ? (totalCollected / totalExpected) * 100 : 0;
+                overallPaymentRate.textContent = `${paymentRate.toFixed(1)}%`;
+                
+                // Update modal display
+                modalOverallTotalCollected.textContent = formatCurrency(totalCollected);
+                modalOverallTotalExpected.textContent = formatCurrency(totalExpected);
+                modalOverallTotalOutstanding.textContent = formatCurrency(totalExpected - totalCollected);
+                modalOverallPaymentRate.textContent = `${paymentRate.toFixed(1)}%`;
+                
+                // Render class breakdown
+                renderClassBreakdown(classBreakdown);
+                
+                // Render overall totals chart
+                renderOverallTotalsChart(totalCollected, totalExpected);
+                
+                // Show overall totals section
+                overallTotalsSection.style.display = 'block';
+                
+                return true;
+            } catch (error) {
+                console.error('Error calculating overall totals:', error);
+                return false;
+            }
+        }
+        
+        // Render class breakdown in modal
+        function renderClassBreakdown(classBreakdown) {
+            if (classBreakdown.length === 0) {
+                classBreakdownList.innerHTML = '<p>No class data available.</p>';
+                return;
+            }
+            
+            // Group by class
+            const classGroups = {};
+            classBreakdown.forEach(item => {
+                if (!classGroups[item.className]) {
+                    classGroups[item.className] = {
+                        className: item.className,
+                        collected: 0,
+                        expected: 0,
+                        outstanding: 0,
+                        terms: []
+                    };
+                }
+                
+                classGroups[item.className].collected += item.collected;
+                classGroups[item.className].expected += item.expected;
+                classGroups[item.className].outstanding += item.outstanding;
+                classGroups[item.className].terms.push(item);
+            });
+            
+            let html = '';
+            
+            for (const className in classGroups) {
+                const classData = classGroups[className];
+                const paymentRate = classData.expected > 0 ? (classData.collected / classData.expected) * 100 : 0;
+                
+                html += `
+                    <div class="class-breakdown-item" style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                        <h5>${className}</h5>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px;">
+                            <div style="text-align: center;">
+                                <div style="font-weight: 600;">${formatCurrency(classData.collected)}</div>
+                                <div style="font-size: 0.8rem; color: var(--light-text);">Collected</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-weight: 600;">${formatCurrency(classData.expected)}</div>
+                                <div style="font-size: 0.8rem; color: var(--light-text);">Expected</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-weight: 600;">${paymentRate.toFixed(1)}%</div>
+                                <div style="font-size: 0.8rem; color: var(--light-text);">Rate</div>
+                            </div>
+                        </div>
+                        <details>
+                            <summary style="cursor: pointer; font-size: 0.9rem;">View Term Breakdown</summary>
+                            <table class="stats-table" style="margin-top: 10px;">
+                                <thead>
+                                    <tr>
+                                        <th>Term</th>
+                                        <th>Collected</th>
+                                        <th>Expected</th>
+                                        <th>Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+                
+                classData.terms.forEach(term => {
+                    const termPaymentRate = term.expected > 0 ? (term.collected / term.expected) * 100 : 0;
+                    html += `
+                        <tr>
+                            <td>Term ${term.term}</td>
+                            <td>${formatCurrency(term.collected)}</td>
+                            <td>${formatCurrency(term.expected)}</td>
+                            <td>${termPaymentRate.toFixed(1)}%</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                                </tbody>
+                            </table>
+                        </details>
+                    </div>
+                `;
+            }
+            
+            classBreakdownList.innerHTML = html;
+        }
+        
+        // Render overall totals chart
+        function renderOverallTotalsChart(totalCollected, totalExpected) {
+            const ctx = document.getElementById('overall-totals-chart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (overallTotalsChart) {
+                overallTotalsChart.destroy();
+            }
+            
+            overallTotalsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Collected', 'Outstanding'],
+                    datasets: [{
+                        data: [totalCollected, totalExpected - totalCollected],
+                        backgroundColor: [
+                            'rgba(0, 184, 148, 0.7)',
+                            'rgba(214, 48, 49, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(0, 184, 148, 1)',
+                            'rgba(214, 48, 49, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${formatCurrency(context.raw)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
         
         // Reset all payments to unpaid
@@ -2046,6 +2453,11 @@
             
             // Update class broom fee display
             classBroomFeeElement.textContent = formatCurrency(broomFeeAmount);
+            
+            // Update overall totals if they are visible
+            if (overallTotalsSection.style.display === 'block') {
+                calculateAndDisplayOverallTotals();
+            }
         }
         
         // Initialize the application
@@ -2080,6 +2492,9 @@
                 // Update summary and render students list
                 updateSummary();
                 renderStudentsList();
+                
+                // Load and display overall totals
+                await calculateAndDisplayOverallTotals();
                 
                 // Show main content and hide loading screen
                 mainContent.style.display = 'block';
@@ -2261,6 +2676,30 @@
                 // Reload statistics with new period view
                 loadStatistics();
             });
+        });
+        
+        // Overall totals button
+        overallTotalsBtn.addEventListener('click', () => {
+            overallTotalsModal.classList.add('active');
+        });
+        
+        // Refresh overall totals button
+        refreshTotalsBtn.addEventListener('click', async () => {
+            await calculateAndDisplayOverallTotals();
+        });
+        
+        // Refresh overall totals button in modal
+        refreshOverallTotalsBtn.addEventListener('click', async () => {
+            await calculateAndDisplayOverallTotals();
+        });
+        
+        // Close overall totals modal
+        closeOverallTotalsModalBtn.addEventListener('click', () => {
+            overallTotalsModal.classList.remove('active');
+        });
+        
+        closeOverallTotalsBtn.addEventListener('click', () => {
+            overallTotalsModal.classList.remove('active');
         });
         
         // Initialize the app when the page loads
