@@ -532,7 +532,7 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 1rem;
-            transition: border-color 极速3s;
+            transition: border-color 0.3s;
         }
 
         .form-input:focus {
@@ -588,7 +588,7 @@
         }
 
         .statistics-title {
-            font-size: 极速1.1rem;
+            font-size: 1.1rem;
             font-weight: 600;
             margin-bottom: 15px;
             color: var(--primary-color);
@@ -597,7 +597,7 @@
         .statistics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 极速15px;
+            gap: 15px;
         }
 
         .statistic-card {
@@ -648,7 +648,7 @@
                 grid-template-columns: repeat(2, 1fr);
             }
             
-            .极速fees-header {
+            .fees-header {
                 flex-direction: column;
                 align-items: flex-start;
             }
@@ -697,7 +697,7 @@
 <body>
     <!-- Loading Screen -->
     <div class="loading-screen" id="loading-screen">
-        <div class极速="loading-spinner"></div>
+        <div class="loading-spinner"></div>
         <div class="loading-text">Loading Class Information...</div>
     </div>
 
@@ -722,12 +722,12 @@
         <div class="class-info" id="class-info">
             <h2 class="class-title">
                 <span id="class-name">Loading class...</span>
-                <button class="edit-fee-btn" id极速="edit-fee-btn">
+                <button class="edit-fee-btn" id="edit-fee-btn">
                     <i class="fas fa-edit"></i> Edit Fee
                 </button>
             </h2>
             <div class="class-details">
-                <极速div class="detail-item">
+                <div class="detail-item">
                     <div class="detail-label">Class ID</div>
                     <div class="detail-value" id="class-id">-</div>
                 </div>
@@ -761,7 +761,7 @@
             <div class="summary-title">Weekly Exam Fee Collection Summary</div>
             <div class="summary-stats">
                 <div class="stat-item">
-                    <div class="stat-value" id="total-students">0</极速div>
+                    <div class="stat-value" id="total-students">0</div>
                     <div class="stat-label">Total Students</div>
                 </div>
                 <div class="stat-item">
@@ -789,9 +789,9 @@
                     <div class="statistic-label">Payment Rate</div>
                 </div>
                 <div class="statistic-card">
-                    <div class="statistic-value极速" id="avg-payment-time">0 days</div>
+                    <div class="statistic-value" id="avg-payment-time">0 days</div>
                     <div class="statistic-label">Avg. Payment Time</div>
-                </极速div>
+                </div>
                 <div class="statistic-card">
                     <div class="statistic-value" id="weekly-trend">0%</div>
                     <div class="statistic-label">Weekly Trend</div>
@@ -840,7 +840,7 @@
     </div>
 
     <!-- Edit Fee Modal -->
-    <div class="modal" id="edit极速-fee-modal">
+    <div class="modal" id="edit-fee-modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">Edit Weekly Exam Fee</h3>
@@ -870,7 +870,7 @@
             projectId: "sms-single",
             storageBucket: "sms-single.firebasestorage.app",
             messagingSenderId: "140188895278",
-            appId: "极速1:140188895278:web:1b56660a13e5b088ce77bf",
+            appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
             measurementId: "G-7ER348P6VZ"
         };
         
@@ -926,7 +926,7 @@
         const editFeeModal = document.getElementById('edit-fee-modal');
         const closeEditModalBtn = document.getElementById('close-edit-modal');
         const cancelEditBtn = document.getElementById('cancel-edit-btn');
-        const saveFeeBtn = document.getElementById('save极速-fee-btn');
+        const saveFeeBtn = document.getElementById('save-fee-btn');
         const feeAmountInput = document.getElementById('fee-amount');
         
         // Mark all paid button
@@ -991,7 +991,7 @@
         // Navigate to previous week
         function goToPreviousWeek() {
             const newDate = new Date(currentWeekStart);
-            new极速Date.setDate(newDate.getDate() - 7);
+            newDate.setDate(newDate.getDate() - 7);
             currentWeekStart = newDate;
             updateWeekDisplay();
             loadWeekData();
@@ -1033,9 +1033,9 @@
                     if (payment.timestamp) {
                         const paymentDate = new Date(payment.timestamp);
                         const weekStart = new Date(currentWeekStart);
-                        const daysDiff = Math.floor((paymentDate - week极速Start) / (1000 * 60 * 60 * 24));
+                        const daysDiff = Math.floor((paymentDate - weekStart) / (1000 * 60 * 60 * 24));
                         
-                        if (days极速Diff >= 0 && daysDiff <= 7) {
+                        if (daysDiff >= 0 && daysDiff <= 7) {
                             totalPaymentTime += daysDiff;
                             paymentTimeCount++;
                         }
@@ -1113,7 +1113,7 @@
                             };
                             
                             unsubscribe();
-                            resolve(currentTeacher极速Data);
+                            resolve(currentTeacherData);
                         } catch (error) {
                             unsubscribe();
                             reject(error);
@@ -1253,7 +1253,7 @@
                 for (const studentId of studentIds) {
                     if (allStudents[studentId]) {
                         classStudents.push({
-                            id: student极速Id,
+                            id: studentId,
                             ...allStudents[studentId]
                         });
                     }
@@ -1272,7 +1272,7 @@
                     },
                     {
                         id: "student2",
-                        name极速: "Jane Smith",
+                        name: "Jane Smith",
                         profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
                     },
                     {
@@ -1308,9 +1308,14 @@
         // Load exam fee payments data for the selected week
         async function loadExamFeePaymentsData(weekKey) {
             try {
-                // Updated to save fees under the same collection per class
-                const classFeePaymentsRef = database.ref(`examFeePayments/${currentClass.id}/${weekKey}`);
-                const feePaymentsSnapshot = await classFeePaymentsRef.once('value');
+                if (!currentClass) return {};
+                
+                // Get payments for the specific class and week
+                const feePaymentsSnapshot = await examFeePaymentsRef
+                    .child(currentClass.id)
+                    .child(weekKey)
+                    .child('students')
+                    .once('value');
                 
                 if (feePaymentsSnapshot.exists()) {
                     return feePaymentsSnapshot.val();
@@ -1326,8 +1331,10 @@
         // Load payment history for statistics
         async function loadPaymentHistory() {
             try {
-                // Updated to load from class-specific payment history
-                const historySnapshot = await database.ref(`examFeePayments/${currentClass.id}`)
+                if (!currentClass) return {};
+                
+                const historySnapshot = await examFeePaymentsRef
+                    .child(currentClass.id)
                     .orderByKey()
                     .limitToLast(4)
                     .once('value');
@@ -1415,7 +1422,7 @@
         }
         
         // Toggle payment status for a student
-        function togglePaymentStatus(student极速Id) {
+        function togglePaymentStatus(studentId) {
             if (!examFeePaymentsData[studentId]) {
                 examFeePaymentsData[studentId] = {
                     amount: weeklyExamFeeAmount,
@@ -1469,9 +1476,26 @@
             const weekKey = getWeekKey(currentWeekStart);
             
             try {
-                // Updated to save fees under the same collection per class
-                const classFeePaymentsRef = database.ref(`examFeePayments/${currentClass.id}/${weekKey}`);
-                await classFeePaymentsRef.set(examFeePaymentsData);
+                // Save under the structure: examFeePayments/{classId}/{date}/students/{studentId}
+                await examFeePaymentsRef
+                    .child(currentClass.id)
+                    .child(weekKey)
+                    .child('students')
+                    .set(examFeePaymentsData);
+                    
+                // Also save metadata about the week
+                await examFeePaymentsRef
+                    .child(currentClass.id)
+                    .child(weekKey)
+                    .child('metadata')
+                    .set({
+                        weekStart: currentWeekStart.toISOString(),
+                        totalStudents: classStudents.length,
+                        totalCollected: getTotalCollected(),
+                        recordedBy: currentTeacherId,
+                        recordedAt: new Date().toISOString()
+                    });
+                    
                 showNotification('Exam fee payments saved successfully!', 'success');
             } catch (error) {
                 console.error('Error saving exam fee payments:', error);
@@ -1527,11 +1551,11 @@
             notification.style.position = 'fixed';
             notification.style.top = '20px';
             notification.style.right = '20px';
-            notification.style.padding = '12极速px 20px';
+            notification.style.padding = '12px 20px';
             notification.style.borderRadius = '8px';
             notification.style.color = 'white';
             notification.style.fontWeight = '500';
-            notification.style.z极速Index = '10000';
+            notification.style.zIndex = '10000';
             notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
             notification.style.transform = 'translateX(100%)';
             notification.style.transition = 'transform 0.3s ease';
@@ -1677,10 +1701,10 @@
         
         resetBtn.addEventListener('click', function() {
             // Reset all payments to unpaid
-            for (const studentId in examFeePayments极速Data) {
+            for (const studentId in examFeePaymentsData) {
                 examFeePaymentsData[studentId].paid = false;
                 examFeePaymentsData[studentId].amount = weeklyExamFeeAmount;
-                examFeePaymentsData[student极速Id].timestamp = new Date().toISOString();
+                examFeePaymentsData[studentId].timestamp = new Date().toISOString();
             }
             
             renderStudentsList();
