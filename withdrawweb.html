@@ -794,6 +794,13 @@
                 return;
             }
             
+            // Get class name if applicable
+            let className = '';
+            if (feeType !== 'accountant') {
+                const classSelect = document.getElementById('classSelect');
+                className = classSelect.options[classSelect.selectedIndex].text;
+            }
+            
             // Create request object
             const requestData = {
                 feeType: feeType,
@@ -803,11 +810,13 @@
                 reason: reason,
                 date: Date.now(),
                 status: 'pending',
-                teacherId: currentTeacherId
+                teacherId: currentTeacherId,
+                teacherName: currentTeacherData.name || 'Teacher',
+                className: className
             };
             
-            // Save to Firebase
-            database.ref('withdrawalRequests').push(requestData)
+            // Save to Firebase under 'requests' collection
+            database.ref('requests').push(requestData)
                 .then(() => {
                     console.log("Withdrawal request saved successfully");
                     successToast.show();
