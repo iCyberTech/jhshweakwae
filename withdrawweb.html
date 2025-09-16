@@ -126,8 +126,7 @@
             margin-top: 5px;
             font-weight: 500;
         }
-        
-        /* Loading Screen */
+
         .loading-screen {
             position: fixed;
             top: 0;
@@ -162,55 +161,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Teacher Info Header */
-        .teacher-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-            border: 1px solid var(--glass-border);
-        }
-
-        .profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 0;
-        }
-
-        .profile-img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            flex-shrink: 0;
-        }
-
-        .greeting h1 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .greeting p {
-            font-size: 0.85rem;
-            color: var(--light-text);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -223,14 +173,6 @@
             .card-body {
                 padding: 15px;
             }
-            
-            .teacher-header {
-                padding: 12px;
-            }
-            
-            .greeting h1 {
-                font-size: 1.1rem;
-            }
         }
     </style>
 </head>
@@ -241,25 +183,8 @@
         <div class="loading-text">Loading Withdrawal System...</div>
     </div>
 
+    <!-- Main Content (initially hidden) -->
     <div id="main-content" style="display: none;">
-        <!-- Teacher Info Header -->
-        <div class="container mt-4">
-            <div class="teacher-header">
-                <div class="profile">
-                    <img id="profile-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="profile-img">
-                    <div class="greeting">
-                        <h1 id="greeting-title">Hello, <span id="teacher-name">Teacher</span>!</h1>
-                        <p id="teacher-role">Loading your information...</p>
-                    </div>
-                </div>
-                <div>
-                    <button class="btn btn-outline-secondary btn-sm" id="logout-btn">
-                        <i class="bi bi-box-arrow-right"></i> Logout
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <div class="toast-container">
             <div id="success-toast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
@@ -287,15 +212,6 @@
                     <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                 </div>
             </div>
-            
-            <div id="auth-toast" class="toast align-items-center text-white bg-info border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        <i class="bi bi-info-circle-fill me-2"></i> <span id="auth-message"></span>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            </div>
         </div>
 
         <div class="container mt-4">
@@ -318,7 +234,7 @@
                                             <option value="others">Other Fees</option>
                                             <option value="pta">PTA Fees</option>
                                             <option value="weekly">Weekly Fee</option>
-                                            <option value="accountant" id="accountant-option" style="display: none;">Accountant</option>
+                                            <option value="accountant" id="accountantOption" style="display: none;">Accountant</option>
                                         </select>
                                     </div>
                                     
@@ -352,7 +268,7 @@
                                     
                                     <div class="col-md-6 mb-3">
                                         <label for="requestedBy" class="form-label">Requested By <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="requestedBy" placeholder="Your name" required readonly>
+                                        <input type="text" class="form-control" id="requestedBy" placeholder="Your name" required>
                                     </div>
                                     
                                     <div class="col-12 mb-3">
@@ -392,22 +308,13 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const auth = firebase.auth();
-        
+
         // DOM elements
         const loadingScreen = document.getElementById('loading-screen');
         const mainContent = document.getElementById('main-content');
         const successToast = new bootstrap.Toast(document.getElementById('success-toast'));
         const errorToast = new bootstrap.Toast(document.getElementById('error-toast'));
         const validationToast = new bootstrap.Toast(document.getElementById('validation-toast'));
-        const authToast = new bootstrap.Toast(document.getElementById('auth-toast'));
-        const authMessage = document.getElementById('auth-message');
-        const teacherNameElement = document.getElementById('teacher-name');
-        const teacherRoleElement = document.getElementById('teacher-role');
-        const profileImg = document.getElementById('profile-img');
-        const greetingTitle = document.getElementById('greeting-title');
-        const requestedByInput = document.getElementById('requestedBy');
-        const logoutBtn = document.getElementById('logout-btn');
-        const accountantOption = document.getElementById('accountant-option');
         
         // Firebase references
         const authUsersRef = database.ref('authUsers');
@@ -417,6 +324,7 @@
         // Global variables
         let currentTeacherId = null;
         let currentTeacherData = null;
+        let isAccountant = false;
         let allClasses = [];
         let feePaymentsData = {};
         let feeSettingsData = {};
@@ -430,13 +338,53 @@
         let foodVendorsData = {};
         let otherFeesData = {};
         let feeTypesData = {};
-        let isAccountant = false;
         
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
             checkActiveSession();
-            setupEventListeners();
         });
+        
+        // Check for active teacher session
+        async function checkActiveSession() {
+            try {
+                // First try to identify the teacher based on auth state
+                const teacher = await identifyCurrentTeacher();
+                
+                if (teacher) {
+                    // Update UI with teacher info
+                    document.getElementById('requestedBy').value = teacher.name || 'Teacher';
+                    
+                    // Check if teacher is an accountant
+                    await checkIfTeacherIsAccountant(teacher.name);
+                    
+                    // Load initial data
+                    loadInitialData();
+                    
+                    // Hide loading screen and show main content
+                    loadingScreen.style.display = 'none';
+                    mainContent.style.display = 'block';
+                    
+                    return;
+                }
+                
+                // If no teacher identified
+                alert('Session Expired. Please sign in again');
+                
+                // Redirect to login page after a delay
+                setTimeout(() => {
+                    window.location.href = 'logins.html';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error checking active session:', error);
+                alert('Failed to load teacher information');
+                
+                // Redirect to login page after a delay
+                setTimeout(() => {
+                    window.location.href = 'logins.html';
+                }, 2000);
+            }
+        }
         
         // Identify the current teacher based on Firebase Auth
         async function identifyCurrentTeacher() {
@@ -485,64 +433,33 @@
             });
         }
         
-        // Check for active teacher session
-        async function checkActiveSession() {
+        // Check if the teacher is an accountant
+        async function checkIfTeacherIsAccountant(teacherName) {
             try {
-                // First try to identify the teacher based on auth state
-                const teacher = await identifyCurrentTeacher();
-                
-                if (teacher) {
-                    // Update UI with teacher info
-                    teacherNameElement.textContent = teacher.name || 'Teacher';
-                    requestedByInput.value = teacher.name || '';
+                // Check credentials to see if this teacher is an accountant
+                const credentialsSnapshot = await credentialsRef.once('value');
+                if (credentialsSnapshot.exists()) {
+                    const credentials = credentialsSnapshot.val();
                     
-                    if (teacher.profileImage) {
-                        profileImg.src = teacher.profileImage;
+                    // Check if this teacher is listed as an accountant
+                    if (credentials.accountants && Array.isArray(credentials.accountants)) {
+                        isAccountant = credentials.accountants.includes(teacherName);
+                    } else {
+                        isAccountant = false;
                     }
                     
-                    // Check if teacher is an accountant
-                    isAccountant = teacher.role === 'accountant';
-                    
-                    // Update UI based on accountant status
+                    // Show/hide accountant option based on accountant status
+                    const accountantOption = document.getElementById('accountantOption');
                     if (isAccountant) {
-                        teacherRoleElement.textContent = 'Accountant';
                         accountantOption.style.display = 'block';
                     } else {
-                        teacherRoleElement.textContent = 'Teacher';
                         accountantOption.style.display = 'none';
                     }
-                    
-                    // Load initial data
-                    loadInitialData();
-                    
-                    // Hide loading screen and show main content
-                    loadingScreen.style.display = 'none';
-                    mainContent.style.display = 'block';
-                    
-                    authMessage.textContent = `Welcome, ${teacher.name || 'Teacher'}!`;
-                    authToast.show();
-                    
-                    return;
                 }
-                
-                // If no teacher identified
-                authMessage.textContent = 'Session expired. Please sign in again.';
-                authToast.show();
-                
-                // Redirect to login page after a delay
-                setTimeout(() => {
-                    window.location.href = 'logins.html';
-                }, 2000);
-                
             } catch (error) {
-                console.error('Error checking active session:', error);
-                authMessage.textContent = 'Failed to load teacher information. Please sign in again.';
-                authToast.show();
-                
-                // Redirect to login page after a delay
-                setTimeout(() => {
-                    window.location.href = 'logins.html';
-                }, 2000);
+                console.error('Error checking accountant status:', error);
+                isAccountant = false;
+                document.getElementById('accountantOption').style.display = 'none';
             }
         }
         
@@ -557,25 +474,14 @@
                         ...classesData[key]
                     }));
                     
-                    // Populate class dropdown with only classes this teacher teaches
+                    // Populate class dropdown
                     const classSelect = document.getElementById('classSelect');
-                    classSelect.innerHTML = '<option value="">Select Class</option>';
-                    
                     allClasses.forEach(cls => {
-                        // Check if this teacher is assigned to this class
-                        if (cls.teacher === currentTeacherData.name) {
-                            const option = document.createElement('option');
-                            option.value = cls.id;
-                            option.textContent = cls.name || cls.id;
-                            classSelect.appendChild(option);
-                        }
+                        const option = document.createElement('option');
+                        option.value = cls.id;
+                        option.textContent = cls.name || cls.id;
+                        classSelect.appendChild(option);
                     });
-                    
-                    // If no classes assigned, disable the dropdown
-                    if (classSelect.options.length === 1) {
-                        classSelect.disabled = true;
-                        classSelect.innerHTML = '<option value="">No classes assigned to you</option>';
-                    }
                 }
             }).catch(error => {
                 console.error("Error loading classes:", error);
@@ -583,6 +489,7 @@
             
             // Load other necessary data
             loadFeeData();
+            setupEventListeners();
         }
         
         // Set up event listeners
@@ -626,15 +533,6 @@
             document.getElementById('withdrawalForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 submitWithdrawalRequest();
-            });
-            
-            // Logout button handler
-            logoutBtn.addEventListener('click', function() {
-                auth.signOut().then(() => {
-                    window.location.href = 'logins.html';
-                }).catch(error => {
-                    console.error('Error signing out:', error);
-                });
             });
         }
         
@@ -883,7 +781,7 @@
                     console.log("Withdrawal request saved successfully");
                     successToast.show();
                     document.getElementById('withdrawalForm').reset();
-                    document.getElementById('requestedBy').value = currentTeacherData.name || '';
+                    document.getElementById('requestedBy').value = currentTeacherData.name || 'Teacher';
                     document.getElementById('availableAmount').textContent = '--';
                 })
                 .catch((error) => {
