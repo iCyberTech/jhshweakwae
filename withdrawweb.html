@@ -319,7 +319,7 @@
         // Firebase references
         const authUsersRef = database.ref('authUsers');
         const teachersRef = database.ref('teachers');
-        const credentialsRef = database.ref('credentials');
+        const accountantsRef = database.ref('accountants');
         
         // Global variables
         let currentTeacherId = null;
@@ -440,16 +440,20 @@
         // Check if the teacher is an accountant
         async function checkIfTeacherIsAccountant(teacherName) {
             try {
-                // Check credentials to see if this teacher is an accountant
-                const credentialsSnapshot = await credentialsRef.once('value');
-                if (credentialsSnapshot.exists()) {
-                    const credentials = credentialsSnapshot.val();
+                // Check accountants collection to see if this teacher has accountant privileges
+                const accountantsSnapshot = await accountantsRef.once('value');
+                if (accountantsSnapshot.exists()) {
+                    const accountants = accountantsSnapshot.val();
                     
                     // Check if this teacher is listed as an accountant
-                    if (credentials.accountants && Array.isArray(credentials.accountants)) {
-                        isAccountant = credentials.accountants.includes(teacherName);
-                    } else {
-                        isAccountant = false;
+                    isAccountant = false;
+                    
+                    for (const accountantId in accountants) {
+                        const accountant = accountants[accountantId];
+                        if (accountant.name === teacherName) {
+                            isAccountant = true;
+                            break;
+                        }
                     }
                     
                     // Show/hide accountant option based on accountant status
