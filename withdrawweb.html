@@ -437,7 +437,7 @@
             });
         }
         
-        // Check if the teacher is an accountant
+        // Check if the teacher is an accountant by checking the accountants collection
         async function checkIfTeacherIsAccountant(teacherName) {
             try {
                 // Check accountants collection to see if this teacher has accountant privileges
@@ -448,8 +448,8 @@
                     // Check if this teacher is listed as an accountant
                     isAccountant = false;
                     
-                    for (const accountantId in accountants) {
-                        const accountant = accountants[accountantId];
+                    for (const key in accountants) {
+                        const accountant = accountants[key];
                         if (accountant.name === teacherName) {
                             isAccountant = true;
                             break;
