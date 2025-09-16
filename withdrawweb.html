@@ -356,7 +356,7 @@
                     document.getElementById('requestedBy').value = teacher.name || 'Teacher';
                     
                     // Check if teacher is an accountant
-                    await checkIfTeacherIsAccountant(teacher.name);
+                    await checkIfTeacherIsAccountant(teacher.id);
                     
                     // Check if teacher is assigned to any class
                     await checkIfTeacherAssignedToClass(teacher.name);
@@ -438,23 +438,18 @@
         }
         
         // Check if the teacher is an accountant by checking the accountants collection
-        async function checkIfTeacherIsAccountant(teacherName) {
+        async function checkIfTeacherIsAccountant(teacherId) {
             try {
-                // Check accountants collection to see if this teacher has accountant privileges
+                // Check accountants collection to see if this teacher is listed
                 const accountantsSnapshot = await accountantsRef.once('value');
                 if (accountantsSnapshot.exists()) {
                     const accountants = accountantsSnapshot.val();
                     
-                    // Check if this teacher is listed as an accountant
-                    isAccountant = false;
-                    
-                    for (const key in accountants) {
+                    // Check if this teacher ID exists in the accountants collection
+                    isAccountant = Object.keys(accountants).some(key => {
                         const accountant = accountants[key];
-                        if (accountant.name === teacherName) {
-                            isAccountant = true;
-                            break;
-                        }
-                    }
+                        return accountant.id === teacherId;
+                    });
                     
                     // Show/hide accountant option based on accountant status
                     const accountantOption = document.getElementById('accountantOption');
