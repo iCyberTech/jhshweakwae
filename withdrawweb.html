@@ -320,12 +320,14 @@
         const authUsersRef = database.ref('authUsers');
         const teachersRef = database.ref('teachers');
         const credentialsRef = database.ref('credentials');
+        const classesRef = database.ref('classes');
         
         // Global variables
         let currentTeacherId = null;
         let currentTeacherData = null;
         let isAccountant = false;
-        let allClasses = [];
+        let isClassTeacher = false;
+        let teacherClasses = [];
         let feePaymentsData = {};
         let feeSettingsData = {};
         let classBalancesData = {};
@@ -354,8 +356,8 @@
                     // Update UI with teacher info
                     document.getElementById('requestedBy').value = teacher.name || 'Teacher';
                     
-                    // Check if teacher is an accountant
-                    await checkIfTeacherIsAccountant(teacher.name);
+                    // Check if teacher is an accountant or class teacher
+                    await checkTeacherRoles(teacher.name);
                     
                     // Load initial data
                     loadInitialData();
@@ -433,8 +435,8 @@
             });
         }
         
-        // Check if the teacher is an accountant
-        async function checkIfTeacherIsAccountant(teacherName) {
+        // Check if the teacher is an accountant or class teacher
+        async function checkTeacherRoles(teacherName) {
             try {
                 // Check credentials to see if this teacher is an accountant
                 const credentialsSnapshot = await credentialsRef.once('value');
@@ -456,36 +458,48 @@
                         accountantOption.style.display = 'none';
                     }
                 }
+                
+                // Check if teacher is assigned to any class
+                const classesSnapshot = await classesRef.once('value');
+                if (classesSnapshot.exists()) {
+                    const classes = classesSnapshot.val();
+                    isClassTeacher = false;
+                    teacherClasses = [];
+                    
+                    // Check if this teacher is assigned to any class
+                    for (const classId in classes) {
+                        if (classes[classId].teacher === teacherName) {
+                            isClassTeacher = true;
+                            teacherClasses.push({
+                                id: classId,
+                                name: classes[classId].name || classId
+                            });
+                        }
+                    }
+                }
             } catch (error) {
-                console.error('Error checking accountant status:', error);
+                console.error('Error checking teacher roles:', error);
                 isAccountant = false;
+                isClassTeacher = false;
                 document.getElementById('accountantOption').style.display = 'none';
             }
         }
         
         // Load initial data from Firebase
         function loadInitialData() {
-            // Load classes
-            database.ref('classes').once('value').then(classesSnapshot => {
-                if (classesSnapshot.exists()) {
-                    const classesData = classesSnapshot.val();
-                    allClasses = Object.keys(classesData).map(key => ({
-                        id: key,
-                        ...classesData[key]
-                    }));
-                    
-                    // Populate class dropdown
-                    const classSelect = document.getElementById('classSelect');
-                    allClasses.forEach(cls => {
-                        const option = document.createElement('option');
-                        option.value = cls.id;
-                        option.textContent = cls.name || cls.id;
-                        classSelect.appendChild(option);
-                    });
-                }
-            }).catch(error => {
-                console.error("Error loading classes:", error);
+            // Populate class dropdown with teacher's classes
+            const classSelect = document.getElementById('classSelect');
+            teacherClasses.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.id;
+                option.textContent = cls.name;
+                classSelect.appendChild(option);
             });
+            
+            // If teacher has only one class, select it by default
+            if (teacherClasses.length === 1) {
+                classSelect.value = teacherClasses[0].id;
+            }
             
             // Load other necessary data
             loadFeeData();
@@ -675,11 +689,9 @@
                     const payment = termData[studentId];
                     
                     // Check if student belongs to this class
-                    const studentClass = allClasses.find(cls => 
-                        cls.students && cls.students.includes(studentId)
-                    );
+                    const studentClass = teacherClasses.find(cls => cls.id === classId);
                     
-                    if (studentClass && studentClass.id === classId) {
+                    if (studentClass) {
                         // Calculate collected amount
                         if (payment.pta) total += classFees.pta;
                         if (payment.utility) total += classFees.utility;
@@ -772,7 +784,8 @@
                 reason: reason,
                 date: Date.now(),
                 status: 'pending',
-                teacherId: currentTeacherId
+                teacherId: currentTeacherId,
+                teacherName: currentTeacherData.name
             };
             
             // Save to Firebase
