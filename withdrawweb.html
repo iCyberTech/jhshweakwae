@@ -127,6 +127,7 @@
             font-weight: 500;
         }
         
+        /* Loading Screen */
         .loading-screen {
             position: fixed;
             top: 0;
@@ -161,6 +162,55 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Teacher Info Header */
+        .teacher-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border: 1px solid var(--glass-border);
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        .greeting h1 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .greeting p {
+            font-size: 0.85rem;
+            color: var(--light-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -173,6 +223,14 @@
             .card-body {
                 padding: 15px;
             }
+            
+            .teacher-header {
+                padding: 12px;
+            }
+            
+            .greeting h1 {
+                font-size: 1.1rem;
+            }
         }
     </style>
 </head>
@@ -183,114 +241,133 @@
         <div class="loading-text">Loading Withdrawal System...</div>
     </div>
 
-    <div class="toast-container">
-        <div id="success-toast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="bi bi-check-circle-fill me-2"></i> Withdrawal request submitted successfully!
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-        
-        <div id="error-toast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Error submitting withdrawal request!
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-        
-        <div id="validation-toast" class="toast align-items-center text-white bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="bi bi-exclamation-circle-fill me-2"></i> Please fill all required fields correctly!
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-        
-        <div id="auth-error-toast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Authentication error! Redirecting to login...
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
-
-    <div class="container mt-4" id="main-content" style="display: none;">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card">
-                    <div class="card-header bg-white">
-                        <h4 class="mb-0"><i class="bi bi-cash-coin me-2"></i> Withdrawal Request</h4>
-                        <small class="text-muted">Logged in as: <span id="teacher-name-display">Teacher</span></small>
+    <div id="main-content" style="display: none;">
+        <!-- Teacher Info Header -->
+        <div class="container mt-4">
+            <div class="teacher-header">
+                <div class="profile">
+                    <img id="profile-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="profile-img">
+                    <div class="greeting">
+                        <h1 id="greeting-title">Hello, <span id="teacher-name">Teacher</span>!</h1>
+                        <p id="teacher-role">Loading your information...</p>
                     </div>
-                    <div class="card-body">
-                        <form id="withdrawalForm">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="feeType" class="form-label">Fee Type <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="feeType" required>
-                                        <option value="">Select Fee Type</option>
-                                        <option value="broom">Brooms Fee</option>
-                                        <option value="exam">Exam Fee</option>
-                                        <option value="daily">Daily Fee</option>
-                                        <option value="others">Other Fees</option>
-                                        <option value="pta">PTA Fees</option>
-                                        <option value="weekly">Weekly Fee</option>
-                                        <option value="accountant" id="accountant-option" style="display: none;">Accountant</option>
-                                    </select>
+                </div>
+                <div>
+                    <button class="btn btn-outline-secondary btn-sm" id="logout-btn">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="toast-container">
+            <div id="success-toast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-check-circle-fill me-2"></i> Withdrawal request submitted successfully!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+            
+            <div id="error-toast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Error submitting withdrawal request!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+            
+            <div id="validation-toast" class="toast align-items-center text-white bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-exclamation-circle-fill me-2"></i> Please fill all required fields correctly!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+            
+            <div id="auth-toast" class="toast align-items-center text-white bg-info border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-info-circle-fill me-2"></i> <span id="auth-message"></span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="container mt-4">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header bg-white">
+                            <h4 class="mb-0"><i class="bi bi-cash-coin me-2"></i> Withdrawal Request</h4>
+                        </div>
+                        <div class="card-body">
+                            <form id="withdrawalForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="feeType" class="form-label">Fee Type <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="feeType" required>
+                                            <option value="">Select Fee Type</option>
+                                            <option value="broom">Brooms Fee</option>
+                                            <option value="exam">Exam Fee</option>
+                                            <option value="daily">Daily Fee</option>
+                                            <option value="others">Other Fees</option>
+                                            <option value="pta">PTA Fees</option>
+                                            <option value="weekly">Weekly Fee</option>
+                                            <option value="accountant" id="accountant-option" style="display: none;">Accountant</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3" id="classContainer">
+                                        <label for="classSelect" class="form-label">Class <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="classSelect" required>
+                                            <option value="">Select Class</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3 d-none" id="accountantContainer">
+                                        <label for="accountantSource" class="form-label">Accountant Source <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="accountantSource" required>
+                                            <option value="">Select Source</option>
+                                            <option value="offerings">Offerings</option>
+                                            <option value="ptaFees">PTA Fees</option>
+                                            <option value="foodVendors">Food Vendors</option>
+                                            <option value="otherFees">Other Fees</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label">Available Amount</label>
+                                        <div class="amount-display" id="availableAmount">--</div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="amount" class="form-label">Withdrawal Amount <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" id="amount" placeholder="Enter amount" min="1" step="0.01" required>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="requestedBy" class="form-label">Requested By <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="requestedBy" placeholder="Your name" required readonly>
+                                    </div>
+                                    
+                                    <div class="col-12 mb-3">
+                                        <label for="reason" class="form-label">Reason for Withdrawal <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" id="reason" rows="3" placeholder="Explain the purpose of this withdrawal" required></textarea>
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="bi bi-send me-2"></i> Submit Request
+                                        </button>
+                                    </div>
                                 </div>
-                                
-                                <div class="col-md-6 mb-3" id="classContainer">
-                                    <label for="classSelect" class="form-label">Class <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="classSelect" required>
-                                        <option value="">Select Class</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3 d-none" id="accountantContainer">
-                                    <label for="accountantSource" class="form-label">Accountant Source <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="accountantSource" required>
-                                        <option value="">Select Source</option>
-                                        <option value="offerings">Offerings</option>
-                                        <option value="ptaFees">PTA Fees</option>
-                                        <option value="foodVendors">Food Vendors</option>
-                                        <option value="otherFees">Other Fees</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="col-12 mb-3">
-                                    <label class="form-label">Available Amount</label>
-                                    <div class="amount-display" id="availableAmount">--</div>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label for="amount" class="form-label">Withdrawal Amount <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="amount" placeholder="Enter amount" min="1" step="0.01" required>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label for="requestedBy" class="form-label">Requested By <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="requestedBy" placeholder="Your name" required>
-                                </div>
-                                
-                                <div class="col-12 mb-3">
-                                    <label for="reason" class="form-label">Reason for Withdrawal <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" id="reason" rows="3" placeholder="Explain the purpose of this withdrawal" required></textarea>
-                                </div>
-                                
-                                <div class="col-12">
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        <i class="bi bi-send me-2"></i> Submit Request
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -315,22 +392,27 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const auth = firebase.auth();
-
+        
         // DOM elements
+        const loadingScreen = document.getElementById('loading-screen');
+        const mainContent = document.getElementById('main-content');
         const successToast = new bootstrap.Toast(document.getElementById('success-toast'));
         const errorToast = new bootstrap.Toast(document.getElementById('error-toast'));
         const validationToast = new bootstrap.Toast(document.getElementById('validation-toast'));
-        const authErrorToast = new bootstrap.Toast(document.getElementById('auth-error-toast'));
-        const loadingScreen = document.getElementById('loading-screen');
-        const mainContent = document.getElementById('main-content');
-        const teacherNameDisplay = document.getElementById('teacher-name-display');
+        const authToast = new bootstrap.Toast(document.getElementById('auth-toast'));
+        const authMessage = document.getElementById('auth-message');
+        const teacherNameElement = document.getElementById('teacher-name');
+        const teacherRoleElement = document.getElementById('teacher-role');
+        const profileImg = document.getElementById('profile-img');
+        const greetingTitle = document.getElementById('greeting-title');
+        const requestedByInput = document.getElementById('requestedBy');
+        const logoutBtn = document.getElementById('logout-btn');
         const accountantOption = document.getElementById('accountant-option');
         
         // Firebase references
         const authUsersRef = database.ref('authUsers');
         const teachersRef = database.ref('teachers');
         const credentialsRef = database.ref('credentials');
-        const classesRef = database.ref('classes');
         
         // Global variables
         let currentTeacherId = null;
@@ -349,11 +431,11 @@
         let otherFeesData = {};
         let feeTypesData = {};
         let isAccountant = false;
-        let isClassTeacher = false;
         
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
             checkActiveSession();
+            setupEventListeners();
         });
         
         // Identify the current teacher based on Firebase Auth
@@ -377,10 +459,6 @@
                                     
                                     if (teacherSnapshot.exists()) {
                                         currentTeacherData = teacherSnapshot.val();
-                                        
-                                        // Check if teacher is an accountant
-                                        isAccountant = currentTeacherData.isAccountant || false;
-                                        
                                         unsubscribe();
                                         resolve(currentTeacherData);
                                         return;
@@ -415,16 +493,22 @@
                 
                 if (teacher) {
                     // Update UI with teacher info
-                    teacherNameDisplay.textContent = teacher.name || 'Teacher';
-                    document.getElementById('requestedBy').value = teacher.name || '';
+                    teacherNameElement.textContent = teacher.name || 'Teacher';
+                    requestedByInput.value = teacher.name || '';
                     
-                    // Check if teacher is assigned to any class
-                    await checkIfTeacherAssignedToClass(teacher.name);
+                    if (teacher.profileImage) {
+                        profileImg.src = teacher.profileImage;
+                    }
                     
-                    // Show/hide accountant option based on accountant status
+                    // Check if teacher is an accountant
+                    isAccountant = teacher.role === 'accountant';
+                    
+                    // Update UI based on accountant status
                     if (isAccountant) {
+                        teacherRoleElement.textContent = 'Accountant';
                         accountantOption.style.display = 'block';
                     } else {
+                        teacherRoleElement.textContent = 'Teacher';
                         accountantOption.style.display = 'none';
                     }
                     
@@ -435,47 +519,30 @@
                     loadingScreen.style.display = 'none';
                     mainContent.style.display = 'block';
                     
+                    authMessage.textContent = `Welcome, ${teacher.name || 'Teacher'}!`;
+                    authToast.show();
+                    
                     return;
                 }
                 
                 // If no teacher identified
-                authErrorToast.show();
+                authMessage.textContent = 'Session expired. Please sign in again.';
+                authToast.show();
                 
                 // Redirect to login page after a delay
                 setTimeout(() => {
                     window.location.href = 'logins.html';
-                }, 3000);
+                }, 2000);
                 
             } catch (error) {
                 console.error('Error checking active session:', error);
-                authErrorToast.show();
+                authMessage.textContent = 'Failed to load teacher information. Please sign in again.';
+                authToast.show();
                 
                 // Redirect to login page after a delay
                 setTimeout(() => {
                     window.location.href = 'logins.html';
-                }, 3000);
-            }
-        }
-        
-        // Check if the teacher is assigned to any class
-        async function checkIfTeacherAssignedToClass(teacherName) {
-            try {
-                const classesSnapshot = await classesRef.once('value');
-                if (classesSnapshot.exists()) {
-                    const classes = classesSnapshot.val();
-                    isClassTeacher = false;
-                    
-                    // Check if this teacher is assigned to any class
-                    for (const classId in classes) {
-                        if (classes[classId].teacher === teacherName) {
-                            isClassTeacher = true;
-                            break;
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Error checking class assignment:', error);
-                isClassTeacher = false;
+                }, 2000);
             }
         }
         
@@ -490,14 +557,25 @@
                         ...classesData[key]
                     }));
                     
-                    // Populate class dropdown
+                    // Populate class dropdown with only classes this teacher teaches
                     const classSelect = document.getElementById('classSelect');
+                    classSelect.innerHTML = '<option value="">Select Class</option>';
+                    
                     allClasses.forEach(cls => {
-                        const option = document.createElement('option');
-                        option.value = cls.id;
-                        option.textContent = cls.name || cls.id;
-                        classSelect.appendChild(option);
+                        // Check if this teacher is assigned to this class
+                        if (cls.teacher === currentTeacherData.name) {
+                            const option = document.createElement('option');
+                            option.value = cls.id;
+                            option.textContent = cls.name || cls.id;
+                            classSelect.appendChild(option);
+                        }
                     });
+                    
+                    // If no classes assigned, disable the dropdown
+                    if (classSelect.options.length === 1) {
+                        classSelect.disabled = true;
+                        classSelect.innerHTML = '<option value="">No classes assigned to you</option>';
+                    }
                 }
             }).catch(error => {
                 console.error("Error loading classes:", error);
@@ -505,9 +583,6 @@
             
             // Load other necessary data
             loadFeeData();
-            
-            // Set up event listeners
-            setupEventListeners();
         }
         
         // Set up event listeners
@@ -551,6 +626,15 @@
             document.getElementById('withdrawalForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 submitWithdrawalRequest();
+            });
+            
+            // Logout button handler
+            logoutBtn.addEventListener('click', function() {
+                auth.signOut().then(() => {
+                    window.location.href = 'logins.html';
+                }).catch(error => {
+                    console.error('Error signing out:', error);
+                });
             });
         }
         
@@ -790,8 +874,7 @@
                 reason: reason,
                 date: Date.now(),
                 status: 'pending',
-                teacherId: currentTeacherId,
-                teacherName: currentTeacherData.name
+                teacherId: currentTeacherId
             };
             
             // Save to Firebase
