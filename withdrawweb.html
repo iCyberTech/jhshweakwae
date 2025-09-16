@@ -320,14 +320,13 @@
         const authUsersRef = database.ref('authUsers');
         const teachersRef = database.ref('teachers');
         const credentialsRef = database.ref('credentials');
-        const classesRef = database.ref('classes');
         
         // Global variables
         let currentTeacherId = null;
         let currentTeacherData = null;
         let isAccountant = false;
         let isClassTeacher = false;
-        let teacherClasses = [];
+        let allClasses = [];
         let feePaymentsData = {};
         let feeSettingsData = {};
         let classBalancesData = {};
@@ -356,8 +355,11 @@
                     // Update UI with teacher info
                     document.getElementById('requestedBy').value = teacher.name || 'Teacher';
                     
-                    // Check if teacher is an accountant or class teacher
-                    await checkTeacherRoles(teacher.name);
+                    // Check if teacher is an accountant
+                    await checkIfTeacherIsAccountant(teacher.name);
+                    
+                    // Check if teacher is assigned to any class
+                    await checkIfTeacherAssignedToClass(teacher.name);
                     
                     // Load initial data
                     loadInitialData();
@@ -435,8 +437,8 @@
             });
         }
         
-        // Check if the teacher is an accountant or class teacher
-        async function checkTeacherRoles(teacherName) {
+        // Check if the teacher is an accountant
+        async function checkIfTeacherIsAccountant(teacherName) {
             try {
                 // Check credentials to see if this teacher is an accountant
                 const credentialsSnapshot = await credentialsRef.once('value');
@@ -458,48 +460,64 @@
                         accountantOption.style.display = 'none';
                     }
                 }
-                
-                // Check if teacher is assigned to any class
-                const classesSnapshot = await classesRef.once('value');
+            } catch (error) {
+                console.error('Error checking accountant status:', error);
+                isAccountant = false;
+                document.getElementById('accountantOption').style.display = 'none';
+            }
+        }
+        
+        // Check if the teacher is assigned to any class
+        async function checkIfTeacherAssignedToClass(teacherName) {
+            try {
+                const classesSnapshot = await database.ref('classes').once('value');
                 if (classesSnapshot.exists()) {
                     const classes = classesSnapshot.val();
                     isClassTeacher = false;
-                    teacherClasses = [];
                     
                     // Check if this teacher is assigned to any class
                     for (const classId in classes) {
                         if (classes[classId].teacher === teacherName) {
                             isClassTeacher = true;
-                            teacherClasses.push({
-                                id: classId,
-                                name: classes[classId].name || classId
-                            });
+                            break;
                         }
                     }
                 }
             } catch (error) {
-                console.error('Error checking teacher roles:', error);
-                isAccountant = false;
+                console.error('Error checking class assignment:', error);
                 isClassTeacher = false;
-                document.getElementById('accountantOption').style.display = 'none';
             }
         }
         
         // Load initial data from Firebase
         function loadInitialData() {
-            // Populate class dropdown with teacher's classes
-            const classSelect = document.getElementById('classSelect');
-            teacherClasses.forEach(cls => {
-                const option = document.createElement('option');
-                option.value = cls.id;
-                option.textContent = cls.name;
-                classSelect.appendChild(option);
+            // Load classes
+            database.ref('classes').once('value').then(classesSnapshot => {
+                if (classesSnapshot.exists()) {
+                    const classesData = classesSnapshot.val();
+                    allClasses = Object.keys(classesData).map(key => ({
+                        id: key,
+                        ...classesData[key]
+                    }));
+                    
+                    // Populate class dropdown with only classes this teacher teaches
+                    const classSelect = document.getElementById('classSelect');
+                    classSelect.innerHTML = '<option value="">Select Class</option>';
+                    
+                    allClasses.forEach(cls => {
+                        // If teacher is a class teacher, only show their classes
+                        // Otherwise, show all classes
+                        if (!isClassTeacher || cls.teacher === currentTeacherData.name) {
+                            const option = document.createElement('option');
+                            option.value = cls.id;
+                            option.textContent = cls.name || cls.id;
+                            classSelect.appendChild(option);
+                        }
+                    });
+                }
+            }).catch(error => {
+                console.error("Error loading classes:", error);
             });
-            
-            // If teacher has only one class, select it by default
-            if (teacherClasses.length === 1) {
-                classSelect.value = teacherClasses[0].id;
-            }
             
             // Load other necessary data
             loadFeeData();
@@ -689,9 +707,11 @@
                     const payment = termData[studentId];
                     
                     // Check if student belongs to this class
-                    const studentClass = teacherClasses.find(cls => cls.id === classId);
+                    const studentClass = allClasses.find(cls => 
+                        cls.students && cls.students.includes(studentId)
+                    );
                     
-                    if (studentClass) {
+                    if (studentClass && studentClass.id === classId) {
                         // Calculate collected amount
                         if (payment.pta) total += classFees.pta;
                         if (payment.utility) total += classFees.utility;
@@ -784,8 +804,7 @@
                 reason: reason,
                 date: Date.now(),
                 status: 'pending',
-                teacherId: currentTeacherId,
-                teacherName: currentTeacherData.name
+                teacherId: currentTeacherId
             };
             
             // Save to Firebase
