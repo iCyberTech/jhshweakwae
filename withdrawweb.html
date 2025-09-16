@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdrawal Request System</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --text-color: #2d3436;
+            --light-text: #636e72;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --success-color: #00b894;
+            --danger-color: #d63031;
+            --warning-color: #fdcb6e;
+            --info-color: #0984e3;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            --term1-color: #6c5ce7;
+            --term2-color: #00b894;
+            --term3-color: #e17055;
+            --purple-color: #6c5ce7;
+            --broom-color: #17a2b8;
+            --exam-color: #dc3545;
+            --daily-color: #007bff;
+            --pta-color: #ffc107;
+            --accountant-color: #28a745;
+            --weekly-color: #fd7e14;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding-bottom: 20px;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.2);
+        }
+
+        .card-header {
+            background: var(--card-bg) !important;
+            border-bottom: 1px solid var(--glass-border);
+            padding: 15px 20px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #5649c5;
+            border-color: #5649c5;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background: var(--glass-bg) !important;
+            border: 1px solid var(--glass-border) !important;
+            box-shadow: var(--shadow);
+            border-radius: 12px !important;
+            overflow: hidden;
+        }
+
+        .amount-display {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            color: var(--text-color);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .card-header {
+                padding: 12px 15px;
+            }
+            
+            .card-body {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Withdrawal System...</div>
+    </div>
+
+    <!-- Main Content (initially hidden) -->
+    <div id="main-content" style="display: none;">
+        <div class="toast-container">
+            <div id="success-toast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-check-circle-fill me-2"></i> Withdrawal request submitted successfully!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+            
+            <div id="error-toast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Error submitting withdrawal request!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+            
+            <div id="validation-toast" class="toast align-items-center text-white bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-exclamation-circle-fill me-2"></i> Please fill all required fields correctly!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="container mt-4">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header bg-white">
+                            <h4 class="mb-0"><i class="bi bi-cash-coin me-2"></i> Withdrawal Request</h4>
+                        </div>
+                        <div class="card-body">
+                            <form id="withdrawalForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="feeType" class="form-label">Fee Type <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="feeType" required>
+                                            <option value="">Select Fee Type</option>
+                                            <option value="broom">Brooms Fee</option>
+                                            <option value="exam">Exam Fee</option>
+                                            <option value="daily">Daily Fee</option>
+                                            <option value="others">Other Fees</option>
+                                            <option value="pta">PTA Fees</option>
+                                            <option value="weekly">Weekly Fee</option>
+                                            <option value="accountant" id="accountantOption" style="display: none;">Accountant</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3" id="classContainer">
+                                        <label for="classSelect" class="form-label">Class <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="classSelect" required>
+                                            <option value="">Select Class</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3 d-none" id="accountantContainer">
+                                        <label for="accountantSource" class="form-label">Accountant Source <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="accountantSource" required>
+                                            <option value="">Select Source</option>
+                                            <option value="offerings">Offerings</option>
+                                            <option value="ptaFees">PTA Fees</option>
+                                            <option value="foodVendors">Food Vendors</option>
+                                            <option value="otherFees">Other Fees</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label">Available Amount</label>
+                                        <div class="amount-display" id="availableAmount">--</div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="amount" class="form-label">Withdrawal Amount <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" id="amount" placeholder="Enter amount" min="1" step="0.01" required>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="requestedBy" class="form-label">Requested By <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="requestedBy" placeholder="Your name" required>
+                                    </div>
+                                    
+                                    <div class="col-12 mb-3">
+                                        <label for="reason" class="form-label">Reason for Withdrawal <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" id="reason" rows="3" placeholder="Explain the purpose of this withdrawal" required></textarea>
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="bi bi-send me-2"></i> Submit Request
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkrHsyfCTijqKP7UJv0eSx0iNvl8S06U8",
+            authDomain: "sms-single.firebaseapp.com",
+            databaseURL: "https://sms-single-default-rtdb.firebaseio.com",
+            projectId: "sms-single",
+            storageBucket: "sms-single.firebasestorage.app",
+            messagingSenderId: "140188895278",
+            appId: "1:140188895278:web:1b56660a13e5b088ce77bf",
+            measurementId: "G-7ER348P6VZ"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        // DOM elements
+        const loadingScreen = document.getElementById('loading-screen');
+        const mainContent = document.getElementById('main-content');
+        const successToast = new bootstrap.Toast(document.getElementById('success-toast'));
+        const errorToast = new bootstrap.Toast(document.getElementById('error-toast'));
+        const validationToast = new bootstrap.Toast(document.getElementById('validation-toast'));
+        
+        // Firebase references
+        const authUsersRef = database.ref('authUsers');
+        const teachersRef = database.ref('teachers');
+        const credentialsRef = database.ref('credentials');
+        
+        // Global variables
+        let currentTeacherId = null;
+        let currentTeacherData = null;
+        let isAccountant = false;
+        let allClasses = [];
+        let feePaymentsData = {};
+        let feeSettingsData = {};
+        let classBalancesData = {};
+        let broomFeesData = {};
+        let broomFeeSettingsData = {};
+        let termFeePaymentsData = {};
+        let examFeePaymentsData = {};
+        let offeringsData = {};
+        let ptaFeesData = {};
+        let foodVendorsData = {};
+        let otherFeesData = {};
+        let feeTypesData = {};
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkActiveSession();
+        });
+        
+        // Check for active teacher session
+        async function checkActiveSession() {
+            try {
+                // First try to identify the teacher based on auth state
+                const teacher = await identifyCurrentTeacher();
+                
+                if (teacher) {
+                    // Update UI with teacher info
+                    document.getElementById('requestedBy').value = teacher.name || 'Teacher';
+                    
+                    // Check if teacher is an accountant
+                    await checkIfTeacherIsAccountant(teacher.name);
+                    
+                    // Load initial data
+                    loadInitialData();
+                    
+                    // Hide loading screen and show main content
+                    loadingScreen.style.display = 'none';
+                    mainContent.style.display = 'block';
+                    
+                    return;
+                }
+                
+                // If no teacher identified
+                alert('Session Expired. Please sign in again');
+                
+                // Redirect to login page after a delay
+                setTimeout(() => {
+                    window.location.href = 'logins.html';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error checking active session:', error);
+                alert('Failed to load teacher information');
+                
+                // Redirect to login page after a delay
+                setTimeout(() => {
+                    window.location.href = 'logins.html';
+                }, 2000);
+            }
+        }
+        
+        // Identify the current teacher based on Firebase Auth
+        async function identifyCurrentTeacher() {
+            return new Promise((resolve, reject) => {
+                // Check if user is already signed in
+                const unsubscribe = auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        try {
+                            // User is signed in, get their data from authUsers
+                            const authUserSnapshot = await database.ref(`authUsers/${user.uid}`).once('value');
+                            
+                            if (authUserSnapshot.exists()) {
+                                const authUser = authUserSnapshot.val();
+                                
+                                if (authUser.userType === 'teacher') {
+                                    currentTeacherId = authUser.userId;
+                                    
+                                    // Get teacher details from teachers collection
+                                    const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
+                                    
+                                    if (teacherSnapshot.exists()) {
+                                        currentTeacherData = teacherSnapshot.val();
+                                        unsubscribe();
+                                        resolve(currentTeacherData);
+                                        return;
+                                    }
+                                }
+                            }
+                            
+                            // If we reach here, the auth user doesn't have proper teacher data
+                            unsubscribe();
+                            reject(new Error('Teacher data not found for authenticated user'));
+                        } catch (error) {
+                            unsubscribe();
+                            reject(error);
+                        }
+                    } else {
+                        // No user is signed in
+                        unsubscribe();
+                        reject(new Error('No user is currently signed in'));
+                    }
+                }, (error) => {
+                    unsubscribe();
+                    reject(error);
+                });
+            });
+        }
+        
+        // Check if the teacher is an accountant
+        async function checkIfTeacherIsAccountant(teacherName) {
+            try {
+                // Check credentials to see if this teacher is an accountant
+                const credentialsSnapshot = await credentialsRef.once('value');
+                if (credentialsSnapshot.exists()) {
+                    const credentials = credentialsSnapshot.val();
+                    
+                    // Check if this teacher is listed as an accountant
+                    if (credentials.accountants && Array.isArray(credentials.accountants)) {
+                        isAccountant = credentials.accountants.includes(teacherName);
+                    } else {
+                        isAccountant = false;
+                    }
+                    
+                    // Show/hide accountant option based on accountant status
+                    const accountantOption = document.getElementById('accountantOption');
+                    if (isAccountant) {
+                        accountantOption.style.display = 'block';
+                    } else {
+                        accountantOption.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking accountant status:', error);
+                isAccountant = false;
+                document.getElementById('accountantOption').style.display = 'none';
+            }
+        }
+        
+        // Load initial data from Firebase
+        function loadInitialData() {
+            // Load classes
+            database.ref('classes').once('value').then(classesSnapshot => {
+                if (classesSnapshot.exists()) {
+                    const classesData = classesSnapshot.val();
+                    allClasses = Object.keys(classesData).map(key => ({
+                        id: key,
+                        ...classesData[key]
+                    }));
+                    
+                    // Populate class dropdown
+                    const classSelect = document.getElementById('classSelect');
+                    allClasses.forEach(cls => {
+                        const option = document.createElement('option');
+                        option.value = cls.id;
+                        option.textContent = cls.name || cls.id;
+                        classSelect.appendChild(option);
+                    });
+                }
+            }).catch(error => {
+                console.error("Error loading classes:", error);
+            });
+            
+            // Load other necessary data
+            loadFeeData();
+            setupEventListeners();
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Fee type change handler
+            document.getElementById('feeType').addEventListener('change', function() {
+                const feeType = this.value;
+                const classContainer = document.getElementById('classContainer');
+                const accountantContainer = document.getElementById('accountantContainer');
+                
+                if (feeType === 'accountant') {
+                    classContainer.classList.add('d-none');
+                    document.getElementById('classSelect').removeAttribute('required');
+                    
+                    accountantContainer.classList.remove('d-none');
+                    document.getElementById('accountantSource').setAttribute('required', 'true');
+                    
+                    // Clear class selection and update available amount
+                    document.getElementById('classSelect').value = '';
+                    updateAvailableAmount();
+                } else {
+                    classContainer.classList.remove('d-none');
+                    document.getElementById('classSelect').setAttribute('required', 'true');
+                    
+                    accountantContainer.classList.add('d-none');
+                    document.getElementById('accountantSource').removeAttribute('required');
+                    
+                    // Clear accountant selection and update available amount
+                    document.getElementById('accountantSource').value = '';
+                    updateAvailableAmount();
+                }
+            });
+            
+            // Class selection change handler
+            document.getElementById('classSelect').addEventListener('change', updateAvailableAmount);
+            
+            // Accountant source change handler
+            document.getElementById('accountantSource').addEventListener('change', updateAvailableAmount);
+            
+            // Form submission handler
+            document.getElementById('withdrawalForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitWithdrawalRequest();
+            });
+        }
+        
+        // Update available amount based on selections
+        function updateAvailableAmount() {
+            const feeType = document.getElementById('feeType').value;
+            const classId = document.getElementById('classSelect').value;
+            const accountantSource = document.getElementById('accountantSource').value;
+            const amountDisplay = document.getElementById('availableAmount');
+            
+            if (!feeType) {
+                amountDisplay.textContent = '--';
+                return;
+            }
+            
+            let availableAmount = 0;
+            
+            if (feeType === 'accountant') {
+                if (!accountantSource) {
+                    amountDisplay.textContent = '--';
+                    return;
+                }
+                
+                switch(accountantSource) {
+                    case 'offerings':
+                        availableAmount = calculateTotal(offeringsData);
+                        break;
+                    case 'ptaFees':
+                        availableAmount = calculateTotal(ptaFeesData);
+                        break;
+                    case 'foodVendors':
+                        availableAmount = calculateTotal(foodVendorsData);
+                        break;
+                    case 'otherFees':
+                        availableAmount = calculateTotal(otherFeesData);
+                        break;
+                }
+            } else {
+                if (!classId) {
+                    amountDisplay.textContent = '--';
+                    return;
+                }
+                
+                switch(feeType) {
+                    case 'broom':
+                        availableAmount = calculateBroomFeeTotal(classId);
+                        break;
+                    case 'exam':
+                        availableAmount = calculateExamFeeTotal(classId);
+                        break;
+                    case 'daily':
+                        availableAmount = calculateDailyFeeTotal(classId);
+                        break;
+                    case 'others':
+                        availableAmount = calculateOtherFeesTotal(classId);
+                        break;
+                    case 'pta':
+                        availableAmount = calculatePTAFeeTotal(classId);
+                        break;
+                    case 'weekly':
+                        availableAmount = calculateWeeklyFeeTotal(classId);
+                        break;
+                }
+            }
+            
+            amountDisplay.textContent = formatCurrency(availableAmount);
+        }
+        
+        // Calculate total from records
+        function calculateTotal(records) {
+            let total = 0;
+            for (const key in records) {
+                if (records[key].amount) {
+                    total += records[key].amount;
+                }
+            }
+            return total;
+        }
+        
+        // Calculate broom fee total for a class
+        function calculateBroomFeeTotal(classId) {
+            let total = 0;
+            
+            if (broomFeesData[classId]) {
+                for (const term in broomFeesData[classId]) {
+                    for (const studentId in broomFeesData[classId][term]) {
+                        const fee = broomFeesData[classId][term][studentId];
+                        if (fee.paid && fee.amount) {
+                            total += fee.amount;
+                        }
+                    }
+                }
+            }
+            
+            return total;
+        }
+        
+        // Calculate exam fee total for a class
+        function calculateExamFeeTotal(classId) {
+            let total = 0;
+            
+            if (termFeePaymentsData[classId]) {
+                for (const term in termFeePaymentsData[classId]) {
+                    for (const studentId in termFeePaymentsData[classId][term]) {
+                        const payment = termFeePaymentsData[classId][term][studentId];
+                        if (payment.paid && payment.amount) {
+                            total += payment.amount;
+                        }
+                    }
+                }
+            }
+            
+            return total;
+        }
+        
+        // Calculate daily fee total for a class
+        function calculateDailyFeeTotal(classId) {
+            return classBalancesData[classId]?.totalCollected || 0;
+        }
+        
+        // Calculate other fees total for a class
+        function calculateOtherFeesTotal(classId) {
+            // This would need to be implemented based on your data structure
+            // For now, returning 0 as a placeholder
+            return 0;
+        }
+        
+        // Calculate PTA fee total for a class
+        function calculatePTAFeeTotal(classId) {
+            let total = 0;
+            
+            // Get fee settings for this class
+            const classFees = feeSettingsData[classId] || { pta: 50, utility: 30 };
+            
+            // Process payments for each term
+            for (const term in feePaymentsData) {
+                const termData = feePaymentsData[term];
+                
+                for (const studentId in termData) {
+                    const payment = termData[studentId];
+                    
+                    // Check if student belongs to this class
+                    const studentClass = allClasses.find(cls => 
+                        cls.students && cls.students.includes(studentId)
+                    );
+                    
+                    if (studentClass && studentClass.id === classId) {
+                        // Calculate collected amount
+                        if (payment.pta) total += classFees.pta;
+                        if (payment.utility) total += classFees.utility;
+                    }
+                }
+            }
+            
+            return total;
+        }
+        
+        // Calculate weekly fee total for a class - UPDATED to match dashboard structure
+        function calculateWeeklyFeeTotal(classId) {
+            let total = 0;
+            
+            if (examFeePaymentsData[classId]) {
+                const classData = examFeePaymentsData[classId];
+                
+                for (const dateKey in classData) {
+                    if (dateKey !== 'metadata') {
+                        const weeklyData = classData[dateKey];
+                        
+                        // Check if this is the new structure with students
+                        if (weeklyData.students) {
+                            // New structure: has students object with individual payments
+                            if (weeklyData.totalCollected) {
+                                total += weeklyData.totalCollected;
+                            } else {
+                                // Calculate from individual students if totalCollected doesn't exist
+                                for (const studentId in weeklyData.students) {
+                                    const studentData = weeklyData.students[studentId];
+                                    if (studentData.paid && studentData.amount) {
+                                        total += studentData.amount;
+                                    }
+                                }
+                            }
+                        } else {
+                            // Old structure: direct payment records
+                            for (const studentId in weeklyData) {
+                                const payment = weeklyData[studentId];
+                                if (payment.paid && payment.amount) {
+                                    total += payment.amount;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return total;
+        }
+        
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(amount);
+        }
+        
+        // Submit withdrawal request
+        function submitWithdrawalRequest() {
+            const feeType = document.getElementById('feeType').value;
+            const classId = document.getElementById('classSelect').value;
+            const accountantSource = document.getElementById('accountantSource').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const requestedBy = document.getElementById('requestedBy').value;
+            const reason = document.getElementById('reason').value;
+            
+            // Validate form
+            if (!feeType || (!classId && feeType !== 'accountant') || 
+                (feeType === 'accountant' && !accountantSource) || 
+                !amount || !requestedBy || !reason) {
+                validationToast.show();
+                return;
+            }
+            
+            // Check if amount is valid
+            const availableAmount = parseFloat(document.getElementById('availableAmount').textContent.replace(/[^0-9.-]+/g, ''));
+            if (isNaN(availableAmount) || amount > availableAmount) {
+                alert('Withdrawal amount cannot exceed available amount!');
+                return;
+            }
+            
+            // Create request object
+            const requestData = {
+                feeType: feeType,
+                source: feeType === 'accountant' ? accountantSource : classId,
+                amount: amount,
+                requestedBy: requestedBy,
+                reason: reason,
+                date: Date.now(),
+                status: 'pending',
+                teacherId: currentTeacherId
+            };
+            
+            // Save to Firebase
+            database.ref('withdrawalRequests').push(requestData)
+                .then(() => {
+                    console.log("Withdrawal request saved successfully");
+                    successToast.show();
+                    document.getElementById('withdrawalForm').reset();
+                    document.getElementById('requestedBy').value = currentTeacherData.name || 'Teacher';
+                    document.getElementById('availableAmount').textContent = '--';
+                })
+                .catch((error) => {
+                    console.error("Error saving withdrawal request:", error);
+                    errorToast.show();
+                });
+        }
+        
+        // Load fee data (similar to your dashboard)
+        function loadFeeData() {
+            // Load broom fees
+            database.ref('broomFees').once('value').then(broomSnapshot => {
+                broomFeesData = broomSnapshot.val() || {};
+            }).catch(error => {
+                console.error("Error loading broom fees:", error);
+            });
+            
+            // Load term fee payments
+            database.ref('termFeePayments').once('value').then(examSnapshot => {
+                termFeePaymentsData = examSnapshot.val() || {};
+            }).catch(error => {
+                console.error("Error loading exam fees:", error);
+            });
+            
+            // Load class balances
+            database.ref('classBalances').once('value').then(balanceSnapshot => {
+                classBalancesData = balanceSnapshot.val() || {};
+            }).catch(error => {
+                console.error("Error loading class balances:", error);
+            });
+            
+            // Load fee settings
+            database.ref('ptaUtilitySettings').once('value').then(settingsSnapshot => {
+                feeSettingsData = settingsSnapshot.exists() ? settingsSnapshot.val() : {};
+            }).catch(error => {
+                console.error("Error loading PTA settings:", error);
+            });
+            
+            // Load fee payments
+            database.ref('ptaUtilityPayments').once('value').then(paymentsSnapshot => {
+                feePaymentsData = paymentsSnapshot.exists() ? paymentsSnapshot.val() : {};
+            }).catch(error => {
+                console.error("Error loading PTA payments:", error);
+            });
+            
+            // Load exam fee payments (weekly fees) - UPDATED to match dashboard structure
+            database.ref('examFeePayments').once('value').then(weeklySnapshot => {
+                examFeePaymentsData = weeklySnapshot.val() || {};
+            }).catch(error => {
+                console.error("Error loading weekly fees:", error);
+            });
+            
+            // Load accountant data
+            Promise.all([
+                database.ref('offerings').once('value'),
+                database.ref('ptaFees').once('value'),
+                database.ref('foodVendors').once('value'),
+                database.ref('otherFees').once('value')
+            ]).then(([offeringsSnapshot, ptaFeesSnapshot, foodVendorsSnapshot, otherFeesSnapshot]) => {
+                offeringsData = offeringsSnapshot.val() || {};
+                ptaFeesData = ptaFeesSnapshot.val() || {};
+                foodVendorsData = foodVendorsSnapshot.val() || {};
+                otherFeesData = otherFeesSnapshot.val() || {};
+            }).catch(error => {
+                console.error("Error loading accountant data:", error);
+            });
+        }
+    </script>
+</body>
+</html>
