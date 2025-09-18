@@ -339,6 +339,7 @@
         let foodVendorsData = {};
         let otherFeesData = {};
         let feeTypesData = {};
+        let specialFeePaymentsData = {};
         
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
@@ -686,9 +687,25 @@
         
         // Calculate other fees total for a class
         function calculateOtherFeesTotal(classId) {
-            // This would need to be implemented based on your data structure
-            // For now, returning 0 as a placeholder
-            return 0;
+            let total = 0;
+            
+            // Get all fee types that belong to this class
+            for (const feeId in feeTypesData) {
+                const feeType = feeTypesData[feeId];
+                if (feeType.classId === classId) {
+                    // Find all payments for this fee type
+                    for (const paymentKey in specialFeePaymentsData) {
+                        if (paymentKey.includes(feeId)) {
+                            const payment = specialFeePaymentsData[paymentKey];
+                            if (payment.paid && payment.amount) {
+                                total += payment.amount;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return total;
         }
         
         // Calculate PTA fee total for a class
@@ -887,6 +904,17 @@
                 otherFeesData = otherFeesSnapshot.val() || {};
             }).catch(error => {
                 console.error("Error loading accountant data:", error);
+            });
+            
+            // Load fee types and special fee payments for "other fees" calculation
+            Promise.all([
+                database.ref('feeTypes').once('value'),
+                database.ref('specialFeePayments').once('value')
+            ]).then(([feeTypesSnapshot, specialFeePaymentsSnapshot]) => {
+                feeTypesData = feeTypesSnapshot.val() || {};
+                specialFeePaymentsData = specialFeePaymentsSnapshot.val() || {};
+            }).catch(error => {
+                console.error("Error loading fee types and special payments:", error);
             });
         }
     </script>
