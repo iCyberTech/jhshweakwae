@@ -188,6 +188,135 @@
             color: #636e72;
         }
 
+        /* Password Change Modal Styles */
+        .password-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .password-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .password-modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .password-modal-header {
+            padding: 15px 20px;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .password-modal-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .password-modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .password-modal-body {
+            padding: 20px;
+        }
+
+        .password-input-group {
+            margin-bottom: 15px;
+        }
+
+        .password-input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .password-input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .password-input-group input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .password-modal-footer {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .password-modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .password-modal-btn.cancel {
+            background: #e9ecef;
+            color: var(--text-color);
+        }
+
+        .password-modal-btn.cancel:hover {
+            background: #dee2e6;
+        }
+
+        .password-modal-btn.submit {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .password-modal-btn.submit:hover {
+            background: #5c4fc9;
+        }
+
+        .password-modal-btn.submit:disabled {
+            background: #b2b2b2;
+            cursor: not-allowed;
+        }
+
+        .password-error {
+            color: var(--danger-color);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 480px) {
             .notification-container {
@@ -215,6 +344,10 @@
             .notification-popup {
                 width: 95%;
                 right: 10px;
+            }
+
+            .password-modal-content {
+                width: 95%;
             }
         }
         :root {
@@ -266,6 +399,8 @@
             align-items: center;
             gap: 10px;
             min-width: 0;
+            cursor: pointer;
+            position: relative;
         }
 
         .profile-img {
@@ -276,6 +411,11 @@
             border: 2px solid white;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .profile:hover .profile-img {
+            transform: scale(1.05);
         }
 
         .greeting h1 {
@@ -407,6 +547,7 @@
         .card-title {
             font-size: 0.85rem;
             font-weight: 600;
+            margin-top: 5px;
         }
 
         .card-value {
@@ -653,6 +794,7 @@
         .frame-content {
             height: calc(100% - 60px);
             padding: 0;
+            background: white;
         }
 
         .frame-content iframe {
@@ -723,6 +865,7 @@
             flex: 1;
             max-width: calc(100% - 60px);
             overflow: hidden;
+            word-wrap: break-word;
         }
 
         .notification-title {
@@ -975,6 +1118,39 @@
         <div class="loading-text">Loading Teacher Dashboard...</div>
     </div>
 
+    <!-- Password Change Modal -->
+    <div class="password-modal" id="password-modal">
+        <div class="password-modal-content">
+            <div class="password-modal-header">
+                <div class="password-modal-title">Change Password</div>
+                <button class="password-modal-close" id="password-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="password-modal-body">
+                <div class="password-input-group">
+                    <label for="current-password">Current Password</label>
+                    <input type="password" id="current-password" placeholder="Enter current password">
+                    <div class="password-error" id="current-password-error"></div>
+                </div>
+                <div class="password-input-group">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password" placeholder="Enter new password">
+                    <div class="password-error" id="new-password-error"></div>
+                </div>
+                <div class="password-input-group">
+                    <label for="confirm-password">Confirm New Password</label>
+                    <input type="password" id="confirm-password" placeholder="Confirm new password">
+                    <div class="password-error" id="confirm-password-error"></div>
+                </div>
+            </div>
+            <div class="password-modal-footer">
+                <button class="password-modal-btn cancel" id="password-modal-cancel">Cancel</button>
+                <button class="password-modal-btn submit" id="password-modal-submit" disabled>Change Password</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification Popup -->
     <div class="notification-popup" id="notification-popup">
         <div class="notification-popup-header">
@@ -992,7 +1168,7 @@
     <div id="dashboard" style="display: none;">
         <div class="container">
             <header>
-                <div class="profile">
+                <div class="profile" id="profile-section">
                     <img id="profile-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="profile-img">
                     <div class="greeting">
                         <h1 id="greeting-title">Good Morning, <span id="teacher-name">Teacher</span>!</h1>
@@ -1264,6 +1440,7 @@
         const dashboard = document.getElementById('dashboard');
         const teacherNameElement = document.getElementById('teacher-name');
         const profileImg = document.getElementById('profile-img');
+        const profileSection = document.getElementById('profile-section');
         const greetingTitle = document.getElementById('greeting-title');
         const greetingSubtitle = document.getElementById('greeting-subtitle');
         const notificationContainer = document.getElementById('notification-container');
@@ -1273,6 +1450,18 @@
         const notificationPopup = document.getElementById('notification-popup');
         const notificationPopupBody = document.getElementById('notification-popup-body');
         const notificationPopupClose = document.getElementById('notification-popup-close');
+        
+        // Password modal elements
+        const passwordModal = document.getElementById('password-modal');
+        const passwordModalClose = document.getElementById('password-modal-close');
+        const passwordModalCancel = document.getElementById('password-modal-cancel');
+        const passwordModalSubmit = document.getElementById('password-modal-submit');
+        const currentPasswordInput = document.getElementById('current-password');
+        const newPasswordInput = document.getElementById('new-password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+        const currentPasswordError = document.getElementById('current-password-error');
+        const newPasswordError = document.getElementById('new-password-error');
+        const confirmPasswordError = document.getElementById('confirm-password-error');
         
         // Attendance elements
         const attendanceStatus = document.getElementById('attendance-status');
@@ -1319,6 +1508,7 @@
         let teacherRequests = [];
         let requestListener = null;
         let lastLoginTime = null;
+        let currentUser = null;
         
         // Get current date in YYYY-MM-DD format based on local time
         function getCurrentDate() {
@@ -1423,6 +1613,7 @@
                 // Check if user is already signed in
                 const unsubscribe = auth.onAuthStateChanged(async (user) => {
                     if (user) {
+                        currentUser = user;
                         try {
                             // User is signed in, get their data from authUsers
                             const authUserSnapshot = await database.ref(`authUsers/${user.uid}`).once('value');
@@ -2215,6 +2406,113 @@
                     }, 100);
                 });
             }, 500);
+        });
+        
+        // Password change functionality
+        profileSection.addEventListener('click', function() {
+            // Clear any previous values and errors
+            currentPasswordInput.value = '';
+            newPasswordInput.value = '';
+            confirmPasswordInput.value = '';
+            currentPasswordError.style.display = 'none';
+            newPasswordError.style.display = 'none';
+            confirmPasswordError.style.display = 'none';
+            passwordModalSubmit.disabled = true;
+            
+            // Show the password modal
+            passwordModal.classList.add('show');
+        });
+        
+        // Close password modal
+        passwordModalClose.addEventListener('click', function() {
+            passwordModal.classList.remove('show');
+        });
+        
+        passwordModalCancel.addEventListener('click', function() {
+            passwordModal.classList.remove('show');
+        });
+        
+        // Close modal when clicking outside
+        passwordModal.addEventListener('click', function(e) {
+            if (e.target === passwordModal) {
+                passwordModal.classList.remove('show');
+            }
+        });
+        
+        // Validate password inputs in real-time
+        function validatePasswordInputs() {
+            let isValid = true;
+            
+            // Check current password
+            if (!currentPasswordInput.value) {
+                isValid = false;
+            }
+            
+            // Check new password (minimum 6 characters)
+            if (newPasswordInput.value.length < 6) {
+                isValid = false;
+            }
+            
+            // Check if passwords match
+            if (newPasswordInput.value !== confirmPasswordInput.value) {
+                isValid = false;
+            }
+            
+            // Enable/disable submit button
+            passwordModalSubmit.disabled = !isValid;
+        }
+        
+        currentPasswordInput.addEventListener('input', validatePasswordInputs);
+        newPasswordInput.addEventListener('input', validatePasswordInputs);
+        confirmPasswordInput.addEventListener('input', validatePasswordInputs);
+        
+        // Handle password change submission
+        passwordModalSubmit.addEventListener('click', async function() {
+            const currentPassword = currentPasswordInput.value;
+            const newPassword = newPasswordInput.value;
+            
+            try {
+                // Reauthenticate user with current password
+                const credential = firebase.auth.EmailAuthProvider.credential(
+                    currentUser.email,
+                    currentPassword
+                );
+                
+                await currentUser.reauthenticateWithCredential(credential);
+                
+                // Update password
+                await currentUser.updatePassword(newPassword);
+                
+                // Show success notification
+                showNotification({
+                    title: 'Password Changed',
+                    message: 'Your password has been updated successfully',
+                    type: 'success',
+                    duration: 5000
+                });
+                
+                // Close the modal
+                passwordModal.classList.remove('show');
+                
+            } catch (error) {
+                console.error('Error changing password:', error);
+                
+                // Show appropriate error message
+                if (error.code === 'auth/wrong-password') {
+                    currentPasswordError.textContent = 'Current password is incorrect';
+                    currentPasswordError.style.display = 'block';
+                } else if (error.code === 'auth/weak-password') {
+                    newPasswordError.textContent = 'Password should be at least 6 characters';
+                    newPasswordError.style.display = 'block';
+                } else {
+                    showNotification({
+                        title: 'Error',
+                        message: 'Failed to change password: ' + error.message,
+                        type: 'error',
+                        duration: 5000
+                    });
+                }
+            }
         });
         
         // Initialize the app - check for active session
