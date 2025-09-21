@@ -3,404 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Assessment Portal</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Teacher Grade Entry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
         :root {
-            --primary-color: rgba(108, 92, 231, 0.9);
-            --secondary-color: rgba(162, 155, 254, 0.9);
-            --text-color: rgba(45, 52, 54, 0.9);
-            --light-text: rgba(99, 110, 114, 0.8);
-            --glass-bg: rgba(255, 255, 255, 0.2);
-            --glass-border: rgba(255, 255, 255, 0.3);
-            --glass-blur: 16px;
-            --success-color: rgba(0, 184, 148, 0.9);
-            --danger-color: rgba(214, 48, 49, 0.9);
-            --warning-color: rgba(253, 203, 110, 0.9);
-            --info-color: rgba(9, 132, 227, 0.9);
-            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            --transition-speed: 0.3s;
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --text-color: #2d3436;
+            --light-text: #636e72;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --success-color: #00b894;
+            --danger-color: #d63031;
+            --warning-color: #fdcb6e;
+            --info-color: #0984e3;
+            --shadow: 8px 8px 16px #d1d9e6, -8px -8px 16px #ffffff;
+            --shadow-inset: inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff;
+            --border-radius: 15px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
 
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: var(--text-color);
             min-height: 100vh;
-            padding: 20px;
-            backdrop-filter: blur(var(--glass-blur));
-            -webkit-backdrop-filter: blur(var(--glass-blur));
+            padding: 15px;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
         }
 
-        header {
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            border-radius: 16px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--card-shadow);
-            backdrop-filter: blur(var(--glass-blur));
-            -webkit-backdrop-filter: blur(var(--glass-blur));
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
         }
 
-        .header-title {
-            font-size: 1.8rem;
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
             color: var(--primary-color);
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .teacher-info {
+        .user-info {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
+        }
+
+        .logout-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
             padding: 8px 15px;
-            border-radius: 50px;
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        .teacher-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .teacher-name {
-            font-weight: 600;
-            color: var(--text-color);
-        }
-
-        .tabs {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 25px;
-            overflow-x: auto;
-            padding: 10px 5px;
-            scrollbar-width: none;
-        }
-
-        .tabs::-webkit-scrollbar {
-            display: none;
-        }
-
-        .tab {
-            padding: 12px 24px;
-            background: var(--glass-bg);
-            border-radius: 50px;
+            border-radius: var(--border-radius);
             cursor: pointer;
-            font-weight: 600;
-            white-space: nowrap;
-            transition: all var(--transition-speed) ease;
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            color: var(--text-color);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        .tab.active {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: white;
-            box-shadow: 0 6px 12px rgba(108, 92, 231, 0.3);
+        .logout-btn:hover {
+            background: var(--secondary-color);
         }
 
-        .tab:hover:not(.active) {
-            background: rgba(108, 92, 231, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .content-section {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .content-section.active {
-            display: block;
-        }
-
-        .subjects-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-
-        .subject-card {
-            background: var(--glass-bg);
-            border-radius: 16px;
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: var(--border-radius);
             padding: 20px;
-            box-shadow: var(--card-shadow);
-            transition: all var(--transition-speed) ease;
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(var(--glass-blur));
-            -webkit-backdrop-filter: blur(var(--glass-blur));
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
         }
 
-        .subject-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15);
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .subject-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
             margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .subject-name {
-            font-size: 1.3rem;
-            font-weight: 700;
             color: var(--primary-color);
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .subject-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: white;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            box-shadow: 0 4px 8px rgba(108, 92, 231, 0.3);
+            gap: 10px;
         }
 
-        .class-info {
-            margin-top: 15px;
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
-        .class-name {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-color);
-        }
-
-        .schedule {
-            font-size: 0.9rem;
-            color: var(--light-text);
-            margin-bottom: 12px;
-        }
-
-        .days {
+        .filter-group {
             display: flex;
-            gap: 8px;
-            margin: 8px 0;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .filter-group select, .filter-group input {
+            padding: 12px 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            background: var(--glass-bg);
+            box-shadow: var(--shadow-inset);
+            font-size: 14px;
+        }
+
+        .grade-scale {
+            display: flex;
             flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: center;
         }
 
-        .day {
-            background: rgba(108, 92, 231, 0.15);
-            color: var(--primary-color);
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            border: 1px solid rgba(108, 92, 231, 0.2);
+        .grade-scale-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 500;
         }
 
-        .time {
+        .grade-scale-item.A { background-color: rgba(0, 184, 148, 0.1); color: var(--success-color); }
+        .grade-scale-item.B { background-color: rgba(162, 155, 254, 0.1); color: var(--primary-color); }
+        .grade-scale-item.C { background-color: rgba(253, 203, 110, 0.2); color: #e17055; }
+        .grade-scale-item.D { background-color: rgba(214, 48, 49, 0.1); color: var(--danger-color); }
+        .grade-scale-item.F { background-color: rgba(214, 48, 49, 0.2); color: var(--danger-color); }
+
+        .grade-sheet-container {
+            overflow-x: auto;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            background: white;
+        }
+
+        .grade-sheet {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        .grade-sheet th, .grade-sheet td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .grade-sheet th {
+            background-color: var(--primary-color);
+            color: white;
             font-weight: 600;
-            color: var(--success-color);
-            font-size: 0.9rem;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .grade-sheet tr:hover {
+            background-color: rgba(108, 92, 231, 0.05);
+        }
+
+        .student-info {
+            text-align: left;
+            background-color: #f8f9fa;
+            position: sticky;
+            left: 0;
+            z-index: 5;
+        }
+
+        .grade-input {
+            width: 60px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .grade-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
+            outline: none;
+        }
+
+        .grade-input.A { background-color: rgba(0, 184, 148, 0.1); color: var(--success-color); font-weight: bold; }
+        .grade-input.B { background-color: rgba(162, 155, 254, 0.1); color: var(--primary-color); font-weight: bold; }
+        .grade-input.C { background-color: rgba(253, 203, 110, 0.2); color: #e17055; font-weight: bold; }
+        .grade-input.D { background-color: rgba(214, 48, 49, 0.1); color: var(--danger-color); font-weight: bold; }
+        .grade-input.F { background-color: rgba(214, 48, 49, 0.2); color: var(--danger-color); font-weight: bold; }
+
+        .letter-grade {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-align: center;
+            display: inline-block;
+            min-width: 30px;
+        }
+
+        .letter-grade.A { background-color: rgba(0, 184, 148, 0.1); color: var(--success-color); }
+        .letter-grade.B { background-color: rgba(162, 155, 254, 0.1); color: var(--primary-color); }
+        .letter-grade.C { background-color: rgba(253, 203, 110, 0.2); color: #e17055; }
+        .letter-grade.D { background-color: rgba(214, 48, 49, 0.1); color: var(--danger-color); }
+        .letter-grade.F { background-color: rgba(214, 48, 49, 0.2); color: var(--danger-color); }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 20px;
         }
 
         .btn {
-            padding: 10px 18px;
-            border-radius: 12px;
+            padding: 12px 25px;
+            border-radius: var(--border-radius);
             border: none;
+            font-weight: 500;
             cursor: pointer;
-            font-weight: 600;
-            transition: all var(--transition-speed) ease;
-            display: inline-flex;
+            transition: all 0.3s ease;
+            display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.95rem;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            background: var(--primary-color);
             color: white;
-            box-shadow: 0 4px 8px rgba(108, 92, 231, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: var(--shadow);
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, rgba(90, 75, 209, 0.9) 0%, rgba(142, 134, 222, 0.9) 100%);
+            background: var(--secondary-color);
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(108, 92, 231, 0.4);
         }
 
-        .btn-outline {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        .btn-secondary {
+            background: var(--glass-bg);
+            color: var(--text-color);
+            box-shadow: var(--shadow);
         }
 
-        .btn-outline:hover {
-            background: rgba(108, 92, 231, 0.15);
+        .btn-secondary:hover {
+            background: #dfe6e9;
             transform: translateY(-2px);
-            box-shadow: 0 6px 10px rgba(108, 92, 231, 0.2);
-        }
-
-        .students-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 25px;
-            background: var(--glass-bg);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: var(--card-shadow);
-            backdrop-filter: blur(var(--glass-blur));
-            -webkit-backdrop-filter: blur(var(--glass-blur));
-            border: 1px solid var(--glass-border);
-        }
-
-        .students-table th, 
-        .students-table td {
-            padding: 15px 20px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .students-table th {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: white;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-        }
-
-        .students-table tr:hover {
-            background: rgba(108, 92, 231, 0.08);
-        }
-
-        .students-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .student-avatar {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 12px;
-            vertical-align: middle;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .input-grade {
-            width: 80px;
-            padding: 8px 12px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.2);
-            color: var(--text-color);
-            font-weight: 500;
-            transition: all var(--transition-speed) ease;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-        }
-
-        .input-grade:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            background: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
-        }
-
-        .grade-form {
-            background: var(--glass-bg);
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: var(--card-shadow);
-            margin-top: 25px;
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(var(--glass-blur));
-            -webkit-backdrop-filter: blur(var(--glass-blur));
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text-color);
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.2);
-            color: var(--text-color);
-            font-size: 1rem;
-            transition: all var(--transition-speed) ease;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            background: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
-        }
-
-        .form-row {
-            display: flex;
-            gap: 20px;
-        }
-
-        .form-row .form-group {
-            flex: 1;
         }
 
         .loading-screen {
@@ -409,31 +277,27 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.9);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 2000;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
 
         .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 6px solid rgba(108, 92, 231, 0.1);
-            border-top: 6px solid var(--primary-color);
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
         .loading-text {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             color: var(--text-color);
-            font-weight: 500;
         }
 
         @keyframes spin {
@@ -441,99 +305,12 @@
             100% { transform: rotate(360deg); }
         }
 
-        .no-data {
-            text-align: center;
-            padding: 50px;
-            background: var(--glass-bg);
-            border-radius: 16px;
-            margin-top: 25px;
-            box-shadow: var(--card-shadow);
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(var(--glass-blur));
-            -webkit-backdrop-filter: blur(var(--glass-blur));
-        }
-
-        .no-data i {
-            font-size: 2.5rem;
-            color: var(--light-text);
-            margin-bottom: 20px;
-            opacity: 0.7;
-        }
-
-        .no-data h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: var(--text-color);
-        }
-
-        .no-data p {
-            font-size: 1rem;
-            color: var(--light-text);
-        }
-
-        .back-btn {
-            margin-bottom: 25px;
-            transition: all var(--transition-speed) ease;
-        }
-
-        .back-btn:hover {
-            transform: translateX(-3px);
-        }
-
-        .grade-summary {
-            background: var(--glass-bg);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: var(--card-shadow);
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(var(--glass-blur));
-            -webkit-backdrop-filter: blur(var(--glass-blur));
-        }
-
-        .grade-summary h3 {
-            margin-bottom: 15px;
-            color: var(--primary-color);
-            font-size: 1.4rem;
-        }
-
-        .grade-summary p {
-            margin-bottom: 8px;
-            font-size: 1rem;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .grade-summary strong {
-            color: var(--text-color);
-            font-weight: 600;
-        }
-
-        .grade-weight {
-            font-size: 0.9rem;
-            color: var(--light-text);
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .total-grade {
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-
-        .letter-grade {
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        /* Notification styles */
         .notification-container {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 350px;
-            max-width: 90%;
+            top: 15px;
+            right: 15px;
+            width: 90%;
+            max-width: 350px;
             z-index: 9999;
             display: flex;
             flex-direction: column;
@@ -541,232 +318,94 @@
         }
 
         .notification {
-            position: relative;
-            padding: 16px 20px;
-            border-radius: 10px;
-            color: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            border-left: 5px solid rgba(255, 255, 255, 0.3);
             display: flex;
-            align-items: center;
-            transform: translateX(120%);
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            opacity: 0;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-            opacity: 1;
-        }
-
-        .notification.hide {
-            transform: translateX(120%);
-            opacity: 0;
+            align-items: flex-start;
+            gap: 15px;
         }
 
         .notification.success {
-            background-color: var(--success-color);
+            background: linear-gradient(135deg, rgba(0, 184, 148, 0.9) 0%, rgba(0, 184, 148, 1) 100%);
+            color: white;
         }
 
         .notification.error {
-            background-color: var(--danger-color);
+            background: linear-gradient(135deg, rgba(214, 48, 49, 0.9) 0%, rgba(214, 48, 49, 1) 100%);
+            color: white;
         }
 
         .notification.warning {
-            background-color: var(--warning-color);
+            background: linear-gradient(135deg, rgba(253, 203, 110, 0.9) 0%, rgba(253, 203, 110, 1) 100%);
             color: var(--text-color);
         }
 
         .notification.info {
-            background-color: var(--info-color);
+            background: linear-gradient(135deg, rgba(9, 132, 227, 0.9) 0%, rgba(9, 132, 227, 1) 100%);
+            color: white;
         }
 
         .notification-icon {
-            margin-right: 12px;
             font-size: 20px;
+            margin-top: 2px;
         }
 
         .notification-content {
             flex: 1;
-            overflow: hidden;
         }
 
         .notification-title {
             font-weight: 600;
-            margin-bottom: 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .notification-message {
-            font-size: 14px;
-            opacity: 0.9;
-            line-height: 1.4;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+            margin-bottom: 5px;
         }
 
         .notification-close {
             background: none;
             border: none;
-            color: inherit;
-            cursor: pointer;
-            margin-left: 15px;
             font-size: 18px;
-            opacity: 0.8;
-            transition: opacity 0.2s ease;
+            cursor: pointer;
+            opacity: 0.7;
         }
 
         .notification-close:hover {
             opacity: 1;
         }
 
-        /* Responsive styles */
-        @media (max-width: 1200px) {
-            .container {
-                padding: 15px;
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
             }
-            
-            .subjects-container {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            to {
+                transform: translateX(0);
+                opacity: 1;
             }
         }
 
-        @media (max-width: 992px) {
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-                padding: 15px;
-            }
-            
-            .teacher-info {
-                width: 100%;
-                justify-content: flex-end;
-            }
-            
-            .form-row {
-                flex-direction: column;
-                gap: 0;
-            }
+        .notification.show {
+            animation: slideIn 0.3s ease forwards;
         }
 
         @media (max-width: 768px) {
-            .header-title {
-                font-size: 1.5rem;
-            }
-            
-            .subjects-container {
+            .filters {
                 grid-template-columns: 1fr;
             }
             
-            .students-table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
             }
             
-            .grade-form {
-                padding: 20px;
-            }
-            
-            .students-table th, 
-            .students-table td {
-                padding: 12px 15px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            :root {
-                --glass-blur: 10px;
-            }
-            
-            .container {
-                padding: 10px;
-            }
-            
-            .header-title {
-                font-size: 1.3rem;
-            }
-            
-            .teacher-info {
-                padding: 6px 12px;
-            }
-            
-            .teacher-avatar {
-                width: 38px;
-                height: 38px;
-            }
-            
-            .teacher-name {
-                font-size: 0.9rem;
-            }
-            
-            .tabs {
-                gap: 8px;
-            }
-            
-            .tab {
-                padding: 10px 16px;
-                font-size: 0.85rem;
-            }
-            
-            .subject-card {
-                padding: 15px;
-            }
-            
-            .subject-name {
-                font-size: 1.1rem;
+            .actions {
+                flex-direction: column;
             }
             
             .btn {
-                padding: 8px 14px;
-                font-size: 0.9rem;
-            }
-            
-            .no-data {
-                padding: 30px 20px;
-            }
-            
-            .no-data i {
-                font-size: 2rem;
-            }
-            
-            .no-data h3 {
-                font-size: 1.3rem;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .header-title {
-                font-size: 1.2rem;
-            }
-            
-            .teacher-info {
-                padding: 5px 10px;
-            }
-            
-            .teacher-avatar {
-                width: 35px;
-                height: 35px;
-            }
-            
-            .tab {
-                padding: 8px 12px;
-                font-size: 0.8rem;
-            }
-            
-            .subject-icon {
-                width: 35px;
-                height: 35px;
-                font-size: 0.9rem;
-            }
-            
-            .input-grade {
-                width: 70px;
-                padding: 6px 8px;
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
@@ -775,7 +414,7 @@
     <!-- Loading Screen -->
     <div class="loading-screen" id="loading-screen">
         <div class="loading-spinner"></div>
-        <div class="loading-text">Loading Teacher Portal...</div>
+        <div class="loading-text">Loading Grade Entry System...</div>
     </div>
 
     <!-- Notification Container -->
@@ -783,132 +422,84 @@
 
     <!-- Main Content -->
     <div class="container" id="main-content" style="display: none;">
-        <!-- Header -->
-        <header>
-            <h1 class="header-title">Teacher Assessment Portal</h1>
-            <div class="teacher-info">
-                <img id="teacher-avatar" src="" alt="Teacher" class="teacher-avatar">
-                <span class="teacher-name" id="teacher-name">Loading...</span>
-            </div>
-        </header>
-
-        <!-- Tabs -->
-        <div class="tabs">
-            <div class="tab active" data-tab="subjects">My Subjects</div>
-            <div class="tab" data-tab="grades">Enter Grades</div>
-            <div class="tab" data-tab="published">Published Grades</div>
-        </div>
-
-        <!-- Subjects Tab -->
-        <div class="content-section active" id="subjects-tab">
-            <div class="subjects-container" id="subjects-container">
-                <!-- Subjects will be dynamically inserted here -->
-            </div>
-
-            <div id="no-subjects" class="no-data" style="display: none;">
-                <i class="fas fa-book-open"></i>
-                <h3>No Subjects Assigned</h3>
-                <p>You currently don't have any subjects assigned to you.</p>
+        <div class="header">
+            <h1 class="page-title"><i class="fas fa-chalkboard-teacher"></i> Teacher Grade Entry</h1>
+            <div class="user-info">
+                <span id="teacher-name">Teacher</span>
+                <button class="logout-btn" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </div>
         </div>
 
-        <!-- Grades Tab -->
-        <div class="content-section" id="grades-tab">
-            <div id="grade-selection">
-                <div class="form-group">
-                    <label for="subject-select">Select Subject</label>
-                    <select id="subject-select" class="form-control">
-                        <option value="">-- Select Subject --</option>
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-filter"></i> Filters</h2>
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="class-filter">Class</label>
+                    <select id="class-filter">
+                        <option value="">Select Class</option>
                     </select>
                 </div>
-                
-                <div class="form-group">
-                    <label for="class-select">Select Class</label>
-                    <select id="class-select" class="form-control">
-                        <option value="">-- Select Class --</option>
+                <div class="filter-group">
+                    <label for="subject-filter">Subject</label>
+                    <select id="subject-filter">
+                        <option value="">Select Subject</option>
                     </select>
                 </div>
-                
-                <div class="form-group">
-                    <label for="term-select">Select Term</label>
-                    <select id="term-select" class="form-control">
+                <div class="filter-group">
+                    <label for="term-filter">Term</label>
+                    <select id="term-filter">
                         <option value="Term 1">Term 1</option>
                         <option value="Term 2">Term 2</option>
                         <option value="Term 3">Term 3</option>
+                        <option value="Final">Final</option>
                     </select>
                 </div>
-                
-                <button id="load-students-btn" class="btn btn-primary">
-                    <i class="fas fa-users"></i> Load Students
-                </button>
-            </div>
-            
-            <div id="grade-form-container" style="display: none;">
-                <button id="back-to-selection" class="btn btn-outline back-btn">
-                    <i class="fas fa-arrow-left"></i> Back to Selection
-                </button>
-                
-                <div class="grade-summary">
-                    <h3 id="grade-summary-title">Grade Summary</h3>
-                    <p><strong>Subject:</strong> <span id="current-subject"></span></p>
-                    <p><strong>Class:</strong> <span id="current-class"></span></p>
-                    <p><strong>Term:</strong> <span id="current-term"></span></p>
-                    <p class="grade-weight"><strong>Grading Weights:</strong> 
-                        <span id="grade-weights">Loading weights...</span>
-                    </p>
-                </div>
-                
-                <div class="grade-form">
-                    <h3>Enter Student Grades</h3>
-                    <table class="students-table" id="students-grade-table">
-                        <thead>
-                            <tr>
-                                <th>Student</th>
-                                <th>Assignments</th>
-                                <th>Projects</th>
-                                <th>Class Score</th>
-                                <th>Final Exam</th>
-                                <th>Total</th>
-                                <th>Grade</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Student rows will be inserted here -->
-                        </tbody>
-                    </table>
-                    
-                    <div style="margin-top: 20px; text-align: right;">
-                        <button id="save-grades-btn" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Save Grades
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="no-grade-data" class="no-data" style="display: none;">
-                <i class="fas fa-graduation-cap"></i>
-                <h3>No Students Found</h3>
-                <p>Please select a subject and class to view students.</p>
             </div>
         </div>
 
-        <!-- Published Grades Tab -->
-        <div class="content-section" id="published-tab">
-            <div id="published-grades-container">
-                <!-- Published grades will be inserted here -->
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-graduation-cap"></i> Grade Scale</h2>
+            <div class="grade-scale">
+                <div class="grade-scale-item A">A (90-100)</div>
+                <div class="grade-scale-item B">B (80-89)</div>
+                <div class="grade-scale-item C">C (70-79)</div>
+                <div class="grade-scale-item D">D (60-69)</div>
+                <div class="grade-scale-item F">F (Below 60)</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-table"></i> Grade Sheet</h2>
+            <div class="grade-sheet-container">
+                <table class="grade-sheet" id="grade-table">
+                    <thead>
+                        <tr>
+                            <th class="student-info">Student ID</th>
+                            <th class="student-info">Student Name</th>
+                            <th>Class Score</th>
+                            <th>Projects</th>
+                            <th>Assignments</th>
+                            <th>Exam Score</th>
+                            <th>Total Score</th>
+                            <th>Letter Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody id="grade-table-body">
+                        <!-- Students will be populated here -->
+                    </tbody>
+                </table>
             </div>
             
-            <div id="no-published-grades" class="no-data" style="display: none;">
-                <i class="fas fa-check-circle"></i>
-                <h3>No Published Grades</h3>
-                <p>You haven't published any grades yet.</p>
+            <div class="actions">
+                <button class="btn btn-secondary" id="reset-btn"><i class="fas fa-undo"></i> Reset</button>
+                <button class="btn btn-primary" id="save-btn"><i class="fas fa-save"></i> Save Grades</button>
             </div>
         </div>
     </div>
 
     <script>
         // Firebase configuration
-       const firebaseConfig = {
+          const firebaseConfig = {
     apiKey: "AIzaSyB5NcC2P3v0LFBVFMp9-mAHQKYuo1pKokA",
     authDomain: "hweakwaecram.firebaseapp.com",
     projectId: "hweakwaecram",
@@ -918,7 +509,6 @@
     measurementId: "G-4GMZJJRVG0"
   };
 
-        
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
@@ -927,56 +517,30 @@
         // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
         const mainContent = document.getElementById('main-content');
-        const subjectsContainer = document.getElementById('subjects-container');
-        const noSubjectsMessage = document.getElementById('no-subjects');
-        const teacherAvatar = document.getElementById('teacher-avatar');
         const teacherName = document.getElementById('teacher-name');
+        const logoutBtn = document.getElementById('logout-btn');
+        const classFilter = document.getElementById('class-filter');
+        const subjectFilter = document.getElementById('subject-filter');
+        const termFilter = document.getElementById('term-filter');
+        const gradeTableBody = document.getElementById('grade-table-body');
+        const saveBtn = document.getElementById('save-btn');
+        const resetBtn = document.getElementById('reset-btn');
         const notificationContainer = document.getElementById('notification-container');
-        
-        // Tab elements
-        const tabs = document.querySelectorAll('.tab');
-        const contentSections = document.querySelectorAll('.content-section');
-        
-        // Grade entry elements
-        const subjectSelect = document.getElementById('subject-select');
-        const classSelect = document.getElementById('class-select');
-        const termSelect = document.getElementById('term-select');
-        const loadStudentsBtn = document.getElementById('load-students-btn');
-        const gradeFormContainer = document.getElementById('grade-form-container');
-        const gradeSelection = document.getElementById('grade-selection');
-        const backToSelection = document.getElementById('back-to-selection');
-        const noGradeData = document.getElementById('no-grade-data');
-        const studentsGradeTable = document.getElementById('students-grade-table').querySelector('tbody');
-        const saveGradesBtn = document.getElementById('save-grades-btn');
-        const currentSubject = document.getElementById('current-subject');
-        const currentClass = document.getElementById('current-class');
-        const currentTerm = document.getElementById('current-term');
-        const gradeWeights = document.getElementById('grade-weights');
-        
-        // Published grades elements
-        const publishedGradesContainer = document.getElementById('published-grades-container');
-        const noPublishedGrades = document.getElementById('no-published-grades');
-        
-        // Firebase references
-        const authUsersRef = database.ref('authUsers');
-        const teachersRef = database.ref('teachers');
-        const subjectsRef = database.ref('subjects');
-        const classesRef = database.ref('classes');
-        const studentsRef = database.ref('students');
-        const gradesRef = database.ref('grades');
-        const publishedGradesRef = database.ref('publishedGrades');
-        const settingsRef = database.ref('settings');
         
         // Global variables
         let currentTeacherId = null;
         let currentTeacherData = null;
-        let teacherSubjects = [];
-        let allClasses = {};
-        let allStudents = {};
-        let gradeSettings = {};
-        let selectedSubject = null;
-        let selectedClass = null;
-        let selectedTerm = null;
+        let students = {};
+        let subjects = {};
+        let classes = {};
+        let currentGrades = {};
+        let teacherAssignments = [];
+        let gradeWeights = {
+            classScore: 25,
+            projects: 15,
+            assignments: 15,
+            examScore: 45
+        };
         
         // Show notification function
         function showNotification({ title, message, type = 'info', duration = 5000 }) {
@@ -1010,13 +574,7 @@
             let timeoutId;
             if (duration > 0) {
                 timeoutId = setTimeout(() => {
-                    notification.classList.remove('show');
-                    notification.classList.add('hide');
-                    
-                    // Remove after animation completes
-                    setTimeout(() => {
-                        notification.remove();
-                    }, 300);
+                    notification.remove();
                 }, duration);
             }
             
@@ -1024,12 +582,7 @@
             const closeBtn = notification.querySelector('.notification-close');
             closeBtn.addEventListener('click', () => {
                 clearTimeout(timeoutId);
-                notification.classList.remove('show');
-                notification.classList.add('hide');
-                
-                setTimeout(() => {
-                    notification.remove();
-                }, 300);
+                notification.remove();
             });
             
             return notification;
@@ -1056,6 +609,7 @@
                                     
                                     if (teacherSnapshot.exists()) {
                                         currentTeacherData = teacherSnapshot.val();
+                                        teacherName.textContent = currentTeacherData.name || user.email;
                                         unsubscribe();
                                         resolve(currentTeacherData);
                                         return;
@@ -1082,397 +636,142 @@
             });
         }
         
-        // Check for active teacher session
-        async function checkActiveSession() {
+        // Load teacher's assigned classes and subjects
+        async function loadTeacherAssignments() {
             try {
-                // First try to identify the teacher based on auth state
-                const teacher = await identifyCurrentTeacher();
+                // Load all classes, subjects, and assignments
+                const [subjectsSnapshot, classesSnapshot] = await Promise.all([
+                    database.ref('subjects').once('value'),
+                    database.ref('classes').once('value')
+                ]);
                 
-                if (teacher) {
-                    // Update UI with teacher info
-                    teacherName.textContent = teacher.name || 'Teacher';
-                    
-                    // Set avatar - use profileImage if available, otherwise use dicebear
-                    const avatarUrl = teacher.profileImage || 
-                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentTeacherId}`;
-                    teacherAvatar.src = avatarUrl;
-                    
-                    // Load teacher's subjects
-                    await loadTeacherSubjects();
-                    
-                    // Load all classes
-                    await loadAllClasses();
-                    
-                    // Load all students
-                    await loadAllStudents();
-                    
-                    // Load grade settings
-                    await loadGradeSettings();
-                    
-                    // Populate subject dropdown for grade entry
-                    populateSubjectDropdown();
-                    
-                    // Load published grades
-                    await loadPublishedGrades();
-                    
-                    // Hide loading screen and show main content
-                    loadingScreen.style.display = 'none';
-                    mainContent.style.display = 'block';
-                    
-                    showNotification({
-                        title: 'Welcome Back',
-                        message: `You're logged in as ${teacher.name || 'Teacher'}`,
-                        type: 'success',
-                        duration: 3000
-                    });
-                    
-                    return true;
-                }
-                
-                return false;
-            } catch (error) {
-                console.error('Error checking active session:', error);
-                return false;
-            }
-        }
-        
-        // Initialize the app
-        async function initApp() {
-            try {
-                // Check if there's an active session
-                const hasActiveSession = await checkActiveSession();
-                
-                if (!hasActiveSession) {
-                    // If no active session, redirect to login
-                    showNotification({
-                        title: 'Session Expired',
-                        message: 'Please sign in again',
-                        type: 'error',
-                        duration: 3000
-                    });
-                    
-                    // Redirect to login page after a delay
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
-                }
-            } catch (error) {
-                console.error('Error initializing app:', error);
-                showNotification({
-                    title: 'Error',
-                    message: 'Failed to load teacher information',
-                    type: 'error'
-                });
-                
-                // Redirect to login page after a delay
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 2000);
-            }
-        }
-        
-        // Set up tab switching
-        function setupTabs() {
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Remove active class from all tabs
-                    tabs.forEach(t => t.classList.remove('active'));
-                    
-                    // Add active class to clicked tab
-                    tab.classList.add('active');
-                    
-                    // Hide all content sections
-                    contentSections.forEach(section => section.classList.remove('active'));
-                    
-                    // Show corresponding content section
-                    const tabId = tab.getAttribute('data-tab');
-                    document.getElementById(`${tabId}-tab`).classList.add('active');
-                });
-            });
-        }
-        
-        // Set up grade entry form
-        function setupGradeForm() {
-            // Load students button
-            loadStudentsBtn.addEventListener('click', () => {
-                selectedSubject = subjectSelect.value;
-                selectedClass = classSelect.value;
-                selectedTerm = termSelect.value;
-                
-                if (!selectedSubject || !selectedClass || !selectedTerm) {
-                    showNotification({
-                        title: 'Selection Required',
-                        message: 'Please select a subject, class, and term',
-                        type: 'warning',
-                        duration: 3000
-                    });
-                    return;
-                }
-                
-                loadStudentsForGrading();
-            });
-            
-            // Back to selection button
-            backToSelection.addEventListener('click', () => {
-                gradeFormContainer.style.display = 'none';
-                gradeSelection.style.display = 'block';
-            });
-            
-            // Save grades button
-            saveGradesBtn.addEventListener('click', saveGrades);
-            
-            // When subject changes, update class dropdown
-            subjectSelect.addEventListener('change', () => {
-                updateClassDropdown();
-            });
-        }
-        
-        // Load teacher's subjects - UPDATED to handle new data structure
-        async function loadTeacherSubjects() {
-            try {
-                const snapshot = await subjectsRef.once('value');
-                const subjects = snapshot.exists() ? snapshot.val() : {};
-                
-                // Clear previous content
-                subjectsContainer.innerHTML = '';
-                
-                if (!subjects || Object.keys(subjects).length === 0) {
-                    noSubjectsMessage.style.display = 'block';
-                    return;
-                }
+                subjects = subjectsSnapshot.val() || {};
+                classes = classesSnapshot.val() || {};
                 
                 // Filter subjects assigned to this teacher
-                teacherSubjects = [];
+                const teacherSubjects = [];
+                const teacherClasses = new Set();
                 
                 for (const subjectId in subjects) {
                     const subject = subjects[subjectId];
                     
-                    // Check if this subject is assigned to the current teacher
-                    if (subject.teacher === currentTeacherId) {
+                    // Check if this teacher is assigned to this subject
+                    if (subject.assignments && subject.assignments[currentTeacherId]) {
                         teacherSubjects.push({
                             id: subjectId,
-                            ...subject
+                            name: subject.name,
+                            assignments: subject.assignments[currentTeacherId]
+                        });
+                        
+                        // Get classes this teacher teaches for this subject
+                        // Check if assignments is an array (multiple assignments)
+                        if (Array.isArray(subject.assignments[currentTeacherId])) {
+                            subject.assignments[currentTeacherId].forEach(assignment => {
+                                if (assignment.classId) {
+                                    teacherClasses.add(assignment.classId);
+                                }
+                            });
+                        } 
+                        // Check if assignments is an object with classId property (single assignment)
+                        else if (subject.assignments[currentTeacherId].classId) {
+                            teacherClasses.add(subject.assignments[currentTeacherId].classId);
+                        }
+                    }
+                }
+                
+                // Store assignments for later use
+                teacherAssignments = teacherSubjects;
+                
+                // Populate class filter
+                classFilter.innerHTML = '<option value="">Select Class</option>';
+                for (const classId of teacherClasses) {
+                    if (classes[classId]) {
+                        const option = document.createElement('option');
+                        option.value = classId;
+                        option.textContent = classes[classId].name || `Class ${classId}`;
+                        classFilter.appendChild(option);
+                    }
+                }
+                
+                // Initially populate subject filter based on selected class
+                updateSubjectFilter();
+                
+                return {
+                    subjects: teacherSubjects,
+                    classes: Array.from(teacherClasses).map(classId => classes[classId])
+                };
+            } catch (error) {
+                console.error('Error loading teacher assignments:', error);
+                showNotification({
+                    title: 'Error',
+                    message: 'Failed to load your assignments',
+                    type: 'error'
+                });
+                return { subjects: [], classes: [] };
+            }
+        }
+        
+        // Update subject filter based on selected class
+        function updateSubjectFilter() {
+            const classId = classFilter.value;
+            subjectFilter.innerHTML = '<option value="">Select Subject</option>';
+            
+            if (!classId) return;
+            
+            // Find subjects that this teacher teaches for the selected class
+            const availableSubjects = [];
+            
+            teacherAssignments.forEach(subject => {
+                let isAssignedToClass = false;
+                
+                // Check if assignments is an array (multiple assignments)
+                if (Array.isArray(subject.assignments)) {
+                    subject.assignments.forEach(assignment => {
+                        if (assignment.classId === classId) {
+                            isAssignedToClass = true;
+                        }
+                    });
+                } 
+                // Check if assignments is an object with classId property (single assignment)
+                else if (subject.assignments.classId === classId) {
+                    isAssignedToClass = true;
+                }
+                
+                if (isAssignedToClass) {
+                    availableSubjects.push({
+                        id: subject.id,
+                        name: subject.name
+                    });
+                }
+            });
+            
+            // Populate subject filter
+            availableSubjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject.id;
+                option.textContent = subject.name;
+                subjectFilter.appendChild(option);
+            });
+        }
+        
+        // Load students for the selected class
+        async function loadStudents(classId) {
+            try {
+                const studentsSnapshot = await database.ref('students').once('value');
+                const allStudents = studentsSnapshot.val() || {};
+                
+                // Filter students by class - Using 'class' field
+                const classStudents = [];
+                for (const studentId in allStudents) {
+                    if (allStudents[studentId].class === classes[classId]?.name) {
+                        classStudents.push({
+                            id: studentId,
+                            ...allStudents[studentId]
                         });
                     }
                 }
                 
-                if (teacherSubjects.length === 0) {
-                    noSubjectsMessage.style.display = 'block';
-                    return;
-                }
-                
-                // Display each subject with its class information
-                teacherSubjects.forEach(subject => {
-                    const subjectCard = document.createElement('div');
-                    subjectCard.className = 'subject-card';
-                    
-                    // Subject header with name and icon
-                    const subjectHeader = document.createElement('div');
-                    subjectHeader.className = 'subject-header';
-                    
-                    const subjectName = document.createElement('div');
-                    subjectName.className = 'subject-name';
-                    subjectName.textContent = subject.name;
-                    
-                    const subjectIcon = document.createElement('div');
-                    subjectIcon.className = 'subject-icon';
-                    
-                    // Choose icon based on subject name
-                    const icon = getSubjectIcon(subject.name);
-                    subjectIcon.innerHTML = `<i class="fas fa-${icon}"></i>`;
-                    
-                    subjectHeader.appendChild(subjectName);
-                    subjectHeader.appendChild(subjectIcon);
-                    
-                    // Class information
-                    const classInfo = document.createElement('div');
-                    classInfo.className = 'class-info';
-                    
-                    // Check if subject has classId property (new structure)
-                    if (subject.classId) {
-                        const classItem = createClassItem(subject.classId, subject.schedule);
-                        classInfo.appendChild(classItem);
-                    } 
-                    // Check if subject has class property (old structure)
-                    else if (subject.class) {
-                        const classItem = createClassItem(subject.class, subject.schedule);
-                        classInfo.appendChild(classItem);
-                    } 
-                    // Check if subject has schedule information
-                    else if (subject.schedule) {
-                        const scheduleInfo = document.createElement('div');
-                        scheduleInfo.className = 'schedule';
-                        
-                        const daysDiv = document.createElement('div');
-                        daysDiv.className = 'days';
-                        
-                        if (subject.schedule.days && Array.isArray(subject.schedule.days)) {
-                            subject.schedule.days.forEach(day => {
-                                const daySpan = document.createElement('span');
-                                daySpan.className = 'day';
-                                daySpan.textContent = day;
-                                daysDiv.appendChild(daySpan);
-                            });
-                        }
-                        
-                        const timeDiv = document.createElement('div');
-                        timeDiv.className = 'time';
-                        
-                        if (subject.schedule.time) {
-                            timeDiv.textContent = `${subject.schedule.time.from || 'TBA'} - ${subject.schedule.time.to || 'TBA'}`;
-                        } else {
-                            timeDiv.textContent = 'Time not specified';
-                        }
-                        
-                        scheduleInfo.appendChild(daysDiv);
-                        scheduleInfo.appendChild(timeDiv);
-                        classInfo.appendChild(scheduleInfo);
-                    } else {
-                        const noClassInfo = document.createElement('div');
-                        noClassInfo.textContent = 'No specific class assigned';
-                        noClassInfo.style.color = 'var(--light-text)';
-                        noClassInfo.style.fontStyle = 'italic';
-                        classInfo.appendChild(noClassInfo);
-                    }
-                    
-                    // Add button to grade this subject
-                    const gradeBtn = document.createElement('button');
-                    gradeBtn.className = 'btn btn-primary';
-                    gradeBtn.style.marginTop = '10px';
-                    gradeBtn.style.width = '100%';
-                    gradeBtn.innerHTML = '<i class="fas fa-edit"></i> Enter Grades';
-                    gradeBtn.addEventListener('click', () => {
-                        // Switch to grades tab
-                        document.querySelector('.tab[data-tab="grades"]').click();
-                        
-                        // Set the subject and class dropdowns
-                        subjectSelect.value = subject.id;
-                        updateClassDropdown();
-                        
-                        // Set the class dropdown if subject has a class
-                        if (subject.classId) {
-                            classSelect.value = subject.classId;
-                        } else if (subject.class) {
-                            classSelect.value = subject.class;
-                        }
-                        
-                        // Trigger load students
-                        loadStudentsBtn.click();
-                    });
-                    
-                    // Put it all together
-                    subjectCard.appendChild(subjectHeader);
-                    subjectCard.appendChild(classInfo);
-                    subjectCard.appendChild(gradeBtn);
-                    subjectsContainer.appendChild(subjectCard);
-                });
-            } catch (error) {
-                console.error('Error loading subjects:', error);
-                showNotification({
-                    title: 'Error',
-                    message: 'Failed to load subjects',
-                    type: 'error'
-                });
-            }
-        }
-        
-        // Create a class information item
-        function createClassItem(classId, schedule) {
-            const classItem = document.createElement('div');
-            
-            const className = document.createElement('div');
-            className.className = 'class-name';
-            
-            // Find class name from classes collection
-            if (allClasses[classId]) {
-                className.textContent = allClasses[classId].name || allClasses[classId].className || `Class ${classId}`;
-            } else {
-                className.textContent = `Class ${classId}`;
-            }
-            
-            const scheduleInfo = document.createElement('div');
-            scheduleInfo.className = 'schedule';
-            
-            if (schedule) {
-                const daysDiv = document.createElement('div');
-                daysDiv.className = 'days';
-                
-                if (schedule.days && Array.isArray(schedule.days)) {
-                    schedule.days.forEach(day => {
-                        const daySpan = document.createElement('span');
-                        daySpan.className = 'day';
-                        daySpan.textContent = day;
-                        daysDiv.appendChild(daySpan);
-                    });
-                }
-                
-                const timeDiv = document.createElement('div');
-                timeDiv.className = 'time';
-                
-                if (schedule.time) {
-                    timeDiv.textContent = `${schedule.time.from || 'TBA'} - ${schedule.time.to || 'TBA'}`;
-                } else {
-                    timeDiv.textContent = 'Time not specified';
-                }
-                
-                scheduleInfo.appendChild(daysDiv);
-                scheduleInfo.appendChild(timeDiv);
-            } else {
-                scheduleInfo.textContent = 'No schedule set';
-                scheduleInfo.style.color = 'var(--light-text)';
-                scheduleInfo.style.fontStyle = 'italic';
-            }
-            
-            classItem.appendChild(className);
-            classItem.appendChild(scheduleInfo);
-            
-            return classItem;
-        }
-        
-        // Load all classes
-        async function loadAllClasses() {
-            try {
-                const snapshot = await classesRef.once('value');
-                const classesData = snapshot.exists() ? snapshot.val() : {};
-                
-                // Process classes data to handle both old and new structures
-                allClasses = {};
-                
-                for (const classId in classesData) {
-                    const classData = classesData[classId];
-                    
-                    // Handle different data structures
-                    if (classData.name || classData.className) {
-                        // This is a class object with name property
-                        allClasses[classId] = {
-                            id: classId,
-                            name: classData.name || classData.className,
-                            students: classData.students || []
-                        };
-                    } else {
-                        // This might be a different structure, try to extract class name
-                        allClasses[classId] = {
-                            id: classId,
-                            name: classData.className || `Class ${classId}`,
-                            students: classData.students || []
-                        };
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading classes:', error);
-                showNotification({
-                    title: 'Error',
-                    message: 'Failed to load classes',
-                    type: 'error'
-                });
-            }
-        }
-        
-        // Load all students
-        async function loadAllStudents() {
-            try {
-                const snapshot = await studentsRef.once('value');
-                allStudents = snapshot.exists() ? snapshot.val() : {};
+                return classStudents;
             } catch (error) {
                 console.error('Error loading students:', error);
                 showNotification({
@@ -1480,407 +779,298 @@
                     message: 'Failed to load students',
                     type: 'error'
                 });
+                return [];
             }
         }
         
-        // Load grade settings
-        async function loadGradeSettings() {
+        // Load existing grades for the selected class, subject, and term
+        async function loadGrades(classId, subjectId, term) {
             try {
-                const snapshot = await settingsRef.once('value');
-                gradeSettings = snapshot.exists() ? snapshot.val() : {};
+                const gradesSnapshot = await database.ref('grades').once('value');
+                const allGrades = gradesSnapshot.val() || {};
                 
-                // Update grade weights display
-                updateGradeWeightsDisplay();
-            } catch (error) {
-                console.error('Error loading grade settings:', error);
-                showNotification({
-                    title: 'Error',
-                    message: 'Failed to load grade settings',
-                    type: 'error'
-                });
-            }
-        }
-        
-        // Update grade weights display
-        function updateGradeWeightsDisplay() {
-            if (gradeSettings) {
-                const weights = [
-                    `Assignments: ${gradeSettings.participationWeight || '0'}%`,
-                    `Projects: ${gradeSettings.projectsWeight || '0'}%`,
-                    `Class Score: ${gradeSettings.midtermWeight || '0'}%`,
-                    `Final Exam: ${gradeSettings.finalExamWeight || '0'}%`
-                ];
-                gradeWeights.textContent = weights.join(' | ');
-            }
-        }
-        
-        // Populate subject dropdown for grade entry
-        function populateSubjectDropdown() {
-            subjectSelect.innerHTML = '<option value="">-- Select Subject --</option>';
-            
-            teacherSubjects.forEach(subject => {
-                const option = document.createElement('option');
-                option.value = subject.id;
-                option.textContent = subject.name;
-                subjectSelect.appendChild(option);
-            });
-        }
-        
-        // Update class dropdown based on selected subject
-        function updateClassDropdown() {
-            classSelect.innerHTML = '<option value="">-- Select Class --</option>';
-            
-            const subjectId = subjectSelect.value;
-            if (!subjectId) return;
-            
-            // Find the selected subject
-            const subject = teacherSubjects.find(s => s.id === subjectId);
-            if (!subject) return;
-            
-            // If subject has a specific class assigned (check both old and new properties)
-            const classId = subject.classId || subject.class;
-            if (classId) {
-                const option = document.createElement('option');
-                option.value = classId;
-                
-                // Get class name
-                if (allClasses[classId]) {
-                    option.textContent = allClasses[classId].name || `Class ${classId}`;
-                } else {
-                    option.textContent = `Class ${classId}`;
-                }
-                
-                classSelect.appendChild(option);
-            } else {
-                // If subject is assigned to multiple classes, we need to determine which ones
-                // For simplicity, we'll assume the teacher can grade any class they teach
-                // In a real app, you'd need a better way to determine this
-                
-                // Add all classes (this is a simplified approach)
-                for (const classId in allClasses) {
-                    const option = document.createElement('option');
-                    option.value = classId;
-                    option.textContent = allClasses[classId].name || `Class ${classId}`;
-                    classSelect.appendChild(option);
-                }
-            }
-        }
-        
-        // Load students for grading
-        async function loadStudentsForGrading() {
-            if (!selectedSubject || !selectedClass || !selectedTerm) {
-                noGradeData.style.display = 'block';
-                return;
-            }
-            
-            // Get the subject name
-            const subject = teacherSubjects.find(s => s.id === selectedSubject);
-            if (!subject) return;
-            
-            // Get the class
-            const classData = allClasses[selectedClass];
-            if (!classData) return;
-            
-            // Update UI
-            currentSubject.textContent = subject.name;
-            currentClass.textContent = classData.name || `Class ${selectedClass}`;
-            currentTerm.textContent = selectedTerm;
-            
-            // Clear previous student data
-            studentsGradeTable.innerHTML = '';
-            
-            // Get students in this class
-            const studentIds = classData.students || [];
-            
-            if (studentIds.length === 0) {
-                noGradeData.style.display = 'block';
-                gradeSelection.style.display = 'none';
-                gradeFormContainer.style.display = 'block';
-                return;
-            }
-            
-            // Add rows for each student
-            studentIds.forEach(studentId => {
-                const student = allStudents[studentId];
-                if (!student) return;
-                
-                const row = document.createElement('tr');
-                
-                // Student name and avatar
-                const nameCell = document.createElement('td');
-                const avatarUrl = student.profileImage || student.avatar || 
-                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${studentId}`;
-                
-                nameCell.innerHTML = `
-                    <img src="${avatarUrl}" alt="${student.name}" class="student-avatar">
-                    ${student.name}
-                `;
-                
-                // Assignment score
-                const assignmentCell = document.createElement('td');
-                const assignmentInput = document.createElement('input');
-                assignmentInput.type = 'number';
-                assignmentInput.className = 'input-grade';
-                assignmentInput.min = '0';
-                assignmentInput.max = '100';
-                assignmentInput.placeholder = '0-100';
-                assignmentInput.setAttribute('data-type', 'assignments');
-                assignmentInput.setAttribute('data-student', studentId);
-                assignmentCell.appendChild(assignmentInput);
-                
-                // Project score
-                const projectCell = document.createElement('td');
-                const projectInput = document.createElement('input');
-                projectInput.type = 'number';
-                projectInput.className = 'input-grade';
-                projectInput.min = '0';
-                projectInput.max = '100';
-                projectInput.placeholder = '0-100';
-                projectInput.setAttribute('data-type', 'projects');
-                projectInput.setAttribute('data-student', studentId);
-                projectCell.appendChild(projectInput);
-                
-                // Class score
-                const classScoreCell = document.createElement('td');
-                const classScoreInput = document.createElement('input');
-                classScoreInput.type = 'number';
-                classScoreInput.className = 'input-grade';
-                classScoreInput.min = '0';
-                classScoreInput.max = '100';
-                classScoreInput.placeholder = '0-100';
-                classScoreInput.setAttribute('data-type', 'classScore');
-                classScoreInput.setAttribute('data-student', studentId);
-                classScoreCell.appendChild(classScoreInput);
-                
-                // Final exam
-                finalExamCell = document.createElement('td');
-                const finalExamInput = document.createElement('input');
-                finalExamInput.type = 'number';
-                finalExamInput.className = 'input-grade';
-                finalExamInput.min = '0';
-                finalExamInput.max = '100';
-                finalExamInput.placeholder = '0-100';
-                finalExamInput.setAttribute('data-type', 'finalExam');
-                finalExamInput.setAttribute('data-student', studentId);
-                finalExamCell.appendChild(finalExamInput);
-                
-                // Total (calculated)
-                const totalCell = document.createElement('td');
-                totalCell.className = 'total-grade';
-                totalCell.setAttribute('data-student', studentId);
-                totalCell.textContent = '0';
-                
-                // Letter grade (calculated)
-                const gradeCell = document.createElement('td');
-                gradeCell.className = 'letter-grade';
-                gradeCell.setAttribute('data-student', studentId);
-                gradeCell.textContent = '-';
-                
-                // Add event listeners to calculate totals when inputs change
-                [assignmentInput, projectInput, classScoreInput, finalExamInput].forEach(input => {
-                    input.addEventListener('input', calculateGrades);
-                });
-                
-                // Add cells to row
-                row.appendChild(nameCell);
-                row.appendChild(assignmentCell);
-                row.appendChild(projectCell);
-                row.appendChild(classScoreCell);
-                row.appendChild(finalExamCell);
-                row.appendChild(totalCell);
-                row.appendChild(gradeCell);
-                
-                // Add row to table
-                studentsGradeTable.appendChild(row);
-                
-                // Try to load existing grades for this student
-                loadExistingGrades(studentId);
-            });
-            
-            // Show the form
-            noGradeData.style.display = 'none';
-            gradeSelection.style.display = 'none';
-            gradeFormContainer.style.display = 'block';
-        }
-        
-        // Load existing grades for a student
-        async function loadExistingGrades(studentId) {
-            try {
-                const snapshot = await gradesRef.once('value');
-                const grades = snapshot.exists() ? snapshot.val() : {};
-                
-                // Find grades for this student in the selected subject and term
-                for (const gradeId in grades) {
-                    const grade = grades[gradeId];
-                    
-                    if (grade.studentId === studentId && 
-                        grade.subjectId === selectedSubject && 
-                        grade.term === selectedTerm &&
-                        grade.class === (allClasses[selectedClass].name || `Class ${selectedClass}`)) {
-                        
-                        // Fill in the inputs
-                        const assignmentsInput = document.querySelector(`input[data-student="${studentId}"][data-type="assignments"]`);
-                        const projectsInput = document.querySelector(`input[data-student="${studentId}"][data-type="projects"]`);
-                        const classScoreInput = document.querySelector(`input[data-student="${studentId}"][data-type="classScore"]`);
-                        const finalExamInput = document.querySelector(`input[data-student="${studentId}"][data-type="finalExam"]`);
-                        
-                        if (assignmentsInput) assignmentsInput.value = grade.assignments || '';
-                        if (projectsInput) projectsInput.value = grade.projects || '';
-                        if (classScoreInput) classScoreInput.value = grade.classScore || '';
-                        if (finalExamInput) finalExamInput.value = grade.finalExam || '';
-                        
-                        // Trigger calculation
-                        calculateGrades();
-                        
-                        break;
+                const filteredGrades = {};
+                for (const gradeId in allGrades) {
+                    const grade = allGrades[gradeId];
+                    if (grade.classId === classId && 
+                        grade.subjectId === subjectId && 
+                        grade.term === term) {
+                        filteredGrades[grade.studentId] = grade;
                     }
                 }
+                
+                return filteredGrades;
             } catch (error) {
-                console.error('Error loading existing grades:', error);
+                console.error('Error loading grades:', error);
+                showNotification({
+                    title: 'Error',
+                    message: 'Failed to load existing grades',
+                    type: 'error'
+                });
+                return {};
             }
         }
         
-        // Calculate grades based on inputs
-        function calculateGrades() {
-            const students = {};
-            
-            // Get all student rows
-            const rows = studentsGradeTable.querySelectorAll('tr');
-            
-            rows.forEach(row => {
-                const studentId = row.querySelector('.total-grade').getAttribute('data-student');
-                const assignmentsInput = row.querySelector('input[data-type="assignments"]');
-                const projectsInput = row.querySelector('input[data-type="projects"]');
-                const classScoreInput = row.querySelector('input[data-type="classScore"]');
-                const finalExamInput = row.querySelector('input[data-type="finalExam"]');
-                
-                if (!assignmentsInput || !projectsInput || !classScoreInput || !finalExamInput) return;
-                
-                students[studentId] = {
-                    assignments: parseFloat(assignmentsInput.value) || 0,
-                    projects: parseFloat(projectsInput.value) || 0,
-                    classScore: parseFloat(classScoreInput.value) || 0,
-                    finalExam: parseFloat(finalExamInput.value) || 0
-                };
-                
-                // Calculate weighted total
-                const total = (
-                    (students[studentId].assignments * (gradeSettings.participationWeight || 0) / 100) +
-                    (students[studentId].projects * (gradeSettings.projectsWeight || 0) / 100) +
-                    (students[studentId].classScore * (gradeSettings.midtermWeight || 0) / 100) +
-                    (students[studentId].finalExam * (gradeSettings.finalExamWeight || 0) / 100)
-                ).toFixed(1);
-                
-                // Update total display
-                row.querySelector('.total-grade').textContent = total;
-                
-                // Calculate letter grade
-                const letterGrade = calculateLetterGrade(parseFloat(total));
-                row.querySelector('.letter-grade').textContent = letterGrade;
-            });
+        // Calculate letter grade based on score
+        function calculateLetterGrade(score) {
+            if (score >= 90) return 'A';
+            if (score >= 80) return 'B';
+            if (score >= 70) return 'C';
+            if (score >= 60) return 'D';
+            if (score > 0) return 'F';
+            return '';
         }
         
-        // Calculate letter grade based on total score
-        function calculateLetterGrade(total) {
-            if (total >= 90) return 'A';
-            if (total >= 80) return 'B';
-            if (total >= 70) return 'C';
-            if (total >= 60) return 'D';
+        // Get CSS class for grade input based on value
+        function getGradeClass(value) {
+            const numValue = parseFloat(value);
+            if (isNaN(numValue)) return '';
+            
+            if (numValue >= 90) return 'A';
+            if (numValue >= 80) return 'B';
+            if (numValue >= 70) return 'C';
+            if (numValue >= 60) return 'D';
             return 'F';
         }
         
-        // Save grades to database
+        // Calculate total score based on all grade components
+        function calculateTotalScore(scores) {
+            const classScore = parseFloat(scores.classScore) || 0;
+            const projects = parseFloat(scores.projects) || 0;
+            const assignments = parseFloat(scores.assignments) || 0;
+            const examScore = parseFloat(scores.examScore) || 0;
+            
+            // Calculate weighted total
+            return (classScore * (gradeWeights.classScore / 100)) + 
+                   (projects * (gradeWeights.projects / 100)) + 
+                   (assignments * (gradeWeights.assignments / 100)) + 
+                   (examScore * (gradeWeights.examScore / 100));
+        }
+        
+        // Render grade table with students
+        function renderGradeTable(students, existingGrades = {}) {
+            gradeTableBody.innerHTML = '';
+            
+            if (students.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="8" style="text-align: center; padding: 20px;">No students found in this class</td>`;
+                gradeTableBody.appendChild(row);
+                return;
+            }
+            
+            students.forEach(student => {
+                const existingGrade = existingGrades[student.id] || {};
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="student-info">${student.id}</td>
+                    <td class="student-info">${student.name}</td>
+                    <td>
+                        <input type="number" min="0" max="100" class="grade-input class-score" 
+                               data-student-id="${student.id}" 
+                               value="${existingGrade.classScore || ''}" 
+                               placeholder="0-100">
+                    </td>
+                    <td>
+                        <input type="number" min="0" max="100" class="grade-input projects" 
+                               data-student-id="${student.id}" 
+                               value="${existingGrade.projects || ''}" 
+                               placeholder="0-100">
+                    </td>
+                    <td>
+                        <input type="number" min="0" max="100" class="grade-input assignments" 
+                               data-student-id="${student.id}" 
+                               value="${existingGrade.assignments || ''}" 
+                               placeholder="0-100">
+                    </td>
+                    <td>
+                        <input type="number" min="0" max="100" class="grade-input exam-score" 
+                               data-student-id="${student.id}" 
+                               value="${existingGrade.examScore || ''}" 
+                               placeholder="0-100">
+                    </td>
+                    <td class="total-score" data-student-id="${student.id}">
+                        ${existingGrade.totalScore ? existingGrade.totalScore.toFixed(1) : '-'}
+                    </td>
+                    <td class="letter-grade" data-student-id="${student.id}">
+                        ${existingGrade.letterGrade ? `<span class="letter-grade ${existingGrade.letterGrade}">${existingGrade.letterGrade}</span>` : '-'}
+                    </td>
+                `;
+                
+                gradeTableBody.appendChild(row);
+            });
+            
+            // Add event listeners to all grade inputs
+            const gradeInputs = document.querySelectorAll('.grade-input');
+            
+            gradeInputs.forEach(input => {
+                input.addEventListener('input', handleGradeInput);
+                // Apply initial class
+                if (input.value) {
+                    input.className = `grade-input ${input.classList[1]} ${getGradeClass(input.value)}`;
+                }
+            });
+        }
+        
+        // Handle grade input changes
+        function handleGradeInput(e) {
+            const input = e.target;
+            const studentId = input.dataset.studentId;
+            const value = parseFloat(input.value) || 0;
+            
+            // Update input class based on value
+            input.className = `grade-input ${input.classList[1]} ${getGradeClass(value)}`;
+            
+            // Get all grade inputs for this student
+            const classScoreInput = document.querySelector(`.class-score[data-student-id="${studentId}"]`);
+            const projectsInput = document.querySelector(`.projects[data-student-id="${studentId}"]`);
+            const assignmentsInput = document.querySelector(`.assignments[data-student-id="${studentId}"]`);
+            const examScoreInput = document.querySelector(`.exam-score[data-student-id="${studentId}"]`);
+            
+            const classScore = parseFloat(classScoreInput.value) || 0;
+            const projects = parseFloat(projectsInput.value) || 0;
+            const assignments = parseFloat(assignmentsInput.value) || 0;
+            const examScore = parseFloat(examScoreInput.value) || 0;
+            
+            // Calculate total score
+            const totalScore = calculateTotalScore({
+                classScore,
+                projects,
+                assignments,
+                examScore
+            });
+            
+            const letterGrade = calculateLetterGrade(totalScore);
+            
+            // Update total score and letter grade display
+            const totalScoreCell = document.querySelector(`.total-score[data-student-id="${studentId}"]`);
+            const letterGradeCell = document.querySelector(`.letter-grade[data-student-id="${studentId}"]`);
+            
+            totalScoreCell.textContent = totalScore.toFixed(1);
+            letterGradeCell.innerHTML = letterGrade ? `<span class="letter-grade ${letterGrade}">${letterGrade}</span>` : '-';
+        }
+        
+        // Save grades to Firebase
         async function saveGrades() {
-            if (!selectedSubject || !selectedClass || !selectedTerm) return;
+            const classId = classFilter.value;
+            const subjectId = subjectFilter.value;
+            const term = termFilter.value;
+            
+            if (!classId || !subjectId) {
+                showNotification({
+                    title: 'Warning',
+                    message: 'Please select both class and subject',
+                    type: 'warning'
+                });
+                return;
+            }
+            
+            const gradeInputs = document.querySelectorAll('.grade-input');
+            
+            if (gradeInputs.length === 0) {
+                showNotification({
+                    title: 'Warning',
+                    message: 'No students to grade',
+                    type: 'warning'
+                });
+                return;
+            }
             
             try {
-                // Get the subject name
-                const subject = teacherSubjects.find(s => s.id === selectedSubject);
-                if (!subject) return;
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
                 
-                // Get the class name
-                const className = allClasses[selectedClass].name || `Class ${selectedClass}`;
+                const updates = {};
+                let gradesCount = 0;
                 
-                // Get all student rows
-                const rows = studentsGradeTable.querySelectorAll('tr');
+                // Process each student
+                const studentIds = new Set();
+                gradeInputs.forEach(input => studentIds.add(input.dataset.studentId));
                 
-                // Save each student's grades
-                for (const row of rows) {
-                    const studentId = row.querySelector('.total-grade').getAttribute('data-student');
-                    const student = allStudents[studentId];
-                    if (!student) continue;
+                for (const studentId of studentIds) {
+                    // Get all grade inputs for this student
+                    const classScoreInput = document.querySelector(`.class-score[data-student-id="${studentId}"]`);
+                    const projectsInput = document.querySelector(`.projects[data-student-id="${studentId}"]`);
+                    const assignmentsInput = document.querySelector(`.assignments[data-student-id="${studentId}"]`);
+                    const examScoreInput = document.querySelector(`.exam-score[data-student-id="${studentId}"]`);
                     
-                    const assignmentsInput = row.querySelector('input[data-type="assignments"]');
-                    const projectsInput = row.querySelector('input[data-type="projects"]');
-                    const classScoreInput = row.querySelector('input[data-type="classScore"]');
-                    const finalExamInput = row.querySelector('input[data-type="finalExam"]');
-                    
-                    if (!assignmentsInput || !projectsInput || !classScoreInput || !finalExamInput) continue;
-                    
-                    const assignments = parseFloat(assignmentsInput.value) || 0;
-                    const projects = parseFloat(projectsInput.value) || 0;
                     const classScore = parseFloat(classScoreInput.value) || 0;
-                    const finalExam = parseFloat(finalExamInput.value) || 0;
-                    const total = parseFloat(row.querySelector('.total-grade').textContent);
-                    const letterGrade = row.querySelector('.letter-grade').textContent;
+                    const projects = parseFloat(projectsInput.value) || 0;
+                    const assignments = parseFloat(assignmentsInput.value) || 0;
+                    const examScore = parseFloat(examScoreInput.value) || 0;
                     
-                    // Create grade data
-                    const gradeData = {
-                        studentId,
-                        studentName: student.name,
-                        class: className,
-                        subject: subject.name,
-                        subjectId: selectedSubject,
-                        term: selectedTerm,
-                        assignments: assignments.toString(),
-                        projects: projects.toString(),
-                        classScore: classScore.toString(),
-                        finalExam: finalExam.toString(),
-                        totalScore: total.toString(),
-                        letterGrade,
-                        status: 'draft',
-                        lastUpdated: new Date().toISOString(),
-                        teacherId: currentTeacherId,
-                        teacherName: currentTeacherData.name
-                    };
-                    
-                    // Check if this grade already exists
-                    const snapshot = await gradesRef.once('value');
-                    const grades = snapshot.exists() ? snapshot.val() : {};
-                    
-                    let gradeExists = false;
-                    let existingGradeId = null;
-                    
-                    for (const gradeId in grades) {
-                        const grade = grades[gradeId];
+                    // Only save if at least one score is provided
+                    if (classScore > 0 || projects > 0 || assignments > 0 || examScore > 0) {
+                        // Calculate total score
+                        const totalScore = calculateTotalScore({
+                            classScore,
+                            projects,
+                            assignments,
+                            examScore
+                        });
                         
-                        if (grade.studentId === studentId && 
-                            grade.subjectId === selectedSubject && 
-                            grade.term === selectedTerm &&
-                            grade.class === className) {
-                            
-                            gradeExists = true;
-                            existingGradeId = gradeId;
-                            break;
+                        const letterGrade = calculateLetterGrade(totalScore);
+                        
+                        // Prepare grade data
+                        const gradeData = {
+                            studentId: studentId,
+                            studentName: students[studentId]?.name || 'Unknown',
+                            class: classes[classId]?.name || `Class ${classId}`,
+                            classId: classId,
+                            subject: subjects[subjectId]?.name || `Subject ${subjectId}`,
+                            subjectId: subjectId,
+                            term: term,
+                            classScore: classScore,
+                            projects: projects,
+                            assignments: assignments,
+                            examScore: examScore,
+                            totalScore: totalScore,
+                            letterGrade: letterGrade,
+                            teacherId: currentTeacherId,
+                            teacherName: currentTeacherData?.name || 'Unknown',
+                            lastUpdated: new Date().toISOString()
+                        };
+                        
+                        // Check if this grade already exists
+                        let existingGradeId = null;
+                        for (const gradeId in currentGrades) {
+                            if (currentGrades[gradeId].studentId === studentId) {
+                                existingGradeId = gradeId;
+                                break;
+                            }
                         }
-                    }
-                    
-                    // Save or update the grade
-                    if (gradeExists) {
-                        // Update existing grade
-                        await database.ref(`grades/${existingGradeId}`).set(gradeData);
-                    } else {
-                        // Create new grade
-                        await gradesRef.push(gradeData);
+                        
+                        // Add to updates
+                        if (existingGradeId) {
+                            updates[`grades/${existingGradeId}`] = gradeData;
+                        } else {
+                            const newGradeRef = database.ref('grades').push();
+                            updates[`grades/${newGradeRef.key}`] = gradeData;
+                        }
+                        
+                        gradesCount++;
                     }
                 }
                 
-                showNotification({
-                    title: 'Success',
-                    message: 'Grades saved successfully!',
-                    type: 'success',
-                    duration: 3000
-                });
+                // Perform all updates in a single transaction
+                if (Object.keys(updates).length > 0) {
+                    await database.ref().update(updates);
+                    showNotification({
+                        title: 'Success',
+                        message: `Successfully saved ${gradesCount} grades`,
+                        type: 'success'
+                    });
+                    
+                    // Reload grades to get the latest data
+                    currentGrades = await loadGrades(classId, subjectId, term);
+                } else {
+                    showNotification({
+                        title: 'Info',
+                        message: 'No changes to save',
+                        type: 'info'
+                    });
+                }
+                
             } catch (error) {
                 console.error('Error saving grades:', error);
                 showNotification({
@@ -1888,98 +1078,186 @@
                     message: 'Failed to save grades: ' + error.message,
                     type: 'error'
                 });
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Grades';
             }
         }
         
-        // Load published grades
-        async function loadPublishedGrades() {
+        // Reset grade inputs
+        function resetGrades() {
+            const gradeInputs = document.querySelectorAll('.grade-input');
+            
+            gradeInputs.forEach(input => {
+                input.value = '';
+                input.className = `grade-input ${input.classList[1]}`;
+            });
+            
+            const totalScoreCells = document.querySelectorAll('.total-score');
+            const letterGradeCells = document.querySelectorAll('.letter-grade');
+            
+            totalScoreCells.forEach(cell => {
+                cell.textContent = '-';
+            });
+            
+            letterGradeCells.forEach(cell => {
+                cell.innerHTML = '-';
+            });
+        }
+        
+        // Handle class filter change
+        async function handleClassChange() {
+            const classId = classFilter.value;
+            const subjectId = subjectFilter.value;
+            const term = termFilter.value;
+            
+            // Update subject filter based on selected class
+            updateSubjectFilter();
+            
+            if (!classId) return;
+            
             try {
-                const snapshot = await publishedGradesRef.once('value');
-                const publishedGrades = snapshot.exists() ? snapshot.val() : {};
+                loadingScreen.style.display = 'flex';
                 
-                // Clear previous content
-                publishedGradesContainer.innerHTML = '';
+                // Load students for the selected class
+                const classStudents = await loadStudents(classId);
                 
-                if (Object.keys(publishedGrades).length === 0) {
-                    noPublishedGrades.style.display = 'block';
-                    return;
-                }
-                
-                // Filter grades published by this teacher
-                const teacherPublishedGrades = [];
-                
-                for (const gradeId in publishedGrades) {
-                    const grade = publishedGrades[gradeId];
-                    
-                    // Check if this teacher published these grades
-                    if (grade.teacherId === currentTeacherId) {
-                        teacherPublishedGrades.push({
-                            id: gradeId,
-                            ...grade
-                        });
-                    }
-                }
-                
-                if (teacherPublishedGrades.length === 0) {
-                    noPublishedGrades.style.display = 'block';
-                    return;
-                }
-                
-                // Display published grades
-                teacherPublishedGrades.forEach(grade => {
-                    const gradeCard = document.createElement('div');
-                    gradeCard.className = 'subject-card';
-                    gradeCard.style.marginBottom = '20px';
-                    
-                    gradeCard.innerHTML = `
-                        <div class="subject-header">
-                            <div class="subject-name">${grade.subject} - ${grade.class}</div>
-                            <div class="subject-icon"><i class="fas fa-check"></i></div>
-                        </div>
-                        <div class="class-info">
-                            <p><strong>Term:</strong> ${grade.term}</p>
-                            <p><strong>Published:</strong> ${new Date(grade.publishedAt).toLocaleString()}</p>
-                            <p><strong>Students:</strong> ${grade.studentCount}</p>
-                        </div>
-                    `;
-                    
-                    publishedGradesContainer.appendChild(gradeCard);
+                // Store students for later use
+                students = {};
+                classStudents.forEach(student => {
+                    students[student.id] = student;
                 });
+                
+                // Load existing grades for the selected class, subject, and term
+                if (subjectId) {
+                    currentGrades = await loadGrades(classId, subjectId, term);
+                } else {
+                    currentGrades = {};
+                }
+                
+                // Render grade table
+                renderGradeTable(classStudents, currentGrades);
+                
             } catch (error) {
-                console.error('Error loading published grades:', error);
+                console.error('Error handling class change:', error);
                 showNotification({
                     title: 'Error',
-                    message: 'Failed to load published grades',
+                    message: 'Failed to load data for selected class',
                     type: 'error'
                 });
+            } finally {
+                loadingScreen.style.display = 'none';
             }
         }
         
-        // Get appropriate icon for subject
-        function getSubjectIcon(subjectName) {
-            const lowerName = subjectName.toLowerCase();
+        // Handle subject filter change
+        async function handleSubjectChange() {
+            const classId = classFilter.value;
+            const subjectId = subjectFilter.value;
+            const term = termFilter.value;
             
-            if (lowerName.includes('math')) return 'calculator';
-            if (lowerName.includes('science')) return 'flask';
-            if (lowerName.includes('english') || lowerName.includes('literature')) return 'book';
-            if (lowerName.includes('history') || lowerName.includes('social')) return 'landmark';
-            if (lowerName.includes('art')) return 'palette';
-            if (lowerName.includes('music')) return 'music';
-            if (lowerName.includes('physical') || lowerName.includes('pe')) return 'running';
-            if (lowerName.includes('computer') || lowerName.includes('tech')) return 'laptop-code';
+            if (!classId || !subjectId) return;
             
-            return 'book-open'; // default icon
+            try {
+                loadingScreen.style.display = 'flex';
+                
+                // Load existing grades for the selected class, subject, and term
+                currentGrades = await loadGrades(classId, subjectId, term);
+                
+                // Render grade table with existing grades
+                const classStudents = await loadStudents(classId);
+                renderGradeTable(classStudents, currentGrades);
+                
+            } catch (error) {
+                console.error('Error handling subject change:', error);
+                showNotification({
+                    title: 'Error',
+                    message: 'Failed to load data for selected subject',
+                    type: 'error'
+                });
+            } finally {
+                loadingScreen.style.display = 'none';
+            }
         }
         
-        // Initialize the app
-        loadingScreen.style.display = 'flex';
-        mainContent.style.display = 'none';
+        // Handle term filter change
+        async function handleTermChange() {
+            const classId = classFilter.value;
+            const subjectId = subjectFilter.value;
+            const term = termFilter.value;
+            
+            if (!classId || !subjectId) return;
+            
+            try {
+                loadingScreen.style.display = 'flex';
+                
+                // Load existing grades for the selected class, subject, and term
+                currentGrades = await loadGrades(classId, subjectId, term);
+                
+                // Render grade table with existing grades
+                const classStudents = await loadStudents(classId);
+                renderGradeTable(classStudents, currentGrades);
+                
+            } catch (error) {
+                console.error('Error handling term change:', error);
+                showNotification({
+                    title: 'Error',
+                    message: 'Failed to load data for selected term',
+                    type: 'error'
+                });
+            } finally {
+                loadingScreen.style.display = 'none';
+            }
+        }
         
-        // Set up tabs and grade form
-        setupTabs();
-        setupGradeForm();
+        // Initialize the application
+        async function initApp() {
+            try {
+                // Check active session and identify teacher
+                await identifyCurrentTeacher();
+                
+                // Load teacher assignments
+                await loadTeacherAssignments();
+                
+                // Set up event listeners
+                classFilter.addEventListener('change', handleClassChange);
+                subjectFilter.addEventListener('change', handleSubjectChange);
+                termFilter.addEventListener('change', handleTermChange);
+                saveBtn.addEventListener('click', saveGrades);
+                resetBtn.addEventListener('click', resetGrades);
+                logoutBtn.addEventListener('click', () => {
+                    auth.signOut().then(() => {
+                        window.location.href = 'logins.html';
+                    });
+                });
+                
+                // Show main content
+                loadingScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+                
+                showNotification({
+                    title: 'Welcome',
+                    message: 'Select a class and subject to start entering grades',
+                    type: 'info',
+                    duration: 3000
+                });
+                
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                showNotification({
+                    title: 'Error',
+                    message: 'Failed to initialize application: ' + error.message,
+                    type: 'error'
+                });
+                
+                // Redirect to login page after a delay
+                setTimeout(() => {
+                    window.location.href = 'logins.html';
+                }, 3000);
+            }
+        }
         
-        // Start the app
+        // Start the application
         initApp();
     </script>
 </body>
