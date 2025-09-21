@@ -361,6 +361,15 @@
             border-bottom: none;
         }
 
+        /* Iframe styling */
+        .iframe-container {
+            width: 100%;
+            height: calc(100vh - 100px);
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
         /* Bottom Navigation */
         .nav-bottom {
             position: fixed;
@@ -691,39 +700,17 @@
             </div>
         </div>
         
-        <!-- Withdrawal Section -->
+        <!-- Withdrawal Section (Now an iframe) -->
         <div id="withdrawal-section" class="section">
             <div class="card">
-                <div class="card-header">Request Withdrawal</div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label">Amount (₵)</label>
-                        <input type="number" class="form-control" id="withdraw-amount" placeholder="Enter amount">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Source</label>
-                        <select class="form-control" id="withdraw-source">
-                            <option value="">Select source</option>
-                            <option value="offerings">Church Offerings</option>
-                            <option value="pta">PTA Funds</option>
-                            <option value="food_vendors">Food Vendors</option>
-                            <option value="other_fees">Other Fees</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Reason</label>
-                        <textarea class="form-control" id="withdraw-reason" placeholder="Enter reason for withdrawal"></textarea>
-                    </div>
-                    <button class="btn btn-primary w-100" id="request-withdrawal">
-                        <i class="fas fa-paper-plane me-2"></i>Submit Request
+                <div class="card-header">
+                    Withdrawal Management
+                    <button class="btn btn-sm btn-outline-secondary" id="refresh-withdrawal">
+                        <i class="fas fa-sync-alt"></i> Refresh
                     </button>
                 </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-header">Pending Requests</div>
-                <div class="card-body">
-                    <div id="pending-requests"></div>
+                <div class="card-body p-0">
+                    <iframe src="withdrawweb.html" class="iframe-container" id="withdrawal-iframe"></iframe>
                 </div>
             </div>
         </div>
@@ -794,7 +781,7 @@
         }
 
         // Firebase configuration
-       const firebaseConfig = {
+         const firebaseConfig = {
     apiKey: "AIzaSyB5NcC2P3v0LFBVFMp9-mAHQKYuo1pKokA",
     authDomain: "hweakwaecram.firebaseapp.com",
     projectId: "hweakwaecram",
@@ -803,7 +790,6 @@
     appId: "1:1012181976581:web:eee0ad07650b360bc8fe6c",
     measurementId: "G-4GMZJJRVG0"
   };
-
 
         // Initialize Firebase
         logDebug("Initializing Firebase...");
@@ -823,7 +809,6 @@
         const recentTitlesContainer = document.getElementById('recent-titles');
         const recentTransactionsContainer = document.getElementById('recent-transactions');
         const transactionHistoryContainer = document.getElementById('transaction-history');
-        const pendingRequestsContainer = document.getElementById('pending-requests');
         
         // Stats elements
         const totalOfferingsElement = document.getElementById('total-offerings');
@@ -836,7 +821,7 @@
         const addPTABtn = document.getElementById('add-pta');
         const addFoodBtn = document.getElementById('add-food');
         const addOtherBtn = document.getElementById('add-other');
-        const requestWithdrawalBtn = document.getElementById('request-withdrawal');
+        const refreshWithdrawalBtn = document.getElementById('refresh-withdrawal');
         
         // Form inputs
         const offeringAmountInput = document.getElementById('offering-amount');
@@ -845,9 +830,6 @@
         const foodAmountInput = document.getElementById('food-amount');
         const otherTitleInput = document.getElementById('other-title');
         const otherAmountInput = document.getElementById('other-amount');
-        const withdrawAmountInput = document.getElementById('withdraw-amount');
-        const withdrawSourceSelect = document.getElementById('withdraw-source');
-        const withdrawReasonInput = document.getElementById('withdraw-reason');
         const historyFilterSelect = document.getElementById('history-filter');
         
         // New elements for icon-based fee system
@@ -859,6 +841,9 @@
         const classesContainer = document.getElementById('classes-container');
         const studentsContainer = document.getElementById('students-container');
         const selectedClassName = document.getElementById('selected-class-name');
+        
+        // Iframe element
+        const withdrawalIframe = document.getElementById('withdrawal-iframe');
         
         // Global variables
         let financialChart = null;
@@ -904,7 +889,17 @@
                 // Show target section
                 sections.forEach(section => section.classList.remove('active'));
                 document.getElementById(target).classList.add('active');
+                
+                // If withdrawal section is selected, refresh the iframe
+                if (target === 'withdrawal-section') {
+                    withdrawalIframe.contentWindow.location.reload();
+                }
             });
+        });
+
+        // Refresh withdrawal iframe
+        refreshWithdrawalBtn.addEventListener('click', function() {
+            withdrawalIframe.contentWindow.location.reload();
         });
 
         // Fee icon selection
@@ -1441,59 +1436,6 @@
                 });
         });
 
-        // Request withdrawal
-        requestWithdrawalBtn.addEventListener('click', () => {
-            const amount = parseFloat(withdrawAmountInput.value);
-            const source = withdrawSourceSelect.value;
-            const reason = withdrawReasonInput.value.trim();
-            
-            if (isNaN(amount) || amount <= 0) {
-                alert('Please enter a valid amount');
-                return;
-            }
-            
-            if (!source) {
-                alert('Please select a source');
-                return;
-            }
-            
-            if (!reason) {
-                alert('Please enter a reason for withdrawal');
-                return;
-            }
-            
-            // Check if amount exceeds available balance
-            if (amount > categoryTotals[source]) {
-                alert(`Withdrawal amount exceeds available balance for this source. Available: ${formatCurrency(categoryTotals[source])}`);
-                return;
-            }
-            
-            const withdrawalRequest = {
-                amount: amount,
-                source: source,
-                reason: reason,
-                date: Date.now(),
-                status: 'pending' // pending, approved, rejected
-            };
-            
-            logDebug("Submitting withdrawal request:", withdrawalRequest);
-            database.ref('requests').push(withdrawalRequest)
-                .then(() => {
-                    logDebug("Withdrawal request submitted successfully");
-                    
-                    withdrawAmountInput.value = '';
-                    withdrawSourceSelect.value = '';
-                    withdrawReasonInput.value = '';
-                    
-                    loadPendingRequests();
-                    alert('Withdrawal request submitted successfully! It will be processed after approval.');
-                })
-                .catch((error) => {
-                    logDebug('Error submitting withdrawal request:', error);
-                    alert('Error submitting withdrawal request. Please try again.');
-                });
-        });
-
         // Load recent transactions
         function loadRecentTransactions() {
             logDebug("Loading recent transactions...");
@@ -1589,47 +1531,6 @@
             }).catch(error => {
                 logDebug("Error loading recent transactions:", error);
                 recentTransactionsContainer.innerHTML = '<div class="text-center text-muted py-3">Error loading transactions</div>';
-            });
-        }
-
-        // Load pending withdrawal requests
-        function loadPendingRequests() {
-            logDebug("Loading pending requests...");
-            pendingRequestsContainer.innerHTML = '';
-            
-            database.ref('requests').orderByChild('date').once('value').then((snapshot) => {
-                let hasPending = false;
-                
-                snapshot.forEach((childSnapshot) => {
-                    const request = childSnapshot.val();
-                    request.id = childSnapshot.key;
-                    
-                    if (request.status === 'pending') {
-                        hasPending = true;
-                        
-                        const requestElement = document.createElement('div');
-                        requestElement.className = 'history-item';
-                        
-                        requestElement.innerHTML = `
-                            <div>
-                                <div class="fw-bold">Withdrawal Request</div>
-                                <div class="small">From: ${request.source}</div>
-                                <div class="small">Reason: ${request.reason}</div>
-                                <div class="small text-muted">${formatDate(request.date)}</div>
-                            </div>
-                            <div class="negative-amount">-${formatCurrency(request.amount)}</div>
-                        `;
-                        
-                        pendingRequestsContainer.appendChild(requestElement);
-                    }
-                });
-                
-                if (!hasPending) {
-                    pendingRequestsContainer.innerHTML = '<div class="text-center text-muted py-3">No pending requests</div>';
-                }
-            }).catch(error => {
-                logDebug("Error loading pending requests:", error);
-                pendingRequestsContainer.innerHTML = '<div class="text-center text-muted py-3">Error loading requests</div>';
             });
         }
 
@@ -1827,7 +1728,7 @@
                                 label: 'Income',
                                 data: incomeData,
                                 backgroundColor: 'rgba(40, 167, 69, 0.7)',
-                                borderColor: 'rgba(40, 167, 69, 1)',
+                                borderColor: 'rgza(40, 167, 69, 1)',
                                 borderWidth: 1
                             },
                             {
@@ -1888,7 +1789,6 @@
             // Load initial data
             calculateTotals();
             loadRecentTransactions();
-            loadPendingRequests();
             loadTransactionHistory();
             updateChart();
             
