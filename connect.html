@@ -2,1652 +2,731 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>School Communication Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Communication Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
-:root {
-    --primary-color: #6c5ce7;
-    --secondary-color: #a29bfe;
-    --accent-color: #fd79a8;
-    --text-color: #2d3436;
-    --light-text: #636e72;
-    --background-color: #f5f7fa;
-    --card-bg: rgba(255, 255, 255, 0.25);
-    --card-border: rgba(255, 255, 255, 0.18);
-    --sidebar-bg: rgba(255, 255, 255, 0.9);
-    --chat-bg: rgba(255, 255, 255, 0.95);
-    --success-color: #00b894;
-    --danger-color: #d63031;
-    --warning-color: #fdcb6e;
-    --info-color: #0984e3;
-    --online-status: #00b894;
-    --offline-status: #636e72;
-    --sent-message-bg: #6c5ce7;
-    --received-message-bg: #dfe6e9;
-    --border-color: rgba(0, 0, 0, 0.1);
-    --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-    --transition: all 0.3s ease;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    -webkit-tap-highlight-color: transparent;
-}
-
-body {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    color: var(--text-color);
-    min-height: 100vh;
-    overflow-x: hidden;
-    touch-action: manipulation;
-}
-
-/* Loading Screen */
-.loading-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.95);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-}
-
-.loading-logo {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 20px;
-}
-
-.loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid #f3f3f3;
-    border-top: 5px solid var(--primary-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 20px;
-}
-
-.loading-text {
-    font-size: 1.2rem;
-    color: var(--text-color);
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Main Container */
-.container {
-    display: flex;
-    height: 100vh;
-    max-width: 1400px;
-    margin: 0 auto;
-    background: var(--background-color);
-    position: relative;
-}
-
-/* Sidebar */
-.sidebar {
-    width: 100%;
-    max-width: 350px;
-    background: var(--sidebar-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-right: 1px solid var(--card-border);
-    display: flex;
-    flex-direction: column;
-    box-shadow: var(--shadow);
-    transition: transform 0.3s ease;
-    z-index: 10;
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    overflow: hidden;
-}
-
-.sidebar-header {
-    padding: 16px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 15px;
-}
-
-.user-avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid white;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.user-name {
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-
-.user-badge {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    margin-top: 4px;
-}
-
-.badge-student {
-    background-color: #74b9ff;
-    color: white;
-}
-
-.badge-teacher {
-    background-color: #a29bfe;
-    color: white;
-}
-
-.badge-alumni {
-    background-color: #fdcb6e;
-    color: var(--text-color);
-}
-
-.sidebar-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 15px;
-}
-
-.sidebar-actions i {
-    font-size: 1.2rem;
-    color: var(--light-text);
-    cursor: pointer;
-    transition: var(--transition);
-    padding: 8px;
-}
-
-.sidebar-actions i:hover {
-    color: var(--primary-color);
-}
-
-.search-bar {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.search-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.search-container i {
-    position: absolute;
-    left: 12px;
-    color: var(--light-text);
-    z-index: 1;
-}
-
-.search-container input {
-    width: 100%;
-    padding: 12px 15px 12px 40px;
-    border-radius: 20px;
-    border: 1px solid var(--border-color);
-    background: rgba(255, 255, 255, 0.5);
-    font-size: 1rem;
-    transition: var(--transition);
-}
-
-.search-container input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
-}
-
-.tab-bar {
-    display: flex;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.tab {
-    flex: 1;
-    text-align: center;
-    padding: 16px 0;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    color: var(--light-text);
-    border-bottom: 2px solid transparent;
-    font-size: 0.9rem;
-}
-
-.tab.active {
-    color: var(--primary-color);
-    border-bottom: 2px solid var(--primary-color);
-}
-
-.chat-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px 0;
-    -webkit-overflow-scrolling: touch;
-}
-
-.chat-item {
-    display: flex;
-    align-items: center;
-    padding: 14px 16px;
-    cursor: pointer;
-    transition: var(--transition);
-    position: relative;
-    min-height: 70px;
-}
-
-.chat-item:hover {
-    background: rgba(108, 92, 231, 0.1);
-}
-
-.chat-item.active {
-    background: rgba(108, 92, 231, 0.15);
-}
-
-.chat-item-avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 15px;
-    flex-shrink: 0;
-}
-
-.online-status {
-    position: absolute;
-    bottom: 16px;
-    left: 58px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 2px solid white;
-    z-index: 2;
-}
-
-.online-status.online {
-    background-color: var(--online-status);
-}
-
-.online-status.offline {
-    background-color: var(--offline-status);
-}
-
-.chat-item-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.chat-item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 5px;
-}
-
-.chat-item-name {
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 1rem;
-}
-
-.chat-item-time {
-    font-size: 0.8rem;
-    color: var(--light-text);
-    flex-shrink: 0;
-    margin-left: 10px;
-}
-
-.chat-item-preview {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.chat-item-message {
-    font-size: 0.9rem;
-    color: var(--light-text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overcept: ellipsis;
-    flex: 1;
-}
-
-.unread-badge {
-    background-color: var(--primary-color);
-    color: white;
-    border-radius: 10px;
-    padding: 2px 6px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    margin-left: 5px;
-    flex-shrink: 0;
-    min-width: 18px;
-    text-align: center;
-}
-
-.chat-item.unread .chat-item-name {
-    font-weight: 700;
-}
-
-.chat-item.unread .chat-item-message {
-    color: var(--text-color);
-    font-weight: 600;
-}
-
-/* Chat Area */
-.chat-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: var(--chat-bg);
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-
-.chat-header {
-    display: flex;
-    align-items: center;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border-color);
-    background: var(--sidebar-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    min-height: 70px;
-}
-
-.chat-header-back {
-    margin-right: 15px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-}
-
-.chat-header-back i {
-    font-size: 1.2rem;
-    color: var(--text-color);
-}
-
-.chat-header-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 15px;
-}
-
-.chat-header-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.chat-header-name {
-    font-weight: 600;
-    font-size: 1.1rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.chat-header-status {
-    font-size: 0.8rem;
-    color: var(--light-text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.chat-header-actions {
-    display: flex;
-    gap: 15px;
-}
-
-.chat-header-actions i {
-    font-size: 1.2rem;
-    color: var(--light-text);
-    cursor: pointer;
-    transition: var(--transition);
-    padding: 8px;
-}
-
-.chat-header-actions i:hover {
-    color: var(--primary-color);
-}
-
-.chat-messages {
-    flex: 1;
-    padding: 16px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    -webkit-overflow-scrolling: touch;
-}
-
-.message {
-    display: flex;
-    margin-bottom: 12px;
-}
-
-.message.sent {
-    justify-content: flex-end;
-}
-
-.message.received {
-    justify-content: flex-start;
-}
-
-.message-avatar {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 10px;
-    align-self: flex-end;
-    flex-shrink: 0;
-}
-
-.message-content {
-    max-width: 85%;
-}
-
-.message-sender {
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin-bottom: 5px;
-    color: var(--light-text);
-}
-
-.message-bubble {
-    padding: 12px 15px;
-    border-radius: 18px;
-    position: relative;
-    word-wrap: break-word;
-    font-size: 1rem;
-    line-height: 1.4;
-}
-
-.message.sent .message-bubble {
-    background: var(--sent-message-bg);
-    color: white;
-    border-top-right-radius: 5px;
-}
-
-.message.received .message-bubble {
-    background: var(--received-message-bg);
-    color: var(--text-color);
-    border-top-left-radius: 5px;
-}
-
-.message-info {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-top: 5px;
-    font-size: 0.7rem;
-}
-
-.message-time {
-    color: var(--light-text);
-    margin-right: 5px;
-}
-
-.message-status {
-    color: var(--light-text);
-}
-
-.chat-input-container {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    border-top: 1px solid var(--border-color);
-    background: var(--sidebar-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    min-height: 70px;
-}
-
-.chat-input-actions {
-    display: flex;
-    gap: 10px;
-    margin-right: 12px;
-}
-
-.chat-input-actions i {
-    font-size: 1.2rem;
-    color: var(--light-text);
-    cursor: pointer;
-    transition: var(--transition);
-    padding: 8px;
-}
-
-.chat-input-actions i:hover {
-    color: var(--primary-color);
-}
-
-.chat-input {
-    flex: 1;
-}
-
-.chat-input textarea {
-    width: 100%;
-    border: none;
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 20px;
-    padding: 12px 15px;
-    resize: none;
-    font-size: 1rem;
-    max-height: 120px;
-    transition: var(--transition);
-    line-height: 1.4;
-}
-
-.chat-input textarea:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
-}
-
-.chat-input-send {
-    margin-left: 12px;
-    background: var(--primary-color);
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition);
-    flex-shrink: 0;
-}
-
-.chat-input-send:hover {
-    background: var(--secondary-color);
-    transform: scale(1.05);
-}
-
-.chat-input-send i {
-    color: white;
-    font-size: 1.1rem;
-}
-
-/* Info Panel */
-.info-panel {
-    width: 100%;
-    max-width: 350px;
-    background: var(--sidebar-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-left: 1px solid var(--card-border);
-    overflow-y: auto;
-    transition: transform 0.3s ease;
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 30;
-    display: flex;
-    flex-direction: column;
-}
-
-.info-panel.hidden {
-    transform: translateX(100%);
-}
-
-.info-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid var(--border-color);
-    min-height: 70px;
-}
-
-.info-header-title {
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-
-.info-header-close {
-    cursor: pointer;
-    padding: 8px;
-}
-
-.info-header-close i {
-    font-size: 1.2rem;
-    color: var(--light-text);
-    transition: var(--transition);
-}
-
-.info-header-close i:hover {
-    color: var(--primary-color);
-}
-
-.info-section {
-    padding: 16px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.info-section-title {
-    font-weight: 600;
-    margin-bottom: 15px;
-    color: var(--light-text);
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.group-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin: 0 auto 15px;
-    display: block;
-}
-
-.group-name {
-    text-align: center;
-    font-weight: 600;
-    font-size: 1.2rem;
-    margin-bottom: 10px;
-}
-
-.group-description {
-    text-align: center;
-    color: var(--light-text);
-    margin-bottom: 10px;
-    font-size: 0.9rem;
-    line-height: 1.4;
-}
-
-.group-created {
-    text-align: center;
-    font-size: 0.8rem;
-    color: var(--light-text);
-}
-
-.group-action {
-    display: flex;
-    align-items: center;
-    padding: 14px 0;
-    cursor: pointer;
-    transition: var(--transition);
-    min-height: 60px;
-}
-
-.group-action:hover {
-    background: rgba(108, 92, 231, 0.1);
-    border-radius: 8px;
-}
-
-.group-action i:first-child {
-    font-size: 1.2rem;
-    color: var(--light-text);
-    margin-right: 15px;
-    width: 24px;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.group-action-text {
-    flex: 1;
-    min-width: 0;
-}
-
-.group-action-title {
-    font-weight: 600;
-    margin-bottom: 3px;
-    font-size: 1rem;
-}
-
-.group-action-desc {
-    font-size: 0.8rem;
-    color: var(--light-text);
-    line-height: 1.4;
-}
-
-.group-action i:last-child {
-    color: var(--light-text);
-    font-size: 0.9rem;
-    flex-shrink: 0;
-}
-
-.group-action.danger .group-action-title {
-    color: var(--danger-color);
-}
-
-.group-action.danger i:first-child {
-    color: var(--danger-color);
-}
-
-.member-item {
-    display: flex;
-    align-items: center;
-    padding: 12px 0;
-    transition: var(--transition);
-    min-height: 60px;
-}
-
-.member-item:hover {
-    background: rgba(108, 92, 231, 0.1);
-    border-radius: 8px;
-}
-
-.member-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 15px;
-    flex-shrink: 0;
-}
-
-.member-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.member-name {
-    font-weight: 600;
-    margin-bottom: 3px;
-    font-size: 1rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.member-role {
-    font-size: 0.8rem;
-    color: var(--light-text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.member-status {
-    font-size: 0.7rem;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-weight: 600;
-    flex-shrink: 0;
-}
-
-.status-online {
-    background-color: rgba(0, 184, 148, 0.2);
-    color: var(--online-status);
-}
-
-.status-offline {
-    background-color: rgba(99, 110, 114, 0.2);
-    color: var(--offline-status);
-}
-
-/* Empty State */
-.empty-state {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--light-text);
-}
-
-.empty-state i {
-    font-size: 3rem;
-    margin-bottom: 20px;
-    color: var(--secondary-color);
-}
-
-.empty-state h3 {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-    color: var(--text-color);
-}
-
-.empty-state p {
-    margin-bottom: 20px;
-    max-width: 300px;
-    line-height: 1.4;
-}
-
-.btn {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-    color: white;
-    border: none;
-    border-radius: 50px;
-    padding: 14px 28px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
-    min-height: 48px;
-}
-
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
-}
-
-/* Modals */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 16px;
-}
-
-.modal-content {
-    background: white;
-    border-radius: 15px;
-    width: 100%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid var(--border-color);
-    min-height: 70px;
-}
-
-.modal-title {
-    font-weight: 600;
-    font-size: 1.2rem;
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--light-text);
-    transition: var(--transition);
-    padding: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-close:hover {
-    color: var(--primary-color);
-}
-
-.modal-body {
-    padding: 20px;
-    overflow-y: auto;
-    flex: 1;
-    -webkit-overflow-scrolling: touch;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-.form-control {
-    width: 100%;
-    padding: 14px 15px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: var(--transition);
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
-}
-
-.form-control textarea {
-    min-height: 100px;
-    resize: vertical;
-}
-
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 20px;
-    border-top: 1px solid var(--border-color);
-    flex-wrap: wrap;
-}
-
-.modal-btn {
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    border: none;
-    min-height: 44px;
-    font-size: 1rem;
-}
-
-.modal-btn-secondary {
-    background: var(--received-message-bg);
-    color: var(--text-color);
-}
-
-.modal-btn-secondary:hover {
-    background: #d1d8dc;
-}
-
-.modal-btn-primary {
-    background: var(--primary-color);
-    color: white;
-}
-
-.modal-btn-primary:hover {
-    background: var(--secondary-color);
-}
-
-/* Emoji Picker */
-.emoji-picker {
-    position: absolute;
-    bottom: 70px;
-    right: 10px;
-    width: 300px;
-    height: 350px;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    z-index: 100;
-    overflow: hidden;
-    display: none;
-}
-
-.emoji-picker.show {
-    display: flex;
-}
-
-.emoji-picker-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    border-bottom: 1px solid var(--border-color);
-    font-weight: 600;
-}
-
-.emoji-picker-header span:last-child {
-    cursor: pointer;
-    color: var(--light-text);
-    transition: var(--transition);
-    padding: 8px;
-}
-
-.emoji-picker-header span:last-child:hover {
-    color: var(--primary-color);
-}
-
-.emoji-picker-search {
-    padding: 15px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.emoji-picker-search input {
-    width: 100%;
-    padding: 12px 15px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    font-size: 1rem;
-}
-
-.emoji-picker-search input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-}
-
-.emoji-picker-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px;
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 10px;
-    -webkit-overflow-scrolling: touch;
-}
-
-.emoji-item {
-    font-size: 1.5rem;
-    text-align: center;
-    cursor: pointer;
-    transition: var(--transition);
-    border-radius: 8px;
-    padding: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.emoji-item:hover {
-    background: rgba(108, 92, 231, 0.1);
-    transform: scale(1.2);
-}
-
-.emoji-picker-footer {
-    padding: 10px 15px;
-    text-align: center;
-    font-size: 0.8rem;
-    color: var(--light-text);
-    border-top: 1px solid var(--border-color);
-}
-
-/* Attachment Modal */
-.attachment-modal {
-    position: absolute;
-    bottom: 70px;
-    left: 10px;
-    width: 200px;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    z-index: 100;
-    overflow: hidden;
-    display: none;
-}
-
-.attachment-modal.show {
-    display: block;
-}
-
-.attachment-option {
-    display: flex;
-    align-items: center;
-    padding: 16px;
-    cursor: pointer;
-    transition: var(--transition);
-    min-height: 60px;
-}
-
-.attachment-option:hover {
-    background: rgba(108, 92, 231, 0.1);
-}
-
-.attachment-option i {
-    font-size: 1.2rem;
-    color: var(--light-text);
-    margin-right: 15px;
-    width: 24px;
-    text-align: center;
-}
-
-.attachment-option-text {
-    font-weight: 600;
-    font-size: 1rem;
-}
-
-/* Notification Container */
-.notification-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 350px;
-    max-width: calc(100% - 40px);
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.notification {
-    position: relative;
-    padding: 16px 20px;
-    border-radius: 10px;
-    color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    transform: translateX(120%);
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    opacity: 0;
-}
-
-.notification.show {
-    transform: translateX(0);
-    opacity: 1;
-}
-
-.notification.hide {
-    transform: translateX(120%);
-    opacity: 0;
-}
-
-.notification.success {
-    background-color: var(--success-color);
-}
-
-.notification.error {
-    background-color: var(--danger-color);
-}
-
-.notification.warning {
-    background-color: var(--warning-color);
-    color: var(--text-color);
-}
-
-.notification.info {
-    background-color: var(--info-color);
-}
-
-.notification-icon {
-    margin-right: 12px;
-    font-size: 20px;
-}
-
-.notification-content {
-    flex: 1;
-}
-
-.notification-title {
-    font-weight: 600;
-    margin-bottom: 4px;
-    font-size: 1rem;
-}
-
-.notification-message {
-    font-size: 14px;
-    opacity: 0.9;
-    line-height: 1.4;
-}
-
-.notification-close {
-    background: none;
-    border: none;
-    color: inherit;
-    cursor: pointer;
-    margin-left: 15px;
-    font-size: 18px;
-    opacity: 0.8;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Responsive Design */
-@media (min-width: 768px) {
-    .container {
-        position: static;
-    }
-    
-    .sidebar {
-        position: relative;
-        transform: none;
-        width: 350px;
-        max-width: 350px;
-    }
-    
-    .sidebar.hidden {
-        display: none;
-    }
-    
-    .chat-area.active ~ .sidebar {
-        display: none;
-    }
-    
-    .info-panel {
-        position: relative;
-        transform: none;
-        width: 350px;
-        max-width: 350px;
-    }
-    
-    .info-panel.hidden {
-        display: none;
-    }
-    
-    .chat-header-back {
-        display: none;
-    }
-    
-    .message-content {
-        max-width: 70%;
-    }
-    
-    .emoji-picker {
-        right: 20px;
-    }
-    
-    .attachment-modal {
-        left: 20px;
-    }
-}
-
-@media (max-width: 480px) {
-    .sidebar {
-        width: 100%;
-    }
-    
-    .chat-item {
-        padding: 12px 14px;
-    }
-    
-    .chat-item-avatar {
-        width: 45px;
-        height: 45px;
-        margin-right: 12px;
-    }
-    
-    .online-status {
-        left: 50px;
-        bottom: 14px;
-    }
-    
-    .chat-item-name {
-        font-size: 0.95rem;
-    }
-    
-    .chat-item-message {
-        font-size: 0.85rem;
-    }
-    
-    .message-bubble {
-        padding: 10px 14px;
-        font-size: 0.95rem;
-    }
-    
-    .emoji-picker {
-        width: 280px;
-        height: 320px;
-        right: 5px;
-    }
-    
-    .emoji-picker-body {
-        grid-template-columns: repeat(5, 1fr);
-    }
-    
-    .attachment-modal {
-        left: 5px;
-        width: 180px;
-    }
-    
-    .notification-container {
-        width: 300px;
-    }
-    
-    .modal {
-        padding: 10px;
-    }
-    
-    .modal-content {
-        border-radius: 12px;
-    }
-    
-    .modal-header, .modal-body, .modal-footer {
-        padding: 16px;
-    }
-}
-
-/* Utility Classes */
-.hidden {
-    display: none !important;
-}
-
-/* Animation for chat items */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.chat-item {
-    animation: fadeIn 0.3s ease;
-}
-
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-    width: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(108, 92, 231, 0.3);
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(108, 92, 231, 0.5);
-}
-
-/* Mobile-specific improvements */
-.mobile-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 25;
-    display: none;
-}
-
-@media (max-width: 767px) {
-    .sidebar:not(.hidden) ~ .mobile-overlay {
-        display: block;
-    }
-    
-    .info-panel:not(.hidden) ~ .mobile-overlay {
-        display: block;
-    }
-    
-    .chat-area.active {
-        transform: translateX(0);
-    }
-    
-    /* Improve touch targets */
-    .tab {
-        padding: 18px 0;
-    }
-    
-    .sidebar-actions i, 
-    .chat-header-actions i,
-    .chat-input-actions i {
-        min-width: 44px;
-        min-height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .chat-input-send {
-        width: 48px;
-        height: 48px;
-    }
-    
-    /* Prevent zoom on input focus */
-    @media (max-width: 360px) {
-        .search-container input,
-        .chat-input textarea,
-        .form-control {
-            font-size: 16px; /* Prevents zoom on iOS */
+        :root {
+            --primary-color: #0088cc;
+            --secondary-color: #00a2e8;
+            --sidebar-bg: #f8f9fa;
+            --chat-bg: #ffffff;
+            --message-sent-bg: #e3f2fd;
+            --message-received-bg: #f5f5f5;
+            --text-color: #333333;
+            --light-text: #707579;
+            --border-color: #e6e6e6;
+            --online-status: #00c853;
+            --offline-status: #9e9e9e;
+            --active-tab: #e6f7ff;
+            --hover-color: #f0f0f0;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
         }
-    }
-}
 
-/* Swipe to close for mobile */
-.sidebar, .info-panel {
-    touch-action: pan-y;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1400px;
+            height: 100vh;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 320px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 15px 20px;
+            background: var(--sidebar-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .user-status {
+            font-size: 12px;
+            color: var(--light-text);
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .search-container {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 20px;
+            padding: 8px 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 5px;
+            background: transparent;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            background: var(--active-tab);
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .contacts-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .contact-item:hover {
+            background: var(--hover-color);
+        }
+
+        .contact-item.active {
+            background: var(--active-tab);
+        }
+
+        .contact-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .online-dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--online-status);
+            border-radius: 50%;
+            bottom: 0;
+            right: 0;
+            border: 2px solid white;
+        }
+
+        .contact-info {
+            flex: 1;
+            margin-left: 12px;
+        }
+
+        .contact-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .contact-preview {
+            font-size: 13px;
+            color: var(--light-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .contact-meta {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .contact-time {
+            font-size: 11px;
+            color: var(--light-text);
+            margin-bottom: 5px;
+        }
+
+        .unread-count {
+            background: var(--primary-color);
+            color: white;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        /* Chat Area Styles */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--chat-bg);
+        }
+
+        .chat-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            background: var(--sidebar-bg);
+        }
+
+        .back-button {
+            margin-right: 15px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .current-chat-info {
+            flex: 1;
+        }
+
+        .current-chat-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .current-chat-status {
+            font-size: 13px;
+            color: var(--light-text);
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .chat-action-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: var(--chat-bg);
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 10px;
+            position: relative;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            background: var(--message-sent-bg);
+            border-bottom-right-radius: 2px;
+        }
+
+        .message.received {
+            align-self: flex-start;
+            background: var(--message-received-bg);
+            border-bottom-left-radius: 2px;
+        }
+
+        .message-sender {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: var(--primary-color);
+        }
+
+        .message-text {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--light-text);
+            text-align: right;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            gap: 10px;
+            background: var(--sidebar-bg);
+            border-top: 1px solid var(--border-color);
+            align-items: center;
+        }
+
+        .attachment-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .send-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Group List Styles */
+        .group-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            padding: 15px;
+        }
+
+        .group-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .group-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .group-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .group-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .group-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+
+        .group-members {
+            font-size: 0.9rem;
+            color: var(--light-text);
+        }
+
+        /* Loading and Notification Styles */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            color: var(--text-color);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .notification-container {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            width: 90%;
+            max-width: 350px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification {
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            color: white;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #00b894 0%, #00d4a4 100%);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #d63031 0%, #e84141 100%);
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, #0984e3 0%, #2aa1f5 100%);
+        }
+
+        .notification-icon {
+            margin-right: 12px;
+            font-size: 20px;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            margin-left: 10px;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                height: 100vh;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 100%;
+                display: none;
+            }
+            
+            .sidebar.active {
+                display: flex;
+            }
+            
+            .chat-area {
+                display: none;
+            }
+            
+            .chat-area.active {
+                display: flex;
+            }
+            
+            .back-button {
+                display: block;
+            }
+            
+            .group-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .message {
+                max-width: 85%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 12px;
+            }
+            
+            .chat-header {
+                padding: 12px 15px;
+            }
+            
+            .chat-messages {
+                padding: 15px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .chat-input {
+                padding: 12px;
+            }
+            
+            .group-item {
+                padding: 12px;
+            }
+        }
+
+        /* Welcome screen when no chat is selected */
+        .welcome-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--chat-bg);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .welcome-icon {
+            font-size: 60px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .welcome-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .welcome-text {
+            font-size: 16px;
+            color: var(--light-text);
+            max-width: 400px;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
     <!-- Loading Screen -->
     <div class="loading-screen" id="loading-screen">
-        <div class="loading-logo">CramNerd</div>
         <div class="loading-spinner"></div>
-        <div class="loading-text">Loading School Connect</div>
+        <div class="loading-text">Loading Communication Portal...</div>
     </div>
 
     <!-- Notification Container -->
     <div class="notification-container" id="notification-container"></div>
 
-    <!-- Mobile Overlay -->
-    <div class="mobile-overlay" id="mobile-overlay"></div>
-
-    <!-- Main Container -->
-    <div class="container" id="main-container" style="display: none;">
-        <!-- Sidebar -->
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="user-info">
-                    <img id="user-avatar" src="" alt="User" class="user-avatar">
-                    <div>
-                        <div class="user-name" id="user-name">Loading...</div>
-                        <div class="user-badge" id="user-badge">...</div>
+    <!-- Main Content -->
+    <div id="main-content" style="display: none;">
+        <div class="container">
+            <!-- Sidebar -->
+            <div class="sidebar" id="sidebar">
+                <div class="header">
+                    <div class="user-info">
+                        <div class="user-avatar" id="user-avatar">T</div>
+                        <div class="user-details">
+                            <div class="user-name" id="user-name">Teacher Name</div>
+                            <div class="user-status" id="user-status">Online</div>
+                        </div>
                     </div>
+                    <button class="logout-btn" id="logout-btn" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
                 </div>
-                <div class="sidebar-actions">
-                    <i class="fas fa-users" id="new-group-btn" title="New Group"></i>
-                    <i class="fas fa-ellipsis-v" id="menu-btn" title="Menu"></i>
-                </div>
-            </div>
-            
-            <div class="search-bar">
+
                 <div class="search-container">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search or start new chat" id="search-input">
-                </div>
-            </div>
-            
-            <div class="tab-bar">
-                <div class="tab active" data-tab="chats">Chats</div>
-                <div class="tab" data-tab="groups">Groups</div>
-                <div class="tab" data-tab="contacts">Contacts</div>
-            </div>
-            
-            <div class="chat-list" id="chat-list">
-                <!-- Chats will be loaded here -->
-            </div>
-        </div>
-        
-        <!-- Chat Area -->
-        <div class="chat-area" id="chat-area">
-            <div class="chat-header">
-                <div class="chat-header-back" id="back-btn">
-                    <i class="fas fa-arrow-left"></i>
-                </div>
-                <img id="chat-header-avatar" src="" alt="Chat" class="chat-header-avatar">
-                <div class="chat-header-info">
-                    <div class="chat-header-name" id="chat-header-name">Select a chat</div>
-                    <div class="chat-header-status" id="chat-header-status">Online</div>
-                </div>
-                <div class="chat-header-actions">
-                    <i class="fas fa-search"></i>
-                    <i class="fas fa-info-circle" id="info-btn"></i>
-                </div>
-            </div>
-            
-            <div class="chat-messages" id="chat-messages">
-                <!-- Messages will be loaded here -->
-            </div>
-            
-            <div class="chat-input-container">
-                <div class="chat-input-actions">
-                    <i class="far fa-smile" id="emoji-btn"></i>
-                    <i class="fas fa-paperclip" id="attach-btn"></i>
-                </div>
-                <div class="chat-input">
-                    <textarea id="message-input" placeholder="Type a message" rows="1"></textarea>
-                </div>
-                <div class="chat-input-send" id="send-btn">
-                    <i class="fas fa-paper-plane"></i>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Group Info Panel -->
-        <div class="info-panel hidden" id="info-panel">
-            <div class="info-header">
-                <div class="info-header-title">Group Info</div>
-                <div class="info-header-close" id="close-info-btn">
-                    <i class="fas fa-times"></i>
-                </div>
-            </div>
-            
-            <div class="info-section">
-                <img id="group-info-avatar" src="" alt="Group" class="group-avatar">
-                <div class="group-name" id="group-info-name">Group Name</div>
-                <div class="group-description" id="group-info-desc">Group description goes here</div>
-                <div class="group-created" id="group-info-created">Created on Jan 1, 2023</div>
-            </div>
-            
-            <div class="info-section">
-                <div class="info-section-title">Actions</div>
-                <div class="group-action" id="media-btn">
-                    <i class="fas fa-photo-video"></i>
-                    <div class="group-action-text">
-                        <div class="group-action-title">Media, links, and docs</div>
-                        <div class="group-action-desc">25 photos, 10 videos, 5 docs</div>
+                    <div class="search-box">
+                        <i class="fas fa-search" style="color: var(--light-text); margin-right: 8px;"></i>
+                        <input type="text" placeholder="Search..." id="search-input">
                     </div>
-                    <i class="fas fa-chevron-right"></i>
                 </div>
-                <div class="group-action" id="notifications-btn">
-                    <i class="fas fa-bell"></i>
-                    <div class="group-action-text">
-                        <div class="group-action-title">Notifications</div>
-                        <div class="group-action-desc">Mute or customize notifications</div>
-                    </div>
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </div>
-            
-            <div class="info-section">
-                <div class="info-section-title">Participants</div>
-                <div class="member-list" id="member-list">
-                    <!-- Members will be loaded here -->
-                </div>
-            </div>
-            
-            <div class="info-section">
-                <div class="group-action danger" id="exit-group-btn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <div class="group-action-text">
-                        <div class="group-action-title">Exit Group</div>
-                    </div>
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Empty State -->
-        <div class="empty-state" id="empty-state" style="display: none;">
-            <i class="fas fa-comment-alt"></i>
-            <h3>No Chat Selected</h3>
-            <p>Select a chat from the sidebar or start a new conversation</p>
-            <button class="btn" id="new-chat-btn">New Chat</button>
-        </div>
-    </div>
 
-    <!-- New Group Modal -->
-    <div class="modal" id="new-group-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Create New Group</div>
-                <button class="modal-close" id="close-group-modal">&times;</button>
+                <div class="tabs">
+                    <div class="tab active" data-tab="students">Students</div>
+                    <div class="tab" data-tab="teachers">Teachers</div>
+                    <div class="tab" data-tab="subject-groups">Groups</div>
+                </div>
+
+                <div class="contacts-list">
+                    <!-- Students will be populated here -->
+                    <div id="students-list"></div>
+                    <div id="teachers-list" style="display: none;"></div>
+                    <div id="subject-groups-list" style="display: none;"></div>
+                </div>
             </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label" for="group-name">Group Name</label>
-                    <input type="text" id="group-name" class="form-control" placeholder="Enter group name">
+
+            <!-- Chat Area -->
+            <div class="chat-area" id="chat-area">
+                <div class="welcome-screen" id="welcome-screen">
+                    <div class="welcome-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="welcome-title">Teacher Communication Portal</div>
+                    <div class="welcome-text">Select a contact or group from the sidebar to start chatting</div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label" for="group-description">Description</label>
-                    <textarea id="group-description" class="form-control" placeholder="Enter group description"></textarea>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Add Members</label>
-                    <div id="group-members-list" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 4px; padding: 8px;">
-                        <!-- Members will be listed here -->
+
+                <div class="chat-header" id="active-chat-header" style="display: none;">
+                    <div class="back-button" id="back-button">
+                        <i class="fas fa-arrow-left"></i>
+                    </div>
+                    <div class="current-chat-info">
+                        <div class="current-chat-name" id="current-chat-name">Contact Name</div>
+                        <div class="current-chat-status" id="current-chat-status">Online</div>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="chat-action-btn" title="Call">
+                            <i class="fas fa-phone"></i>
+                        </button>
+                        <button class="chat-action-btn" title="Video Call">
+                            <i class="fas fa-video"></i>
+                        </button>
+                        <button class="chat-action-btn" title="More options">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn modal-btn-secondary" id="cancel-group-btn">Cancel</button>
-                <button class="modal-btn modal-btn-primary" id="create-group-btn">Create Group</button>
+
+                <div class="chat-messages" id="chat-messages" style="display: none;"></div>
+
+                <div class="chat-input" id="chat-input" style="display: none;">
+                    <button class="attachment-btn" title="Attach file">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <input type="text" id="message-input" placeholder="Type a message...">
+                    <button class="send-btn" id="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Emoji Picker -->
-    <div class="emoji-picker" id="emoji-picker">
-        <div class="emoji-picker-header">
-            <span>Emoji</span>
-            <span id="close-emoji-picker"><i class="fas fa-times"></i></span>
-        </div>
-        <div class="emoji-picker-search">
-            <input type="text" placeholder="Search emoji..." id="emoji-search">
-        </div>
-        <div class="emoji-picker-body" id="emoji-container">
-            <!-- Emojis will be loaded here -->
-        </div>
-        <div class="emoji-picker-footer">
-            Click an emoji to insert
-        </div>
-    </div>
-
-    <!-- Attachment Modal -->
-    <div class="attachment-modal" id="attachment-modal">
-        <div class="attachment-option" id="attach-photo">
-            <i class="fas fa-camera"></i>
-            <span class="attachment-option-text">Photo or Video</span>
-        </div>
-        <div class="attachment-option" id="attach-document">
-            <i class="fas fa-file"></i>
-            <span class="attachment-option-text">Document</span>
-        </div>
-        <div class="attachment-option" id="attach-location">
-            <i class="fas fa-map-marker-alt"></i>
-            <span class="attachment-option-text">Location</span>
-        </div>
-    </div>
-
-    <script type="module">
-        // Import Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, get, onValue, set, push, onChildAdded, onChildChanged, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        
+    <script>
         // Firebase configuration
-       const firebaseConfig = {
+         const firebaseConfig = {
     apiKey: "AIzaSyB5NcC2P3v0LFBVFMp9-mAHQKYuo1pKokA",
     authDomain: "hweakwaecram.firebaseapp.com",
     projectId: "hweakwaecram",
@@ -1657,92 +736,54 @@ body {
     measurementId: "G-4GMZJJRVG0"
   };
 
-        
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const auth = getAuth(app);
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
         
         // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
-        const mainContainer = document.getElementById('main-container');
+        const mainContent = document.getElementById('main-content');
         const notificationContainer = document.getElementById('notification-container');
-        const mobileOverlay = document.getElementById('mobile-overlay');
-        const sidebar = document.getElementById('sidebar');
-        const chatArea = document.getElementById('chat-area');
-        const emptyState = document.getElementById('empty-state');
+        const logoutBtn = document.getElementById('logout-btn');
         const userAvatar = document.getElementById('user-avatar');
         const userName = document.getElementById('user-name');
-        const userBadge = document.getElementById('user-badge');
-        const searchInput = document.getElementById('search-input');
+        const userStatus = document.getElementById('user-status');
         const tabs = document.querySelectorAll('.tab');
-        const chatList = document.getElementById('chat-list');
-        const backBtn = document.getElementById('back-btn');
-        const chatHeaderAvatar = document.getElementById('chat-header-avatar');
-        const chatHeaderName = document.getElementById('chat-header-name');
-        const chatHeaderStatus = document.getElementById('chat-header-status');
-        const infoBtn = document.getElementById('info-btn');
+        const searchInput = document.getElementById('search-input');
+        
+        // Sidebar and chat elements
+        const sidebar = document.getElementById('sidebar');
+        const chatArea = document.getElementById('chat-area');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const activeChatHeader = document.getElementById('active-chat-header');
         const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const backButton = document.getElementById('back-button');
+        
+        // Contact lists
+        const studentsList = document.getElementById('students-list');
+        const teachersList = document.getElementById('teachers-list');
+        const subjectGroupsList = document.getElementById('subject-groups-list');
+        
+        // Chat elements
+        const currentChatName = document.getElementById('current-chat-name');
+        const currentChatStatus = document.getElementById('current-chat-status');
         const messageInput = document.getElementById('message-input');
         const sendBtn = document.getElementById('send-btn');
-        const infoPanel = document.getElementById('info-panel');
-        const closeInfoBtn = document.getElementById('close-info-btn');
-        const groupInfoAvatar = document.getElementById('group-info-avatar');
-        const groupInfoName = document.getElementById('group-info-name');
-        const groupInfoDesc = document.getElementById('group-info-desc');
-        const groupInfoCreated = document.getElementById('group-info-created');
-        const memberList = document.getElementById('member-list');
-        const newChatBtn = document.getElementById('new-chat-btn');
-        const newGroupBtn = document.getElementById('new-group-btn');
-        const emojiBtn = document.getElementById('emoji-btn');
-        const emojiPicker = document.getElementById('emoji-picker');
-        const emojiContainer = document.getElementById('emoji-container');
-        const closeEmojiPicker = document.getElementById('close-emoji-picker');
-        const emojiSearch = document.getElementById('emoji-search');
-        const attachBtn = document.getElementById('attach-btn');
-        const attachmentModal = document.getElementById('attachment-modal');
-        const menuBtn = document.getElementById('menu-btn');
-        
-        // Modal elements
-        const newGroupModal = document.getElementById('new-group-modal');
-        const closeGroupModal = document.getElementById('close-group-modal');
-        const cancelGroupBtn = document.getElementById('cancel-group-btn');
-        const createGroupBtn = document.getElementById('create-group-btn');
-        const groupNameInput = document.getElementById('group-name');
-        const groupDescriptionInput = document.getElementById('group-description');
-        const groupMembersList = document.getElementById('group-members-list');
-        
-        // Firebase references
-        const authUsersRef = ref(db, 'authUsers');
-        const teachersRef = ref(db, 'teachers');
-        const studentsRef = ref(db, 'students');
-        const alumniRef = ref(db, 'alumni');
-        const credentialsRef = ref(db, 'credentials');
-        const classesRef = ref(db, 'classes');
-        const subjectsRef = ref(db, 'subjects');
-        const privateMessagesRef = ref(db, 'privateMessages');
-        const groupChatsRef = ref(db, 'groupChats');
-        const groupMessagesRef = ref(db, 'groupMessages');
-        const activeSessionsRef = ref(db, 'activeSessions');
-        const onlineStatusRef = ref(db, 'onlineStatus');
         
         // Global variables
-        let currentUserId = null;
-        let currentUserData = null;
-        let userType = null; // 'student', 'teacher', or 'alumni'
-        let allTeachers = {};
-        let allStudents = {};
-        let allAlumni = {};
-        let allClasses = {};
-        let allSubjects = {};
-        let currentChat = null; // { type: 'private'|'group', id: string }
-        let currentChatData = null;
-        let currentChatMembers = [];
-        let userClasses = [];
-        let userSubjects = [];
-        let onlineUsers = {};
-        let userStatusInterval = null;
-        let existingConversations = {}; // Track existing conversations
+        let currentTeacherId = null;
+        let currentTeacherData = null;
+        let currentChatStudent = null;
+        let currentChatTeacher = null;
+        let currentChatGroup = null;
+        let studentsData = {};
+        let teachersData = {};
+        let subjectsData = {};
+        let classesData = {};
+        let activeTab = 'students';
+        let messageListeners = {};
         
         // Show notification function
         function showNotification({ title, message, type = 'info', duration = 5000 }) {
@@ -1801,138 +842,75 @@ body {
             return notification;
         }
         
-        // Identify the current user based on authentication
-        async function identifyCurrentUser() {
-            try {
-                // Check if user is authenticated
-                return new Promise((resolve, reject) => {
-                    onAuthStateChanged(auth, async (user) => {
-                        if (user) {
-                            // User is signed in
-                            const email = user.email;
+        // Identify the current teacher based on Firebase Auth
+        async function identifyCurrentTeacher() {
+            return new Promise((resolve, reject) => {
+                // Check if user is already signed in
+                const unsubscribe = auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        try {
+                            // User is signed in, get their data from authUsers
+                            const authUserSnapshot = await database.ref(`authUsers/${user.uid}`).once('value');
                             
-                            // Extract user ID from email (assuming format: ID@cramnerd.sms)
-                            const emailParts = email.split('@');
-                            if (emailParts.length === 2 && emailParts[1] === 'cramnerd.sms') {
-                                currentUserId = emailParts[0];
+                            if (authUserSnapshot.exists()) {
+                                const authUser = authUserSnapshot.val();
                                 
-                                // Determine user type based on ID format
-                                if (currentUserId.startsWith('TCH')) {
-                                    userType = 'teacher';
-                                } else if (currentUserId.startsWith('STD')) {
-                                    userType = 'student';
-                                } else if (currentUserId.startsWith('ALM')) {
-                                    userType = 'alumni';
-                                } else {
-                                    throw new Error('Unknown user type');
+                                if (authUser.userType === 'teacher') {
+                                    currentTeacherId = authUser.userId;
+                                    
+                                    // Get teacher details from teachers collection
+                                    const teacherSnapshot = await database.ref(`teachers/${currentTeacherId}`).once('value');
+                                    
+                                    if (teacherSnapshot.exists()) {
+                                        currentTeacherData = teacherSnapshot.val();
+                                        unsubscribe();
+                                        resolve(currentTeacherData);
+                                        return;
+                                    }
                                 }
-                                
-                                // Get user details from appropriate collection
-                                let userRef;
-                                if (userType === 'teacher') {
-                                    userRef = ref(db, `teachers/${currentUserId}`);
-                                } else if (userType === 'student') {
-                                    userRef = ref(db, `students/${currentUserId}`);
-                                } else if (userType === 'alumni') {
-                                    userRef = ref(db, `alumni/${currentUserId}`);
-                                } else {
-                                    throw new Error('Unknown user type');
-                                }
-                                
-                                const userSnapshot = await get(userRef);
-                                
-                                if (userSnapshot.exists()) {
-                                    currentUserData = userSnapshot.val();
-                                    currentUserData.id = currentUserId;
-                                    resolve(currentUserData);
-                                } else {
-                                    reject(new Error('User data not found'));
-                                }
-                            } else {
-                                reject(new Error('Invalid email format'));
                             }
-                        } else {
-                            // User is signed out
-                            reject(new Error('No user signed in'));
+                            
+                            // If we reach here, the auth user doesn't have proper teacher data
+                            unsubscribe();
+                            reject(new Error('Teacher data not found for authenticated user'));
+                        } catch (error) {
+                            unsubscribe();
+                            reject(error);
                         }
-                    });
+                    } else {
+                        // No user is signed in
+                        unsubscribe();
+                        reject(new Error('No user is currently signed in'));
+                    }
+                }, (error) => {
+                    unsubscribe();
+                    reject(error);
                 });
-            } catch (error) {
-                console.error('Error identifying user:', error);
-                showNotification({
-                    title: 'Error',
-                    message: 'Failed to identify user: ' + error.message,
-                    type: 'error'
-                });
-                return null;
-            }
+            });
         }
         
-        // Initialize the app
-        async function initApp() {
+        // Check for active teacher session
+        async function checkActiveSession() {
             try {
-                // First try to identify the user based on authentication
-                const user = await identifyCurrentUser();
+                // First try to identify the teacher based on auth state
+                const teacher = await identifyCurrentTeacher();
                 
-                if (user) {
-                    // Update UI with user info
-                    userName.textContent = user.name || 'User';
+                if (teacher) {
+                    // Update UI with teacher info
+                    userAvatar.textContent = teacher.name ? teacher.name.charAt(0) : 'T';
+                    userName.textContent = teacher.name || 'Teacher';
+                    userStatus.textContent = 'Online';
                     
-                    // Set user badge
-                    if (userType === 'student') {
-                        userBadge.textContent = 'Student';
-                        userBadge.className = 'user-badge badge-student';
-                    } else if (userType === 'teacher') {
-                        userBadge.textContent = 'Teacher';
-                        userBadge.className = 'user-badge badge-teacher';
-                    } else if (userType === 'alumni') {
-                        userBadge.textContent = 'Alumni';
-                        userBadge.className = 'user-badge badge-alumni';
-                    }
-                    
-                    // Set avatar - use profileImage if available, otherwise use dicebear
-                    const avatarUrl = user.profileImage || user.avatar || 
-                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUserId}`;
-                    userAvatar.src = avatarUrl;
-                    
-                    // Load all teachers, students, and alumni
-                    await loadAllUsers();
-                    
-                    // Load all classes and subjects
-                    await loadAllClasses();
-                    await loadAllSubjects();
-                    
-                    // Determine user's classes and subjects
-                    await determineUserClassesAndSubjects();
-                    
-                    // Create subject groups for the user
-                    await createSubjectGroups();
-                    
-                    // Create class groups for the user
-                    await createClassGroups();
-                    
-                    // Set up online status tracking
-                    setupOnlineStatus();
-                    
-                    // Set up event listeners
-                    setupEventListeners();
-                    
-                    // Load chats
-                    await loadChats();
-                    
-                    // Set up real-time listeners
-                    setupRealTimeListeners();
-                    
-                    // Load emojis
-                    loadEmojis();
+                    // Load teacher's data
+                    loadTeacherData();
                     
                     // Hide loading screen and show main content
                     loadingScreen.style.display = 'none';
-                    mainContainer.style.display = 'flex';
+                    mainContent.style.display = 'block';
                     
                     showNotification({
-                        title: 'Welcome Back',
-                        message: `You're logged in as ${user.name || 'User'}`,
+                        title: 'Welcome!',
+                        message: 'Communication portal loaded successfully',
                         type: 'success',
                         duration: 3000
                     });
@@ -1940,7 +918,7 @@ body {
                     return;
                 }
                 
-                // If no user identified
+                // If no teacher identified
                 showNotification({
                     title: 'Session Expired',
                     message: 'Please sign in again',
@@ -1950,1724 +928,527 @@ body {
                 
                 // Redirect to login page after a delay
                 setTimeout(() => {
-                    window.location.href = 'login.html';
+                    window.location.href = 'logins.html';
                 }, 2000);
                 
             } catch (error) {
-                console.error('Error initializing app:', error);
+                console.error('Error checking active session:', error);
                 showNotification({
                     title: 'Error',
-                    message: 'Failed to load user information',
+                    message: 'Failed to load teacher information',
                     type: 'error'
                 });
                 
                 // Redirect to login page after a delay
                 setTimeout(() => {
-                    window.location.href = 'login.html';
+                    window.location.href = 'logins.html';
                 }, 2000);
             }
         }
         
-        // Load all users (teachers, students, alumni)
-        async function loadAllUsers() {
-            // Load teachers
-            const teachersSnapshot = await get(teachersRef);
-            allTeachers = teachersSnapshot.exists() ? teachersSnapshot.val() : {};
-            
-            // Load students
-            const studentsSnapshot = await get(studentsRef);
-            allStudents = studentsSnapshot.exists() ? studentsSnapshot.val() : {};
-            
-            // Load alumni
-            const alumniSnapshot = await get(alumniRef);
-            allAlumni = alumniSnapshot.exists() ? alumniSnapshot.val() : {};
-        }
-        
-        // Load all classes
-        async function loadAllClasses() {
-            const snapshot = await get(classesRef);
-            allClasses = snapshot.exists() ? snapshot.val() : {};
-        }
-        
-        // Load all subjects
-        async function loadAllSubjects() {
-            const snapshot = await get(subjectsRef);
-            allSubjects = snapshot.exists() ? snapshot.val() : {};
-        }
-        
-        // Determine which classes and subjects the user is associated with
-        async function determineUserClassesAndSubjects() {
-            userClasses = [];
-            userSubjects = [];
-            
-            if (userType === 'student') {
-                // For students, get their class from student data
-                if (currentUserData.class) {
-                    userClasses.push(currentUserData.class);
-                    
-                    // Find subjects taught in this class
-                    for (const subjectId in allSubjects) {
-                        const subject = allSubjects[subjectId];
-                        if (subject.class === currentUserData.class) {
-                            userSubjects.push({
-                                id: subjectId,
-                                ...subject
-                            });
-                        }
-                    }
-                }
-            } else if (userType === 'teacher') {
-                // For teachers, get classes and subjects they teach
-                for (const subjectId in allSubjects) {
-                    const subject = allSubjects[subjectId];
-                    if (subject.teacher === currentUserId) {
-                        userSubjects.push({
-                            id: subjectId,
-                            ...subject
-                        });
-                        
-                        if (subject.class && !userClasses.includes(subject.class)) {
-                            userClasses.push(subject.class);
-                        }
-                    }
-                }
-            } else if (userType === 'alumni') {
-                // For alumni, we might want to show forums from their previous classes
-                if (currentUserData.previousClass) {
-                    userClasses.push(currentUserData.previousClass);
-                    
-                    // Find subjects from their previous class
-                    for (const subjectId in allSubjects) {
-                        const subject = allSubjects[subjectId];
-                        if (subject.class === currentUserData.previousClass) {
-                            userSubjects.push({
-                                id: subjectId,
-                                ...subject
-                            });
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Create subject groups for the user
-        async function createSubjectGroups() {
-            if (userType === 'student' || userType === 'teacher') {
-                for (const subject of userSubjects) {
-                    const subjectId = subject.id;
-                    const classId = subject.class;
-                    const teacherId = subject.teacher;
-                    
-                    // Generate a unique group ID based on subject and class
-                    const groupId = `subject_${subjectId}_class_${classId}`;
-                    
-                    // Check if group already exists
-                    const groupRef = ref(db, `groupChats/${groupId}`);
-                    const groupSnapshot = await get(groupRef);
-                    
-                    if (!groupSnapshot.exists()) {
-                        // Get all students in this class
-                        const classStudents = [];
-                        const classData = allClasses[classId];
-                        
-                        if (classData && classData.students) {
-                            for (const studentId of classData.students) {
-                                const student = allStudents[studentId];
-                                if (student) {
-                                    classStudents.push(studentId);
-                                }
-                            }
-                        }
-                        
-                        // Combine teacher and students as group members
-                        const members = [teacherId, ...classStudents];
-                        
-                        // Create the group
-                        const groupData = {
-                            id: groupId,
-                            name: `${subject.name} - ${classData?.name || 'Class'}`,
-                            description: `Group for ${subject.name} subject in ${classData?.name || 'Class'}`,
-                            members: members,
-                            createdAt: new Date().toISOString(),
-                            isSubjectGroup: true,
-                            subjectId: subjectId,
-                            classId: classId
-                        };
-                        
-                        await set(groupRef, groupData);
-                        
-                        console.log(`Created group for ${subject.name} in ${classData?.name}`);
-                    }
-                }
-            }
-        }
-        
-        // Create class groups for the user
-        async function createClassGroups() {
-            if (userType === 'student' || userType === 'teacher') {
-                for (const classId of userClasses) {
-                    const classData = allClasses[classId];
-                    if (!classData) continue;
-                    
-                    // Generate a unique group ID based on class
-                    const groupId = `class_${classId}`;
-                    
-                    // Check if group already exists
-                    const groupRef = ref(db, `groupChats/${groupId}`);
-                    const groupSnapshot = await get(groupRef);
-                    
-                    if (!groupSnapshot.exists()) {
-                        // Get all students in this class
-                        const classStudents = [];
-                        if (classData.students) {
-                            for (const studentId of classData.students) {
-                                const student = allStudents[studentId];
-                                if (student) {
-                                    classStudents.push(studentId);
-                                }
-                            }
-                        }
-                        
-                        // Get the class teacher (if specified)
-                        let classTeacher = null;
-                        if (classData.teacher) {
-                            // If teacher is specified by name, find the teacher ID
-                            if (typeof classData.teacher === 'string') {
-                                for (const teacherId in allTeachers) {
-                                    if (allTeachers[teacherId].name === classData.teacher) {
-                                        classTeacher = teacherId;
-                                        break;
-                                    }
-                                }
-                            } else {
-                                classTeacher = classData.teacher;
-                            }
-                        }
-                        
-                        // Combine teacher and students as group members
-                        const members = classTeacher ? [classTeacher, ...classStudents] : [...classStudents];
-                        
-                        // Create the group
-                        const groupData = {
-                            id: groupId,
-                            name: `${classData.name} Class Group`,
-                            description: `Group for ${classData.name} class`,
-                            members: members,
-                            createdAt: new Date().toISOString(),
-                            isClassGroup: true,
-                            classId: classId,
-                            teacher: classTeacher || null
-                        };
-                        
-                        await set(groupRef, groupData);
-                        
-                        console.log(`Created group for ${classData.name} class`);
-                    }
-                }
-            }
-        }
-        
-        // Set up online status tracking
-        function setupOnlineStatus() {
-            // Set user as online
-            set(ref(db, `onlineStatus/${currentUserId}`), true);
-            
-            // Update every 30 seconds to keep status active
-            userStatusInterval = setInterval(() => {
-                set(ref(db, `onlineStatus/${currentUserId}`), true);
-            }, 30000);
-            
-            // Listen for online status changes
-            onValue(ref(db, 'onlineStatus'), (snapshot) => {
-                onlineUsers = snapshot.exists() ? snapshot.val() : {};
+        // Load teacher's students, colleagues, and subject groups
+        async function loadTeacherData() {
+            try {
+                // Load all necessary data
+                const [studentsSnapshot, teachersSnapshot, subjectsSnapshot, classesSnapshot] = await Promise.all([
+                    database.ref('students').once('value'),
+                    database.ref('teachers').once('value'),
+                    database.ref('subjects').once('value'),
+                    database.ref('classes').once('value')
+                ]);
                 
-                // Update status indicators in chat list
-                updateOnlineStatusIndicators();
-            });
-        }
-        
-        // Update online status indicators in chat list
-        function updateOnlineStatusIndicators() {
-            document.querySelectorAll('.chat-item').forEach(item => {
-                const userId = item.getAttribute('data-user-id');
-                if (userId && onlineUsers[userId]) {
-                    const statusIndicator = item.querySelector('.online-status');
-                    if (statusIndicator) {
-                        statusIndicator.classList.add('online');
-                        statusIndicator.classList.remove('offline');
-                    }
-                } else if (userId) {
-                    const statusIndicator = item.querySelector('.online-status');
-                    if (statusIndicator) {
-                        statusIndicator.classList.add('offline');
-                        statusIndicator.classList.remove('online');
-                    }
-                }
+                // Store data in global variables
+                studentsData = studentsSnapshot.val() || {};
+                teachersData = teachersSnapshot.val() || {};
+                subjectsData = subjectsSnapshot.val() || {};
+                classesData = classesSnapshot.val() || {};
                 
-                // For group chats, we don't show online status in the list
-            });
-            
-            // Update current chat status if it's a private chat
-            if (currentChat && currentChat.type === 'private') {
-                const isOnline = onlineUsers[currentChat.id];
-                chatHeaderStatus.textContent = isOnline ? 'Online' : 'Offline';
-                chatHeaderStatus.style.color = isOnline ? 'var(--online-status)' : 'var(--offline-status)';
-            }
-        }
-        
-        // Set up event listeners
-        function setupEventListeners() {
-            // Tab switching
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Remove active class from all tabs
-                    tabs.forEach(t => t.classList.remove('active'));
-                    
-                    // Add active class to clicked tab
-                    tab.classList.add('active');
-                    
-                    // Reload chat list based on selected tab
-                    loadChats();
+                // Load teacher's students
+                loadTeacherStudents();
+                
+                // Load other teachers
+                loadOtherTeachers();
+                
+                // Load subject groups
+                loadSubjectGroups();
+                
+            } catch (error) {
+                console.error('Error loading teacher data:', error);
+                showNotification({
+                    title: 'Error',
+                    message: 'Failed to load communication data',
+                    type: 'error'
                 });
-            });
+            }
+        }
+        
+        // Load teacher's students
+        function loadTeacherStudents() {
+            studentsList.innerHTML = '';
             
-            // Back button (for mobile)
-            backBtn.addEventListener('click', () => {
-                sidebar.classList.remove('hidden');
-                chatArea.classList.remove('active');
-                emptyState.style.display = 'none';
-                currentChat = null;
-                currentChatData = null;
-            });
+            // Find students assigned to this teacher through subjects
+            const teacherStudents = [];
             
-            // Info button
-            infoBtn.addEventListener('click', () => {
-                if (currentChat) {
-                    loadChatInfo();
-                    infoPanel.classList.remove('hidden');
+            for (const subjectId in subjectsData) {
+                const subject = subjectsData[subjectId];
+                
+                // Check if this teacher is assigned to this subject
+                if (subject.assignments && subject.assignments[currentTeacherId]) {
+                    // Get class IDs from assignments
+                    let classIds = [];
+                    
+                    if (Array.isArray(subject.assignments[currentTeacherId])) {
+                        classIds = subject.assignments[currentTeacherId].map(a => a.classId);
+                    } else if (subject.assignments[currentTeacherId].classId) {
+                        classIds = [subject.assignments[currentTeacherId].classId];
+                    }
+                    
+                    // Find students in these classes
+                    for (const studentId in studentsData) {
+                        const student = studentsData[studentId];
+                        
+                        if (classIds.includes(student.classId)) {
+                            // Avoid duplicates
+                            if (!teacherStudents.find(s => s.id === studentId)) {
+                                teacherStudents.push({
+                                    id: studentId,
+                                    ...student
+                                });
+                            }
+                        }
+                    }
                 }
-            });
+            }
             
-            // Close info panel
-            closeInfoBtn.addEventListener('click', () => {
-                infoPanel.classList.add('hidden');
-            });
+            if (teacherStudents.length === 0) {
+                studentsList.innerHTML = '<div class="contact-item">No students found</div>';
+                return;
+            }
             
-            // Send message
-            sendBtn.addEventListener('click', sendMessage);
-            
-            // Also send message when Enter is pressed (but not Shift+Enter)
-            messageInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
-            
-            // New chat button
-            newChatBtn.addEventListener('click', () => {
-                showNewChatModal();
-            });
-            
-            // New group button
-            newGroupBtn.addEventListener('click', () => {
-                showNewGroupModal();
-            });
-            
-            // Search input
-            searchInput.addEventListener('input', (e) => {
-                filterChats(e.target.value);
-            });
-            
-            // Menu button (logout)
-            menuBtn.addEventListener('click', () => {
-                signOut(auth).then(() => {
-                    showNotification({
-                        title: 'Signed Out',
-                        message: 'You have been successfully signed out',
-                        type: 'success',
-                        duration: 3000
+            // Display students
+            teacherStudents.forEach(student => {
+                const studentItem = document.createElement('div');
+                studentItem.className = 'contact-item';
+                studentItem.dataset.id = student.id;
+                studentItem.dataset.type = 'student';
+                
+                studentItem.innerHTML = `
+                    <div class="contact-avatar">
+                        ${student.name ? student.name.charAt(0) : 'S'}
+                        <div class="online-dot"></div>
+                    </div>
+                    <div class="contact-info">
+                        <div class="contact-name">${student.name || 'Student'}</div>
+                        <div class="contact-preview">Tap to start chatting</div>
+                    </div>
+                    <div class="contact-meta">
+                        <div class="contact-time">Now</div>
+                    </div>
+                `;
+                
+                studentItem.addEventListener('click', () => {
+                    // Remove active class from all contacts
+                    document.querySelectorAll('.contact-item').forEach(item => {
+                        item.classList.remove('active');
                     });
                     
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 1000);
-                }).catch((error) => {
+                    // Add active class to clicked contact
+                    studentItem.classList.add('active');
+                    
+                    // Set active chat
+                    currentChatStudent = student;
+                    currentChatTeacher = null;
+                    currentChatGroup = null;
+                    
+                    // Update UI for mobile
+                    if (window.innerWidth <= 768) {
+                        sidebar.style.display = 'none';
+                        chatArea.style.display = 'flex';
+                    }
+                    
+                    // Update chat header
+                    currentChatName.textContent = student.name || 'Student';
+                    currentChatStatus.textContent = 'Online';
+                    
+                    // Show chat elements, hide welcome screen
+                    welcomeScreen.style.display = 'none';
+                    activeChatHeader.style.display = 'flex';
+                    chatMessages.style.display = 'flex';
+                    chatInput.style.display = 'flex';
+                    
+                    // Load chat messages
+                    loadChatMessages('student', student.id);
+                });
+                
+                studentsList.appendChild(studentItem);
+            });
+        }
+        
+        // Load other teachers
+        function loadOtherTeachers() {
+            teachersList.innerHTML = '';
+            
+            // Filter out current teacher
+            const otherTeachers = [];
+            
+            for (const teacherId in teachersData) {
+                if (teacherId !== currentTeacherId) {
+                    otherTeachers.push({
+                        id: teacherId,
+                        ...teachersData[teacherId]
+                    });
+                }
+            }
+            
+            if (otherTeachers.length === 0) {
+                teachersList.innerHTML = '<div class="contact-item">No other teachers found</div>';
+                return;
+            }
+            
+            // Display other teachers
+            otherTeachers.forEach(teacher => {
+                const teacherItem = document.createElement('div');
+                teacherItem.className = 'contact-item';
+                teacherItem.dataset.id = teacher.id;
+                teacherItem.dataset.type = 'teacher';
+                
+                teacherItem.innerHTML = `
+                    <div class="contact-avatar">
+                        ${teacher.name ? teacher.name.charAt(0) : 'T'}
+                        <div class="online-dot"></div>
+                    </div>
+                    <div class="contact-info">
+                        <div class="contact-name">${teacher.name || 'Teacher'}</div>
+                        <div class="contact-preview">Tap to start chatting</div>
+                    </div>
+                    <div class="contact-meta">
+                        <div class="contact-time">Now</div>
+                    </div>
+                `;
+                
+                teacherItem.addEventListener('click', () => {
+                    // Remove active class from all contacts
+                    document.querySelectorAll('.contact-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked contact
+                    teacherItem.classList.add('active');
+                    
+                    // Set active chat
+                    currentChatTeacher = teacher;
+                    currentChatStudent = null;
+                    currentChatGroup = null;
+                    
+                    // Update UI for mobile
+                    if (window.innerWidth <= 768) {
+                        sidebar.style.display = 'none';
+                        chatArea.style.display = 'flex';
+                    }
+                    
+                    // Update chat header
+                    currentChatName.textContent = teacher.name || 'Teacher';
+                    currentChatStatus.textContent = 'Online';
+                    
+                    // Show chat elements, hide welcome screen
+                    welcomeScreen.style.display = 'none';
+                    activeChatHeader.style.display = 'flex';
+                    chatMessages.style.display = 'flex';
+                    chatInput.style.display = 'flex';
+                    
+                    // Load chat messages
+                    loadChatMessages('teacher', teacher.id);
+                });
+                
+                teachersList.appendChild(teacherItem);
+            });
+        }
+        
+        // Load subject groups
+        function loadSubjectGroups() {
+            subjectGroupsList.innerHTML = '';
+            
+            // Find subjects assigned to this teacher
+            const teacherSubjects = [];
+            
+            for (const subjectId in subjectsData) {
+                const subject = subjectsData[subjectId];
+                
+                // Check if this teacher is assigned to this subject
+                if (subject.assignments && subject.assignments[currentTeacherId]) {
+                    teacherSubjects.push({
+                        id: subjectId,
+                        ...subject
+                    });
+                }
+            }
+            
+            if (teacherSubjects.length === 0) {
+                subjectGroupsList.innerHTML = '<div class="contact-item">No subject groups found</div>';
+                return;
+            }
+            
+            // Display subject groups as contact items
+            teacherSubjects.forEach(subject => {
+                const groupItem = document.createElement('div');
+                groupItem.className = 'contact-item';
+                groupItem.dataset.id = subject.id;
+                groupItem.dataset.type = 'group';
+                
+                // Get class info
+                let classInfo = 'Multiple classes';
+                if (subject.assignments[currentTeacherId]) {
+                    if (Array.isArray(subject.assignments[currentTeacherId])) {
+                        classInfo = `${subject.assignments[currentTeacherId].length} classes`;
+                    } else if (subject.assignments[currentTeacherId].classId) {
+                        const classId = subject.assignments[currentTeacherId].classId;
+                        classInfo = classesData[classId]?.name || `Class ${classId}`;
+                    }
+                }
+                
+                groupItem.innerHTML = `
+                    <div class="contact-avatar">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="contact-info">
+                        <div class="contact-name">${subject.name}</div>
+                        <div class="contact-preview">${classInfo}</div>
+                    </div>
+                    <div class="contact-meta">
+                        <div class="contact-time">Now</div>
+                    </div>
+                `;
+                
+                groupItem.addEventListener('click', () => {
+                    // Remove active class from all contacts
+                    document.querySelectorAll('.contact-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked contact
+                    groupItem.classList.add('active');
+                    
+                    // Set active group chat
+                    currentChatGroup = subject;
+                    currentChatStudent = null;
+                    currentChatTeacher = null;
+                    
+                    // Update UI for mobile
+                    if (window.innerWidth <= 768) {
+                        sidebar.style.display = 'none';
+                        chatArea.style.display = 'flex';
+                    }
+                    
+                    // Update chat header
+                    currentChatName.textContent = subject.name;
+                    currentChatStatus.textContent = 'Group';
+                    
+                    // Show chat elements, hide welcome screen
+                    welcomeScreen.style.display = 'none';
+                    activeChatHeader.style.display = 'flex';
+                    chatMessages.style.display = 'flex';
+                    chatInput.style.display = 'flex';
+                    
+                    // Load group messages
+                    loadChatMessages('group', subject.id);
+                });
+                
+                subjectGroupsList.appendChild(groupItem);
+            });
+        }
+        
+        // Load chat messages
+        function loadChatMessages(type, id) {
+            // Clear previous messages
+            chatMessages.innerHTML = '';
+            
+            // Remove any existing message listeners
+            for (const path in messageListeners) {
+                database.ref(path).off('value', messageListeners[path]);
+            }
+            messageListeners = {};
+            
+            let path;
+            
+            if (type === 'student') {
+                path = `chats/teachers/${currentTeacherId}/students/${id}`;
+            } else if (type === 'teacher') {
+                path = `chats/teachers/${currentTeacherId}/teachers/${id}`;
+            } else if (type === 'group') {
+                path = `chats/groups/${id}`;
+            }
+            
+            // Listen for messages
+            const messageListener = database.ref(path).on('value', (snapshot) => {
+                const messages = snapshot.val() || {};
+                chatMessages.innerHTML = '';
+                
+                // Convert to array and sort by timestamp
+                const messagesArray = Object.entries(messages).map(([key, value]) => ({
+                    id: key,
+                    ...value
+                }));
+                
+                messagesArray.sort((a, b) => a.timestamp - b.timestamp);
+                
+                // Display messages
+                messagesArray.forEach(message => {
+                    const messageEl = document.createElement('div');
+                    messageEl.className = `message ${message.senderId === currentTeacherId ? 'sent' : 'received'}`;
+                    
+                    const senderName = message.senderId === currentTeacherId 
+                        ? 'You' 
+                        : (type === 'student' ? currentChatStudent.name 
+                            : type === 'teacher' ? currentChatTeacher.name 
+                            : message.senderName || 'Unknown');
+                    
+                    const time = new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    messageEl.innerHTML = `
+                        ${type !== 'student' && message.senderId !== currentTeacherId ? 
+                            `<div class="message-sender">${senderName}</div>` : ''}
+                        <div class="message-text">${message.text}</div>
+                        <div class="message-time">${time}</div>
+                    `;
+                    
+                    chatMessages.appendChild(messageEl);
+                });
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+            
+            // Store the listener reference
+            messageListeners[path] = messageListener;
+        }
+        
+        // Send message
+        function sendMessage() {
+            if (!messageInput.value.trim()) return;
+            
+            let path, messageData;
+            
+            if (currentChatStudent) {
+                path = `chats/teachers/${currentTeacherId}/students/${currentChatStudent.id}`;
+                messageData = {
+                    text: messageInput.value,
+                    senderId: currentTeacherId,
+                    senderName: currentTeacherData.name,
+                    timestamp: Date.now()
+                };
+            } else if (currentChatTeacher) {
+                path = `chats/teachers/${currentTeacherId}/teachers/${currentChatTeacher.id}`;
+                messageData = {
+                    text: messageInput.value,
+                    senderId: currentTeacherId,
+                    senderName: currentTeacherData.name,
+                    timestamp: Date.now()
+                };
+            } else if (currentChatGroup) {
+                path = `chats/groups/${currentChatGroup.id}`;
+                messageData = {
+                    text: messageInput.value,
+                    senderId: currentTeacherId,
+                    senderName: currentTeacherData.name,
+                    timestamp: Date.now()
+                };
+            } else {
+                return;
+            }
+            
+            // Push message to database
+            database.ref(path).push(messageData)
+                .then(() => {
+                    // Clear input
+                    messageInput.value = '';
+                })
+                .catch(error => {
+                    console.error('Error sending message:', error);
                     showNotification({
                         title: 'Error',
-                        message: 'Failed to sign out: ' + error.message,
-                        type: 'error',
-                        duration: 3000
+                        message: 'Failed to send message',
+                        type: 'error'
                     });
                 });
-            });
-            
-            // Window resize handler
-            window.addEventListener('resize', handleResize);
-            
-            // Modal event listeners
-            closeGroupModal.addEventListener('click', () => {
-                newGroupModal.style.display = 'none';
-            });
-            
-            cancelGroupBtn.addEventListener('click', () => {
-                newGroupModal.style.display = 'none';
-            });
-            
-            createGroupBtn.addEventListener('click', createNewGroup);
-            
-            // Close modal when clicking outside
-            window.addEventListener('click', (e) => {
-                if (e.target === newGroupModal) {
-                    newGroupModal.style.display = 'none';
-                }
-                if (e.target === emojiPicker) {
-                    emojiPicker.classList.remove('show');
-                }
-                if (e.target === attachmentModal) {
-                    attachmentModal.classList.remove('show');
-                }
-            });
-            
-            // Emoji picker
-            emojiBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                attachmentModal.classList.remove('show');
-                emojiPicker.classList.toggle('show');
-            });
-            
-            closeEmojiPicker.addEventListener('click', () => {
-                emojiPicker.classList.remove('show');
-            });
-            
-            // Attachment button
-            attachBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                emojiPicker.classList.remove('show');
-                attachmentModal.classList.toggle('show');
-            });
-            
-            // Close emoji picker when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!emojiPicker.contains(e.target) && e.target !== emojiBtn) {
-                    emojiPicker.classList.remove('show');
-                }
-                if (!attachmentModal.contains(e.target) && e.target !== attachBtn) {
-                    attachmentModal.classList.remove('show');
-                }
-            });
-            
-            // Attachment options
-            document.getElementById('attach-photo').addEventListener('click', () => {
-                attachmentModal.classList.remove('show');
-                showNotification({
-                    title: 'Feature Coming Soon',
-                    message: 'Photo attachment functionality will be added in a future update',
-                    type: 'info',
-                    duration: 3000
-                });
-            });
-            
-            document.getElementById('attach-document').addEventListener('click', () => {
-                attachmentModal.classList.remove('show');
-                showNotification({
-                    title: 'Feature Coming Soon',
-                    message: 'Document attachment functionality will be added in a future update',
-                    type: 'info',
-                    duration: 3000
-                });
-            });
-            
-            document.getElementById('attach-location').addEventListener('click', () => {
-                attachmentModal.classList.remove('show');
-                showNotification({
-                    title: 'Feature Coming Soon',
-                    message: 'Location sharing functionality will be added in a future update',
-                    type: 'info',
-                    duration: 3000
-                });
-            });
-            
-            // Mobile overlay click to close sidebars
-            mobileOverlay.addEventListener('click', () => {
-                sidebar.classList.add('hidden');
-                infoPanel.classList.add('hidden');
-            });
-            
-            // Swipe handling for mobile
-            let touchStartX = 0;
-            let touchStartY = 0;
-            
-            document.addEventListener('touchstart', (e) => {
-                touchStartX = e.touches[0].clientX;
-                touchStartY = e.touches[0].clientY;
-            });
-            
-            document.addEventListener('touchend', (e) => {
-                const touchEndX = e.changedTouches[0].clientX;
-                const touchEndY = e.changedTouches[0].clientY;
-                const diffX = touchEndX - touchStartX;
-                const diffY = touchEndY - touchStartY;
-                
-                // Check if it's a horizontal swipe (not vertical)
-                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
-                    // Left swipe to close sidebar
-                    if (diffX < -50 && !sidebar.classList.contains('hidden')) {
-                        sidebar.classList.add('hidden');
-                    }
-                    // Right swipe to open sidebar when in chat view
-                    else if (diffX > 50 && sidebar.classList.contains('hidden') && 
-                             window.innerWidth < 768 && !infoPanel.classList.contains('hidden')) {
-                        sidebar.classList.remove('hidden');
-                    }
-                    // Right swipe to close info panel
-                    else if (diffX > 50 && !infoPanel.classList.contains('hidden')) {
-                        infoPanel.classList.add('hidden');
-                    }
-                    // Left swipe to open info panel when in chat view
-                    else if (diffX < -50 && infoPanel.classList.contains('hidden') && 
-                             window.innerWidth < 768 && !sidebar.classList.contains('hidden')) {
-                        infoPanel.classList.remove('hidden');
-                    }
-                }
-            });
         }
         
-        // Load emojis into the picker
-        function loadEmojis() {
-            const emojis = [
-                '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇',
-                '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚',
-                '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🥸',
-                '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️',
-                '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡',
-                '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓',
-                '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄',
-                '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵',
-                '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑', '🤠',
-                '😈', '👿', '👹', '👺', '🤡', '💩', '👻', '💀', '☠️', '👽',
-                '👾', '🤖', '🎃', '😺', '😸', '😹', '😻', '😼', '😽', '🙀',
-                '😿', '😾', '🙈', '🙉', '🙊', '💋', '💌', '💘', '💝', '💖',
-                '💗', '💓', '💞', '💕', '💟', '❣️', '💔', '❤️', '🧡', '💛',
-                '💚', '💙', '💜', '🤎', '🖤', '🤍', '💯', '💢', '💥', '💫',
-                '💦', '💨', '🕳️', '💣', '💬', '👁️‍🗨️', '🗨️', '🗯️', '💭', '💤'
-            ];
-            
-            emojiContainer.innerHTML = '';
-            
-            emojis.forEach(emoji => {
-                const emojiElement = document.createElement('div');
-                emojiElement.className = 'emoji-item';
-                emojiElement.textContent = emoji;
-                emojiElement.addEventListener('click', () => {
-                    messageInput.value += emoji;
-                    messageInput.focus();
-                });
-                emojiContainer.appendChild(emojiElement);
+        // Tab switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Update active tab
+                activeTab = tab.dataset.tab;
+                
+                // Show corresponding content
+                if (activeTab === 'students') {
+                    studentsList.style.display = 'block';
+                    teachersList.style.display = 'none';
+                    subjectGroupsList.style.display = 'none';
+                } else if (activeTab === 'teachers') {
+                    studentsList.style.display = 'none';
+                    teachersList.style.display = 'block';
+                    subjectGroupsList.style.display = 'none';
+                } else if (activeTab === 'subject-groups') {
+                    studentsList.style.display = 'none';
+                    teachersList.style.display = 'none';
+                    subjectGroupsList.style.display = 'block';
+                }
             });
-            
-            // Emoji search
-            emojiSearch.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                const emojiItems = emojiContainer.querySelectorAll('.emoji-item');
-                
-                emojiItems.forEach(item => {
-                    const emoji = item.textContent;
-                    if (emoji.includes(searchTerm)) {
-                        item.style.display = 'block';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-            });
-        }
+        });
         
-        // Handle window resize
-        function handleResize() {
-            if (window.innerWidth >= 768) {
-                sidebar.classList.remove('hidden');
-                chatArea.classList.add('active');
-                
-                if (currentChat) {
-                    emptyState.style.display = 'none';
-                } else {
-                    emptyState.style.display = 'flex';
-                }
+        // Back button for mobile view
+        backButton.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.style.display = 'flex';
+                chatArea.style.display = 'none';
             }
-        }
+        });
         
-        // Load chats based on selected tab
-        async function loadChats() {
-            chatList.innerHTML = '';
-            existingConversations = {}; // Reset existing conversations
-            
-            const selectedTab = document.querySelector('.tab.active').getAttribute('data-tab');
-            
-            if (selectedTab === 'chats') {
-                await loadPrivateChats();
-            } else if (selectedTab === 'groups') {
-                await loadGroupChats();
-            } else if (selectedTab === 'contacts') {
-                await loadContacts();
-            }
-        }
-        
-        // Load private chats
-        async function loadPrivateChats() {
-            // Get all private messages involving this user
-            const messagesSnapshot = await get(privateMessagesRef);
-            const allMessages = messagesSnapshot.exists() ? messagesSnapshot.val() : {};
-            
-            // Find unique conversations
-            const conversations = {};
-            
-            for (const messageId in allMessages) {
-                const message = allMessages[messageId];
-                
-                if (message.senderId === currentUserId || message.recipientId === currentUserId) {
-                    // Determine the other participant in the conversation
-                    const otherUserId = message.senderId === currentUserId ? message.recipientId : message.senderId;
-                    
-                    if (!conversations[otherUserId]) {
-                        conversations[otherUserId] = {
-                            lastMessage: message,
-                            unread: message.recipientId === currentUserId && !message.read
-                        };
-                    } else {
-                        // Keep the most recent message
-                        if (new Date(message.timestamp) > new Date(conversations[otherUserId].lastMessage.timestamp)) {
-                            conversations[otherUserId].lastMessage = message;
-                            conversations[otherUserId].unread = message.recipientId === currentUserId && !message.read;
-                        }
-                    }
-                }
-            }
-            
-            // Track existing conversations to avoid duplicates
-            for (const otherUserId in conversations) {
-                existingConversations[otherUserId] = true;
-            }
-            
-            // Create chat list items for existing conversations
-            for (const otherUserId in conversations) {
-                const conversation = conversations[otherUserId];
-                const otherUser = getUserInfo(otherUserId);
-                
-                if (!otherUser) continue;
-                
-                const chatItem = createPrivateChatItem(otherUser, conversation.lastMessage, conversation.unread);
-                chatList.appendChild(chatItem);
-            }
-            
-            // Add potential new chats based on user type
-            if (userType === 'student' && userSubjects.length > 0) {
-                // Get unique teachers from subjects
-                const subjectTeachers = {};
-                
-                userSubjects.forEach(subject => {
-                    if (subject.teacher && !subjectTeachers[subject.teacher] && subject.teacher !== currentUserId) {
-                        subjectTeachers[subject.teacher] = true;
-                    }
-                });
-                
-                // Add "New Chat" items for each teacher that doesn't have an existing conversation
-                for (const teacherId in subjectTeachers) {
-                    if (!existingConversations[teacherId]) {
-                        const teacher = allTeachers[teacherId];
-                        if (!teacher) continue;
-                        
-                        const chatItem = createNewPrivateChatItem(teacher);
-                        chatList.appendChild(chatItem);
-                    }
-                }
-            }
-            
-            if (userType === 'teacher' && userClasses.length > 0) {
-                // Get students in teacher's classes
-                const classStudents = {};
-                
-                for (const classId of userClasses) {
-                    const classData = allClasses[classId];
-                    if (classData && classData.students) {
-                        classData.students.forEach(studentId => {
-                            if (studentId !== currentUserId && !classStudents[studentId]) {
-                                classStudents[studentId] = true;
-                            }
-                        });
-                    }
-                }
-                
-                // Add "New Chat" items for each student that doesn't have an existing conversation
-                for (const studentId in classStudents) {
-                    if (!existingConversations[studentId]) {
-                        const student = allStudents[studentId];
-                        if (!student) continue;
-                        
-                        const chatItem = createNewPrivateChatItem(student);
-                        chatList.appendChild(chatItem);
-                    }
-                }
-            }
-            
-            // Update online status indicators
-            updateOnlineStatusIndicators();
-            
-            // Show empty state if no chats
-            if (chatList.children.length === 0) {
-                const emptyItem = document.createElement('div');
-                emptyItem.className = 'empty-state';
-                emptyItem.innerHTML = `
-                    <i class="fas fa-comment-slash"></i>
-                    <h3>No Conversations</h3>
-                    <p>You don't have any conversations yet.</p>
-                `;
-                chatList.appendChild(emptyItem);
-            }
-        }
-        
-        // Load contacts (teachers and students)
-        async function loadContacts() {
-            chatList.innerHTML = '';
-            
-            // Add teachers section
-            const teachersHeader = document.createElement('div');
-            teachersHeader.className = 'info-section-title';
-            teachersHeader.textContent = 'Teachers';
-            chatList.appendChild(teachersHeader);
-            
-            // Add teachers
-            for (const teacherId in allTeachers) {
-                const teacher = allTeachers[teacherId];
-                if (teacherId === currentUserId) continue;
-                
-                const contactItem = createContactItem(teacher, 'teacher');
-                chatList.appendChild(contactItem);
-            }
-            
-            // Add students section
-            const studentsHeader = document.createElement('div');
-            studentsHeader.className = 'info-section-title';
-            studentsHeader.textContent = 'Students';
-            chatList.appendChild(studentsHeader);
-            
-            // Add students
-            for (const studentId in allStudents) {
-                const student = allStudents[studentId];
-                if (studentId === currentUserId) continue;
-                
-                const contactItem = createContactItem(student, 'student');
-                chatList.appendChild(contactItem);
-            }
-            
-            // Add alumni section if any
-            if (Object.keys(allAlumni).length > 0) {
-                const alumniHeader = document.createElement('div');
-                alumniHeader.className = 'info-section-title';
-                alumniHeader.textContent = 'Alumni';
-                chatList.appendChild(alumniHeader);
-                
-                for (const alumniId in allAlumni) {
-                    const alumni = allAlumni[alumniId];
-                    if (alumniId === currentUserId) continue;
-                    
-                    const contactItem = createContactItem(alumni, 'alumni');
-                    chatList.appendChild(contactItem);
-                }
-            }
-            
-            // Update online status indicators
-            updateOnlineStatusIndicators();
-        }
-        
-        // Create a contact item
-        function createContactItem(user, type) {
-            const contactItem = document.createElement('div');
-            contactItem.className = 'chat-item contact-item';
-            contactItem.setAttribute('data-user-id', user.id);
-            
-            // Use profileImage if available, otherwise fall back to avatar or generate one
-            const avatarUrl = user.profileImage || user.avatar || 
-                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`;
-            
-            const isOnline = onlineUsers[user.id];
-            
-            contactItem.innerHTML = `
-                <img src="${avatarUrl}" alt="${user.name}" class="chat-item-avatar">
-                <div class="online-status ${isOnline ? 'online' : 'offline'}"></div>
-                <div class="chat-item-info">
-                    <div class="chat-item-header">
-                        <div class="chat-item-name">${user.name}</div>
-                        <div class="chat-item-time">
-                            <span class="user-badge ${type === 'teacher' ? 'badge-teacher' : type === 'student' ? 'badge-student' : 'badge-alumni'}">
-                                ${type === 'teacher' ? 'Teacher' : type === 'student' ? 'Student' : 'Alumni'}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="chat-item-preview">
-                        <div class="chat-item-message">
-                            ${type === 'teacher' ? user.subject || 'Teacher' : 
-                              type === 'student' ? `Class: ${user.class || 'N/A'}` : 
-                              'Alumni'}
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Add click handler to open chat
-            contactItem.addEventListener('click', () => openPrivateChat({
-                id: user.id,
-                name: user.name,
-                profileImage: user.profileImage,
-                avatar: user.avatar
-            }));
-            
-            return contactItem;
-        }
-        
-        // Create a private chat list item
-        function createPrivateChatItem(user, lastMessage, unread = false) {
-            const chatItem = document.createElement('div');
-            chatItem.className = `chat-item ${unread ? 'unread' : ''}`;
-            chatItem.setAttribute('data-user-id', user.id);
-            
-            const avatarUrl = user.profileImage || user.avatar || 
-                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`;
-            
-            const isOnline = onlineUsers[user.id];
-            
-            chatItem.innerHTML = `
-                <img src="${avatarUrl}" alt="${user.name}" class="chat-item-avatar">
-                <div class="online-status ${isOnline ? 'online' : 'offline'}"></div>
-                <div class="chat-item-info">
-                    <div class="chat-item-header">
-                        <div class="chat-item-name">${user.name}</div>
-                        <div class="chat-item-time">${formatTime(lastMessage.timestamp)}</div>
-                    </div>
-                    <div class="chat-item-preview">
-                        <div class="chat-item-message">${lastMessage.content}</div>
-                        ${unread ? '<div class="unread-badge">1</div>' : ''}
-                    </div>
-                </div>
-            `;
-            
-            // Add click handler to open chat
-            chatItem.addEventListener('click', () => openPrivateChat(user));
-            
-            return chatItem;
-        }
-        
-        // Create a new private chat list item
-        function createNewPrivateChatItem(user) {
-            const chatItem = document.createElement('div');
-            chatItem.className = 'chat-item new-chat';
-            chatItem.setAttribute('data-user-id', user.id);
-            
-            const avatarUrl = user.profileImage || user.avatar || 
-                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`;
-            
-            const isOnline = onlineUsers[user.id];
-            
-            chatItem.innerHTML = `
-                <img src="${avatarUrl}" alt="${user.name}" class="chat-item-avatar">
-                <div class="online-status ${isOnline ? 'online' : 'offline'}"></div>
-                <div class="chat-item-info">
-                    <div class="chat-item-header">
-                        <div class="chat-item-name">${user.name}</div>
-                        <div class="chat-item-time"><i class="fas fa-plus"></i></div>
-                    </div>
-                    <div class="chat-item-preview">
-                        <div class="chat-item-message">Start new conversation</div>
-                    </div>
-                </div>
-            `;
-            
-            // Add click handler to open chat
-            chatItem.addEventListener('click', () => openPrivateChat(user));
-            
-            return chatItem;
-        }
-        
-        // Load group chats
-        async function loadGroupChats() {
-            // Get all group chats
-            const groupsSnapshot = await get(groupChatsRef);
-            const allGroups = groupsSnapshot.exists() ? groupsSnapshot.val() : {};
-            
-            // Filter groups relevant to this user
-            const userGroups = [];
-            
-            for (const groupId in allGroups) {
-                const group = allGroups[groupId];
-                
-                // Check if user is a member of this group
-                if (group.members && group.members.includes(currentUserId)) {
-                    userGroups.push({
-                        id: groupId,
-                        ...group
+        // Event listeners
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut()
+                .then(() => {
+                    window.location.href = 'logins.html';
+                })
+                .catch(error => {
+                    console.error('Error signing out:', error);
+                    showNotification({
+                        title: 'Error',
+                        message: 'Failed to sign out',
+                        type: 'error'
                     });
-                }
-            }
-            
-            // Sort groups - class groups first, then subject groups, then others
-            userGroups.sort((a, b) => {
-                if (a.isClassGroup && !b.isClassGroup) return -1;
-                if (!a.isClassGroup && b.isClassGroup) return 1;
-                if (a.isSubjectGroup && !b.isSubjectGroup) return -1;
-                if (!a.isSubjectGroup && b.isSubjectGroup) return 1;
-                return 0;
-            });
-            
-            // Create group chat items
-            for (const group of userGroups) {
-                const chatItem = createGroupChatItem(group);
-                chatList.appendChild(chatItem);
-            }
-            
-            // Show empty state if no groups
-            if (chatList.children.length === 0) {
-                const emptyItem = document.createElement('div');
-                emptyItem.className = 'empty-state';
-                emptyItem.innerHTML = `
-                    <i class="fas fa-users-slash"></i>
-                    <h3>No Group Chats</h3>
-                    <p>You're not a member of any group chats yet.</p>
-                `;
-                chatList.appendChild(emptyItem);
-            }
-        }
+                });
+        });
         
-        // Create a group chat list item
-        function createGroupChatItem(group) {
-            const chatItem = document.createElement('div');
-            chatItem.className = 'chat-item';
-            chatItem.setAttribute('data-group-id', group.id);
-            
-            // Get last message for this group
-            const lastMessage = group.lastMessage || {
-                content: 'No messages yet',
-                timestamp: group.createdAt || new Date().toISOString(),
-                senderName: ''
-            };
-            
-            // Count unread messages
-            const unreadCount = group.unreadCounts && group.unreadCounts[currentUserId] || 0;
-            
-            // Use group avatar if available, otherwise create a default one
-            const avatarUrl = group.avatar || 
-                `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(group.name)}`;
-            
-            chatItem.innerHTML = `
-                <img src="${avatarUrl}" alt="${group.name}" class="chat-item-avatar">
-                <div class="chat-item-info">
-                    <div class="chat-item-header">
-                        <div class="chat-item-name">${group.name}</div>
-                        <div class="chat-item-time">${formatTime(lastMessage.timestamp)}</div>
-                    </div>
-                    <div class="chat-item-preview">
-                        <div class="chat-item-message">
-                            ${lastMessage.senderName ? `${lastMessage.senderName}: ` : ''}
-                            ${lastMessage.content}
-                        </div>
-                        ${unreadCount > 0 ? `<div class="unread-badge">${unreadCount}</div>` : ''}
-                    </div>
-                </div>
-            `;
-            
-            // Add click handler to open group chat
-            chatItem.addEventListener('click', () => openGroupChat(group));
-            
-            return chatItem;
-        }
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
         
-        // Filter chats based on search input
-        function filterChats(searchTerm) {
-            const term = searchTerm.toLowerCase();
-            const items = chatList.querySelectorAll('.chat-item');
+        // Search functionality
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const contactItems = document.querySelectorAll('.contact-item');
             
-            items.forEach(item => {
-                const name = item.querySelector('.chat-item-name').textContent.toLowerCase();
-                const message = item.querySelector('.chat-item-message').textContent.toLowerCase();
-                
-                if (name.includes(term) || message.includes(term)) {
+            contactItems.forEach(item => {
+                const name = item.querySelector('.contact-name').textContent.toLowerCase();
+                if (name.includes(searchTerm)) {
                     item.style.display = 'flex';
                 } else {
                     item.style.display = 'none';
                 }
             });
-        }
+        });
         
-        // Open a private chat
-        async function openPrivateChat(user) {
-            currentChat = {
-                type: 'private',
-                id: user.id
-            };
-            currentChatData = user;
-            currentChatMembers = [currentUserId, user.id];
-            
-            // Update UI
-            updateChatHeader();
-            
-            // Load messages
-            await loadPrivateMessages();
-            
-            // Mark messages as read
-            markMessagesAsRead(user.id);
-            
-            // For mobile, hide sidebar and show chat area
-            if (window.innerWidth < 768) {
-                sidebar.classList.add('hidden');
-                chatArea.classList.add('active');
-            }
-            
-            // Hide empty state
-            emptyState.style.display = 'none';
-            
-            // Highlight active chat in list
-            highlightActiveChat();
-        }
-        
-        // Open a group chat
-        async function openGroupChat(group) {
-            currentChat = {
-                type: 'group',
-                id: group.id
-            };
-            currentChatData = group;
-            currentChatMembers = group.members || [];
-            
-            // Update UI
-            updateChatHeader();
-            
-            // Load messages
-            await loadGroupMessages();
-            
-            // Mark messages as read
-            markGroupMessagesAsRead(group.id);
-            
-            // For mobile, hide sidebar and show chat area
-            if (window.innerWidth < 768) {
-                sidebar.classList.add('hidden');
-                chatArea.classList.add('active');
-            }
-            
-            // Hide empty state
-            emptyState.style.display = 'none';
-            
-            // Highlight active chat in list
-            highlightActiveChat();
-        }
-        
-        // Update chat header based on current chat
-        function updateChatHeader() {
-            if (!currentChat || !currentChatData) return;
-            
-            if (currentChat.type === 'private') {
-                // Private chat header
-                const avatarUrl = currentChatData.profileImage || currentChatData.avatar || 
-                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentChatData.id}`;
-                
-                chatHeaderAvatar.src = avatarUrl;
-                chatHeaderName.textContent = currentChatData.name;
-                
-                // Set status based on online status
-                const isOnline = onlineUsers[currentChatData.id];
-                chatHeaderStatus.textContent = isOnline ? 'Online' : 'Offline';
-                chatHeaderStatus.style.color = isOnline ? 'var(--online-status)' : 'var(--offline-status)';
-            } else if (currentChat.type === 'group') {
-                // Group chat header
-                const avatarUrl = currentChatData.avatar || 
-                    `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentChatData.name)}`;
-                
-                chatHeaderAvatar.src = avatarUrl;
-                chatHeaderName.textContent = currentChatData.name;
-                chatHeaderStatus.textContent = `${currentChatMembers.length} members`;
-                chatHeaderStatus.style.color = 'var(--light-text)';
-            }
-        }
-        
-        // Load private messages
-        async function loadPrivateMessages() {
-            chatMessages.innerHTML = '';
-            
-            // Get all private messages between current user and chat participant
-            const messagesSnapshot = await get(privateMessagesRef);
-            const allMessages = messagesSnapshot.exists() ? messagesSnapshot.val() : {};
-            
-            const messagesArray = [];
-            
-            for (const messageId in allMessages) {
-                const message = allMessages[messageId];
-                
-                if ((message.senderId === currentUserId && message.recipientId === currentChat.id) || 
-                    (message.senderId === currentChat.id && message.recipientId === currentUserId)) {
-                    messagesArray.push(message);
-                }
-            }
-            
-            // Sort messages by timestamp
-            messagesArray.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            
-            // Display messages
-            messagesArray.forEach(message => {
-                addMessageToChat(message);
-            });
-            
-            // Scroll to bottom
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        // Load group messages
-        async function loadGroupMessages() {
-            chatMessages.innerHTML = '';
-            
-            // Get all messages for this group
-            const messagesSnapshot = await get(ref(db, `groupMessages/${currentChat.id}`));
-            const allMessages = messagesSnapshot.exists() ? messagesSnapshot.val() : {};
-            
-            const messagesArray = [];
-            
-            for (const messageId in allMessages) {
-                messagesArray.push({
-                    id: messageId,
-                    ...allMessages[messageId]
-                });
-            }
-            
-            // Sort messages by timestamp
-            messagesArray.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            
-            // Display messages
-            messagesArray.forEach(message => {
-                addMessageToChat(message);
-            });
-            
-            // Scroll to bottom
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        // Add a message to the chat UI
-        function addMessageToChat(message) {
-            const isSent = message.senderId === currentUserId;
-            const sender = getUserInfo(message.senderId);
-            
-            if (!sender && message.senderId !== currentUserId) return;
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
-            
-            if (!isSent) {
-                const avatarUrl = sender.profileImage || sender.avatar || 
-                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${message.senderId}`;
-                
-                messageDiv.innerHTML = `
-                    <img src="${avatarUrl}" alt="${sender.name}" class="message-avatar">
-                    <div class="message-content">
-                        ${currentChat.type === 'group' && !isSent ? 
-                            `<div class="message-sender">${sender.name}</div>` : ''}
-                        <div class="message-bubble">${message.content}</div>
-                        <div class="message-info">
-                            <span class="message-time">${formatTime(message.timestamp)}</span>
-                            ${isSent ? `<span class="message-status">
-                                ${message.read ? '<i class="fas fa-check-double"></i>' : '<i class="fas fa-check"></i>'}
-                            </span>` : ''}
-                        </div>
-                    </div>
-                `;
-            } else {
-                messageDiv.innerHTML = `
-                    <div class="message-content">
-                        <div class="message-bubble">${message.content}</div>
-                        <div class="message-info">
-                            <span class="message-time">${formatTime(message.timestamp)}</span>
-                            <span class="message-status">
-                                ${message.read ? '<i class="fas fa-check-double"></i>' : '<i class="fas fa-check"></i>'}
-                            </span>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            chatMessages.appendChild(messageDiv);
-        }
-        
-        // Send a message
-        async function sendMessage() {
-            const content = messageInput.value.trim();
-            
-            if (!content || !currentChat) return;
-            
-            // Create message object with temporary ID
-            const tempMessageId = `temp-${Date.now()}`;
-            const message = {
-                id: tempMessageId,
-                senderId: currentUserId,
-                senderName: currentUserData.name,
-                content: content,
-                timestamp: new Date().toISOString(),
-                read: false
-            };
-            
-            // Add message to UI immediately
-            addMessageToChat(message);
-            
-            // Clear input
-            messageInput.value = '';
-            
-            // Scroll to bottom
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            if (currentChat.type === 'private') {
-                // Add recipientId for private messages
-                message.recipientId = currentChat.id;
-                
-                // Add to database
-                const newMessageRef = push(privateMessagesRef);
-                await set(newMessageRef, message);
-                
-                // Update last message in chat list
-                updatePrivateChatListItem(message);
-                
-            } else if (currentChat.type === 'group') {
-                // Add to database
-                const newMessageRef = push(ref(db, `groupMessages/${currentChat.id}`));
-                await set(newMessageRef, message);
-                
-                // Update last message in group chat
-                await update(ref(db, `groupChats/${currentChat.id}`), {
-                    lastMessage: {
-                        content: content,
-                        timestamp: message.timestamp,
-                        senderName: currentUserData.name
-                    },
-                    [`unreadCounts/${currentUserId}`]: 0
-                });
-                
-                // Increment unread count for other members
-                currentChatMembers.forEach(memberId => {
-                    if (memberId !== currentUserId) {
-                        update(ref(db, `groupChats/${currentChat.id}/unreadCounts/${memberId}`), 
-                            (count) => (count || 0) + 1);
-                    }
-                });
-                
-                // Update group chat list item
-                updateGroupChatListItem();
-            }
-        }
-        
-        // Update private chat list item with new message
-        function updatePrivateChatListItem(message) {
-            const chatItem = document.querySelector(`.chat-item[data-user-id="${currentChat.id}"]`);
-            
-            if (chatItem) {
-                // Update last message preview
-                chatItem.querySelector('.chat-item-message').textContent = message.content;
-                chatItem.querySelector('.chat-item-time').textContent = 'Now';
-                
-                // Remove unread badge if present
-                const unreadBadge = chatItem.querySelector('.unread-badge');
-                if (unreadBadge) {
-                    unreadBadge.remove();
-                    chatItem.classList.remove('unread');
-                }
-                
-                // Move to top of list
-                chatList.prepend(chatItem);
-            } else {
-                // Create new chat item if it doesn't exist
-                const user = getUserInfo(currentChat.id);
-                if (user) {
-                    const chatItem = createPrivateChatItem(user, message);
-                    chatList.prepend(chatItem);
-                }
-            }
-        }
-        
-        // Update group chat list item with new message
-        function updateGroupChatListItem() {
-            const chatItem = document.querySelector(`.chat-item[data-group-id="${currentChat.id}"]`);
-            
-            if (chatItem) {
-                // Update last message preview
-                chatItem.querySelector('.chat-item-message').textContent = 
-                    `${currentUserData.name}: ${messageInput.value.trim()}`;
-                chatItem.querySelector('.chat-item-time').textContent = 'Now';
-                
-                // Remove unread badge for current user
-                const unreadBadge = chatItem.querySelector('.unread-badge');
-                if (unreadBadge && unreadBadge.textContent === '1') {
-                    unreadBadge.remove();
-                }
-                
-                // Move to top of list
-                chatList.prepend(chatItem);
-            }
-        }
-        
-        // Mark private messages as read
-        async function markMessagesAsRead(senderId) {
-            const messagesSnapshot = await get(privateMessagesRef);
-            const allMessages = messagesSnapshot.exists() ? messagesSnapshot.val() : {};
-            
-            const updates = {};
-            
-            for (const messageId in allMessages) {
-                const message = allMessages[messageId];
-                
-                if (message.senderId === senderId && 
-                    message.recipientId === currentUserId && 
-                    !message.read) {
-                    
-                    updates[`${messageId}/read`] = true;
-                }
-            }
-            
-            if (Object.keys(updates).length > 0) {
-                await update(privateMessagesRef, updates);
-                
-                // Update chat list item
-                const chatItem = document.querySelector(`.chat-item[data-user-id="${senderId}"]`);
-                if (chatItem) {
-                    chatItem.classList.remove('unread');
-                    const unreadBadge = chatItem.querySelector('.unread-badge');
-                    if (unreadBadge) {
-                        unreadBadge.remove();
-                    }
-                }
-            }
-        }
-        
-        // Mark group messages as read
-        async function markGroupMessagesAsRead(groupId) {
-            // Reset unread count for current user
-            await set(ref(db, `groupChats/${groupId}/unreadCounts/${currentUserId}`), 0);
-            
-            // Update chat list item
-            const chatItem = document.querySelector(`.chat-item[data-group-id="${groupId}"]`);
-            if (chatItem) {
-                const unreadBadge = chatItem.querySelector('.unread-badge');
-                if (unreadBadge) {
-                    unreadBadge.remove();
-                }
-            }
-        }
-        
-        // Highlight active chat in list
-        function highlightActiveChat() {
-            document.querySelectorAll('.chat-item').forEach(item => {
-                item.classList.remove('active');
-                
-                if (currentChat.type === 'private' && item.getAttribute('data-user-id') === currentChat.id) {
-                    item.classList.add('active');
-                } else if (currentChat.type === 'group' && item.getAttribute('data-group-id') === currentChat.id) {
-                    item.classList.add('active');
-                }
-            });
-        }
-        
-        // Load chat info for info panel
-        function loadChatInfo() {
-            if (!currentChat || !currentChatData) return;
-            
-            if (currentChat.type === 'private') {
-                // Private chat info
-                const avatarUrl = currentChatData.profileImage || currentChatData.avatar || 
-                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentChatData.id}`;
-                
-                groupInfoAvatar.src = avatarUrl;
-                groupInfoName.textContent = currentChatData.name;
-                groupInfoDesc.textContent = 'Private conversation';
-                groupInfoCreated.textContent = '';
-                
-                // Load member list (just the two participants)
-                memberList.innerHTML = '';
-                
-                // Add current user
-                addMemberToInfoPanel(currentUserData, 'You');
-                
-                // Add other participant
-                addMemberToInfoPanel(currentChatData);
-                
-            } else if (currentChat.type === 'group') {
-                // Group chat info
-                const avatarUrl = currentChatData.avatar || 
-                    `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentChatData.name)}`;
-                
-                groupInfoAvatar.src = avatarUrl;
-                groupInfoName.textContent = currentChatData.name;
-                groupInfoDesc.textContent = currentChatData.description || 'Group conversation';
-                groupInfoCreated.textContent = `Created on ${formatDate(currentChatData.createdAt)}`;
-                
-                // Load member list
-                memberList.innerHTML = '';
-                
-                currentChatMembers.forEach(memberId => {
-                    const member = getUserInfo(memberId);
-                    if (member) {
-                        addMemberToInfoPanel(member, memberId === currentUserId ? 'You' : '');
-                    }
-                });
-            }
-        }
-        
-        // Add member to info panel
-        function addMemberToInfoPanel(user, role = '') {
-            const memberItem = document.createElement('div');
-            memberItem.className = 'member-item';
-            
-            const avatarUrl = user.profileImage || user.avatar || 
-                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`;
-            
-            const isOnline = onlineUsers[user.id];
-            
-            memberItem.innerHTML = `
-                <img src="${avatarUrl}" alt="${user.name}" class="member-avatar">
-                <div class="member-info">
-                    <div class="member-name">${user.name} ${role ? `(${role})` : ''}</div>
-                    <div class="member-role">${getUserType(user.id)}</div>
-                </div>
-                <div class="member-status ${isOnline ? 'status-online' : 'status-offline'}">
-                    ${isOnline ? 'Online' : 'Offline'}
-                </div>
-            `;
-            
-            // Add click handler to start private chat
-            if (user.id !== currentUserId) {
-                memberItem.style.cursor = 'pointer';
-                memberItem.addEventListener('click', () => {
-                    openPrivateChat(user);
-                    infoPanel.classList.add('hidden');
-                });
-            }
-            
-            memberList.appendChild(memberItem);
-        }
-        
-        // Get user type
-        function getUserType(userId) {
-            if (allTeachers[userId]) return 'Teacher';
-            if (allStudents[userId]) return 'Student';
-            if (allAlumni[userId]) return 'Alumni';
-            return 'User';
-        }
-        
-        // Show new chat modal
-        function showNewChatModal() {
-            // In a real app, this would show a modal to select a user to chat with
-            // For this demo, we'll just show a notification
-            showNotification({
-                title: 'New Chat',
-                message: 'In a complete implementation, this would open a modal to select a user to chat with.',
-                type: 'info',
-                duration: 3000
-            });
-        }
-        
-        // Show new group modal
-        function showNewGroupModal() {
-            newGroupModal.style.display = 'flex';
-            
-            // Clear previous inputs
-            groupNameInput.value = '';
-            groupDescriptionInput.value = '';
-            groupMembersList.innerHTML = '';
-            
-            // Add current user as first member
-            addMemberToGroupList(currentUserData, true);
-            
-            // Add potential members based on user type
-            if (userType === 'teacher') {
-                // For teachers, show students in their classes
-                const classStudents = {};
-                
-                for (const classId of userClasses) {
-                    const classData = allClasses[classId];
-                    if (classData && classData.students) {
-                        classData.students.forEach(studentId => {
-                            if (studentId !== currentUserId && !classStudents[studentId]) {
-                                classStudents[studentId] = true;
-                            }
-                        });
-                    }
-                }
-                
-                // Add students to member list
-                for (const studentId in classStudents) {
-                    const student = allStudents[studentId];
-                    if (student) {
-                        addMemberToGroupList(student);
-                    }
-                }
-            } else if (userType === 'student') {
-                // For students, show teachers of their subjects
-                const subjectTeachers = {};
-                
-                userSubjects.forEach(subject => {
-                    if (subject.teacher && !subjectTeachers[subject.teacher] && subject.teacher !== currentUserId) {
-                        subjectTeachers[subject.teacher] = true;
-                    }
-                });
-                
-                // Add teachers to member list
-                for (const teacherId in subjectTeachers) {
-                    const teacher = allTeachers[teacherId];
-                    if (teacher) {
-                        addMemberToGroupList(teacher);
-                    }
-                }
-                
-                // Also add classmates
-                if (currentUserData.class) {
-                    const classData = allClasses[currentUserData.class];
-                    if (classData && classData.students) {
-                        classData.students.forEach(studentId => {
-                            if (studentId !== currentUserId && !subjectTeachers[studentId]) {
-                                const student = allStudents[studentId];
-                                if (student) {
-                                    addMemberToGroupList(student);
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-        }
-        
-        // Add member to group creation list
-        function addMemberToGroupList(user, isCurrentUser = false) {
-            const memberItem = document.createElement('div');
-            memberItem.className = 'member-item';
-            
-            const avatarUrl = user.profileImage || user.avatar || 
-                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`;
-            
-            memberItem.innerHTML = `
-                <img src="${avatarUrl}" alt="${user.name}" class="member-avatar">
-                <div class="member-info">
-                    <div class="member-name">${user.name} ${isCurrentUser ? '(You)' : ''}</div>
-                    <div class="member-role">${getUserType(user.id)}</div>
-                </div>
-                <div class="member-status">
-                    <input type="checkbox" ${isCurrentUser ? 'checked disabled' : 'checked'} 
-                        data-user-id="${user.id}" class="member-checkbox">
-                </div>
-            `;
-            
-            groupMembersList.appendChild(memberItem);
-        }
-        
-        // Create new group
-        async function createNewGroup() {
-            const name = groupNameInput.value.trim();
-            const description = groupDescriptionInput.value.trim();
-            
-            if (!name) {
-                showNotification({
-                    title: 'Error',
-                    message: 'Please enter a group name',
-                    type: 'error',
-                    duration: 3000
-                });
-                return;
-            }
-            
-            // Get selected members
-            const checkboxes = groupMembersList.querySelectorAll('.member-checkbox');
-            const members = [currentUserId]; // Always include current user
-            
-            checkboxes.forEach(checkbox => {
-                if (checkbox.checked && checkbox.dataset.userId !== currentUserId) {
-                    members.push(checkbox.dataset.userId);
-                }
-            });
-            
-            if (members.length < 2) {
-                showNotification({
-                    title: 'Error',
-                    message: 'Please select at least one other member',
-                    type: 'error',
-                    duration: 3000
-                });
-                return;
-            }
-            
-            try {
-                // Create group data
-                const groupData = {
-                    name: name,
-                    description: description,
-                    members: members,
-                    createdAt: new Date().toISOString(),
-                    createdBy: currentUserId,
-                    isSubjectGroup: false,
-                    isClassGroup: false
-                };
-                
-                // Generate a unique ID for the group
-                const newGroupRef = push(groupChatsRef);
-                await set(newGroupRef, groupData);
-                
-                // Close modal
-                newGroupModal.style.display = 'none';
-                
-                // Show success notification
-                showNotification({
-                    title: 'Success',
-                    message: 'Group created successfully',
-                    type: 'success',
-                    duration: 3000
-                });
-                
-                // Reload groups
-                await loadGroupChats();
-                
-            } catch (error) {
-                console.error('Error creating group:', error);
-                showNotification({
-                    title: 'Error',
-                    message: 'Failed to create group',
-                    type: 'error',
-                    duration: 3000
-                });
-            }
-        }
-        
-        // Set up real-time listeners
-        function setupRealTimeListeners() {
-            // Listen for new private messages
-            onChildAdded(privateMessagesRef, (snapshot) => {
-                const message = snapshot.val();
-                
-                // If message is for current user and not from themselves
-                if (message.recipientId === currentUserId && message.senderId !== currentUserId) {
-                    // If chat is open with this sender, add message to chat
-                    if (currentChat && currentChat.type === 'private' && currentChat.id === message.senderId) {
-                        addMessageToChat(message);
-                        markMessagesAsRead(message.senderId);
-                    } else {
-                        // Otherwise, update chat list item
-                        updatePrivateChatListItem(message);
-                        
-                        // Show notification
-                        const sender = getUserInfo(message.senderId);
-                        if (sender) {
-                            showNotification({
-                                title: `New message from ${sender.name}`,
-                                message: message.content,
-                                type: 'info',
-                                duration: 5000
-                            });
-                        }
-                    }
-                }
-            });
-            
-            // Listen for new group messages
-            onChildAdded(ref(db, 'groupMessages'), (snapshot) => {
-                const groupMessages = snapshot.val();
-                const groupId = snapshot.key;
-                
-                // Only process if this is a group the user is a member of
-                if (currentChatMembers.includes(currentUserId)) {
-                    // Get the latest message (last child added)
-                    let latestMessage = null;
-                    let latestMessageId = null;
-                    
-                    for (const messageId in groupMessages) {
-                        const message = groupMessages[messageId];
-                        if (!latestMessage || new Date(message.timestamp) > new Date(latestMessage.timestamp)) {
-                            latestMessage = message;
-                            latestMessageId = messageId;
-                        }
-                    }
-                    
-                    if (latestMessage && latestMessage.senderId !== currentUserId) {
-                        // If viewing this group, add message to chat
-                        if (currentChat && currentChat.type === 'group' && currentChat.id === groupId) {
-                            addMessageToChat({
-                                id: latestMessageId,
-                                ...latestMessage
-                            });
-                            
-                            // Mark as read
-                            markGroupMessagesAsRead(groupId);
-                        } else {
-                            // Otherwise, update group chat list item
-                            updateGroupChatListItem();
-                            
-                            // Show notification if not viewing groups tab
-                            if (document.querySelector('.tab.active').getAttribute('data-tab') !== 'groups') {
-                                const sender = getUserInfo(latestMessage.senderId);
-                                const group = currentChatData;
-                                
-                                if (sender && group) {
-                                    showNotification({
-                                        title: `New message in ${group.name}`,
-                                        message: `${sender.name}: ${latestMessage.content.substring(0, 50)}...`,
-                                        type: 'info',
-                                        duration: 5000
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        // Get user info from any collection (teachers, students, alumni)
-        function getUserInfo(userId) {
-            if (allTeachers[userId]) {
-                return { id: userId, ...allTeachers[userId] };
-            } else if (allStudents[userId]) {
-                return { id: userId, ...allStudents[userId] };
-            } else if (allAlumni[userId]) {
-                return { id: userId, ...allAlumni[userId] };
-            }
-            return null;
-        }
-        
-        // Format time for display
-        function formatTime(timestamp) {
-            const date = new Date(timestamp);
-            const now = new Date();
-            
-            // If today, show time
-            if (date.toDateString() === now.toDateString()) {
-                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            }
-            
-            // If yesterday, show "Yesterday"
-            const yesterday = new Date(now);
-            yesterday.setDate(yesterday.getDate() - 1);
-            
-            if (date.toDateString() === yesterday.toDateString()) {
-                return 'Yesterday';
-            }
-            
-            // Otherwise, show date
-            return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
-        }
-        
-        // Format date for display
-        function formatDate(timestamp) {
-            if (!timestamp) return 'Unknown date';
-            
-            const date = new Date(timestamp);
-            return date.toLocaleDateString([], { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
-        }
-        
-        // Initialize the app
+        // Initialize the app - check for active session
         loadingScreen.style.display = 'flex';
-        mainContainer.style.display = 'none';
-        
-        // Start the app
-        initApp();
+        mainContent.style.display = 'none';
+        checkActiveSession();
     </script>
 </body>
 </html>
