@@ -98,6 +98,96 @@
             animation: slideOut 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
         }
 
+        /* Notification popup styles */
+        .notification-popup {
+            position: fixed;
+            top: 70px;
+            right: 15px;
+            width: 90%;
+            max-width: 350px;
+            max-height: 70vh;
+            overflow-y: auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .notification-popup-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .notification-popup-title {
+            font-weight: 600;
+            color: #2d3436;
+        }
+
+        .notification-popup-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #636e72;
+        }
+
+        .notification-popup-body {
+            padding: 0;
+        }
+
+        .notification-popup-item {
+            padding: 15px;
+            border-bottom: 1px solid #f1f2f6;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .notification-popup-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-popup-icon {
+            margin-right: 12px;
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .notification-popup-content {
+            flex: 1;
+        }
+
+        .notification-popup-item-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+
+        .notification-popup-item-message {
+            font-size: 0.85rem;
+            color: #636e72;
+            line-height: 1.4;
+        }
+
+        .notification-popup-item-time {
+            font-size: 0.75rem;
+            color: #a0a0a0;
+            margin-top: 5px;
+        }
+
+        .notification-popup-empty {
+            padding: 30px 15px;
+            text-align: center;
+            color: #636e72;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 480px) {
             .notification-container {
@@ -120,6 +210,11 @@
             
             .notification-message {
                 font-size: 0.85rem;
+            }
+
+            .notification-popup {
+                width: 95%;
+                right: 10px;
             }
         }
         :root {
@@ -204,7 +299,7 @@
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border-radius: 50%;
+            borderRadius: 50%;
             width: 40px;
             height: 40px;
             display: flex;
@@ -349,6 +444,7 @@
 
         .attendance-title i {
             color: var(--primary-color);
+            font-size: 1.2rem;
         }
 
         .attendance-status {
@@ -625,6 +721,8 @@
 
         .notification-content {
             flex: 1;
+            max-width: calc(100% - 60px);
+            overflow: hidden;
         }
 
         .notification-title {
@@ -636,6 +734,9 @@
         .notification-message {
             font-size: 0.85rem;
             opacity: 0.9;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .notification-close {
@@ -872,6 +973,19 @@
     <div class="loading-screen" id="loading-screen">
         <div class="loading-spinner"></div>
         <div class="loading-text">Loading Teacher Dashboard...</div>
+    </div>
+
+    <!-- Notification Popup -->
+    <div class="notification-popup" id="notification-popup">
+        <div class="notification-popup-header">
+            <div class="notification-popup-title">Notifications</div>
+            <button class="notification-popup-close" id="notification-popup-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="notification-popup-body" id="notification-popup-body">
+            <!-- Notifications will be inserted here -->
+        </div>
     </div>
 
     <!-- Main Dashboard (initially hidden) -->
@@ -1130,7 +1244,7 @@
 
     <script>
         // Firebase configuration
-        const firebaseConfig = {
+         const firebaseConfig = {
     apiKey: "AIzaSyB5NcC2P3v0LFBVFMp9-mAHQKYuo1pKokA",
     authDomain: "hweakwaecram.firebaseapp.com",
     projectId: "hweakwaecram",
@@ -1139,7 +1253,6 @@
     appId: "1:1012181976581:web:eee0ad07650b360bc8fe6c",
     measurementId: "G-4GMZJJRVG0"
   };
-
         
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -1157,6 +1270,9 @@
         const bottomNav = document.getElementById('bottom-nav');
         const notificationBell = document.getElementById('notification-bell');
         const notificationDot = document.getElementById('notification-dot');
+        const notificationPopup = document.getElementById('notification-popup');
+        const notificationPopupBody = document.getElementById('notification-popup-body');
+        const notificationPopupClose = document.getElementById('notification-popup-close');
         
         // Attendance elements
         const attendanceStatus = document.getElementById('attendance-status');
@@ -1190,7 +1306,7 @@
         const teacherAttendanceRef = database.ref('teacherAttendance');
         const classesRef = database.ref('classes');
         const credentialsRef = database.ref('credentials');
-        const requestsRef = database.ref('requests'); // New reference for requests
+        const requestsRef = database.ref('requests');
         
         // Global variables
         let currentTeacherId = null;
@@ -1200,8 +1316,9 @@
         let isInRange = false;
         let isClassTeacher = false;
         let isAccountant = false;
-        let pendingRequests = [];
+        let teacherRequests = [];
         let requestListener = null;
+        let lastLoginTime = null;
         
         // Get current date in YYYY-MM-DD format based on local time
         function getCurrentDate() {
@@ -1279,7 +1396,7 @@
         
         // Mark notification as read in the database
         function markNotificationAsRead(requestId) {
-            if (!isAccountant || !currentTeacherId) return;
+            if (!currentTeacherId) return;
             
             // Update the notification status for this request
             database.ref(`requests/${requestId}/notification`).set({
@@ -1321,6 +1438,11 @@
                                     
                                     if (teacherSnapshot.exists()) {
                                         currentTeacherData = teacherSnapshot.val();
+                                        
+                                        // Update last login time
+                                        await database.ref(`teachers/${currentTeacherId}/lastLogin`).set(Date.now());
+                                        lastLoginTime = Date.now();
+                                        
                                         unsubscribe();
                                         resolve(currentTeacherData);
                                         return;
@@ -1360,9 +1482,6 @@
                             isAccountant = true;
                             accountNav.style.display = 'flex';
                             
-                            // Start listening for request changes if the user is an accountant
-                            setupRequestListener();
-                            
                             showNotification({
                                 title: 'Accountant Access',
                                 message: 'Account management features enabled',
@@ -1385,90 +1504,146 @@
             }
         }
         
-        // Setup listener for request changes
+        // Setup listener for request changes specific to this teacher
         function setupRequestListener() {
-            if (!isAccountant) return;
+            if (!currentTeacherId) return;
             
             // Remove existing listener if any
             if (requestListener) {
                 requestsRef.off('value', requestListener);
             }
             
-            requestListener = requestsRef.on('value', (snapshot) => {
+            requestListener = requestsRef.orderByChild('teacherId').equalTo(currentTeacherId).on('value', (snapshot) => {
                 const requests = snapshot.val();
-                const newPendingRequests = [];
+                const newTeacherRequests = [];
                 
                 if (requests) {
-                    // Process all requests
+                    // Process all requests for this teacher
                     Object.keys(requests).forEach(requestId => {
                         const request = requests[requestId];
                         
-                        // Check if this is a pending request with unread notification
-                        if (request.status === 'pending') {
-                            // Check notification status
-                            const notificationStatus = request.notification ? request.notification.status : 'unread';
-                            
-                            if (notificationStatus === 'unread') {
-                                newPendingRequests.push({
-                                    id: requestId,
-                                    ...request
-                                });
-                            }
-                        }
+                        // Add to teacher requests array
+                        newTeacherRequests.push({
+                            id: requestId,
+                            ...request
+                        });
                         
-                        // Check for status changes from pending to approved/denied
-                        if (request.status === 'approved' || request.status === 'denied') {
-                            // Check if we have a record of this request being pending before
-                            const wasPending = pendingRequests.find(r => r.id === requestId);
+                        // Check if this is a new request or status change that happened after last login
+                        const existingRequest = teacherRequests.find(r => r.id === requestId);
+                        const requestModifiedTime = request.notification?.timestamp || request.date;
+                        
+                        if (!existingRequest && requestModifiedTime > lastLoginTime) {
+                            // New request created after last login - show notification
+                            showNotification({
+                                title: 'New Request Created',
+                                message: `Your request for ${request.amount} has been created`,
+                                type: 'info',
+                                duration: 5000,
+                                id: requestId
+                            });
+                        } else if (existingRequest && existingRequest.status !== request.status && 
+                                  requestModifiedTime > lastLoginTime) {
+                            // Status changed after last login - show notification
+                            let notificationType = 'info';
+                            let notificationTitle = 'Request Status Updated';
                             
-                            if (wasPending) {
-                                // Show notification about the status change
-                                showNotification({
-                                    title: `Request ${request.status}`,
-                                    message: `Request for ${request.amount} from ${request.source} has been ${request.status}`,
-                                    type: request.status === 'approved' ? 'success' : 'error',
-                                    duration: 5000,
-                                    id: requestId
-                                });
-                                
-                                // Update notification dot
-                                updateNotificationDot();
+                            if (request.status === 'approved') {
+                                notificationType = 'success';
+                                notificationTitle = 'Request Approved';
+                            } else if (request.status === 'denied') {
+                                notificationType = 'error';
+                                notificationTitle = 'Request Denied';
                             }
+                            
+                            showNotification({
+                                title: notificationTitle,
+                                message: `Your request for ${request.amount} has been ${request.status}`,
+                                type: notificationType,
+                                duration: 5000,
+                                id: requestId
+                            });
                         }
                     });
                 }
                 
-                // Update pending requests
-                pendingRequests = newPendingRequests;
+                // Update teacher requests
+                teacherRequests = newTeacherRequests;
                 
-                // Show notification dot if there are pending requests
+                // Update notification dot based on unread notifications
                 updateNotificationDot();
-                
-                // Show notifications for new pending requests
-                pendingRequests.forEach(request => {
-                    // Check if this request is new (wasn't in our previous list)
-                    const wasAlreadyPending = pendingRequests.find(r => r.id === request.id);
-                    
-                    if (!wasAlreadyPending) {
-                        showNotification({
-                            title: 'New Pending Request',
-                            message: `New request for ${request.amount} from ${request.source}: ${request.reason}`,
-                            type: 'info',
-                            duration: 5000,
-                            id: request.id
-                        });
-                    }
-                });
             });
         }
         
-        // Update notification dot visibility
+        // Update notification dot visibility based on unread requests
         function updateNotificationDot() {
-            if (pendingRequests.length > 0) {
+            let hasUnread = false;
+            
+            // Check if any request has an unread notification
+            for (const request of teacherRequests) {
+                if (request.notification && request.notification.status === 'unread') {
+                    hasUnread = true;
+                    break;
+                }
+            }
+            
+            if (hasUnread) {
                 notificationDot.style.display = 'block';
             } else {
                 notificationDot.style.display = 'none';
             }
+        }
+        
+        // Populate notification popup with teacher's requests
+        function populateNotificationPopup() {
+            notificationPopupBody.innerHTML = '';
+            
+            if (teacherRequests.length === 0) {
+                notificationPopupBody.innerHTML = `
+                    <div class="notification-popup-empty">
+                        <i class="fas fa-bell-slash" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>No notifications</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort requests by date (newest first)
+            const sortedRequests = [...teacherRequests].sort((a, b) => b.date - a.date);
+            
+            sortedRequests.forEach(request => {
+                const notificationItem = document.createElement('div');
+                notificationItem.className = 'notification-popup-item';
+                
+                // Determine icon and color based on status
+                let icon = 'info-circle';
+                let color = '#0984e3';
+                
+                if (request.status === 'approved') {
+                    icon = 'check-circle';
+                    color = '#00b894';
+                } else if (request.status === 'denied') {
+                    icon = 'times-circle';
+                    color = '#d63031';
+                } else if (request.status === 'pending') {
+                    icon = 'clock';
+                    color = '#fdcb6e';
+                }
+                
+                // Format date
+                const requestDate = new Date(request.date);
+                const formattedDate = requestDate.toLocaleDateString() + ' ' + requestDate.toLocaleTimeString();
+                
+                notificationItem.innerHTML = `
+                    <i class="fas fa-${icon} notification-popup-icon" style="color: ${color};"></i>
+                    <div class="notification-popup-content">
+                        <div class="notification-popup-item-title">Request ${request.status.charAt(0).toUpperCase() + request.status.slice(1)}</div>
+                        <div class="notification-popup-item-message">Amount: ${request.amount} | Source: ${request.source}</div>
+                        <div class="notification-popup-item-time">${formattedDate}</div>
+                    </div>
+                `;
+                
+                notificationPopupBody.appendChild(notificationItem);
+            });
         }
         
         // Check for active teacher session
@@ -1478,6 +1653,9 @@
                 const teacher = await identifyCurrentTeacher();
                 
                 if (teacher) {
+                    // Get the teacher's last login time
+                    lastLoginTime = teacher.lastLogin || 0;
+                    
                     // Update UI with teacher info
                     teacherNameElement.textContent = teacher.name || 'Teacher';
                     if (teacher.profileImage) {
@@ -1501,6 +1679,9 @@
                     
                     // Load teacher stats
                     loadTeacherStats();
+                    
+                    // Setup request listener for this teacher
+                    setupRequestListener();
                     
                     // Hide loading screen and show dashboard
                     loadingScreen.style.display = 'none';
@@ -1983,29 +2164,30 @@
             });
         });
         
-        // Notification click handler
+        // Notification bell click handler
         notificationBell.addEventListener('click', function() {
-            if (pendingRequests.length > 0) {
-                // Show all pending requests as notifications
-                pendingRequests.forEach(request => {
-                    showNotification({
-                        title: 'Pending Request',
-                        message: `Request for ${request.amount} from ${request.source}: ${request.reason}`,
-                        type: 'info',
-                        duration: 5000,
-                        id: request.id
-                    });
-                });
-                
-                // Hide the notification dot
-                notificationDot.style.display = 'none';
+            // Populate notification popup with teacher's requests
+            populateNotificationPopup();
+            
+            // Toggle notification popup visibility
+            if (notificationPopup.style.display === 'block') {
+                notificationPopup.style.display = 'none';
             } else {
-                showNotification({
-                    title: 'Notifications',
-                    message: 'You have no new notifications',
-                    type: 'info',
-                    duration: 3000
-                });
+                notificationPopup.style.display = 'flex';
+            }
+        });
+        
+        // Close notification popup
+        notificationPopupClose.addEventListener('click', function() {
+            notificationPopup.style.display = 'none';
+        });
+        
+        // Close notification popup when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!notificationPopup.contains(event.target) && 
+                !notificationBell.contains(event.target) &&
+                notificationPopup.style.display === 'block') {
+                notificationPopup.style.display = 'none';
             }
         });
         
