@@ -273,6 +273,7 @@
             align-items: center;
             gap: 15px;
             margin-bottom: 15px;
+            flex-wrap: wrap;
         }
 
         .group-icon {
@@ -511,7 +512,7 @@
 
     <script>
         // Firebase configuration
-         const firebaseConfig = {
+          const firebaseConfig = {
     apiKey: "AIzaSyB5NcC2P3v0LFBVFMp9-mAHQKYuo1pKokA",
     authDomain: "hweakwaecram.firebaseapp.com",
     projectId: "hweakwaecram",
@@ -767,8 +768,8 @@
         function loadTeacherStudents() {
             studentsList.innerHTML = '';
             
-            // Find students assigned to this teacher through subjects
-            const teacherStudents = [];
+            // Find classes assigned to this teacher through subjects
+            const teacherClassIds = new Set();
             
             for (const subjectId in subjectsData) {
                 const subject = subjectsData[subjectId];
@@ -784,20 +785,22 @@
                         classIds = [subject.assignments[currentTeacherId].classId];
                     }
                     
-                    // Find students in these classes
-                    for (const studentId in studentsData) {
-                        const student = studentsData[studentId];
-                        
-                        if (classIds.includes(student.classId)) {
-                            // Avoid duplicates
-                            if (!teacherStudents.find(s => s.id === studentId)) {
-                                teacherStudents.push({
-                                    id: studentId,
-                                    ...student
-                                });
-                            }
-                        }
-                    }
+                    // Add class IDs to the set
+                    classIds.forEach(id => teacherClassIds.add(id));
+                }
+            }
+            
+            // Find students in these classes
+            const teacherStudents = [];
+            
+            for (const studentId in studentsData) {
+                const student = studentsData[studentId];
+                
+                if (teacherClassIds.has(student.classId)) {
+                    teacherStudents.push({
+                        id: studentId,
+                        ...student
+                    });
                 }
             }
             
