@@ -661,6 +661,132 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Custom Fee Input Styles */
+        .custom-fee-input {
+            width: 80px;
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .custom-fee-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .fee-amount-display {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+        }
+
+        .fee-amount-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+
+        .fee-label {
+            font-weight: 500;
+            color: var(--light-text);
+        }
+
+        .fee-value {
+            font-weight: 600;
+        }
+
+        .edit-fee-btn {
+            background: none;
+            border: none;
+            color: var(--info-color);
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 2px 5px;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+
+        .edit-fee-btn:hover {
+            background-color: rgba(9, 132, 227, 0.1);
+        }
+
+        .fee-input-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+
+        /* Statistics Modal Styles */
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .stats-summary-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+        }
+
+        .stats-summary-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stats-summary-label {
+            font-size: 0.8rem;
+            color: var(--light-text);
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .stats-table th, .stats-table td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stats-table th {
+            font-weight: 600;
+            color: var(--light-text);
+            font-size: 0.85rem;
+        }
+
+        .payment-status-badge {
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .payment-status-paid {
+            background-color: rgba(0, 184, 148, 0.2);
+            color: var(--success-color);
+        }
+
+        .payment-status-partial {
+            background-color: rgba(253, 203, 110, 0.2);
+            color: #e17055;
+        }
+
+        .payment-status-unpaid {
+            background-color: rgba(214, 48, 49, 0.2);
+            color: var(--danger-color);
+        }
+
         /* Responsive Styles */
         @media (max-width: 768px) {
             .container {
@@ -720,6 +846,18 @@
                 text-align: center;
                 min-width: 80px;
             }
+            
+            .stats-summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-table {
+                font-size: 0.8rem;
+            }
+            
+            .stats-table th, .stats-table td {
+                padding: 5px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -739,6 +877,16 @@
             .mark-all-paid-btn, .action-btn {
                 width: 100%;
                 justify-content: center;
+            }
+            
+            .fee-amount-display {
+                align-items: center;
+                width: 100%;
+            }
+            
+            .fee-amount-row, .fee-input-row {
+                justify-content: center;
+                width: 100%;
             }
         }
 
@@ -1024,14 +1172,14 @@
 
     <script>
         const firebaseConfig = {
-    apiKey: "AIzaSyB5NcC2P3v0LFBVFMp9-mAHQKYuo1pKokA",
-    authDomain: "hweakwaecram.firebaseapp.com",
-    projectId: "hweakwaecram",
-    storageBucket: "hweakwaecram.firebasestorage.app",
-    messagingSenderId: "1012181976581",
-    appId: "1:1012181976581:web:eee0ad07650b360bc8fe6c",
-    measurementId: "G-4GMZJJRVG0"
-  };
+            apiKey: "AIzaSyB5NcC2P3v0LFBVFMp9-mAHQKYuo1pKokA",
+            authDomain: "hweakwaecram.firebaseapp.com",
+            projectId: "hweakwaecram",
+            storageBucket: "hweakwaecram.firebasestorage.app",
+            messagingSenderId: "1012181976581",
+            appId: "1:1012181976581:web:eee0ad07650b360bc8fe6c",
+            measurementId: "G-4GMZJJRVG0"
+        };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -1140,9 +1288,19 @@
                         feePaymentsData[student.id] = {
                             pta: false,
                             utility: false,
+                            ptaAmount: ptaFeeAmount,
+                            utilityAmount: utilityFeeAmount,
                             timestamp: new Date().toISOString(),
                             recordedBy: currentTeacherId
                         };
+                    } else {
+                        // Ensure existing records have the amount fields
+                        if (feePaymentsData[student.id].ptaAmount === undefined) {
+                            feePaymentsData[student.id].ptaAmount = ptaFeeAmount;
+                        }
+                        if (feePaymentsData[student.id].utilityAmount === undefined) {
+                            feePaymentsData[student.id].utilityAmount = utilityFeeAmount;
+                        }
                     }
                 });
                 
@@ -1203,6 +1361,8 @@
                             feePaymentsData[student.id] = {
                                 pta: false,
                                 utility: false,
+                                ptaAmount: ptaFeeAmount,
+                                utilityAmount: utilityFeeAmount,
                                 timestamp: new Date().toISOString(),
                                 recordedBy: "demo-teacher"
                             };
@@ -1503,9 +1663,19 @@
                             feePaymentsData[student.id] = {
                                 pta: false,
                                 utility: false,
+                                ptaAmount: ptaFeeAmount,
+                                utilityAmount: utilityFeeAmount,
                                 timestamp: new Date().toISOString(),
                                 recordedBy: currentTeacherId
                             };
+                        } else {
+                            // Ensure existing records have the amount fields
+                            if (feePaymentsData[student.id].ptaAmount === undefined) {
+                                feePaymentsData[student.id].ptaAmount = ptaFeeAmount;
+                            }
+                            if (feePaymentsData[student.id].utilityAmount === undefined) {
+                                feePaymentsData[student.id].utilityAmount = utilityFeeAmount;
+                            }
                         }
                     });
                     
@@ -1616,23 +1786,35 @@
             let paidCount = 0;
             let unpaidCount = 0;
             let totalCollected = 0;
+            let totalExpected = 0;
             
             // Add each student to the list
             students.forEach(student => {
-                const studentPayments = feePaymentsData[student.id] || { pta: false, utility: false };
+                const studentPayments = feePaymentsData[student.id] || { 
+                    pta: false, 
+                    utility: false, 
+                    ptaAmount: ptaFeeAmount, 
+                    utilityAmount: utilityFeeAmount 
+                };
+                
+                const studentPtaAmount = studentPayments.ptaAmount || ptaFeeAmount;
+                const studentUtilityAmount = studentPayments.utilityAmount || utilityFeeAmount;
+                const studentTotalAmount = studentPtaAmount + studentUtilityAmount;
                 
                 // Check if both fees are paid
                 const isFullyPaid = studentPayments.pta && studentPayments.utility;
                 const isPartiallyPaid = (studentPayments.pta || studentPayments.utility) && !isFullyPaid;
                 
                 // Update counts
+                totalExpected += studentTotalAmount;
+                
                 if (isFullyPaid) {
                     paidCount++;
-                    totalCollected += ptaFeeAmount + utilityFeeAmount;
+                    totalCollected += studentTotalAmount;
                 } else if (isPartiallyPaid) {
                     unpaidCount++;
-                    if (studentPayments.pta) totalCollected += ptaFeeAmount;
-                    if (studentPayments.utility) totalCollected += utilityFeeAmount;
+                    if (studentPayments.pta) totalCollected += studentPtaAmount;
+                    if (studentPayments.utility) totalCollected += studentUtilityAmount;
                 } else {
                     unpaidCount++;
                 }
@@ -1649,7 +1831,26 @@
                         <div class="student-id">ID: ${student.id || 'N/A'}</div>
                     </div>
                     <div class="fee-status">
-                        <div class="fee-amount">${formatCurrency(ptaFeeAmount + utilityFeeAmount)}</div>
+                        <div class="fee-amount-display">
+                            <div class="fee-amount-row">
+                                <span class="fee-label">Total:</span>
+                                <span class="fee-value">${formatCurrency(studentTotalAmount)}</span>
+                            </div>
+                            <div class="fee-amount-row">
+                                <span class="fee-label">PTA:</span>
+                                <span class="fee-value">${formatCurrency(studentPtaAmount)}</span>
+                                <button class="edit-fee-btn" data-student="${student.id}" data-fee="pta">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                            <div class="fee-amount-row">
+                                <span class="fee-label">Utility:</span>
+                                <span class="fee-value">${formatCurrency(studentUtilityAmount)}</span>
+                                <button class="edit-fee-btn" data-student="${student.id}" data-fee="utility">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </div>
                         <div class="status-buttons">
                             <button class="status-btn ${studentPayments.pta ? 'active' : 'inactive'}" 
                                     data-student="${student.id}" data-fee="pta">
@@ -1668,6 +1869,8 @@
                 // Add event listeners to status buttons
                 const ptaBtn = studentCard.querySelector('[data-fee="pta"]');
                 const utilityBtn = studentCard.querySelector('[data-fee="utility"]');
+                const editPtaBtn = studentCard.querySelector('[data-fee="pta"].edit-fee-btn');
+                const editUtilityBtn = studentCard.querySelector('[data-fee="utility"].edit-fee-btn');
                 
                 ptaBtn.addEventListener('click', () => {
                     toggleFeePayment(student.id, 'pta');
@@ -1677,25 +1880,32 @@
                     toggleFeePayment(student.id, 'utility');
                 });
                 
+                editPtaBtn.addEventListener('click', () => {
+                    editStudentFee(student.id, 'pta', studentPtaAmount);
+                });
+                
+                editUtilityBtn.addEventListener('click', () => {
+                    editStudentFee(student.id, 'utility', studentUtilityAmount);
+                });
+                
                 studentsList.appendChild(studentCard);
             });
             
             // Update summary statistics
             const totalStudents = students.length;
-            const expectedTotal = totalStudents * (ptaFeeAmount + utilityFeeAmount);
-            const paymentRate = expectedTotal > 0 ? Math.round((totalCollected / expectedTotal) * 100) : 0;
+            const paymentRate = totalExpected > 0 ? Math.round((totalCollected / totalExpected) * 100) : 0;
             
             document.getElementById('total-students').textContent = totalStudents;
             document.getElementById('paid-count').textContent = paidCount;
             document.getElementById('unpaid-count').textContent = unpaidCount;
             document.getElementById('total-collected').textContent = formatCurrency(totalCollected);
-            document.getElementById('expected-total').textContent = `Expected Total: ${formatCurrency(expectedTotal)}`;
+            document.getElementById('expected-total').textContent = `Expected Total: ${formatCurrency(totalExpected)}`;
             
             // Update balance card
             document.getElementById('total-balance').textContent = formatCurrency(totalCollected);
-            document.getElementById('total-expected').textContent = formatCurrency(expectedTotal);
+            document.getElementById('total-expected').textContent = formatCurrency(totalExpected);
             document.getElementById('total-collected-balance').textContent = formatCurrency(totalCollected);
-            document.getElementById('total-outstanding').textContent = formatCurrency(expectedTotal - totalCollected);
+            document.getElementById('total-outstanding').textContent = formatCurrency(totalExpected - totalCollected);
             document.getElementById('payment-rate').textContent = `${paymentRate}%`;
             
             // Set balance color based on payment rate
@@ -1720,6 +1930,28 @@
             
             // Update the display
             renderStudentsList(classStudents, feePaymentsData, currentTerm);
+        }
+
+        // Edit individual student fee amount
+        function editStudentFee(studentId, feeType, currentAmount) {
+            const newAmount = prompt(`Enter new ${feeType.toUpperCase()} fee amount for this student:`, currentAmount);
+            
+            if (newAmount !== null) {
+                const amount = parseFloat(newAmount);
+                
+                if (isNaN(amount) || amount < 0) {
+                    alert('Please enter a valid amount.');
+                    return;
+                }
+                
+                // Update the fee amount for this student
+                feePaymentsData[studentId][`${feeType}Amount`] = amount;
+                feePaymentsData[studentId].timestamp = new Date().toISOString();
+                feePaymentsData[studentId].recordedBy = currentTeacherId;
+                
+                // Update the display
+                renderStudentsList(classStudents, feePaymentsData, currentTerm);
+            }
         }
 
         // Mark all fees as paid for the current term
@@ -1843,6 +2075,19 @@
                 ptaFeeAmount = newPtaFee;
                 utilityFeeAmount = newUtilityFee;
                 
+                // Update all students with the new default amounts (only if they haven't been customized)
+                classStudents.forEach(student => {
+                    if (feePaymentsData[student.id]) {
+                        // Only update if the student's amount matches the old default
+                        if (feePaymentsData[student.id].ptaAmount === ptaFeeAmount) {
+                            feePaymentsData[student.id].ptaAmount = newPtaFee;
+                        }
+                        if (feePaymentsData[student.id].utilityAmount === utilityFeeAmount) {
+                            feePaymentsData[student.id].utilityAmount = newUtilityFee;
+                        }
+                    }
+                });
+                
                 // Update the UI
                 renderClassInfo(currentClass);
                 renderStudentsList(classStudents, feePaymentsData, currentTerm);
@@ -1894,16 +2139,27 @@
                     const termPayments = await loadFeePaymentsData(term);
                     
                     let termCollected = 0;
+                    let termExpected = 0;
                     
-                    // Calculate collected amount for this term
+                    // Calculate collected and expected amounts for this term
                     classStudents.forEach(student => {
-                        const studentPayments = termPayments[student.id] || { pta: false, utility: false };
+                        const studentPayments = termPayments[student.id] || { 
+                            pta: false, 
+                            utility: false, 
+                            ptaAmount: ptaFeeAmount, 
+                            utilityAmount: utilityFeeAmount 
+                        };
                         
-                        if (studentPayments.pta) termCollected += ptaFeeAmount;
-                        if (studentPayments.utility) termCollected += utilityFeeAmount;
+                        const studentPtaAmount = studentPayments.ptaAmount || ptaFeeAmount;
+                        const studentUtilityAmount = studentPayments.utilityAmount || utilityFeeAmount;
+                        const studentTotalAmount = studentPtaAmount + studentUtilityAmount;
+                        
+                        termExpected += studentTotalAmount;
+                        
+                        if (studentPayments.pta) termCollected += studentPtaAmount;
+                        if (studentPayments.utility) termCollected += studentUtilityAmount;
                     });
                     
-                    const termExpected = classStudents.length * (ptaFeeAmount + utilityFeeAmount);
                     const termPaymentRate = termExpected > 0 ? Math.round((termCollected / termExpected) * 100) : 0;
                     
                     totalCollectedAllTerms += termCollected;
