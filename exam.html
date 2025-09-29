@@ -627,7 +627,7 @@
             
             .fees-actions {
                 width: 100%;
-                justify-content: space-between;
+                justify-content: flex-end;
             }
             
             .class-details {
@@ -712,9 +712,6 @@
                 </div>
             </div>
             <div class="fees-actions">
-                <button class="action-btn secondary" id="back-btn">
-                    <i class="fas fa-arrow-left"></i> Back
-                </button>
                 <button class="action-btn success" id="save-btn">
                     <i class="fas fa-save"></i> Save
                 </button>
@@ -832,30 +829,6 @@
                     <label class="form-label">Default Term Exam Fee (₵)</label>
                     <input type="number" class="form-input" id="default-fee-input" min="0" step="0.01">
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Term 1 Start Date</label>
-                    <input type="date" class="form-input" id="term1-start">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Term 1 End Date</label>
-                    <input type="date" class="form-input" id="term1-end">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Term 2 Start Date</label>
-                    <input type="date" class="form-input" id="term2-start">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Term 2 End Date</label>
-                    <input type="date" class="form-input" id="term2-end">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Term 3 Start Date</label>
-                    <input type="date" class="form-input" id="term3-start">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Term 3 End Date</label>
-                    <input type="date" class="form-input" id="term3-end">
-                </div>
             </div>
             <div class="modal-footer">
                 <button class="action-btn secondary" id="cancel-settings-btn">Cancel</button>
@@ -865,17 +838,16 @@
     </div>
 
     <script>
-       const firebaseConfig = {
-    apiKey: "AIzaSyB5NcC2P3v0LFBVFMp9-mAHQKYuo1pKokA",
-    authDomain: "hweakwaecram.firebaseapp.com",
-    projectId: "hweakwaecram",
-    storageBucket: "hweakwaecram.firebasestorage.app",
-    messagingSenderId: "1012181976581",
-    appId: "1:1012181976581:web:eee0ad07650b360bc8fe6c",
-    measurementId: "G-4GMZJJRVG0"
-  };
+        const firebaseConfig = {
+            apiKey: "AIzaSyB5NcC2P3v0LFBVFMp9-mAHQKYuo1pKokA",
+            authDomain: "hweakwaecram.firebaseapp.com",
+            projectId: "hweakwaecram",
+            storageBucket: "hweakwaecram.firebasestorage.app",
+            messagingSenderId: "1012181976581",
+            appId: "1:1012181976581:web:eee0ad07650b360bc8fe6c",
+            measurementId: "G-4GMZJJRVG0"
+        };
 
-        
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
@@ -887,7 +859,6 @@
         const profileImg = document.getElementById('profile-img');
         const greetingTitle = document.getElementById('greeting-title');
         const greetingSubtitle = document.getElementById('greeting-subtitle');
-        const backBtn = document.getElementById('back-btn');
         
         // Class info elements
         const classNameElement = document.getElementById('class-name');
@@ -924,12 +895,6 @@
         const cancelSettingsBtn = document.getElementById('cancel-settings-btn');
         const saveSettingsBtn = document.getElementById('save-settings-btn');
         const defaultFeeInput = document.getElementById('default-fee-input');
-        const term1StartInput = document.getElementById('term1-start');
-        const term1EndInput = document.getElementById('term1-end');
-        const term2StartInput = document.getElementById('term2-start');
-        const term2EndInput = document.getElementById('term2-end');
-        const term3StartInput = document.getElementById('term3-start');
-        const term3EndInput = document.getElementById('term3-end');
         
         // Mark all paid button
         const markAllPaidBtn = document.getElementById('mark-all-paid-btn');
@@ -1659,12 +1624,6 @@
         feeSettingsBtn.addEventListener('click', function() {
             // Populate the settings form with current values
             defaultFeeInput.value = defaultTermFeeAmount;
-            term1StartInput.value = termDates[1].start;
-            term1EndInput.value = termDates[1].end;
-            term2StartInput.value = termDates[2].start;
-            term2EndInput.value = termDates[2].end;
-            term3StartInput.value = termDates[3].start;
-            term3EndInput.value = termDates[3].end;
             
             // Show the settings modal
             feeSettingsModal.classList.add('active');
@@ -1683,18 +1642,9 @@
         saveSettingsBtn.addEventListener('click', async function() {
             // Update the settings
             defaultTermFeeAmount = parseFloat(defaultFeeInput.value) || 0;
-            termDates[1].start = term1StartInput.value;
-            termDates[1].end = term1EndInput.value;
-            termDates[2].start = term2StartInput.value;
-            termDates[2].end = term2EndInput.value;
-            termDates[3].start = term3StartInput.value;
-            termDates[3].end = term3EndInput.value;
             
             // Update class exam fee display
             classExamFeeElement.textContent = formatCurrency(defaultTermFeeAmount);
-            
-            // Update term display
-            updateTermDisplay();
             
             // Save the settings to Firebase
             const success = await saveTermFeeSettings();
@@ -1722,13 +1672,6 @@
                     saveSettingsBtn.style.background = '';
                 }, 2000);
             }
-        });
-        
-        // Back button (navigate to previous page)
-        backBtn.addEventListener('click', function() {
-            // In a real app, this would navigate back
-            // For demo purposes, just show an alert
-            alert('Navigating back to dashboard...');
         });
         
         // Initialize the app when the page loads
